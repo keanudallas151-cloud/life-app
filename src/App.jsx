@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { C } from "./systems/theme";
 import { LS } from "./systems/storage";
 import { useSound } from "./systems/useSound";
@@ -84,6 +84,7 @@ export default function LifeApp() {
   // ── USER-SCOPED LOCAL STATE (bookmarks, notes, read tracking) ─
   // These stay in localStorage — they're non-sensitive app state
   const uid = user?.email || "_";
+  const prevUidRef = useRef(uid);
   const [bookmarks, setBookmarksRaw] = useState(() => LS.get(`bk_${uid}`, []));
   const [notes, setNotesRaw] = useState(() => LS.get(`nt_${uid}`, {}));
   const [readKeys, setReadKeysRaw] = useState(() => LS.get(`rd_${uid}`, []));
@@ -110,6 +111,17 @@ export default function LifeApp() {
   const [shareToast, setShareToast] = useState(false);
   const [profile, setProfileRaw] = useState(() => LS.get(`tsd_${uid}`, null));
   const setProfile = v => { setProfileRaw(v); LS.set(`tsd_${user?.email || "_"}`, v); };
+
+  // Reload user-scoped data when uid changes (e.g. after login/logout)
+  useEffect(() => {
+    if (prevUidRef.current !== uid) {
+      prevUidRef.current = uid;
+      setBookmarksRaw(LS.get(`bk_${uid}`, []));
+      setNotesRaw(LS.get(`nt_${uid}`, {}));
+      setReadKeysRaw(LS.get(`rd_${uid}`, []));
+      setProfileRaw(LS.get(`tsd_${uid}`, null));
+    }
+  }, [uid]);
 
   // ── GOOGLE SIGN IN (live) ─────────────────────────────────────
   const doGoogleSignIn = async () => {
