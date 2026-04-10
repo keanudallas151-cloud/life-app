@@ -40,6 +40,10 @@ export function usePostIt(user) {
   // Local cache of vote state so optimistic UI works
   const votesRef = useRef({});  // { postId: currentVoteTotal }
 
+  // Track pending vote operations to prevent double-counting
+  // between optimistic updates and realtime subscription events
+  const pendingVoteIds = useRef({});  // { postId: pendingCount }
+
   // ── INITIAL LOAD ────────────────────────────────────────
   const load = useCallback(async () => {
     setLoading(true);
@@ -117,6 +121,11 @@ export function usePostIt(user) {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "post_votes" },
         payload => {
           const { post_id, dir } = payload.new;
+          // Skip if already applied by our own optimistic update
+          if (pendingVoteIds.current[post_id] > 0) {
+            pendingVoteIds.current[post_id]--;
+            return;
+          }
           setPosts(prev => prev.map(p =>
             p.id === post_id ? { ...p, votes: p.votes + dir } : p
           ));
@@ -125,6 +134,11 @@ export function usePostIt(user) {
         payload => {
           // User changed their vote (e.g. ▲ then ▼): diff = new - old
           const diff = payload.new.dir - payload.old.dir;
+          // Skip if already applied by our own optimistic update
+          if (pendingVoteIds.current[payload.new.post_id] > 0) {
+            pendingVoteIds.current[payload.new.post_id]--;
+            return;
+          }
           setPosts(prev => prev.map(p =>
             p.id === payload.new.post_id ? { ...p, votes: p.votes + diff } : p
           ));
@@ -176,6 +190,9 @@ export function usePostIt(user) {
   const vote = useCallback(async (postId, dir) => {
     if (!user?.id) return;
 
+    // Mark as pending so realtime handler skips the echo
+    pendingVoteIds.current[postId] = (pendingVoteIds.current[postId] || 0) + 1;
+
     // Optimistic update
     setPosts(prev => prev.map(p =>
       p.id === postId ? { ...p, votes: p.votes + dir } : p
@@ -186,7 +203,8 @@ export function usePostIt(user) {
       { onConflict: "user_id,post_id" }
     );
     if (error) {
-      // Rollback on error
+      // Rollback on error and clear pending flag
+      pendingVoteIds.current[postId] = Math.max(0, (pendingVoteIds.current[postId] || 0) - 1);
       setPosts(prev => prev.map(p =>
         p.id === postId ? { ...p, votes: p.votes - dir } : p
       ));
