@@ -114,6 +114,7 @@ export function QuizPage({ play, userId }) {
   const [activeTab, setActiveTab]= useState("play");
 
   const timerRef = useRef(null);
+  const handleAnswerRef = useRef(null);
   const SECS     = { easy:20, medium:15, hard:10 };
   const maxTime  = fmt==="blitz" ? 8 : SECS[diff];
   const timerPct   = maxTime > 0 ? timeLeft / maxTime : 0;
@@ -136,19 +137,6 @@ export function QuizPage({ play, userId }) {
     setTimeLeft(fmt==="blitz" ? 8 : SECS[diff]);
     setPhase("playing");
   }, [topic, diff, fmt, play]);
-
-  // Timer
-  useEffect(() => {
-    if (phase !== "playing" || chosen !== null) return;
-    clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) { clearInterval(timerRef.current); handleAnswer(null); return 0; }
-        return t - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timerRef.current);
-  }, [idx, phase, chosen]);
 
   const handleAnswer = useCallback((picked) => {
     if (chosen !== null) return;
@@ -177,6 +165,24 @@ export function QuizPage({ play, userId }) {
       }
     }, fmt==="blitz" ? 1400 : 2000);
   }, [chosen, qs, idx, fmt, diff, play]);
+
+  // Keep ref in sync so the timer always calls the latest handleAnswer
+  useEffect(() => {
+    handleAnswerRef.current = handleAnswer;
+  });
+
+  // Timer
+  useEffect(() => {
+    if (phase !== "playing" || chosen !== null) return;
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) { clearInterval(timerRef.current); handleAnswerRef.current(null); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [idx, phase, chosen]);
 
   // ── SAVE STATS on result ──────────────────────────────
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { C } from "./systems/theme";
 import { LS } from "./systems/storage";
 import { useSound } from "./systems/useSound";
@@ -84,6 +84,7 @@ export default function LifeApp() {
   // ── USER-SCOPED LOCAL STATE (bookmarks, notes, read tracking) ─
   // These stay in localStorage — they're non-sensitive app state
   const uid = user?.email || "_";
+  const prevUidRef = useRef(uid);
   const [bookmarks, setBookmarksRaw] = useState(() => LS.get(`bk_${uid}`, []));
   const [notes, setNotesRaw] = useState(() => LS.get(`nt_${uid}`, {}));
   const [readKeys, setReadKeysRaw] = useState(() => LS.get(`rd_${uid}`, []));
@@ -93,6 +94,21 @@ export default function LifeApp() {
 
   // ── APP PAGE STATE ────────────────────────────────────────────
   const [page, setPage] = useState("home");
+
+  // Dynamic document title per page
+  useEffect(() => {
+    const titles = {
+      home: "Life. — Knowledge. Finance. Life.",
+      quiz: "Quiz — Life.",
+      postit: "Post-It — Life.",
+      reading: "Reading — Life.",
+      profile: "Profile — Life.",
+      help: "Help — Life.",
+      where_to_start: "Where To Start — Life.",
+      networking: "Networking — Life.",
+    };
+    document.title = titles[page] || "Life. — Knowledge. Finance. Life.";
+  }, [page]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selKey, setSelKey] = useState(null);
   const [selContent, setSelContent] = useState(null);
@@ -110,6 +126,17 @@ export default function LifeApp() {
   const [shareToast, setShareToast] = useState(false);
   const [profile, setProfileRaw] = useState(() => LS.get(`tsd_${uid}`, null));
   const setProfile = v => { setProfileRaw(v); LS.set(`tsd_${user?.email || "_"}`, v); };
+
+  // Reload user-scoped data when uid changes (e.g. after login/logout)
+  useEffect(() => {
+    if (prevUidRef.current !== uid) {
+      prevUidRef.current = uid;
+      setBookmarksRaw(LS.get(`bk_${uid}`, []));
+      setNotesRaw(LS.get(`nt_${uid}`, {}));
+      setReadKeysRaw(LS.get(`rd_${uid}`, []));
+      setProfileRaw(LS.get(`tsd_${uid}`, null));
+    }
+  }, [uid]);
 
   // ── GOOGLE SIGN IN (live) ─────────────────────────────────────
   const doGoogleSignIn = async () => {
@@ -284,8 +311,18 @@ export default function LifeApp() {
   // Loading splash — shown while Supabase resolves session
   if (screen === "loading") return (
     <div style={{ minHeight: "100vh", background: C.skin, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Georgia,serif" }}>
-      <div style={{ textAlign: "center" }}>
-        <div style={{ width: 70, height: 70, borderRadius: "20%", background: `linear-gradient(145deg,${C.green},#2d6e42)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 4px 16px rgba(74,140,92,0.3)" }}>
+      <style>{`
+        @keyframes life-pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.06); opacity: 0.85; }
+        }
+        @keyframes life-fade-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      <div style={{ textAlign: "center", animation: "life-fade-in 0.5s ease-out" }}>
+        <div style={{ width: 70, height: 70, borderRadius: "20%", background: `linear-gradient(145deg,${C.green},#2d6e42)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 4px 16px rgba(74,140,92,0.3)", animation: "life-pulse 1.8s ease-in-out infinite" }}>
           <span style={{ color: "#fff", fontSize: 28, fontWeight: 800 }}>l.</span>
         </div>
         <p style={{ color: C.muted, fontSize: 13, fontStyle: "italic" }}>Loading…</p>
@@ -539,6 +576,24 @@ export default function LifeApp() {
               {rShowPass ? "Hide" : "Show"}
             </button>
           </div>
+          {rPass.length > 0 && (() => {
+            const has8 = rPass.length >= 8;
+            const hasUpper = /[A-Z]/.test(rPass);
+            const hasNum = /\d/.test(rPass);
+            const score = [has8, hasUpper, hasNum].filter(Boolean).length;
+            const labels = ["Weak", "Fair", "Good", "Strong"];
+            const colors = [C.red, "#e6a23c", C.gold, C.green];
+            return (
+              <div style={{ marginTop: 2 }}>
+                <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+                  {[0, 1, 2].map(i => (
+                    <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: i < score ? colors[score] : C.light, transition: "background 0.2s" }} />
+                  ))}
+                </div>
+                <p style={{ margin: 0, fontSize: 11, color: colors[score], fontStyle: "italic" }}>{labels[score]}</p>
+              </div>
+            );
+          })()}
           {rErr.pass && <p style={{ margin: 0, fontSize: 12, color: C.red, fontStyle: "italic" }}>{rErr.pass}</p>}
         </div>
 
