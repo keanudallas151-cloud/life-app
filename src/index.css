@@ -1067,3 +1067,26 @@ button,
     font-size: 20px !important;
   }
 }
+.life-topbar .logo-btn > div {
+  inline-size: clamp(36px, 7vw, 44px) !important;
+  block-size: clamp(36px, 7vw, 44px) !important;
+  min-inline-size: 36px !important;
+  padding: 0 !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  text-indent: -9999px;
+  overflow: hidden;
+  background: center / 88% 88% no-repeat url("/favicon.svg");
+}
+
+.life-topbar .logo-btn {
+  gap: 0 !important;
+}
+
+@media (max-width: 640px) {
+  .life-topbar .logo-btn > div {
+    inline-size: 34px !important;
+    block-size: 34px !important;
+  }
+}
