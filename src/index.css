@@ -25,6 +25,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -40,6 +41,7 @@ body {
   color: var(--life-ink);
   /* Reduce 300ms tap delay on older iOS */
   touch-action: manipulation;
+  overscroll-behavior-y: none;
 }
 
 button,
@@ -140,6 +142,8 @@ p {
     box-shadow 0.28s var(--life-ease-soft),
     transform 0.28s var(--life-ease-soft),
     border-color 0.22s ease;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -557,6 +561,11 @@ input[type="password"]:focus {
   box-shadow: 0 0 0 3px rgba(74, 140, 92, 0.1);
 }
 
+select {
+  min-height: 40px;
+  touch-action: manipulation;
+}
+
 /* ── Glass Card Effect ──────────────────────────────────── */
 .life-glass-card {
   background: rgba(255, 255, 255, 0.92);
@@ -570,6 +579,7 @@ input[type="password"]:focus {
 .life-search-dropdown {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* ── Sidebar section hover ──────────────────────────────── */
@@ -1168,6 +1178,28 @@ button:active:not(:disabled),
   min-width: 0;
 }
 
+.life-home-hero-actions button {
+  position: relative;
+  overflow: hidden;
+  z-index: 41 !important;
+}
+
+.life-home-hero-actions button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.22) 50%, transparent 80%);
+  transform: translateX(-120%);
+  transition: transform 420ms cubic-bezier(0.19, 1, 0.22, 1);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .life-home-hero-actions button:hover::after {
+    transform: translateX(120%);
+  }
+}
+
 @media (max-width: 640px) {
   .life-home-hero {
     width: calc(100% - 16px) !important;
@@ -1182,6 +1214,67 @@ button:active:not(:disabled),
   .life-home-hero p {
     max-width: 32ch;
   }
+}
+
+/* Keep decorative absolute backgrounds behind controls in home hero/cards */
+.life-home-hero [style*="position: absolute"] {
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+.life-home-hero [style*="position: relative"] {
+  z-index: 1;
+}
+
+/* Cinematic sidebar reveal with subtle stagger */
+@keyframes life-sidebar-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+    filter: blur(1px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+.life-sidebar[style*="translateX(0)"] button {
+  animation: life-sidebar-item-in 420ms cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+.life-sidebar[style*="translateX(0)"] button:nth-of-type(1) { animation-delay: 20ms; }
+.life-sidebar[style*="translateX(0)"] button:nth-of-type(2) { animation-delay: 45ms; }
+.life-sidebar[style*="translateX(0)"] button:nth-of-type(3) { animation-delay: 70ms; }
+.life-sidebar[style*="translateX(0)"] button:nth-of-type(4) { animation-delay: 95ms; }
+.life-sidebar[style*="translateX(0)"] button:nth-of-type(5) { animation-delay: 120ms; }
+.life-sidebar[style*="translateX(0)"] button:nth-of-type(6) { animation-delay: 145ms; }
+.life-sidebar[style*="translateX(0)"] button:nth-of-type(7) { animation-delay: 170ms; }
+.life-sidebar[style*="translateX(0)"] button:nth-of-type(8) { animation-delay: 195ms; }
+
+/* Faster tactile response on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  [role="button"] {
+    transition-duration: 86ms !important;
+  }
+
+  button:active:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]):active {
+    transform: scale(0.982) !important;
+  }
+
+  .life-card-hover:hover {
+    transform: none !important;
+  }
+}
+
+/* Paint containment for large interactive surfaces (mobile smoothness) */
+.life-home-hero,
+.life-whats-inside-grid .life-card-hover,
+.life-postit-page .life-card-hover {
+  contain: layout paint style;
 }
 
 /* Home z-index cleanup: interactive controls must sit above decorative backgrounds */
@@ -1207,6 +1300,11 @@ button:active:not(:disabled),
 
 .life-whats-inside-grid .life-card-hover {
   overflow: hidden;
+}
+
+.life-whats-inside-grid .life-card-hover [style*="position: absolute"] {
+  z-index: 0 !important;
+  pointer-events: none !important;
 }
 
 .life-whats-inside-grid .life-card-hover::before,

@@ -167,7 +167,7 @@ export function EbookReader({selKey,selContent,tab,setTab,isBookmarked,toggleBk,
       )}
       <div className="life-reader-toolbar" style={{display:"flex",borderBottom:`1px solid ${C.border}`,background:C.white,padding:"0 12px",overflowX:"auto",flexShrink:0,alignItems:"center",gap:4}}>
         {[{id:"content",label:"Read"},{id:"notes",label:"Notes"},{id:"suggestions",label:"Related"},{id:"saved",label:"Saved"}].map(t=>(
-          <button key={t.id} onClick={()=>{play("tap");setTab(t.id);}} style={{padding:"17px 14px",background:"none",border:"none",borderBottom:tab===t.id?`2px solid ${C.green}`:"2px solid transparent",color:tab===t.id?C.green:C.muted,fontSize:13,fontWeight:tab===t.id?700:400,cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>{t.label}</button>
+          <button key={t.id} onClick={()=>{setTab(t.id);}} style={{padding:"17px 14px",background:"none",border:"none",borderBottom:tab===t.id?`2px solid ${C.green}`:"2px solid transparent",color:tab===t.id?C.green:C.muted,fontSize:13,fontWeight:tab===t.id?700:400,cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>{t.label}</button>
         ))}
         <div className="life-reader-toolbar-actions" style={{display:"inline-flex",alignItems:"center",gap:6,marginLeft:"auto",flexShrink:0}}>
           <button

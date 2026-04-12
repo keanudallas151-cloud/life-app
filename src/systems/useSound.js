@@ -7,7 +7,7 @@ const S = {
   home: "/sounds/home_sound.mp3",
 };
 
-const VOL = 0.28;
+const VOL = 0.27;
 
 const TYPE_COOLDOWN_MS = {
   tap: 70,
@@ -23,15 +23,21 @@ const TYPE_COOLDOWN_MS = {
 };
 
 const SOUND_MODE_DENSITY = {
-  focused: 0.18,
+  focused: 0.16,
   balanced: 0.42,
-  full: 0.72,
+  full: 0.76,
 };
 
 const SOUND_MODE_GLOBAL_GAP_MS = {
-  focused: 165,
-  balanced: 110,
+  focused: 180,
+  balanced: 115,
   full: 80,
+};
+
+const SCOPE_BLOCKED = {
+  focused: new Set(["tap", "ok"]),
+  balanced: new Set(),
+  full: new Set(),
 };
 
 export function useSound(settings = {}) {
@@ -40,7 +46,10 @@ export function useSound(settings = {}) {
   const lastTypeAt = useRef({});
   const lastSrc = useRef("");
   const warming = useRef(false);
-  const { enabled = true, volume = 100, mode = "balanced" } = settings;
+  const { enabled = true, volume = 100, mode = "balanced", scope = "balanced" } = settings;
+
+  const normalizedMode = SOUND_MODE_DENSITY[mode] ? mode : "balanced";
+  const normalizedScope = SCOPE_BLOCKED[scope] ? scope : "balanced";
 
   const getAC = () => {
     if (!ctx.current) {
@@ -60,39 +69,40 @@ export function useSound(settings = {}) {
     return pick;
   }, []);
 
-  const playMP3 = useCallback((src, volume = VOL, opts = {}) => {
+  const playMP3 = useCallback((src, volumeLevel = VOL, opts = {}) => {
     try {
       const ac = getAC();
       const { detuneSpread = 0, rateSpread = 0 } = opts;
+
       const fire = (buf) => {
         const source = ac.createBufferSource();
         const gain = ac.createGain();
-        if (detuneSpread) {
-          source.detune.value = (Math.random() * 2 - 1) * detuneSpread;
-        }
-        if (rateSpread) {
-          source.playbackRate.value = 1 + (Math.random() * 2 - 1) * rateSpread;
-        }
-        gain.gain.value = volume;
+        if (detuneSpread) source.detune.value = (Math.random() * 2 - 1) * detuneSpread;
+        if (rateSpread) source.playbackRate.value = 1 + (Math.random() * 2 - 1) * rateSpread;
+        gain.gain.value = volumeLevel;
         source.buffer = buf;
         source.connect(gain);
         gain.connect(ac.destination);
         source.start();
       };
+
       lastSrc.current = src;
+
       if (cache.current[src]) {
         fire(cache.current[src]);
-        return;
+        return true;
       }
+
       try {
         const immediate = new Audio(src);
-        immediate.volume = Math.max(0, Math.min(1, volume));
+        immediate.volume = Math.max(0, Math.min(1, volumeLevel));
         immediate.play().catch(() => {
           /* autoplay policy */
         });
       } catch {
-        /* Audio element */
+        /* Audio element fallback */
       }
+
       fetch(src)
         .then((r) => r.arrayBuffer())
         .then((buf) => ac.decodeAudioData(buf))
@@ -102,21 +112,25 @@ export function useSound(settings = {}) {
         .catch(() => {
           /* decode/network */
         });
+
+      return true;
     } catch {
-      /* AudioContext */
+      return false;
     }
   }, []);
 
   const warmSounds = useCallback(() => {
     if (warming.current) return;
     warming.current = true;
+
     try {
       const ac = getAC();
       if (ac.state === "suspended" && typeof ac.resume === "function") {
         ac.resume().catch(() => {
-          /* resume can fail before user gesture */
+          /* resume may fail before gesture */
         });
       }
+
       Object.values(S).forEach((src) => {
         if (cache.current[src]) return;
         fetch(src)
@@ -130,7 +144,7 @@ export function useSound(settings = {}) {
           });
       });
     } catch {
-      /* AudioContext */
+      /* AudioContext fail */
     }
   }, []);
 
@@ -150,59 +164,63 @@ export function useSound(settings = {}) {
     (type) => {
       try {
         warmSounds();
+
         const now = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
         const prevAt = lastTypeAt.current[type] || 0;
         const cooldown = TYPE_COOLDOWN_MS[type] || 90;
         if (now - prevAt < cooldown) return;
+
         const prevAny = lastTypeAt.current.__any || 0;
-        const modeDensity = SOUND_MODE_DENSITY[mode] ?? SOUND_MODE_DENSITY.balanced;
-        const globalGap = SOUND_MODE_GLOBAL_GAP_MS[mode] ?? SOUND_MODE_GLOBAL_GAP_MS.balanced;
-        const globalQuietType = type === "tap" || type === "ok";
-        if (globalQuietType && now - prevAny < globalGap) return;
+        const modeDensity = SOUND_MODE_DENSITY[normalizedMode];
+        const globalGap = SOUND_MODE_GLOBAL_GAP_MS[normalizedMode];
+        const isLightType = type === "tap" || type === "ok";
+        if (isLightType && now - prevAny < globalGap) return;
 
         if (!enabled) return;
         const master = Math.max(0, Math.min(1, Number(volume) / 100));
         if (master <= 0) return;
+        if (SCOPE_BLOCKED[normalizedScope].has(type)) return;
+
         const idleWindow = now - prevAny > 1400;
 
         if (type === "tap" && !idleWindow && Math.random() > modeDensity) return;
-        if (mode === "focused" && (type === "ok" || type === "open") && now - prevAny < 220) return;
+        if (type === "ok" && normalizedScope === "balanced" && !idleWindow && Math.random() > modeDensity * 0.75) return;
 
         lastTypeAt.current[type] = now;
         lastTypeAt.current.__any = now;
 
         if (type === "home") {
-          playMP3(S.home, 0.84 * master, { detuneSpread: 8, rateSpread: 0.01 });
+          playMP3(S.home, 0.82 * master, { detuneSpread: 8, rateSpread: 0.01 });
           return;
         }
 
         if (type === "open") {
           const src = chooseSrc([S.deep, S.mid]);
-          if (src) playMP3(src, 0.3 * master, { detuneSpread: 12, rateSpread: 0.02 });
+          if (src) playMP3(src, 0.28 * master, { detuneSpread: 12, rateSpread: 0.02 });
           return;
         }
 
         if (type === "star") {
           const src = chooseSrc([S.deep, S.mid]);
-          if (src) playMP3(src, 0.28 * master, { detuneSpread: 14, rateSpread: 0.015 });
+          if (src) playMP3(src, 0.27 * master, { detuneSpread: 14, rateSpread: 0.015 });
           return;
         }
 
         if (type === "pageturn" || type === "back") {
           const src = chooseSrc([S.mid, S.high]);
-          if (src) playMP3(src, 0.26 * master, { detuneSpread: 10, rateSpread: 0.015 });
+          if (src) playMP3(src, 0.24 * master, { detuneSpread: 10, rateSpread: 0.015 });
           return;
         }
 
         if (type === "tap") {
           const src = chooseSrc([S.high, S.mid]);
-          if (src) playMP3(src, 0.14 * master, { detuneSpread: 16, rateSpread: 0.018 });
+          if (src) playMP3(src, 0.13 * master, { detuneSpread: 16, rateSpread: 0.018 });
           return;
         }
 
         if (type === "ok") {
           const src = chooseSrc([S.mid, S.high]);
-          if (src) playMP3(src, 0.2 * master, { detuneSpread: 14, rateSpread: 0.018 });
+          if (src) playMP3(src, 0.19 * master, { detuneSpread: 14, rateSpread: 0.018 });
           return;
         }
 
@@ -254,10 +272,10 @@ export function useSound(settings = {}) {
           });
         }
       } catch {
-        /* oscillator */
+        /* fail silent */
       }
     },
-    [chooseSrc, enabled, mode, playMP3, volume, warmSounds]
+    [chooseSrc, enabled, normalizedMode, normalizedScope, playMP3, volume, warmSounds]
   );
 
   return play;

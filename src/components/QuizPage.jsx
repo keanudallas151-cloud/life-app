@@ -232,7 +232,7 @@ export function QuizPage({ play, userId }) {
         {/* Header tabs */}
         <div className="life-quiz-tabs" style={{ display:"flex", borderBottom:`1px solid ${C.border}`, background:C.white, padding:"0 max(12px, env(safe-area-inset-left, 0px)) 0 max(12px, env(safe-area-inset-right, 0px))", position:"sticky", top:0, zIndex:10, overflowX:"auto", WebkitOverflowScrolling:"touch", gap:4 }}>
           {[["play","Quiz"],["stats","My Stats"],["achievements","Badges"]].map(([id,label]) => (
-            <button key={id} onClick={() => { play("tap"); setActiveTab(id); }}
+            <button key={id} onClick={() => { setActiveTab(id); }}
               style={{ padding:"14px 14px", flexShrink:0, background:"none", border:"none",
                 borderBottom:activeTab===id?`2px solid ${C.green}`:"2px solid transparent",
                 color:activeTab===id?C.green:C.muted, fontSize:13,
@@ -307,7 +307,7 @@ export function QuizPage({ play, userId }) {
           <div className="life-quiz-panel" style={{ padding:"28px max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px))", maxWidth:520, margin:"0 auto", boxSizing:"border-box" }}>
             {/* Daily Challenge banner */}
             <div className="life-quiz-daily-banner" style={{ background:`linear-gradient(135deg,#4a8c5c,#2d6e42)`, borderRadius:14, padding:"16px 18px", marginBottom:24, display:"flex", alignItems:"center", gap:12, cursor:"pointer", flexWrap:"wrap" }}
-              onClick={() => { play("tap"); setFmt("daily"); }}>
+              onClick={() => { setFmt("daily"); }}>
               <span style={{ fontSize:28 }}>📅</span>
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:14, fontWeight:700, color:"#fff" }}>Daily Challenge</div>
@@ -324,7 +324,7 @@ export function QuizPage({ play, userId }) {
               {Object.entries(TOPIC_META).map(([k, meta]) => {
                 const sel = topic===k && fmt!=="daily";
                 return (
-                  <button key={k} onClick={() => { play("tap"); setTopic(k); if(fmt==="daily") setFmt("multiple"); }}
+                  <button key={k} onClick={() => { setTopic(k); if(fmt==="daily") setFmt("multiple"); }}
                     style={{ background:sel?meta.bg:C.white, border:`1.5px solid ${sel?meta.col:C.border}`,
                       borderRadius:12, padding:"13px 14px", cursor:"pointer", textAlign:"left",
                       display:"flex", alignItems:"center", gap:10, fontFamily:"Georgia,serif" }}>
@@ -345,7 +345,7 @@ export function QuizPage({ play, userId }) {
                 const dm  = DIFF_META[d];
                 const sel = diff===d && fmt!=="daily";
                 return (
-                  <button key={d} onClick={() => { play("tap"); setDiff(d); if(fmt==="daily") setFmt("multiple"); }}
+                  <button key={d} onClick={() => { setDiff(d); if(fmt==="daily") setFmt("multiple"); }}
                     style={{ flex:"1 1 100px", minWidth:0, background:sel?DIFF_COLORS[d]:C.white, border:`1.5px solid ${sel?DIFF_COLORS[d]:C.border}`,
                       borderRadius:12, padding:"12px 8px", cursor:"pointer", fontFamily:"Georgia,serif", textAlign:"center" }}>
                     <div style={{ fontSize:16, marginBottom:4 }}>{dm.icon}</div>
@@ -363,7 +363,7 @@ export function QuizPage({ play, userId }) {
                 const fm  = FORMAT_META[f];
                 const sel = fmt===f;
                 return (
-                  <button key={f} onClick={() => { play("tap"); setFmt(f); }}
+                  <button key={f} onClick={() => { setFmt(f); }}
                     style={{ background:sel?C.greenLt:C.white, border:`1.5px solid ${sel?C.green:C.border}`,
                       borderRadius:12, padding:"14px 18px", cursor:"pointer", textAlign:"left",
                       display:"flex", alignItems:"center", gap:12, fontFamily:"Georgia,serif" }}>

@@ -39,6 +39,7 @@ const PREF_DEFAULTS = {
   soundEnabled: true,
   soundVolume: 58,
   soundMode: "focused",
+  soundScope: "balanced",
   reduceMotion: false,
   pressIntensity: 58,
   instantButtons: true,
@@ -135,6 +136,7 @@ export default function LifeApp() {
     enabled: uiPrefs.soundEnabled,
     volume: uiPrefs.soundVolume,
     mode: uiPrefs.soundMode,
+    scope: uiPrefs.soundScope,
   });
   const cloud = useUserData(userIdForData);
 
@@ -242,6 +244,47 @@ export default function LifeApp() {
 
   const updateUiPrefs = useCallback((patch) => {
     setUiPrefs((prev) => ({ ...prev, ...patch }));
+  }, []);
+
+  const applySettingProfile = useCallback((profile) => {
+    if (profile === "focus") {
+      setUiPrefs((prev) => ({
+        ...prev,
+        soundEnabled: true,
+        soundMode: "focused",
+        soundScope: "focused",
+        reduceMotion: false,
+        instantButtons: true,
+        pressIntensity: 44,
+        sidebarSpeed: 58,
+      }));
+      return;
+    }
+    if (profile === "immersive") {
+      setUiPrefs((prev) => ({
+        ...prev,
+        soundEnabled: true,
+        soundMode: "full",
+        soundScope: "full",
+        reduceMotion: false,
+        instantButtons: false,
+        pressIntensity: 72,
+        sidebarSpeed: 74,
+      }));
+      return;
+    }
+    if (profile === "calm") {
+      setUiPrefs((prev) => ({
+        ...prev,
+        soundEnabled: true,
+        soundMode: "focused",
+        soundScope: "focused",
+        reduceMotion: true,
+        instantButtons: true,
+        pressIntensity: 24,
+        sidebarSpeed: 46,
+      }));
+    }
   }, []);
 
   useEffect(() => {
@@ -1276,8 +1319,8 @@ export default function LifeApp() {
                   {[
                     { icon: "leaf", label: "Life", sub: "Finance, psychology & philosophy", onClick: () => { play("open"); setSidebarOpen(true); } },
                     { icon: "lightbulb", label: "100 Ways", sub: "Online & AI income strategies", onClick: () => { play("open"); setSidebarOpen(true); } },
-                    { icon: "leaf", label: "Daily Growth", sub: "Simple guided steps for steady progress", onClick: () => { play("tap"); setPage("where_to_start"); } },
-                    { icon: "users", label: "Networking Group", sub: "Meet the community and grow together", onClick: () => { play("tap"); setPage("networking"); } },
+                    { icon: "leaf", label: "Daily Growth", sub: "Simple guided steps for steady progress", onClick: () => { play("open"); setPage("where_to_start"); } },
+                    { icon: "users", label: "Networking Group", sub: "Meet the community and grow together", onClick: () => { play("open"); setPage("networking"); } },
                   ].map(item => (
                     <button key={item.label} onClick={item.onClick} className="life-card-hover"
                       style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 16, padding: "20px 16px", cursor: "pointer", textAlign: "left", fontFamily: "Georgia,serif", display: "flex", flexDirection: "column", gap: 10, boxShadow: S.sm }}
@@ -1305,7 +1348,7 @@ export default function LifeApp() {
                 {GUIDED_ORDER.slice(0, 4).map((k, i) => {
                   const node = CONTENT[k]; if (!node) return null;
                   return (
-                    <button key={k} onClick={() => { play("tap"); handleSelect(k, node); }}
+                    <button key={k} onClick={() => { play("open"); handleSelect(k, node); }}
                       style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: "16px 18px", cursor: "pointer", marginBottom: 10, textAlign: "left", fontFamily: "Georgia,serif", boxSizing: "border-box", boxShadow: "0 1px 3px rgba(0,0,0,0.04)", transition: "all 0.18s" }}
                       onMouseEnter={e => { e.currentTarget.style.borderColor = "#c8ddc8"; e.currentTarget.style.boxShadow = "0 4px 14px rgba(74,140,92,0.11)"; }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"; }}>
@@ -1352,7 +1395,7 @@ export default function LifeApp() {
               <div style={{ marginTop: 28, padding: 22, background: C.greenLt, border: `1px solid ${C.green}`, borderRadius: 14 }}>
                 <p style={{ margin: "0 0 6px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: C.green }}>Test yourself</p>
                 <p style={{ margin: "0 0 14px", fontSize: 15, color: C.ink, fontFamily: "Georgia,serif" }}>Once you have read a few topics, test your knowledge with a timed quiz.</p>
-                <button onClick={() => { play("tap"); setPage("quiz"); }} style={{ background: C.green, border: "none", borderRadius: 10, padding: "12px 22px", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                <button onClick={() => { play("open"); setPage("quiz"); }} style={{ background: C.green, border: "none", borderRadius: 10, padding: "12px 22px", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "Georgia,serif" }}>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>{Ic.brain("none", "#fff", 17)} Go to Quiz</span>
                 </button>
               </div>
@@ -1440,6 +1483,66 @@ export default function LifeApp() {
                 </p>
 
                 <div style={{ display: "grid", gap: 14 }}>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>Experience Profile</span>
+                      <span style={{ fontSize: 12, color: C.muted }}>Quick apply</span>
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => applySettingProfile("focus")}
+                        style={{
+                          background: C.white,
+                          border: `1px solid ${C.border}`,
+                          borderRadius: 10,
+                          padding: "8px 12px",
+                          color: C.mid,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          fontFamily: "Georgia,serif",
+                        }}
+                      >
+                        Focus
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applySettingProfile("immersive")}
+                        style={{
+                          background: C.greenLt,
+                          border: `1px solid ${C.green}`,
+                          borderRadius: 10,
+                          padding: "8px 12px",
+                          color: C.green,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          fontFamily: "Georgia,serif",
+                        }}
+                      >
+                        Immersive
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applySettingProfile("calm")}
+                        style={{
+                          background: C.light,
+                          border: `1px solid ${C.border}`,
+                          borderRadius: 10,
+                          padding: "8px 12px",
+                          color: C.mid,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          fontFamily: "Georgia,serif",
+                        }}
+                      >
+                        Calm
+                      </button>
+                    </div>
+                  </div>
+
                   <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                     <div>
                       <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: C.ink }}>Sound Effects</p>
@@ -1452,7 +1555,6 @@ export default function LifeApp() {
                         const next = e.target.checked;
                         if (next) play("ok");
                         updateUiPrefs({ soundEnabled: next });
-                        if (!next) play("tap");
                       }}
                       style={{ width: 20, height: 20, accentColor: C.green }}
                     />
@@ -1497,6 +1599,31 @@ export default function LifeApp() {
                       <option value="focused">Focused (very minimal)</option>
                       <option value="balanced">Balanced</option>
                       <option value="full">Full feedback</option>
+                    </select>
+                  </label>
+
+                  <label style={{ display: "grid", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>Sound Scope</span>
+                      <span style={{ fontSize: 12, color: C.muted, textTransform: "capitalize" }}>{uiPrefs.soundScope || "balanced"}</span>
+                    </div>
+                    <select
+                      value={uiPrefs.soundScope || "balanced"}
+                      disabled={!uiPrefs.soundEnabled}
+                      onChange={(e) => updateUiPrefs({ soundScope: e.target.value })}
+                      style={{
+                        background: C.white,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 12px",
+                        color: C.ink,
+                        fontSize: 13,
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      <option value="focused">Focused (important only)</option>
+                      <option value="balanced">Balanced</option>
+                      <option value="full">Full (all interactions)</option>
                     </select>
                   </label>
 
@@ -1563,7 +1690,7 @@ export default function LifeApp() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8, paddingTop: 2 }}>
                     <button
                       type="button"
-                      onClick={() => play("tap")}
+                      onClick={() => play("star")}
                       disabled={!uiPrefs.soundEnabled}
                       style={{
                         background: C.white,
