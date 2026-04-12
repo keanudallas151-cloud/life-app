@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react'
 
 const ToastContext = createContext(null)
 
@@ -55,10 +53,10 @@ export const ToastProvider = ({ children }) => {
   }
 
   const icons = {
-    success: CheckCircle,
-    error: XCircle,
-    info: Info,
-    warning: AlertTriangle,
+    success: 'OK',
+    error: 'ERR',
+    info: 'INFO',
+    warning: 'WARN',
   }
 
   const colors = {
@@ -69,35 +67,31 @@ export const ToastProvider = ({ children }) => {
   }
 
   return (
-    <ToastContext.Provider value={toast}>
+      <ToastContext.Provider value={toast}>
       {children}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
-        <AnimatePresence mode="popLayout">
-          {toasts.map((t) => {
-            const Icon = icons[t.type]
-            return (
-              <motion.div
-                key={t.id}
-                layout
-                initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 100 }}
-                className={`bg-slate-900/90 backdrop-blur border rounded-xl p-4 pr-10 min-w-[300px] max-w-[400px] ${colors[t.type]} relative shadow-lg`}
+        {toasts.map((t) => {
+          const iconLabel = icons[t.type]
+          return (
+            <div
+              key={t.id}
+              className={`bg-slate-900/90 backdrop-blur border rounded-xl p-4 pr-10 min-w-[300px] max-w-[400px] ${colors[t.type]} relative shadow-lg`}
+            >
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 mt-0.5 text-xs font-bold tracking-wide">
+                  {iconLabel}
+                </span>
+                <p className="text-sm font-medium text-white">{t.message}</p>
+              </div>
+              <button
+                onClick={() => removeToast(t.id)}
+                className="absolute top-3 right-3 p-1 rounded hover:bg-white/10 transition-colors text-white/60"
               >
-                <div className="flex items-start gap-3">
-                  <Icon size={20} className="flex-shrink-0 mt-0.5" />
-                  <p className="text-sm font-medium text-white">{t.message}</p>
-                </div>
-                <button
-                  onClick={() => removeToast(t.id)}
-                  className="absolute top-3 right-3 p-1 rounded hover:bg-white/10 transition-colors text-white/60"
-                >
-                  <X size={14} />
-                </button>
-              </motion.div>
-            )
-          })}
-        </AnimatePresence>
+                x
+              </button>
+            </div>
+          )
+        })}
       </div>
     </ToastContext.Provider>
   )
