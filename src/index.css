@@ -282,11 +282,7 @@ select:focus-visible {
   }
 }
 
-<<<<<<< C:/Users/louie/life-app-vite/src/index.css
-/* ── Responsive Utilities ─────────────────────────────────── */
-=======
 /* ── Mobile Search & Top Bar ──────────────────────────────── */
->>>>>>> C:/Users/louie/.windsurf/worktrees/life-app-vite/life-app-vite-9f9800d7/src/index.css
 @media (max-width: 640px) {
   .scroll-to-top {
     bottom: 16px;
@@ -294,8 +290,6 @@ select:focus-visible {
     width: 44px;
     height: 44px;
   }
-<<<<<<< C:/Users/louie/life-app-vite/src/index.css
-=======
 
   /* Mobile search bar optimizations */
   .life-topbar {
@@ -331,6 +325,11 @@ select:focus-visible {
     max-height: 70vh !important;
     border-radius: 0 0 16px 16px !important;
   }
+
+  .life-sidebar {
+    width: 85vw !important;
+    max-width: 300px !important;
+  }
 }
 
 /* Search bar enhancements */
@@ -355,11 +354,40 @@ select:focus-visible {
   transform: scale(1.1);
 }
 
-/* Mobile sidebar adjustments */
-@media (max-width: 640px) {
-  .life-sidebar {
-    width: 85vw !important;
-    max-width: 300px !important;
-  }
->>>>>>> C:/Users/louie/.windsurf/worktrees/life-app-vite/life-app-vite-9f9800d7/src/index.css
+/* ── Premium Input Focus ────────────────────────────────── */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  box-shadow: 0 0 0 3px rgba(74, 140, 92, 0.1);
+}
+
+/* ── Glass Card Effect ──────────────────────────────────── */
+.life-glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* ── Smooth Scroll ──────────────────────────────────────── */
+.life-sidebar,
+.life-search-dropdown {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Sidebar section hover ──────────────────────────────── */
+.life-sidebar button:hover {
+  background: rgba(74, 140, 92, 0.04);
+}
+
+/* ── Premium button press ───────────────────────────────── */
+button:active:not(:disabled) {
+  transform: scale(0.98) !important;
+}
+
+/* ── Stat card hover ────────────────────────────────────── */
+.life-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
