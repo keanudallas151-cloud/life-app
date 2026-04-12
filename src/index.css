@@ -15,6 +15,7 @@
   --life-press-scale: 0.965;
   --life-sidebar-duration: 520ms;
   --life-sidebar-fade-duration: 420ms;
+  --life-text-scale: 1;
 }
 
 *,
@@ -31,6 +32,7 @@ html {
 body {
   margin: 0;
   font-family: var(--life-font);
+  font-size: calc(16px * var(--life-text-scale));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -42,6 +44,18 @@ body {
   /* Reduce 300ms tap delay on older iOS */
   touch-action: manipulation;
   overscroll-behavior-y: none;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 460px at 8% -10%, rgba(74, 140, 92, 0.09), transparent 62%),
+    radial-gradient(900px 420px at 92% 0%, rgba(180, 151, 90, 0.08), transparent 58%),
+    linear-gradient(180deg, #f7f3ec 0%, #f5f0e8 52%, #f2ebe1 100%);
 }
 
 button,
@@ -144,6 +158,18 @@ p {
     border-color 0.22s ease;
   transform: translateZ(0);
   backface-visibility: hidden;
+  position: relative;
+  overflow: hidden;
+}
+
+.life-card-hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(130deg, rgba(255, 255, 255, 0.36), transparent 44%);
+  transition: opacity 0.24s ease;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -152,6 +178,10 @@ p {
     box-shadow:
       0 4px 6px rgba(20, 20, 20, 0.06),
       0 14px 32px rgba(74, 140, 92, 0.12);
+  }
+
+  .life-card-hover:hover::after {
+    opacity: 1;
   }
 }
 
@@ -171,14 +201,24 @@ p {
   box-sizing: border-box;
 }
 
+.life-topbar > * {
+  min-width: 0;
+}
+
 /* Sticky layers sit below the top bar (height + safe area) */
 .life-search-dropdown {
   top: calc(62px + env(safe-area-inset-top, 0px));
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 14px 34px rgba(20, 20, 20, 0.13);
 }
 
 .life-sidebar,
 .life-sidebar-backdrop {
   top: calc(62px + env(safe-area-inset-top, 0px));
+}
+
+.life-sidebar {
+  width: min(86vw, 340px);
 }
 
 .life-landing-shell,
@@ -189,12 +229,16 @@ p {
 
 .life-auth-card {
   width: min(100%, 420px);
+  box-shadow: 0 16px 36px rgba(20, 20, 20, 0.08);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .life-home-hero-actions {
   width: 100%;
   max-width: 360px;
   margin: 0 auto;
+  gap: 10px;
 }
 
 .life-footer {
@@ -267,6 +311,113 @@ p {
 
 .scroll-to-top:hover svg {
   transform: translateY(-2px);
+}
+
+.life-offline-banner {
+  position: fixed;
+  z-index: 260;
+  left: 50%;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  transform: translateX(-50%);
+  background: rgba(20, 20, 20, 0.94);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@media (max-width: 640px) {
+  .life-offline-banner {
+    width: calc(100% - 20px);
+    max-width: 460px;
+    text-align: center;
+    font-size: 11px;
+    padding: 9px 12px;
+  }
+}
+
+/* Auth/form reliability */
+.life-field-input {
+  min-height: 46px;
+}
+
+.life-field-error {
+  display: block;
+  max-width: 100%;
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.life-auth-card p,
+.life-auth-card span {
+  text-wrap: pretty;
+}
+
+/* Unified password show/hide toggle */
+.life-password-toggle,
+button:has(> .life-password-toggle-label) {
+  min-height: 32px !important;
+  min-width: 54px !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--life-muted) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.01em;
+}
+
+.life-auth-card div[style*="position:relative"] > input + button,
+.life-auth-card div[style*="position: relative"] > input + button {
+  position: absolute !important;
+  right: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 4 !important;
+  min-height: 32px !important;
+  min-width: 54px !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--life-muted) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+.life-password-toggle:hover,
+button:has(> .life-password-toggle-label):hover {
+  background: rgba(74, 140, 92, 0.08) !important;
+  border-color: rgba(74, 140, 92, 0.22) !important;
+  color: var(--life-green) !important;
+}
+
+.life-auth-card div[style*="position:relative"] > input + button:hover,
+.life-auth-card div[style*="position: relative"] > input + button:hover {
+  background: rgba(74, 140, 92, 0.08) !important;
+  border-color: rgba(74, 140, 92, 0.22) !important;
+  color: var(--life-green) !important;
+}
+
+.life-password-toggle:active,
+button:has(> .life-password-toggle-label):active {
+  transform: scale(0.97) !important;
+}
+
+.life-password-toggle:focus-visible,
+button:has(> .life-password-toggle-label):focus-visible {
+  outline: 2px solid var(--life-green) !important;
+  outline-offset: 2px !important;
 }
 
 /* ── Enhanced Animations ───────────────────────────────────── */
@@ -388,6 +539,10 @@ select:focus-visible {
     padding: 24px 18px !important;
   }
 
+  .life-auth-card button {
+    width: 100%;
+  }
+
   /* Mobile search bar optimizations */
   .life-topbar {
     padding-left: max(12px, env(safe-area-inset-left, 0px)) !important;
@@ -461,6 +616,7 @@ select:focus-visible {
     max-width: 100% !important;
     flex-direction: column;
     align-items: stretch;
+    gap: 8px !important;
   }
 
   .life-home-hero-actions button {
@@ -509,6 +665,15 @@ select:focus-visible {
     grid-template-columns: repeat(2, 1fr) !important;
   }
 
+  .life-quiz-tabs button {
+    font-size: 12px !important;
+    padding: 13px 10px !important;
+  }
+
+  .life-postit-header {
+    align-items: center !important;
+  }
+
   /* Post-It comment row */
   .life-postit-comment-row {
     flex-wrap: wrap !important;
@@ -534,6 +699,7 @@ select:focus-visible {
 
 /* Search bar enhancements */
 .life-topbar input[type="text"] {
+  min-width: 0;
   transition: all 0.25s var(--life-ease-soft);
 }
 
@@ -561,9 +727,26 @@ input[type="password"]:focus {
   box-shadow: 0 0 0 3px rgba(74, 140, 92, 0.1);
 }
 
+input,
+textarea,
+select {
+  caret-color: var(--life-green);
+}
+
 select {
   min-height: 40px;
   touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #8a8070 50%),
+    linear-gradient(135deg, #8a8070 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px !important;
 }
 
 /* ── Glass Card Effect ──────────────────────────────────── */
@@ -1057,6 +1240,10 @@ button,
   white-space: nowrap;
 }
 
+.life-reader-toolbar button {
+  min-height: 36px;
+}
+
 @media (max-width: 640px) {
   .life-reader-toolbar {
     flex-wrap: nowrap !important;
@@ -1182,6 +1369,7 @@ button:active:not(:disabled),
   position: relative;
   overflow: hidden;
   z-index: 41 !important;
+  min-height: 48px;
 }
 
 .life-home-hero-actions button::after {
@@ -1198,6 +1386,11 @@ button:active:not(:disabled),
   .life-home-hero-actions button:hover::after {
     transform: translateX(120%);
   }
+}
+
+.life-reduce-motion .life-home-hero-actions button::after,
+.life-reduce-motion .life-home-hero-actions button::before {
+  display: none !important;
 }
 
 @media (max-width: 640px) {
@@ -1252,6 +1445,12 @@ button:active:not(:disabled),
 .life-sidebar[style*="translateX(0)"] button:nth-of-type(6) { animation-delay: 145ms; }
 .life-sidebar[style*="translateX(0)"] button:nth-of-type(7) { animation-delay: 170ms; }
 .life-sidebar[style*="translateX(0)"] button:nth-of-type(8) { animation-delay: 195ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .life-sidebar[style*="translateX(0)"] button {
+    animation: none !important;
+  }
+}
 
 /* Faster tactile response on touch devices */
 @media (hover: none) and (pointer: coarse) {
@@ -1316,4 +1515,181 @@ button:active:not(:disabled),
 .life-whats-inside-grid .life-card-hover > * {
   position: relative;
   z-index: 1;
+}
+
+/* Top-right profile badge: force perfect circle */
+.life-topbar .profile-btn {
+  inline-size: 38px !important;
+  block-size: 38px !important;
+  min-inline-size: 38px !important;
+  min-block-size: 38px !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden;
+  line-height: 1 !important;
+}
+
+.life-topbar button[aria-label*="Profile"],
+.life-topbar button[title*="Profile"] {
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 999px !important;
+}
+
+.life-topbar .profile-btn > span,
+.life-topbar .profile-btn > div {
+  line-height: 1 !important;
+}
+
+.life-topbar .profile-btn {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+@media (max-width: 640px) {
+  .life-topbar .profile-btn {
+    inline-size: 34px !important;
+    block-size: 34px !important;
+    min-inline-size: 34px !important;
+    min-block-size: 34px !important;
+  }
+}
+
+/* Add glow/light behind homepage primary action */
+.life-home-hero-actions button:first-child {
+  box-shadow:
+    0 10px 22px rgba(50, 117, 72, 0.26),
+    0 0 0 1px rgba(255, 255, 255, 0.16) inset !important;
+}
+
+.life-home-hero-actions button:first-child::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 72%;
+  transform: translate(-50%, -50%);
+  width: 150%;
+  height: 180%;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(111, 190, 119, 0.42) 0%, rgba(111, 190, 119, 0.18) 38%, rgba(111, 190, 119, 0) 72%);
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(6px);
+}
+
+.life-home-hero button[style*="#1b2f28"] {
+  position: relative;
+  z-index: 42 !important;
+  box-shadow:
+    0 8px 24px rgba(18, 41, 34, 0.35),
+    0 0 34px rgba(111, 190, 119, 0.28) !important;
+}
+
+.life-home-hero button[style*="#1b2f28"]::before {
+  content: "";
+  position: absolute;
+  inset: -8px -10px;
+  border-radius: 18px;
+  background: radial-gradient(ellipse at center, rgba(111, 190, 119, 0.35) 0%, rgba(111, 190, 119, 0.13) 40%, rgba(111, 190, 119, 0) 76%);
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(4px);
+}
+
+/* Auth card layering fix: keep controls above decorative circles */
+.life-auth-shell,
+.life-auth-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.life-auth-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Density + readability system */
+.life-density-compact .life-home-hero,
+.life-density-compact .life-postit-page,
+.life-density-compact .life-quiz-page,
+.life-density-compact .life-constellation-panel {
+  letter-spacing: -0.005em;
+}
+
+.life-density-compact .life-home-hero-actions button,
+.life-density-compact .life-whats-inside-grid .life-card-hover {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+.life-density-airy .life-home-hero,
+.life-density-airy .life-postit-page,
+.life-density-airy .life-quiz-page,
+.life-density-airy .life-constellation-panel {
+  line-height: 1.72;
+}
+
+.life-density-airy .life-home-hero-actions button,
+.life-density-airy .life-whats-inside-grid .life-card-hover {
+  padding-top: 18px !important;
+  padding-bottom: 18px !important;
+}
+
+/* High contrast mode */
+.life-high-contrast {
+  --life-ink: #0f0f10;
+  --life-muted: #5c564f;
+  --life-border: #b8ad96;
+  --life-green: #2f7a42;
+  --life-green-soft: #dff0e3;
+}
+
+.life-high-contrast body {
+  color: var(--life-ink);
+}
+
+.life-high-contrast .life-topbar,
+.life-high-contrast .life-sidebar,
+.life-high-contrast .life-search-dropdown,
+.life-high-contrast .life-card-hover,
+.life-high-contrast .life-home-hero {
+  border-color: var(--life-border) !important;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 8px 26px rgba(0, 0, 0, 0.09) !important;
+}
+
+.life-high-contrast button,
+.life-high-contrast [role="button"] {
+  filter: saturate(1.05) contrast(1.02);
+}
+
+.life-high-contrast :focus-visible {
+  outline-width: 3px;
+}
+
+/* App-wide section rendering performance */
+.life-home-page > div,
+.life-quiz-page > div,
+.life-postit-page > div {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 620px;
+}
+
+/* Data Saver mode */
+.life-data-saver body::before,
+.life-data-saver .life-grain::after,
+.life-data-saver .life-home-hero-actions button::after,
+.life-data-saver .life-home-hero-actions button::before,
+.life-data-saver .life-card-hover::after,
+.life-data-saver .life-sidebar::before {
+  display: none !important;
+}
+
+.life-data-saver .life-card-hover,
+.life-data-saver .life-sidebar,
+.life-data-saver .life-search-dropdown,
+.life-data-saver .scroll-to-top {
+  box-shadow: none !important;
 }

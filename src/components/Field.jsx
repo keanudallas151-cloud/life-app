@@ -9,6 +9,7 @@ export function Field({label,type="text",value,onChange,error,placeholder}){
       {label&&<label style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:C.muted,fontFamily:"Georgia,serif"}}>{label}</label>}
       <div style={{position:"relative"}}>
         <input
+          className="life-field-input"
           type={type==="password"?(show?"text":"password"):type}
           value={value}
           onChange={e=>onChange(e.target.value)}
@@ -28,13 +29,16 @@ export function Field({label,type="text",value,onChange,error,placeholder}){
         />
         {type==="password"&&(
           <button
+            className="life-password-toggle"
+            type="button"
+            aria-label={show ? "Hide password" : "Show password"}
             onClick={()=>setShow(!show)}
             style={{
               position:"absolute",
               right:14,
               top:"50%",
               transform:"translateY(-50%)",
-              background:"none",
+              background:"transparent",
               border:"none",
               cursor:"pointer",
               color:C.muted,
@@ -45,7 +49,7 @@ export function Field({label,type="text",value,onChange,error,placeholder}){
           </button>
         )}
       </div>
-      {error&&<span style={{fontSize:12,color:C.red,fontFamily:"Georgia,serif",fontStyle:"italic"}}>{error}</span>}
+      {error&&<span className="life-field-error" style={{fontSize:12,color:C.red,fontFamily:"Georgia,serif",fontStyle:"italic"}}>{error}</span>}
     </div>
   );
 }

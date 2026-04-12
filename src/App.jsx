@@ -40,6 +40,10 @@ const PREF_DEFAULTS = {
   soundVolume: 58,
   soundMode: "focused",
   soundScope: "balanced",
+  textScale: 100,
+  readingDensity: "comfortable",
+  highContrast: false,
+  dataSaver: false,
   reduceMotion: false,
   pressIntensity: 58,
   instantButtons: true,
@@ -69,6 +73,20 @@ export default function LifeApp() {
   const [rShowPass, setRShowPass] = useState(false);
   const [rShowPass2, setRShowPass2] = useState(false);
   const [rErr, setRErr] = useState({});
+
+  useEffect(() => {
+    if (!rErr || Object.keys(rErr).length === 0) return;
+    setRErr((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      if (next.name && rName.trim()) { delete next.name; changed = true; }
+      if (next.email && rEmail.includes("@")) { delete next.email; changed = true; }
+      if (next.dob && rDob.trim()) { delete next.dob; changed = true; }
+      if (next.pass && rPass.length >= 8) { delete next.pass; changed = true; }
+      if (next.pass2 && rPass2 && rPass === rPass2) { delete next.pass2; changed = true; }
+      return changed ? next : prev;
+    });
+  }, [rDob, rEmail, rErr, rName, rPass, rPass2]);
 
   // ── AUTH PROVIDERS ────────────────────────────────────────────
   // Only 3 providers on landing page: Google, Phone, Facebook
@@ -225,6 +243,9 @@ export default function LifeApp() {
   const [resumeTipDismissed, setResumeTipDismissed] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [constellationOpen, setConstellationOpen] = useState(false);
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator !== "undefined" ? !navigator.onLine : false
+  );
 
   const readerPagesKey = `rp_${uid}`;
   const [readerPages, setReaderPages] = useState(() => LS.get(readerPagesKey, {}));
@@ -253,6 +274,10 @@ export default function LifeApp() {
         soundEnabled: true,
         soundMode: "focused",
         soundScope: "focused",
+        textScale: 100,
+        readingDensity: "comfortable",
+        highContrast: false,
+        dataSaver: false,
         reduceMotion: false,
         instantButtons: true,
         pressIntensity: 44,
@@ -266,6 +291,10 @@ export default function LifeApp() {
         soundEnabled: true,
         soundMode: "full",
         soundScope: "full",
+        textScale: 102,
+        readingDensity: "airy",
+        highContrast: false,
+        dataSaver: false,
         reduceMotion: false,
         instantButtons: false,
         pressIntensity: 72,
@@ -279,6 +308,10 @@ export default function LifeApp() {
         soundEnabled: true,
         soundMode: "focused",
         soundScope: "focused",
+        textScale: 104,
+        readingDensity: "comfortable",
+        highContrast: false,
+        dataSaver: true,
         reduceMotion: true,
         instantButtons: true,
         pressIntensity: 24,
@@ -303,17 +336,24 @@ export default function LifeApp() {
     const reduce = !!uiPrefs.reduceMotion;
     const intensity = Math.max(0, Math.min(100, Number(uiPrefs.pressIntensity) || 0));
     const sidebarSpeed = Math.max(0, Math.min(100, Number(uiPrefs.sidebarSpeed) || 0));
+    const textScale = Math.max(88, Math.min(122, Number(uiPrefs.textScale) || 100));
+    const density = uiPrefs.readingDensity === "compact" ? "compact" : uiPrefs.readingDensity === "airy" ? "airy" : "comfortable";
     const pressScale = reduce ? 1 : 0.985 - intensity * 0.00035;
     const hoverLift = reduce ? 0 : 0.5 + intensity * 0.02;
     const sidebarDur = reduce ? 0 : Math.round(340 + sidebarSpeed * 3);
     const sidebarFade = reduce ? 0 : Math.max(220, sidebarDur - 90);
     root.classList.toggle("life-reduce-motion", reduce);
     root.classList.toggle("life-instant-buttons", !!uiPrefs.instantButtons);
+    root.classList.toggle("life-high-contrast", !!uiPrefs.highContrast);
+    root.classList.toggle("life-data-saver", !!uiPrefs.dataSaver);
+    root.classList.toggle("life-density-compact", density === "compact");
+    root.classList.toggle("life-density-airy", density === "airy");
     root.style.setProperty("--life-press-scale", String(pressScale));
     root.style.setProperty("--life-hover-lift", `${hoverLift.toFixed(2)}px`);
     root.style.setProperty("--life-sidebar-duration", `${sidebarDur}ms`);
     root.style.setProperty("--life-sidebar-fade-duration", `${sidebarFade}ms`);
-  }, [uiPrefs.instantButtons, uiPrefs.pressIntensity, uiPrefs.reduceMotion, uiPrefs.sidebarSpeed]);
+    root.style.setProperty("--life-text-scale", String(textScale / 100));
+  }, [uiPrefs.dataSaver, uiPrefs.highContrast, uiPrefs.instantButtons, uiPrefs.pressIntensity, uiPrefs.readingDensity, uiPrefs.reduceMotion, uiPrefs.sidebarSpeed, uiPrefs.textScale]);
 
   const setProfile = (v) => {
     const next = typeof v === "function" ? v(profile) : v;
@@ -387,6 +427,7 @@ export default function LifeApp() {
 
   // ── GOOGLE SIGN IN (live) ─────────────────────────────────────
   const doGoogleSignIn = async () => {
+    if (authLoading) return;
     play("tap");
     setSiSocialErr("");
     setAuthLoading(true);
@@ -416,6 +457,7 @@ export default function LifeApp() {
 
   // ── EMAIL / PASSWORD SIGN IN ──────────────────────────────────
   const doEmailSignIn = async () => {
+    if (authLoading) return;
     setSiErr("");
     setSiSocialErr("");
     if (!siEmail.trim()) { setSiErr("Please enter your email."); play("err"); return; }
@@ -427,7 +469,10 @@ export default function LifeApp() {
     });
     setAuthLoading(false);
     if (error) {
-      setSiErr(error.message?.includes("Invalid") ? "Incorrect email or password." : (error.message || "Sign in failed."));
+      const msg = (error.message || "").toLowerCase();
+      if (msg.includes("invalid")) setSiErr("Incorrect email or password.");
+      else if (msg.includes("rate") || msg.includes("too many")) setSiErr("Too many attempts. Wait a moment.");
+      else setSiErr("Could not sign in. Check your details.");
       play("err");
     }
     // success → onAuthStateChange fires → screen = "app"
@@ -435,6 +480,8 @@ export default function LifeApp() {
 
   // ── SUPABASE REGISTER ─────────────────────────────────────────
   const doRegister = async () => {
+    if (authLoading) return;
+    setRErr({});
     const err = {};
     if (!rName.trim()) err.name = "Full name is required.";
     if (!rEmail.trim() || !rEmail.includes("@")) err.email = "Enter a valid email.";
@@ -450,6 +497,9 @@ export default function LifeApp() {
       else if (age < 13) err.dob = "You must be 13 or older to use Life.";
     }
     if (rPass.length < 8) err.pass = "Password must be at least 8 characters.";
+    else if (!/[A-Z]/.test(rPass) || !/[a-z]/.test(rPass) || !/[0-9]/.test(rPass) || !/[^A-Za-z0-9]/.test(rPass)) {
+      err.pass = "Use upper/lowercase letters, a number, and a symbol.";
+    }
     if (rPass !== rPass2) err.pass2 = "Passwords do not match.";
     if (Object.keys(err).length) { setRErr(err); play("err"); return; }
 
@@ -468,10 +518,16 @@ export default function LifeApp() {
     setAuthLoading(false);
 
     if (error) {
-      if (error.message.toLowerCase().includes("already")) {
+      const raw = (error.message || "").trim();
+      const msg = raw.toLowerCase();
+      if (msg.includes("already")) {
         setRErr({ email: "An account with this email already exists." });
+      } else if (msg.includes("password") || msg.includes("character") || msg.includes("weak")) {
+        setRErr({ pass: "Password too weak. Use upper/lowercase, number, and symbol." });
+      } else if (msg.includes("email")) {
+        setRErr({ email: "Please enter a valid email address." });
       } else {
-        setRErr({ email: error.message });
+        setRErr({ email: "Could not create account. Please check details." });
       }
       play("err");
       return;
@@ -555,6 +611,33 @@ export default function LifeApp() {
     setNotes({ ...notes, [selKey]: noteInput });
     setNoteSaved(true);
   };
+
+  const exportSettingSnapshot = () => {
+    try {
+      const file = new Blob([JSON.stringify(uiPrefs, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(file);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "life-settings.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      play("ok");
+    } catch {
+      play("err");
+    }
+  };
+
+  const resetReadingProgress = () => {
+    try {
+      setReadKeys([]);
+      setReaderPages({});
+      LS.set(`rp_${uid}`, {});
+      clearResumeTopic();
+      play("ok");
+    } catch {
+      play("err");
+    }
+  };
   const shareNote = () => {
     if (!selKey || !noteInput.trim()) return;
     play("ok");
@@ -582,6 +665,17 @@ export default function LifeApp() {
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const toOnline = () => setIsOffline(false);
+    const toOffline = () => setIsOffline(true);
+    window.addEventListener("online", toOnline);
+    window.addEventListener("offline", toOffline);
+    return () => {
+      window.removeEventListener("online", toOnline);
+      window.removeEventListener("offline", toOffline);
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -871,12 +965,14 @@ export default function LifeApp() {
               onBlur={e => { e.currentTarget.style.borderColor = C.border; }}
             />
             <button
-              onClick={() => setSiShowPass(v => !v)}
+                    className="life-password-toggle"
+                    type="button"
+                    onClick={() => setSiShowPass(v => !v)}
               style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "Georgia,serif", transition: "color 0.2s ease" }}
               onMouseEnter={e => { e.currentTarget.style.color = C.ink; }}
               onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}>
-              {siShowPass ? "Hide" : "Show"}
-            </button>
+                    <span className="life-password-toggle-label">{siShowPass ? "Hide" : "Show"}</span>
+                  </button>
           </div>
         </div>
 
@@ -999,8 +1095,8 @@ export default function LifeApp() {
               onBlur={e => { e.currentTarget.style.borderColor = C.border; }}
             />
             <button onClick={() => setRShowPass(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "Georgia,serif", transition: "color 0.2s ease" }} onMouseEnter={e => { e.currentTarget.style.color = C.ink; }} onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}>
-              {rShowPass ? "Hide" : "Show"}
-            </button>
+                    <span className="life-password-toggle-label">{rShowPass ? "Hide" : "Show"}</span>
+                  </button>
           </div>
           {rPass.length > 0 && (
             <div style={{ marginTop: 2 }}>
@@ -1031,8 +1127,8 @@ export default function LifeApp() {
               onBlur={e => { e.currentTarget.style.borderColor = (rErr.pass2 || confirmMismatch) ? C.red : C.border; }}
             />
             <button onClick={() => setRShowPass2(v => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "Georgia,serif", transition: "color 0.2s ease" }} onMouseEnter={e => { e.currentTarget.style.color = C.ink; }} onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}>
-              {rShowPass2 ? "Hide" : "Show"}
-            </button>
+                    <span className="life-password-toggle-label">{rShowPass2 ? "Hide" : "Show"}</span>
+                  </button>
           </div>
           {!rErr.pass2 && confirmMismatch && <p style={{ margin: 0, fontSize: 12, color: C.red, fontStyle: "italic" }}>Not Matching Yet</p>}
           {rErr.pass2 && <p style={{ margin: 0, fontSize: 12, color: C.red, fontStyle: "italic" }}>{rErr.pass2}</p>}
@@ -1421,6 +1517,7 @@ export default function LifeApp() {
                 ["What is Guided?", "A curated sequence designed to take you from zero understanding of money to a solid foundation."],
                 ["Keyboard shortcuts", "Press / to focus search (when not typing in a field). Press ? to open this Help page. Reading progress per topic is saved automatically when you turn pages."],
                 ["Share a topic", "While reading, use Copy link to get a URL with #read=topicKey. Anyone with the link can jump straight into that article after signing in."],
+                ["Legal pages", "Open Privacy Policy, Terms, and Cookie Notice from Profile → Setting → Tools & Legal."],
               ].map(([q, a]) => (
                 <div key={q} style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 12, padding: "20px 22px", marginBottom: 12 }}>
                   <p style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 700, color: C.ink }}>{q}</p>
@@ -1481,8 +1578,32 @@ export default function LifeApp() {
                 <p style={{ margin: "0 0 16px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: C.muted }}>
                   Setting
                 </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+                  {["Experience", "Sound", "Display", "Motion", "Tools", "Account"].map((item) => (
+                    <span
+                      key={item}
+                      style={{
+                        fontSize: 10,
+                        color: C.muted,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 999,
+                        padding: "4px 8px",
+                        background: C.white,
+                        letterSpacing: 0.6,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
 
                 <div style={{ display: "grid", gap: 14 }}>
+                  <div style={{ marginTop: 2 }}>
+                    <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, letterSpacing: 2.2, textTransform: "uppercase", color: C.muted }}>
+                      Experience
+                    </p>
+                  </div>
                   <div style={{ display: "grid", gap: 8 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                       <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>Experience Profile</span>
@@ -1543,6 +1664,11 @@ export default function LifeApp() {
                     </div>
                   </div>
 
+                  <div style={{ marginTop: 4, paddingTop: 10, borderTop: `1px solid ${C.light}` }}>
+                    <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, letterSpacing: 2.2, textTransform: "uppercase", color: C.muted }}>
+                      Sound
+                    </p>
+                  </div>
                   <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                     <div>
                       <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: C.ink }}>Sound Effects</p>
@@ -1627,6 +1753,82 @@ export default function LifeApp() {
                     </select>
                   </label>
 
+                  <div style={{ marginTop: 4, paddingTop: 10, borderTop: `1px solid ${C.light}` }}>
+                    <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, letterSpacing: 2.2, textTransform: "uppercase", color: C.muted }}>
+                      Display
+                    </p>
+                  </div>
+                  <label style={{ display: "grid", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>Text Size</span>
+                      <span style={{ fontSize: 12, color: C.muted }}>{uiPrefs.textScale || 100}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={88}
+                      max={122}
+                      step={1}
+                      value={uiPrefs.textScale ?? 100}
+                      onChange={(e) => updateUiPrefs({ textScale: Number(e.target.value) })}
+                      style={{ accentColor: C.green }}
+                    />
+                  </label>
+
+                  <label style={{ display: "grid", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>Reading Density</span>
+                      <span style={{ fontSize: 12, color: C.muted, textTransform: "capitalize" }}>{uiPrefs.readingDensity || "comfortable"}</span>
+                    </div>
+                    <select
+                      value={uiPrefs.readingDensity || "comfortable"}
+                      onChange={(e) => updateUiPrefs({ readingDensity: e.target.value })}
+                      style={{
+                        background: C.white,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 12px",
+                        color: C.ink,
+                        fontSize: 13,
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      <option value="compact">Compact</option>
+                      <option value="comfortable">Comfortable</option>
+                      <option value="airy">Airy</option>
+                    </select>
+                  </label>
+
+                  <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: C.ink }}>High Contrast</p>
+                      <p style={{ margin: "3px 0 0", fontSize: 12, color: C.muted, fontStyle: "italic" }}>Sharper text and stronger separation</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={!!uiPrefs.highContrast}
+                      onChange={(e) => updateUiPrefs({ highContrast: e.target.checked })}
+                      style={{ width: 20, height: 20, accentColor: C.green }}
+                    />
+                  </label>
+
+                  <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: C.ink }}>Data Saver</p>
+                      <p style={{ margin: "3px 0 0", fontSize: 12, color: C.muted, fontStyle: "italic" }}>Reduces heavy visual effects and motion cost</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={!!uiPrefs.dataSaver}
+                      onChange={(e) => updateUiPrefs({ dataSaver: e.target.checked })}
+                      style={{ width: 20, height: 20, accentColor: C.green }}
+                    />
+                  </label>
+
+                  <div style={{ marginTop: 4, paddingTop: 10, borderTop: `1px solid ${C.light}` }}>
+                    <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, letterSpacing: 2.2, textTransform: "uppercase", color: C.muted }}>
+                      Motion & Speed
+                    </p>
+                  </div>
                   <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                     <div>
                       <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: C.ink }}>Reduce Motion</p>
@@ -1687,6 +1889,11 @@ export default function LifeApp() {
                     />
                   </label>
 
+                  <div style={{ marginTop: 4, paddingTop: 10, borderTop: `1px solid ${C.light}` }}>
+                    <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, letterSpacing: 2.2, textTransform: "uppercase", color: C.muted }}>
+                      Tools & Legal
+                    </p>
+                  </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8, paddingTop: 2 }}>
                     <button
                       type="button"
@@ -1723,8 +1930,162 @@ export default function LifeApp() {
                     >
                       Reset Setting
                     </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setUiPrefs((prev) => ({
+                          ...prev,
+                          instantButtons: true,
+                          reduceMotion: false,
+                          sidebarSpeed: 58,
+                          pressIntensity: 48,
+                          textScale: 102,
+                          readingDensity: "comfortable",
+                          soundMode: "focused",
+                          soundScope: "focused",
+                          dataSaver: true,
+                        }))
+                      }
+                      style={{
+                        background: C.white,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 14px",
+                        color: C.mid,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      Optimize iPhone
+                    </button>
+                    <button
+                      type="button"
+                      onClick={resetReadingProgress}
+                      style={{
+                        background: C.white,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 14px",
+                        color: C.mid,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      Reset Progress
+                    </button>
+                    <button
+                      type="button"
+                      onClick={exportSettingSnapshot}
+                      style={{
+                        background: C.white,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 14px",
+                        color: C.mid,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      Export Settings
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.open("/privacy.html", "_blank", "noopener,noreferrer")}
+                      style={{
+                        background: C.light,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 14px",
+                        color: C.mid,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      Privacy Policy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.open("/terms.html", "_blank", "noopener,noreferrer")}
+                      style={{
+                        background: C.light,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 14px",
+                        color: C.mid,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      Terms
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.open("/cookies.html", "_blank", "noopener,noreferrer")}
+                      style={{
+                        background: C.light,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 14px",
+                        color: C.mid,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      Cookie Notice
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.open("/community-guidelines.html", "_blank", "noopener,noreferrer")}
+                      style={{
+                        background: C.light,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 14px",
+                        color: C.mid,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      Community Rules
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.open("/disclaimer.html", "_blank", "noopener,noreferrer")}
+                      style={{
+                        background: C.light,
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 10,
+                        padding: "10px 14px",
+                        color: C.mid,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: "Georgia,serif",
+                      }}
+                    >
+                      Disclaimer
+                    </button>
                   </div>
                 </div>
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, letterSpacing: 2.2, textTransform: "uppercase", color: C.muted }}>
+                  Account
+                </p>
               </div>
               <button onClick={doSignOut} style={{ width: "100%", background: "none", border: `1.5px solid ${C.border}`, borderRadius: 12, padding: "15px", color: C.red, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "Georgia,serif" }}>Sign Out</button>
             </div>
@@ -1759,6 +2120,16 @@ export default function LifeApp() {
           </div>
         </div>
       </div>
+
+      {isOffline && (
+        <div
+          className="life-offline-banner"
+          role="status"
+          aria-live="polite"
+        >
+          Offline mode: cached content only until connection returns.
+        </div>
+      )}
 
       {/* Scroll to Top Button */}
       <button
