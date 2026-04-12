@@ -141,3 +141,225 @@ h1, h2, h3, p {
   backdrop-filter: saturate(1.2) blur(12px);
   -webkit-backdrop-filter: saturate(1.2) blur(12px);
 }
+
+/* ── Social Login Buttons ───────────────────────────────────── */
+.social-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.social-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.social-btn:hover::before {
+  opacity: 1;
+}
+
+/* ── Scroll to Top Button ──────────────────────────────────── */
+.scroll-to-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--life-white);
+  border: 1.5px solid var(--life-border);
+  box-shadow: 0 4px 14px rgba(20,20,20,0.12);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s var(--life-ease-soft);
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+.scroll-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.scroll-to-top:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(74,140,92,0.25);
+  border-color: var(--life-green);
+}
+
+.scroll-to-top svg {
+  color: var(--life-green);
+  transition: transform 0.2s ease;
+}
+
+.scroll-to-top:hover svg {
+  transform: translateY(-2px);
+}
+
+/* ── Enhanced Animations ───────────────────────────────────── */
+@keyframes life-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes life-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes life-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.life-animate-float {
+  animation: life-float 3s ease-in-out infinite;
+}
+
+.life-animate-shimmer {
+  background: linear-gradient(90deg, var(--life-skin) 25%, #fff 50%, var(--life-skin) 75%);
+  background-size: 200% 100%;
+  animation: life-shimmer 2s infinite;
+}
+
+/* ── Focus States ───────────────────────────────────────────── */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--life-green);
+  outline-offset: 2px;
+  transition: outline-offset 0.15s ease;
+}
+
+/* ── Page Transitions ──────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .page-transition-enter {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .page-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.35s var(--life-ease-out), transform 0.35s var(--life-ease-out);
+  }
+
+  .page-transition-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .page-transition-exit-active {
+    opacity: 0;
+    transform: translateY(-12px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+}
+
+/* ── Toast Notifications ─────────────────────────────────── */
+.life-toast {
+  animation: life-toast-in 0.35s var(--life-ease-out) forwards;
+}
+
+@keyframes life-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+<<<<<<< C:/Users/louie/life-app-vite/src/index.css
+/* ── Responsive Utilities ─────────────────────────────────── */
+=======
+/* ── Mobile Search & Top Bar ──────────────────────────────── */
+>>>>>>> C:/Users/louie/.windsurf/worktrees/life-app-vite/life-app-vite-9f9800d7/src/index.css
+@media (max-width: 640px) {
+  .scroll-to-top {
+    bottom: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+  }
+<<<<<<< C:/Users/louie/life-app-vite/src/index.css
+=======
+
+  /* Mobile search bar optimizations */
+  .life-topbar {
+    padding: 0 12px !important;
+    height: 56px !important;
+  }
+
+  .life-topbar input[type="text"] {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 10px 28px 10px 34px !important;
+    border-radius: 24px !important;
+  }
+
+  .life-topbar input[type="text"]::placeholder {
+    font-size: 13px !important;
+  }
+
+  /* Smaller logo on mobile */
+  .life-topbar .logo-btn > div {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  /* Smaller profile button on mobile */
+  .life-topbar .profile-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  /* Mobile search dropdown */
+  .life-search-dropdown {
+    top: 56px !important;
+    max-height: 70vh !important;
+    border-radius: 0 0 16px 16px !important;
+  }
+}
+
+/* Search bar enhancements */
+.life-topbar input[type="text"] {
+  transition: all 0.25s var(--life-ease-soft);
+}
+
+.life-topbar input[type="text"]:focus {
+  background: var(--life-white) !important;
+  border-color: var(--life-green) !important;
+  box-shadow: 0 0 0 3px rgba(74, 140, 92, 0.12);
+}
+
+/* Search icon animation */
+.life-search-icon {
+  transition: all 0.2s ease;
+}
+
+.life-topbar input[type="text"]:focus ~ .life-search-icon,
+.life-topbar input[type="text"]:focus + * .life-search-icon {
+  stroke: var(--life-green);
+  transform: scale(1.1);
+}
+
+/* Mobile sidebar adjustments */
+@media (max-width: 640px) {
+  .life-sidebar {
+    width: 85vw !important;
+    max-width: 300px !important;
+  }
+>>>>>>> C:/Users/louie/.windsurf/worktrees/life-app-vite/life-app-vite-9f9800d7/src/index.css
+}

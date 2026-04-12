@@ -65,7 +65,7 @@ export function PostItFeed({ play, user }) {
       <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:24 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
           <div style={{ width:32, height:32, borderRadius:"50%", background:C.ink, display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <span style={{ color:C.white, fontSize:11, fontWeight:700 }}>{vp.author}</span>
+            <span style={{ color:C.white, fontSize:11, fontWeight:700 }}>{vp.author?.slice(0,2)}</span>
           </div>
           <span style={{ fontSize:13, fontWeight:600, color:C.ink }}>{vp.author}</span>
           <span style={{ fontSize:11, color:C.muted, marginLeft:4 }}>{vp.time}</span>
@@ -92,7 +92,7 @@ export function PostItFeed({ play, user }) {
         {vp.comments.map(c => (
           <div key={c.id} style={{ display:"flex", gap:12, marginBottom:14 }}>
             <div style={{ width:28, height:28, borderRadius:"50%", background:C.light, border:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-              <span style={{ fontSize:10, fontWeight:700, color:C.mid }}>{c.author}</span>
+              <span style={{ fontSize:10, fontWeight:700, color:C.mid }}>{c.author?.slice(0,2)}</span>
             </div>
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:10, padding:"10px 14px", flex:1 }}>
               <span style={{ fontSize:12, fontWeight:600, color:C.ink }}>{c.author}</span>
@@ -182,7 +182,7 @@ export function PostItFeed({ play, user }) {
         <div key={post.id} className="life-card-hover" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:20, marginBottom:12, boxShadow:S.sm, transition:"box-shadow 0.25s ease, border-color 0.2s ease" }}>
           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
             <div style={{ width:28, height:28, borderRadius:"50%", background:C.ink, display:"flex", alignItems:"center", justifyContent:"center" }}>
-              <span style={{ color:C.white, fontSize:10, fontWeight:700 }}>{post.author}</span>
+              <span style={{ color:C.white, fontSize:10, fontWeight:700 }}>{post.author?.slice(0,2)}</span>
             </div>
             <span style={{ fontSize:12, color:C.muted }}>{post.time}</span>
             <span style={{ marginLeft:"auto", background:C.greenLt, color:C.green, fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:20 }}>{post.flair}</span>
