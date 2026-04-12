@@ -13,38 +13,21 @@
 
 .life-home-logo-upgraded {
   display: block !important;
-  margin: 0 auto 0.5rem auto !important;
+  margin: 0 auto 0.65rem auto !important;
   text-align: center !important;
-  font-size: clamp(3.3rem, 14vw, 6rem) !important;
+  font-size: clamp(3.7rem, 16vw, 6.6rem) !important;
   line-height: 0.9 !important;
   font-weight: 800 !important;
   letter-spacing: -0.02em !important;
 }
 
-.life-top-logo-upgraded {
-  width: 42px !important;
-  height: 42px !important;
-  min-width: 42px !important;
-  min-height: 42px !important;
-  border-radius: 12px !important;
-  display: grid !important;
-  place-items: center !important;
-  overflow: hidden !important;
-  background: linear-gradient(145deg, #2f8f55 0%, #256f43 100%) !important;
-  box-shadow: 0 7px 16px rgba(24, 82, 49, 0.24) !important;
-}
+@media (max-width: 640px) {
+  .life-home-welcome-upgraded {
+    letter-spacing: 0.34em !important;
+    font-size: clamp(0.84rem, 3.8vw, 1rem) !important;
+  }
 
-.life-top-logo-upgraded img,
-.life-top-logo-upgraded svg {
-  width: 74% !important;
-  height: 74% !important;
-  object-fit: contain !important;
-}
-
-.life-top-logo-text {
-  font-size: 1.16rem !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.025em !important;
-  color: #f6f8f4 !important;
-  line-height: 1 !important;
+  .life-home-logo-upgraded {
+    font-size: clamp(4rem, 18vw, 5.8rem) !important;
+  }
 }

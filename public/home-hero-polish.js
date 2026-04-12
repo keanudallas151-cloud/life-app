@@ -45,46 +45,8 @@
     logoEl.classList.add("life-home-logo-upgraded");
   };
 
-  const createFallbackMark = (target) => {
-    if (!target) return;
-    if (target.querySelector(".life-top-logo-text")) return;
-    if (target.querySelector("img, svg")) return;
-
-    const mark = document.createElement("span");
-    mark.className = "life-top-logo-text";
-    mark.textContent = "L.";
-    target.textContent = "";
-    target.appendChild(mark);
-  };
-
-  const patchTopLeftLogo = () => {
-    const searchInput = document.querySelector(
-      'input[placeholder*="Search topics"], input[placeholder*="Search"]'
-    );
-    if (!searchInput) return;
-
-    const row =
-      searchInput.closest("header, nav, div") ||
-      searchInput.parentElement?.parentElement;
-    if (!row) return;
-
-    const children = Array.from(row.children);
-    const searchSlot = children.find((child) => child.contains(searchInput));
-    if (!searchSlot) return;
-
-    const searchIndex = children.indexOf(searchSlot);
-    if (searchIndex <= 0) return;
-
-    const logoSlot = children[searchIndex - 1];
-    if (!(logoSlot instanceof HTMLElement)) return;
-
-    logoSlot.classList.add("life-top-logo-upgraded");
-    createFallbackMark(logoSlot);
-  };
-
   const run = () => {
     patchHero();
-    patchTopLeftLogo();
   };
 
   const observer = new MutationObserver(() => {
