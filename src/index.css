@@ -330,6 +330,27 @@ select:focus-visible {
     width: 85vw !important;
     max-width: 300px !important;
   }
+
+  /* Hero section mobile adjustments */
+  .life-grain h1 {
+    font-size: 72px !important;
+    letter-spacing: -3px !important;
+  }
+
+  /* Landing page mobile padding */
+  .life-grain {
+    padding: 32px 20px 40px !important;
+  }
+
+  /* Mobile button sizing */
+  button, [role="button"] {
+    min-height: 44px; /* iOS touch target */
+  }
+
+  /* Mobile footer visibility - ensure it's visible above iOS home indicator */
+  .life-footer {
+    padding-bottom: 34px !important;
+  }
 }
 
 /* Search bar enhancements */
