@@ -43,6 +43,20 @@
       });
   };
 
+  const findSidebarContainers = () => {
+    return Array.from(document.querySelectorAll("aside, nav, section, div")).filter(
+      (container) => {
+        const text = normalize(container.textContent).toLowerCase();
+        return (
+          text.includes("knowledge map") &&
+          text.includes("quiz") &&
+          text.includes("library") &&
+          text.includes("saved")
+        );
+      }
+    );
+  };
+
   const patchHero = () => {
     if (!hasHomeHeaderSearch()) return;
 
@@ -111,16 +125,43 @@
   };
 
   const patchSidebarWordmark = () => {
-    const nodes = Array.from(
+    const sidebarContainers = findSidebarContainers();
+
+    document.querySelectorAll(".life-home-logo-upgraded").forEach((node) => {
+      if (!(node instanceof HTMLElement)) return;
+      if (isHomepageWordmark(node)) return;
+      node.classList.remove("life-home-logo-upgraded");
+    });
+
+    sidebarContainers.forEach((container) => {
+      const nodes = Array.from(
+        container.querySelectorAll("h1, h2, h3, p, span, div, strong")
+      );
+
+      nodes.forEach((node) => {
+        if (!(node instanceof HTMLElement)) return;
+        const text = normalize(node.textContent);
+        if (!/^life\.?$/i.test(text)) {
+          restoreWordmark(node);
+          return;
+        }
+
+        node.classList.remove("life-home-logo-upgraded");
+        node.style.display = "none";
+        node.setAttribute("data-life-sidebar-wordmark-removed", "true");
+      });
+    });
+
+    const nonSidebarNodes = Array.from(
       document.querySelectorAll("h1, h2, h3, p, span, div, strong")
+    ).filter(
+      (node) =>
+        node instanceof HTMLElement &&
+        !sidebarContainers.some((container) => container.contains(node))
     );
 
-    nodes.forEach((node) => {
-      if (!looksLikeLargeLifeWordmark(node)) {
-        restoreWordmark(node);
-        return;
-      }
-
+    nonSidebarNodes.forEach((node) => {
+      if (!(node instanceof HTMLElement)) return;
       if (isHomepageWordmark(node)) {
         restoreWordmark(node);
         return;
