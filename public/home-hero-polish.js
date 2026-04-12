@@ -6,9 +6,9 @@
       'input[placeholder*="Search topics"], input[placeholder*="Search"]'
     );
 
-  const findTextNode = (matcher) => {
+  const findTextNode = (matcher, root = document) => {
     const elements = Array.from(
-      document.querySelectorAll("h1, h2, h3, p, span, strong, div")
+      root.querySelectorAll("h1, h2, h3, p, span, strong, div")
     );
     return elements.find((el) => {
       if (el.children.length > 0) return false;
@@ -16,33 +16,48 @@
     });
   };
 
-  const findHeroContainer = (welcomeEl, logoEl) => {
-    if (!welcomeEl || !logoEl) return null;
+  const findHeroContainer = () => {
+    const containers = Array.from(
+      document.querySelectorAll("section, article, main, div")
+    );
 
-    let container = welcomeEl.closest("section, article, main, div");
-    while (container && !container.contains(logoEl)) {
-      container = container.parentElement?.closest("section, article, main, div");
-    }
-    return container || logoEl.parentElement || null;
+    return (
+      containers.find((container) => {
+        const text = normalize(container.textContent).toLowerCase();
+        return (
+          text.includes("welcome to") &&
+          text.includes("life") &&
+          (text.includes("start reading") || text.includes("daily growth"))
+        );
+      }) || null
+    );
+  };
+
+  const restoreHeroClasses = (heroContainer) => {
+    document
+      .querySelectorAll(".life-home-welcome-upgraded, .life-home-logo-upgraded")
+      .forEach((node) => {
+        if (heroContainer && heroContainer.contains(node)) return;
+        node.classList.remove("life-home-welcome-upgraded");
+        node.classList.remove("life-home-logo-upgraded");
+      });
   };
 
   const patchHero = () => {
     if (!hasHomeHeaderSearch()) return;
 
-    const welcomeEl = findTextNode((text) => /^welcome to$/i.test(text));
-    const logoEl =
-      findTextNode((text) => /^life\.?$/i.test(text)) ||
-      findTextNode((text) => /^life$/i.test(text));
+    const container = findHeroContainer();
+    restoreHeroClasses(container);
+    if (!container) return;
+
+    const welcomeEl = findTextNode((text) => /^welcome to$/i.test(text), container);
+    const logoEl = findTextNode((text) => /^life\.?$/i.test(text), container);
 
     if (!welcomeEl || !logoEl) return;
 
-    const container = findHeroContainer(welcomeEl, logoEl);
-    if (container) {
-      container.classList.add("life-home-hero-upgraded");
-    }
-
     welcomeEl.classList.add("life-home-welcome-upgraded");
     logoEl.classList.add("life-home-logo-upgraded");
+    container.classList.add("life-home-hero-upgraded");
   };
 
   const getAncestors = (node) => {
@@ -61,6 +76,20 @@
     if (!/^life\.?$/i.test(text)) return false;
     const fontSize = Number.parseFloat(getComputedStyle(node).fontSize || "0");
     return fontSize >= 40;
+  };
+
+  const looksLikeSidebarLabelWordmark = (node) => {
+    if (!(node instanceof HTMLElement)) return false;
+    const text = normalize(node.textContent);
+    if (!/^life\.?$/i.test(text)) return false;
+    if (node.tagName !== "P") return false;
+
+    const computed = getComputedStyle(node);
+    const fontSize = Number.parseFloat(computed.fontSize || "0");
+    const textTransform = (node.style.textTransform || computed.textTransform || "").toLowerCase();
+    const textAlign = (node.style.textAlign || computed.textAlign || "").toLowerCase();
+
+    return fontSize <= 18 && textTransform === "uppercase" && textAlign === "left";
   };
 
   const isHomepageWordmark = (node) => {
@@ -97,8 +126,13 @@
         return;
       }
 
-      node.style.display = "none";
-      node.setAttribute("data-life-sidebar-wordmark-removed", "true");
+      if (looksLikeLargeLifeWordmark(node) || looksLikeSidebarLabelWordmark(node)) {
+        node.style.display = "none";
+        node.setAttribute("data-life-sidebar-wordmark-removed", "true");
+        return;
+      }
+
+      restoreWordmark(node);
     });
   };
 
