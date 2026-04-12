@@ -45,32 +45,60 @@
     logoEl.classList.add("life-home-logo-upgraded");
   };
 
-  const isSidebarPanel = (el) => {
-    if (!(el instanceof Element)) return false;
-    const text = normalize(el.textContent).toLowerCase();
-    return (
-      text.includes("knowledge map") &&
-      text.includes("quiz") &&
-      (text.includes("where to start") || text.includes("help"))
-    );
+  const getAncestors = (node) => {
+    const ancestors = [];
+    let current = node instanceof Element ? node : null;
+    while (current && current !== document.body) {
+      ancestors.push(current);
+      current = current.parentElement;
+    }
+    return ancestors;
+  };
+
+  const looksLikeLargeLifeWordmark = (node) => {
+    if (!(node instanceof HTMLElement)) return false;
+    const text = normalize(node.textContent);
+    if (!/^life\.?$/i.test(text)) return false;
+    const fontSize = Number.parseFloat(getComputedStyle(node).fontSize || "0");
+    return fontSize >= 40;
+  };
+
+  const isHomepageWordmark = (node) => {
+    return getAncestors(node).some((ancestor) => {
+      const text = normalize(ancestor.textContent).toLowerCase();
+      return (
+        text.includes("welcome to") &&
+        (text.includes("start reading") || text.includes("daily growth"))
+      );
+    });
+  };
+
+  const restoreWordmark = (node) => {
+    if (!(node instanceof HTMLElement)) return;
+    if (node.dataset.lifeSidebarWordmarkRemoved === "true") {
+      node.style.removeProperty("display");
+      node.removeAttribute("data-life-sidebar-wordmark-removed");
+    }
   };
 
   const patchSidebarWordmark = () => {
-    const containers = Array.from(
-      document.querySelectorAll("aside, nav, section, div")
-    ).filter(isSidebarPanel);
+    const nodes = Array.from(
+      document.querySelectorAll("h1, h2, h3, p, span, div, strong")
+    );
 
-    containers.forEach((container) => {
-      const nodes = Array.from(container.querySelectorAll("h1, h2, h3, p, span, div"));
-      nodes.forEach((node) => {
-        if (node.children.length > 0) return;
-        const text = normalize(node.textContent);
-        if (!/^life\.?$/i.test(text)) return;
-        const fontSize = Number.parseFloat(getComputedStyle(node).fontSize || "0");
-        if (fontSize < 40) return;
-        node.style.display = "none";
-        node.setAttribute("data-life-sidebar-wordmark-removed", "true");
-      });
+    nodes.forEach((node) => {
+      if (!looksLikeLargeLifeWordmark(node)) {
+        restoreWordmark(node);
+        return;
+      }
+
+      if (isHomepageWordmark(node)) {
+        restoreWordmark(node);
+        return;
+      }
+
+      node.style.display = "none";
+      node.setAttribute("data-life-sidebar-wordmark-removed", "true");
     });
   };
 
