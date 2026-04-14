@@ -573,7 +573,7 @@ export default function LifeApp() {
       });
       if (error) {
         const msg = String(error.message || "").toLowerCase();
-        if (msg.includes("invalid")) setSiErr("Incorrect email or password.");
+        if (msg.includes("invalid")) setSiErr("no_account_or_wrong_password");
         else if (msg.includes("rate") || msg.includes("too many")) setSiErr("Too many attempts. Wait a moment.");
         else setSiErr("Could not sign in. Check your details.");
         play("err");
@@ -1167,7 +1167,11 @@ export default function LifeApp() {
         </div>
 
         {siErr && (
-          <p style={{ margin: "-4px 0 0", fontSize: 12, color: C.red, fontStyle: "italic", lineHeight: 1.5 }}>{siErr}</p>
+          <p style={{ margin: "-4px 0 0", fontSize: 12, color: C.red, fontStyle: "italic", lineHeight: 1.5 }}>
+            {siErr === "no_account_or_wrong_password" ? (
+              <>No account found or incorrect password. <span onClick={() => { setSiErr(""); setScreen("register"); }} style={{ color: C.green, cursor: "pointer", textDecoration: "underline" }}>Register instead?</span></>
+            ) : siErr}
+          </p>
         )}
 
         {/* ── Sign In button ── */}
