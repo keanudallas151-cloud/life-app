@@ -2,20 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- viewport-fit=cover enables safe-area-inset on iPhone notch/Dynamic Island -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Life. — Knowledge. Finance. Life.</title>
     <meta name="description" content="Life. is a free educational platform covering finance, psychology, philosophy, and the systems that shape everyday life." />
     <meta name="robots" content="index,follow" />
-    <meta name="theme-color" content="#4a8c5c" />
+
+    <!-- PWA / iOS home-screen integration -->
+    <meta name="theme-color" content="#4a8c5c" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Life." />
+    <!-- black-translucent lets status bar overlay the app so it looks fully native -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Prevent phone-number detection re-styling links -->
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Manifest -->
     <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- iOS requires a rasterised apple-touch-icon; fall back to SVG if no PNG exists -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- iOS splash screens (portrait, most common sizes) -->
+    <link rel="apple-touch-startup-image" href="/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" />
+
+    <!-- Open Graph -->
     <meta property="og:title" content="Life. — Knowledge. Finance. Life." />
     <meta property="og:description" content="Free educational platform covering finance, psychology, philosophy, and the systems that shape everyday life." />
     <meta property="og:type" content="website" />
+
     <link rel="stylesheet" href="/password-toggle-fix.css" />
     <link rel="stylesheet" href="/home-hero-polish.css" />
   </head>
