@@ -1979,7 +1979,7 @@ export default function LifeApp() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 <button onClick={() => { updateUiPrefs(PREF_DEFAULTS); play("ok"); }} style={{ background: C.light, border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 16px", color: C.mid, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "Georgia,serif" }}>Reset Settings</button>
                 <button onClick={() => { setReadKeys([]); play("ok"); }} style={{ background: C.light, border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 16px", color: C.mid, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "Georgia,serif" }}>Reset Progress</button>
-                <button onClick={() => { setProfile(null); LS.del(`profile_${uid}`); play("ok"); }} style={{ background: C.light, border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 16px", color: C.mid, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "Georgia,serif" }}>Reset Tailoring</button>
+                <button onClick={() => { setProfile(null); LS.del(`tsd_${uid}`); play("ok"); }} style={{ background: C.light, border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 16px", color: C.mid, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "Georgia,serif" }}>Reset Tailoring</button>
               </div>
             </div>
           )}
