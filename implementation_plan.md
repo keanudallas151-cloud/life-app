@@ -1,6 +1,8 @@
-# Life. Finalization Implementation Plan
+# Implementation Plan
 
 [Overview]
+
+Finalize the Life. app into a cleaner, more stable, more polished production-ready experience by building on the fixes already present in the working tree.
 
 This plan is the source-of-truth blueprint for the next full finalization pass on the Life. app. The goal is to build on the fixes already present in the working tree, not restart from scratch. The app already has meaningful progress on password-toggle cleanup, internal scroll-container fixes, settings regrouping, and initial dark-mode normalization. The remaining work is to finish those improvements cleanly, harden the main product flows, and remove stale technical debt that is still creating inconsistency and maintenance risk.
 
@@ -49,6 +51,8 @@ Implementation constraints:
 - Prefer CSS and small React helper extraction over additional DOM patching in `public/` scripts.
 
 [Types]
+
+The implementation should preserve the existing JavaScript data contracts while making their responsibilities and compatibility expectations explicit.
 
 This codebase is JavaScript-first, so the “types” below are data contracts to preserve during cleanup rather than a requirement to migrate to TypeScript.
 
@@ -99,6 +103,8 @@ This codebase is JavaScript-first, so the “types” below are data contracts t
   - Should remain unchanged unless a UI issue requires additional metadata.
 
 [Files]
+
+The implementation will primarily modify existing app-shell, styling, feature, and cleanup files while adding no new runtime architecture beyond the plan and handoff artifacts.
 
 - `src/App.jsx`
   - Highest-priority implementation file.
@@ -187,6 +193,8 @@ This codebase is JavaScript-first, so the “types” below are data contracts t
 
 [Functions]
 
+The implementation should preserve the current functional architecture while tightening the highest-risk scroll, theme, settings, auth, and feature integration functions.
+
 Existing functions/hooks that are central to this pass:
 
 - `useTheme()` in `src/App.jsx`
@@ -269,12 +277,16 @@ Candidate helper extractions during implementation if cleanup pressure becomes t
 
 [Classes]
 
+Class-based changes are intentionally minimal because the codebase is overwhelmingly hook- and function-driven.
+
 - `ErrorBoundary` in `src/components/ErrorBoundary.jsx` is the only meaningful class component currently present.
 - No new class-based architecture is planned for this pass.
 - Prefer functional React components/hooks and CSS cleanup over introducing new OO layers.
 - `public/home-hero-polish.js` should also avoid growing into a more complex imperative subsystem.
 
 [Dependencies]
+
+Dependency changes should stay minimal, favoring cleanup and validation over adding new packages.
 
 Current runtime dependencies:
 
@@ -303,6 +315,8 @@ Dependency strategy for this implementation pass:
 - Keep Supabase integration compatible with the current env-variable contract in `.env` / `.env.example`.
 
 [Testing]
+
+Testing will combine automated validation with focused manual smoke testing of the app's highest-risk user flows.
 
 Required automated validation:
 
@@ -362,6 +376,8 @@ Recommended final spot-check:
 - Compare the improved local build against the deployed app for the most visible pain points: shallow scrolling, dark-mode mismatches, settings clutter, auth layout, and mobile touch ergonomics.
 
 [Implementation Order]
+
+The implementation should proceed from safety-critical cleanup into shell stabilization, then visual normalization, then feature polish, and finally validation.
 
 1. Baseline safety and repo cleanup guardrails
    - Work from the current modified tree carefully.

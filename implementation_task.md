@@ -2,6 +2,8 @@
 
 Use `implementation_plan.md` as the source of truth for this task.
 
+Refer to @implementation_plan.md for a complete breakdown of the task requirements and steps. You should periodically read this file again.
+
 ## Objective
 
 Implement the finalization pass for the Life. app by following the phases and constraints in `implementation_plan.md`. Build on the current working tree, preserve the fixes already landed, and push the app toward a cleaner, more stable, more polished production state.
@@ -11,6 +13,34 @@ Implement the finalization pass for the Life. app by following the phases and co
 - Primary plan: `implementation_plan.md`
 - Highest-risk implementation file: `src/App.jsx`
 - Main shared styling file: `src/index.css`
+
+## Plan Document Navigation Commands
+
+```bash
+# Read Overview section
+sed -n '/\[Overview\]/,/\[Types\]/p' implementation_plan.md | cat
+
+# Read Types section
+sed -n '/\[Types\]/,/\[Files\]/p' implementation_plan.md | cat
+
+# Read Files section
+sed -n '/\[Files\]/,/\[Functions\]/p' implementation_plan.md | cat
+
+# Read Functions section
+sed -n '/\[Functions\]/,/\[Classes\]/p' implementation_plan.md | cat
+
+# Read Classes section
+sed -n '/\[Classes\]/,/\[Dependencies\]/p' implementation_plan.md | cat
+
+# Read Dependencies section
+sed -n '/\[Dependencies\]/,/\[Testing\]/p' implementation_plan.md | cat
+
+# Read Testing section
+sed -n '/\[Testing\]/,/\[Implementation Order\]/p' implementation_plan.md | cat
+
+# Read Implementation Order section
+sed -n '/\[Implementation Order\]/,$p' implementation_plan.md | cat
+```
 
 ## Execution Rules
 
@@ -42,6 +72,15 @@ Implement the finalization pass for the Life. app by following the phases and co
 - [ ] Phase 6: Core feature polish pass
 - [ ] Phase 7: Technical debt and public-asset cleanup
 - [ ] Phase 8: Final validation and release readiness
+
+task_progress Items:
+- [ ] Step 1: Preserve and verify the current modified baseline before further implementation
+- [ ] Step 2: Complete app-shell scroll and layout stabilization
+- [ ] Step 3: Normalize theme behavior and close major dark-mode gaps
+- [ ] Step 4: Finalize auth, onboarding, settings, and profile polish
+- [ ] Step 5: Polish Reader, Quiz, Post-It, and continuity features
+- [ ] Step 6: Remove technical debt, obsolete assets, and dependency drift where safe
+- [ ] Step 7: Run lint/build and complete the final smoke-test pass
 
 ## Definition of Done
 
