@@ -1356,10 +1356,10 @@ export default function LifeApp() {
                 <h1 style={{ margin: "0 0 6px", fontSize: "clamp(2.75rem, 14vw, 6.875rem)", fontWeight: 800, color: C.ink, fontFamily: "Georgia,serif", letterSpacing: "-0.08em", lineHeight: 0.88 }}>Life.</h1>
                 <div style={{ width: 40, height: 2.5, background: C.green, borderRadius: 2, margin: "18px auto 22px" }} />
                 <p style={{ color: C.mid, fontSize: 15, lineHeight: 1.9, margin: "0 auto 6px", maxWidth: 340, fontFamily: "Georgia,serif" }}>
-                  One calm place for knowledge, daily growth, and genuine community.
+                  All In One Access To Networking, Information, Guides Tailored Just For You And Your Goals, Everything For You To Become Rich And Succesful Is In This App 
                 </p>
                 <p style={{ color: C.muted, fontSize: 13, lineHeight: 1.7, margin: "0 auto 32px", maxWidth: 300, fontStyle: "italic" }}>
-                  Read, reflect, and keep moving forward at your own pace.
+                  "The First Million Is The Hardest To Get, The 2nd Is Imminent" Success Comes From Understanding How It Works Without That Knowledge, You Can’t Identify, Evaluate, Or Execute The Right Opportunities.
                 </p>
                 <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
                   <button onClick={() => { play("open"); setSidebarOpen(true); }}
