@@ -528,17 +528,23 @@ export default function LifeApp() {
     play("tap");
     setSiSocialErr("");
     setAuthLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin,
-        queryParams: { prompt: "select_account" },
-      },
-    });
-    setAuthLoading(false);
-    if (error) {
-      setSiSocialErr(error.message || "Could not start Google sign in.");
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin,
+          queryParams: { prompt: "select_account" },
+        },
+      });
+      if (error) {
+        setSiSocialErr(String(error.message || "Could not start Google sign in."));
+        play("err");
+      }
+    } catch {
+      setSiSocialErr("Something went wrong. Please try again.");
       play("err");
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -560,32 +566,45 @@ export default function LifeApp() {
     if (!siEmail.trim()) { setSiErr("Please enter your email."); play("err"); return; }
     if (!siPass) { setSiErr("Please enter your password."); play("err"); return; }
     setAuthLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: siEmail.toLowerCase().trim(),
-      password: siPass,
-    });
-    setAuthLoading(false);
-    if (error) {
-      const msg = (error.message || "").toLowerCase();
-      if (msg.includes("invalid")) setSiErr("Incorrect email or password.");
-      else if (msg.includes("rate") || msg.includes("too many")) setSiErr("Too many attempts. Wait a moment.");
-      else setSiErr("Could not sign in. Check your details.");
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: siEmail.toLowerCase().trim(),
+        password: siPass,
+      });
+      if (error) {
+        const msg = String(error.message || "").toLowerCase();
+        if (msg.includes("invalid")) setSiErr("Incorrect email or password.");
+        else if (msg.includes("rate") || msg.includes("too many")) setSiErr("Too many attempts. Wait a moment.");
+        else setSiErr("Could not sign in. Check your details.");
+        play("err");
+      }
+      // success → onAuthStateChange fires → screen = "app"
+    } catch {
+      setSiErr("Something went wrong. Please try again.");
       play("err");
+    } finally {
+      setAuthLoading(false);
     }
-    // success → onAuthStateChange fires → screen = "app"
   };
 
   // ── FORGOT PASSWORD (P9a) ──────────────────────────────────────
   const doForgotPassword = async () => {
+    if (authLoading) return;
     setFpErr(""); setFpMsg("");
     if (!fpEmail.trim() || !fpEmail.includes("@")) { setFpErr("Please enter a valid email."); play("err"); return; }
     setAuthLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(fpEmail.toLowerCase().trim(), {
-      redirectTo: window.location.origin,
-    });
-    setAuthLoading(false);
-    if (error) { setFpErr(error.message || "Could not send reset email."); play("err"); }
-    else { setFpMsg("Password reset email sent. Check your inbox."); play("ok"); }
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(fpEmail.toLowerCase().trim(), {
+        redirectTo: window.location.origin,
+      });
+      if (error) { setFpErr(String(error.message || "Could not send reset email.")); play("err"); }
+      else { setFpMsg("Password reset email sent. Check your inbox."); play("ok"); }
+    } catch {
+      setFpErr("Something went wrong. Please try again.");
+      play("err");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   // ── SUPABASE REGISTER ─────────────────────────────────────────
@@ -614,6 +633,7 @@ export default function LifeApp() {
     if (Object.keys(err).length) { setRErr(err); play("err"); return; }
 
     setAuthLoading(true);
+    try {
     const { data, error } = await supabase.auth.signUp({
       email: rEmail.toLowerCase().trim(),
       password: rPass,
@@ -625,10 +645,9 @@ export default function LifeApp() {
         },
       },
     });
-    setAuthLoading(false);
 
     if (error) {
-      const raw = (error.message || "").trim();
+      const raw = String(error.message || "").trim();
       const msg = raw.toLowerCase();
       if (msg.includes("already")) {
         setRErr({ email: "An account with this email already exists." });
@@ -648,6 +667,12 @@ export default function LifeApp() {
     }
     play("ok");
     setScreen("tailor_intro");
+    } catch {
+      setRErr({ email: "Something went wrong. Please try again." });
+      play("err");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   // ── SUPABASE SIGN OUT ─────────────────────────────────────────
@@ -1488,7 +1513,7 @@ export default function LifeApp() {
 
               {/* PROGRESS BAR — P6: clickable → progress_dashboard */}
               <button type="button" onClick={() => { play("tap"); setPage("progress_dashboard"); }}
-                style={{ display: "block", width: "100%", padding: "14px 20px 12px", background: C.white, borderBottom: `1px solid ${C.border}`, border: "none", cursor: "pointer", textAlign: "left" }}>
+                style={{ display: "block", width: "100%", padding: "14px 20px 12px", background: C.white, border: "none", borderBottom: `1px solid ${C.border}`, cursor: "pointer", textAlign: "left" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: C.muted }}>Your Progress</span>
                   <span style={{ fontSize: 11, color: C.green, fontWeight: 700, letterSpacing: 0.5 }}>
