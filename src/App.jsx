@@ -577,6 +577,7 @@ export default function LifeApp() {
 
   // ── FORGOT PASSWORD (P9a) ──────────────────────────────────────
   const doForgotPassword = async () => {
+    if (authLoading) return;
     setFpErr(""); setFpMsg("");
     if (!fpEmail.trim() || !fpEmail.includes("@")) { setFpErr("Please enter a valid email."); play("err"); return; }
     setAuthLoading(true);
