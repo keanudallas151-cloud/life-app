@@ -294,6 +294,14 @@ export default function LifeApp() {
   const [rShowPass, setRShowPass] = useState(false);
   const [rShowPass2, setRShowPass2] = useState(false);
   const [rErr, setRErr] = useState({});
+  const [verifyEmailAddress, setVerifyEmailAddress] = useState("");
+  const [rpPass, setRpPass] = useState("");
+  const [rpPass2, setRpPass2] = useState("");
+  const [rpShowPass, setRpShowPass] = useState(false);
+  const [rpShowPass2, setRpShowPass2] = useState(false);
+  const [rpErr, setRpErr] = useState("");
+  const postAuthScreenRef = useRef(null);
+  const passwordRecoveryRef = useRef(false);
 
   useEffect(() => {
     if (!rErr || Object.keys(rErr).length === 0) return;
@@ -324,6 +332,32 @@ export default function LifeApp() {
     });
   }, [rDob, rEmail, rErr, rName, rPass, rPass2]);
 
+  const clearAuthFormState = useCallback(() => {
+    setSiSocialErr("");
+    setSiEmail("");
+    setSiPass("");
+    setSiErr("");
+    setSiShowPass(false);
+    setForgotMode(false);
+    setFpEmail("");
+    setFpMsg("");
+    setFpErr("");
+    setRName("");
+    setREmail("");
+    setRDob("");
+    setRPass("");
+    setRPass2("");
+    setRShowPass(false);
+    setRShowPass2(false);
+    setRErr({});
+    setVerifyEmailAddress("");
+    setRpPass("");
+    setRpPass2("");
+    setRpShowPass(false);
+    setRpShowPass2(false);
+    setRpErr("");
+  }, []);
+
   // ── AUTH PROVIDERS ────────────────────────────────────────────
   // Only 3 providers on landing page: Google, Phone, Facebook
   const AUTH_PROVIDERS = [
@@ -351,77 +385,127 @@ export default function LifeApp() {
   ];
 
   // ── SHAPE USER ────────────────────────────────────────────────
-    const shapeUser = (sbUser) => {  
-    const meta = sbUser.user_metadata || {};  
-    return {  
-      id: sbUser.id,  
-      email: sbUser.email,  
-      name: meta.name || meta.full_name || sbUser.email,  
-      username: meta.username || meta.user_name || "",  
-      emailConfirmed: Boolean(sbUser.email_confirmed_at),  
-    };  
-  };
+  const shapeUser = useCallback((sbUser) => {
+    const meta = sbUser.user_metadata || {};
+    return {
+      id: sbUser.id,
+      email: sbUser.email,
+      name: meta.name || meta.full_name || sbUser.email,
+      username: meta.username || meta.user_name || "",
+      emailConfirmed: Boolean(sbUser.email_confirmed_at),
+    };
+  }, []);
 
   // ── SESSION RESTORE ON REFRESH ──────────────────────────────
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {  
-      if (session?.user) {  
-        
-        if (!session.user.email_confirmed_at) {  
-          setScreen("verify_email");  
-          return;  
-        }  
-        setUser(shapeUser(session.user));  
-        // P5: restore last screen  
-        const lastScreen = LS.get("life_last_screen", "app");  
-        const validScreens = [  
-          "app",  
-          "tailor_intro",  
-          "tailor_qs",  
-          "tailor_result",  
-        ];  
-        setScreen(validScreens.includes(lastScreen) ? lastScreen : "app");  
-      } else {  
-        setScreen("landing");  
-      }  
-  });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        if (!session.user.email_confirmed_at) {
+          setUser(null);
+          setVerifyEmailAddress(session.user.email || "");
+          setScreen("verify_email");
+          return;
+        }
+        setUser(shapeUser(session.user));
+        // P5: restore last screen
+        const lastScreen = LS.get("life_last_screen", "app");
+        const validScreens = ["app", "tailor_intro", "tailor_qs", "tailor_result"];
+        setScreen(validScreens.includes(lastScreen) ? lastScreen : "app");
+      } else {
+        setScreen("landing");
+      }
+    });
 
     // Listen for auth changes (login, logout, token refresh)
     const {
       data: { subscription },
-      } = supabase.auth.onAuthStateChange((event, session) => {  
-      if (session?.user) {  
-        // Block access if email is not confirmed  
-        if (!session.user.email_confirmed_at) {  
-          setScreen("verify_email");  
-          return;  
-        }  
-        const shapedUser = shapeUser(session.user);  
-        setUser(shapedUser);  
-        // Check if first-time user (no onboarding completed) - redirect to tailoring  
-        const onboarded = LS.get(`onboarded_${shapedUser.id}`, false);  
-        const hasReadContent =  
-          LS.get(`rd_${shapedUser.email || shapedUser.id}`, []).length > 0;  
-        const hasBookmarks =  
-          LS.get(`bk_${shapedUser.email || shapedUser.id}`, []).length > 0;  
-        const isNewUser = !onboarded && !hasReadContent && !hasBookmarks;  
-        // First-time users (including OAuth) go to tailoring area  
-        if (  
-          (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&  
-          isNewUser  
-        ) {  
-          setScreen("tailor_intro");  
-        } else {  
-          setScreen("app");  
-        }  
-      } else {  
-        setUser(null);  
-        setScreen("landing");  
-      }  
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        passwordRecoveryRef.current = true;
+        postAuthScreenRef.current = "signin";
+        setUser(null);
+        setForgotMode(false);
+        setFpErr("");
+        setFpMsg("");
+        setRpErr("");
+        setRpPass("");
+        setRpPass2("");
+        setScreen("reset_password");
+        return;
+      }
+
+      if (event === "SIGNED_OUT") {
+        const nextScreen = postAuthScreenRef.current || "landing";
+        postAuthScreenRef.current = null;
+        passwordRecoveryRef.current = false;
+        setUser(null);
+        clearAuthFormState();
+        setScreen(nextScreen);
+        return;
+      }
+
+      if (event === "TOKEN_REFRESHED" && session?.user) {
+        if (!session.user.email_confirmed_at) {
+          setUser(null);
+          setVerifyEmailAddress(session.user.email || "");
+          setScreen("verify_email");
+          return;
+        }
+        setUser(shapeUser(session.user));
+        return;
+      }
+
+      if (event === "USER_UPDATED" && passwordRecoveryRef.current) {
+        return;
+      }
+
+      if (session?.user) {
+        // Block access if email is not confirmed
+        if (!session.user.email_confirmed_at) {
+          setUser(null);
+          setVerifyEmailAddress(session.user.email || "");
+          setScreen("verify_email");
+          return;
+        }
+        const shapedUser = shapeUser(session.user);
+        setUser(shapedUser);
+        // Check if first-time user (no onboarding completed) - redirect to tailoring
+        const onboarded = LS.get(`onboarded_${shapedUser.id}`, false);
+        const hasReadContent =
+          LS.get(`rd_${shapedUser.email || shapedUser.id}`, []).length > 0;
+        const hasBookmarks =
+          LS.get(`bk_${shapedUser.email || shapedUser.id}`, []).length > 0;
+        const isNewUser = !onboarded && !hasReadContent && !hasBookmarks;
+        // First-time users (including OAuth) go to tailoring area
+        if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && isNewUser) {
+          setScreen("tailor_intro");
+        } else {
+          setScreen("app");
+        }
+      } else {
+        setUser(null);
+        setScreen("landing");
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [clearAuthFormState, shapeUser]);
+
+  useEffect(() => {
+    const guestScreens = [
+      "loading",
+      "landing",
+      "signin",
+      "register",
+      "privacy_policy",
+      "terms_conditions",
+      "verify_email",
+      "reset_password",
+    ];
+    if (!user && screen && !guestScreens.includes(screen)) {
+      setScreen("landing");
+    }
+  }, [screen, user]);
 
   // P5: persist screen to localStorage
   useEffect(() => {
@@ -1041,6 +1125,57 @@ export default function LifeApp() {
     }
   };
 
+  const doResetPassword = async () => {
+    if (authLoading) return;
+    setRpErr("");
+
+    if (rpPass.length < 8) {
+      setRpErr("Password must be at least 8 characters.");
+      play("err");
+      return;
+    }
+
+    if (
+      !/[A-Z]/.test(rpPass) ||
+      !/[a-z]/.test(rpPass) ||
+      !/[0-9]/.test(rpPass) ||
+      !/[^A-Za-z0-9]/.test(rpPass)
+    ) {
+      setRpErr("Use upper/lowercase letters, a number, and a symbol.");
+      play("err");
+      return;
+    }
+
+    if (rpPass !== rpPass2) {
+      setRpErr("Passwords do not match.");
+      play("err");
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: rpPass });
+      if (error) {
+        setRpErr(String(error.message || "Could not update password."));
+        play("err");
+        return;
+      }
+
+      postAuthScreenRef.current = "signin";
+      passwordRecoveryRef.current = false;
+      clearAuthFormState();
+      play("ok");
+      await supabase.auth.signOut();
+      setUser(null);
+      setScreen("signin");
+    } catch {
+      setRpErr("Something went wrong. Please try again.");
+      play("err");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   // ── SUPABASE REGISTER ─────────────────────────────────────────
   const doRegister = async () => {
     if (authLoading) return;
@@ -1118,12 +1253,13 @@ export default function LifeApp() {
         return;
       }
 
-      if (data?.user && !data.user.email_confirmed_at) {  
-        // Email confirmation required — show verify screen  
-        play("ok");  
-        setScreen("verify_email");  
-        return;  
-      }  
+      if (data?.user && !data.user.email_confirmed_at) {
+        // Email confirmation required — show verify screen
+        setVerifyEmailAddress(data.user.email || rEmail.toLowerCase().trim());
+        play("ok");
+        setScreen("verify_email");
+        return;
+      }
       if (data?.user) {  
         setUser(shapeUser(data.user));  
       }  
@@ -1139,7 +1275,10 @@ export default function LifeApp() {
 
   // ── SUPABASE SIGN OUT ─────────────────────────────────────────
   const doSignOut = async () => {
+    postAuthScreenRef.current = "landing";
+    passwordRecoveryRef.current = false;
     await supabase.auth.signOut();
+    clearAuthFormState();
     setUser(null);
     setScreen("landing");
     setSiSocialErr("");
@@ -1407,6 +1546,22 @@ export default function LifeApp() {
       ? "Tip: add a special character for a stronger password."
       : "";
   const confirmMismatch = rPass2.length > 0 && rPass !== rPass2;
+  const resetPasswordHasMinLength = rpPass.length >= 8;
+  const resetPasswordHasUpper = /[A-Z]/.test(rpPass);
+  const resetPasswordHasNumber = /\d/.test(rpPass);
+  const resetPasswordHasSpecial = /[^A-Za-z0-9]/.test(rpPass);
+  const resetPasswordStrength = [
+    resetPasswordHasMinLength,
+    resetPasswordHasUpper,
+    resetPasswordHasNumber,
+    resetPasswordHasSpecial,
+  ].filter(Boolean).length;
+  const resetPasswordHint =
+    rpPass.length > 0 && !resetPasswordHasSpecial
+      ? "Tip: add a special character for a stronger password."
+      : "";
+  const resetConfirmMismatch = rpPass2.length > 0 && rpPass !== rpPass2;
+  const verifyTargetEmail = verifyEmailAddress || rEmail || user?.email || "";
 
   // ── SIDEBAR HELPERS (extracted outside component — see SS/SL above) ──
 
@@ -1913,7 +2068,7 @@ export default function LifeApp() {
             wordBreak: "break-all",  
           }}  
         >  
-          {rEmail || "your email"}  
+          {verifyTargetEmail || "your email"}  
         </p>  
         <p  
           style={{  
@@ -1942,11 +2097,11 @@ export default function LifeApp() {
           {/* Resend email button */}  
           <button  
             onClick={async () => {  
-              if (!rEmail) return;  
+              if (!verifyTargetEmail) return;  
               try {  
                 await supabase.auth.resend({  
                   type: "signup",  
-                  email: rEmail.toLowerCase().trim(),  
+                  email: verifyTargetEmail.toLowerCase().trim(),  
                 });  
                 play("ok");  
               } catch {  
@@ -2031,6 +2186,360 @@ export default function LifeApp() {
           &copy; 2026 Life. All rights reserved.  
         </p>  
       </div>  
+    );
+
+  if (screen === "reset_password")
+    return (
+      <div
+        data-page-tag="#reset_password_page"
+        className="life-grain life-auth-shell"
+        style={{
+          minHeight: "100svh",
+          background: `linear-gradient(165deg, ${C.skin} 0%, #ebe4d6 50%, ${C.skin} 100%)`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "Georgia,serif",
+          padding: "40px 24px calc(40px + env(safe-area-inset-bottom))",
+          position: "relative",
+          overflowX: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: -40,
+            right: -50,
+            width: 170,
+            height: 170,
+            borderRadius: "50%",
+            border: "1.5px solid rgba(74,140,92,0.09)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            width: 70,
+            height: 70,
+            borderRadius: "20%",
+            background: `linear-gradient(145deg,${C.green},#2d6e42)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 20,
+            boxShadow: S.md,
+          }}
+        >
+          <span style={{ color: "#fff", fontSize: 28, fontWeight: 800 }}>l.</span>
+        </div>
+
+        <h2
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            margin: "0 0 4px",
+            color: C.ink,
+            fontFamily: "Georgia,serif",
+            textAlign: "center",
+          }}
+        >
+          Set New Password
+        </h2>
+        <p
+          style={{
+            margin: "0 0 28px",
+            fontSize: 14,
+            color: C.muted,
+            fontStyle: "italic",
+            textAlign: "center",
+            maxWidth: 320,
+            lineHeight: 1.6,
+          }}
+        >
+          Choose a strong password to finish recovering your account.
+        </p>
+
+        <div
+          className="life-auth-card"
+          style={{
+            width: "100%",
+            maxWidth: 320,
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+            background: C.white,
+            borderRadius: 20,
+            padding: "28px 22px",
+            boxShadow:
+              "0 8px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)",
+            border: `1px solid ${C.border}`,
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 2,
+                textTransform: "uppercase",
+                color: C.muted,
+              }}
+            >
+              New Password
+            </label>
+            <div className="life-password-field">
+              <input
+                type={rpShowPass ? "text" : "password"}
+                value={rpPass}
+                onChange={(e) => {
+                  setRpPass(e.target.value);
+                  setRpErr("");
+                }}
+                onKeyDown={(e) => e.key === "Enter" && doResetPassword()}
+                placeholder="Use 8+ characters"
+                autoComplete="new-password"
+                style={{
+                  background: C.skin,
+                  border: `1.5px solid ${rpErr ? C.red : C.border}`,
+                  borderRadius: 12,
+                  padding: "14px 64px 14px 16px",
+                  fontSize: 15,
+                  color: C.ink,
+                  outline: "none",
+                  fontFamily: "Georgia,serif",
+                  boxSizing: "border-box",
+                  width: "100%",
+                  transition: "border-color 0.2s ease",
+                }}
+                onFocus={(e) => {
+                  if (!rpErr) e.currentTarget.style.borderColor = C.green;
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = rpErr ? C.red : C.border;
+                }}
+              />
+              <button
+                className="life-password-toggle"
+                type="button"
+                data-password-toggle="true"
+                aria-label={rpShowPass ? "Hide password" : "Show password"}
+                onClick={() => setRpShowPass((v) => !v)}
+              >
+                <span className="life-password-toggle-label">
+                  {rpShowPass ? "Hide" : "Show"}
+                </span>
+              </button>
+            </div>
+            {rpPass.length > 0 && (
+              <div style={{ marginTop: 2 }}>
+                <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+                  {[0, 1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      style={{
+                        flex: 1,
+                        height: 3,
+                        borderRadius: 2,
+                        background:
+                          i < resetPasswordStrength
+                            ? passwordStrengthColors[resetPasswordStrength]
+                            : C.light,
+                        transition: "background 0.2s",
+                      }}
+                    />
+                  ))}
+                </div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 11,
+                    color: passwordStrengthColors[resetPasswordStrength],
+                    fontStyle: "italic",
+                  }}
+                >
+                  {passwordStrengthLabels[resetPasswordStrength]}
+                </p>
+                {resetPasswordHint && (
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      fontSize: 11,
+                      color: C.muted,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {resetPasswordHint}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 2,
+                textTransform: "uppercase",
+                color: C.muted,
+              }}
+            >
+              Confirm Password
+            </label>
+            <div className="life-password-field">
+              <input
+                type={rpShowPass2 ? "text" : "password"}
+                value={rpPass2}
+                onChange={(e) => {
+                  setRpPass2(e.target.value);
+                  setRpErr("");
+                }}
+                onKeyDown={(e) => e.key === "Enter" && doResetPassword()}
+                placeholder="Repeat password"
+                autoComplete="new-password"
+                style={{
+                  background: C.skin,
+                  border: `1.5px solid ${rpErr || resetConfirmMismatch ? C.red : C.border}`,
+                  borderRadius: 12,
+                  padding: "14px 64px 14px 16px",
+                  fontSize: 15,
+                  color: C.ink,
+                  outline: "none",
+                  fontFamily: "Georgia,serif",
+                  boxSizing: "border-box",
+                  width: "100%",
+                  transition: "border-color 0.2s ease",
+                }}
+                onFocus={(e) => {
+                  if (!rpErr && !resetConfirmMismatch)
+                    e.currentTarget.style.borderColor = C.green;
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor =
+                    rpErr || resetConfirmMismatch ? C.red : C.border;
+                }}
+              />
+              <button
+                className="life-password-toggle"
+                type="button"
+                data-password-toggle="true"
+                aria-label={rpShowPass2 ? "Hide password" : "Show password"}
+                onClick={() => setRpShowPass2((v) => !v)}
+              >
+                <span className="life-password-toggle-label">
+                  {rpShowPass2 ? "Hide" : "Show"}
+                </span>
+              </button>
+            </div>
+            {!rpErr && resetConfirmMismatch && (
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 12,
+                  color: C.red,
+                  fontStyle: "italic",
+                }}
+              >
+                Not Matching Yet
+              </p>
+            )}
+          </div>
+
+          {rpErr && (
+            <p
+              style={{
+                margin: "-4px 0 0",
+                fontSize: 12,
+                color: C.red,
+                fontStyle: "italic",
+                lineHeight: 1.5,
+              }}
+            >
+              {rpErr}
+            </p>
+          )}
+
+          <button
+            onClick={doResetPassword}
+            disabled={authLoading}
+            style={{
+              background: `linear-gradient(135deg, ${C.green}, #3a7d4a)`,
+              border: "none",
+              borderRadius: 12,
+              padding: "16px",
+              color: "#fff",
+              fontSize: 16,
+              fontWeight: 700,
+              cursor: authLoading ? "default" : "pointer",
+              fontFamily: "Georgia,serif",
+              opacity: authLoading ? 0.7 : 1,
+              marginTop: 2,
+              boxShadow: "0 4px 16px rgba(74,140,92,0.35)",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {authLoading ? "Updating password…" : "Set New Password"}
+          </button>
+
+          <button
+            onClick={() => {
+              play("back");
+              passwordRecoveryRef.current = false;
+              setRpErr("");
+              setScreen("signin");
+            }}
+            style={{
+              background: "none",
+              border: "none",
+              color: C.muted,
+              fontSize: 13,
+              cursor: "pointer",
+              fontFamily: "Georgia,serif",
+              fontStyle: "italic",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              transition: "color 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = C.ink;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = C.muted;
+            }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back to Sign In
+          </button>
+        </div>
+
+        <p
+          className="life-footer"
+          style={{
+            margin: "28px 0 0",
+            color: C.muted,
+            fontSize: 10,
+            fontStyle: "italic",
+            textAlign: "center",
+          }}
+        >
+          © 2026 Life. All rights reserved.
+        </p>
+      </div>
     );
 
   if (screen === "tailor_intro")
