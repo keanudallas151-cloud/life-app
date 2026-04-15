@@ -2044,45 +2044,20 @@ export default function LifeApp() {
             textAlign: "center",  
           }}  
         >  
-          Check Your Email  
+          Check your email
         </h2>  
         <p  
           style={{  
-            margin: "0 0 8px",  
+            margin: "0 0 32px",  
             fontSize: 15,  
             color: C.mid,  
             textAlign: "center",  
             maxWidth: 320,  
             lineHeight: 1.6,  
+            wordBreak: "break-word",  
           }}  
         >  
-          We sent a confirmation link to  
-        </p>  
-        <p  
-          style={{  
-            margin: "0 0 24px",  
-            fontSize: 15,  
-            fontWeight: 700,  
-            color: C.ink,  
-            textAlign: "center",  
-            wordBreak: "break-all",  
-          }}  
-        >  
-          {verifyTargetEmail || "your email"}  
-        </p>  
-        <p  
-          style={{  
-            margin: "0 0 32px",  
-            fontSize: 13,  
-            color: C.muted,  
-            textAlign: "center",  
-            maxWidth: 300,  
-            lineHeight: 1.6,  
-            fontStyle: "italic",  
-          }}  
-        >  
-          Click the link in the email to verify your account and continue to  
-          Life.  
+          We sent a confirmation link to {verifyTargetEmail || "your email"}. Click it to verify your account.  
         </p>  
   
         <div  
@@ -2127,7 +2102,7 @@ export default function LifeApp() {
               e.currentTarget.style.borderColor = C.border;  
             }}  
           >  
-            Resend Confirmation Email  
+            Resend Email
           </button>  
   
           {/* Back to sign in */}  

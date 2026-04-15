@@ -1,8 +1,28 @@
 import js from "@eslint/js";
 import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
 import { defineConfig, globalIgnores } from "eslint/config";
-import globals from "globals";
+
+const browserGlobals = {
+  window: "readonly",
+  document: "readonly",
+  navigator: "readonly",
+  localStorage: "readonly",
+  sessionStorage: "readonly",
+  setTimeout: "readonly",
+  clearTimeout: "readonly",
+  setInterval: "readonly",
+  clearInterval: "readonly",
+  Blob: "readonly",
+  URL: "readonly",
+  Audio: "readonly",
+  fetch: "readonly",
+  performance: "readonly",
+  alert: "readonly",
+  console: "readonly",
+  HTMLInputElement: "readonly",
+  HTMLTextAreaElement: "readonly",
+  HTMLSelectElement: "readonly",
+};
 
 export default defineConfig([
   globalIgnores(["dist"]),
@@ -10,12 +30,11 @@ export default defineConfig([
     files: ["**/*.{js,jsx}"],
     extends: [
       js.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+      reactHooks.configs["recommended-latest"],
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: browserGlobals,
       parserOptions: {
         ecmaVersion: "latest",
         ecmaFeatures: { jsx: true },

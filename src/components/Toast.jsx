@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components -- hook + provider pattern */
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react'
 
 const ToastContext = createContext(null)
