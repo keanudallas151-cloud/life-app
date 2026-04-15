@@ -25,9 +25,12 @@ import {
 import { LS } from "./systems/storage";
 import { C, S } from "./systems/theme";
 import { useSound } from "./systems/useSound";
+import { useMomentum } from "./systems/useMomentum";
+import { useQuizStats } from "./systems/useQuizStats";
 // P4: Constellation removed
 import { isSupabaseConfigured, supabase } from "./supabaseClient";
 import { useUserData } from "./systems/useUserData";
+import { MomentumCard } from "./components/MomentumCard";
 
 /* ── Dark Mode palette (P11) ──────────────────────────────────── */
 const DARK = {
@@ -218,6 +221,9 @@ const TailorQuestions = lazy(() =>
 );
 const TailorResult = lazy(() =>
   import("./components/Tailor").then((m) => ({ default: m.TailorResult })),
+);
+const MomentumHubPage = lazy(() =>
+  import("./components/MomentumHub").then((m) => ({ default: m.MomentumHub })),
 );
 
 function RouteFallback() {
@@ -443,11 +449,15 @@ export default function LifeApp() {
   const [localProfile, setLocalProfileRaw] = useState(() =>
     LS.get(`tsd_${uid}`, null),
   );
+  const [localMomentumState, setLocalMomentumStateRaw] = useState(() =>
+    LS.get(`mom_${uid}`, null),
+  );
 
   const bookmarks = userIdForData ? cloud.bookmarks : localBookmarks;
   const notes = userIdForData ? cloud.notes : localNotes;
   const readKeys = userIdForData ? cloud.readKeys : localReadKeys;
   const profile = userIdForData ? cloud.tsdProfile : localProfile;
+  const momentumState = userIdForData ? cloud.momentumState : localMomentumState;
 
   const setBookmarks = (v) => {
     const next = typeof v === "function" ? v(bookmarks) : v;
@@ -473,6 +483,28 @@ export default function LifeApp() {
       LS.set(`rd_${uid}`, next);
     }
   };
+  const setMomentumState = (v) => {
+    const next = typeof v === "function" ? v(momentumState) : v;
+    if (userIdForData) cloud.setMomentumState(next);
+    else {
+      setLocalMomentumStateRaw(next);
+      LS.set(`mom_${uid}`, next);
+    }
+  };
+
+  const quizStatsState = useQuizStats(isSupabaseConfigured ? user?.id : null);
+  const quizStats = quizStatsState.stats;
+  const { snapshot: momentumSnapshot, recordEvent: momentumRecordEvent } =
+    useMomentum({
+      userId: userIdForData,
+      persistedState: momentumState,
+      readKeys,
+      notes,
+      quizStats,
+      profile,
+      isGuest: !userIdForData,
+      persist: setMomentumState,
+    });
 
   // ── APP PAGE STATE ────────────────────────────────────────────
   // P5: restore last page from localStorage
@@ -485,6 +517,29 @@ export default function LifeApp() {
       LS.set(`life_last_page_${uid}`, p);
     },
     [uid],
+  );
+
+  const openMomentumHub = useCallback(() => {
+    play("tap");
+    setPage("momentum_hub");
+    setSidebarOpen(false);
+  }, [play, setPage]);
+
+  const trackMomentumEvent = useCallback(
+    (type, options = {}) => {
+      if (!type) return;
+      momentumRecordEvent({
+        id: `${type}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+        type,
+        source: options.source || page || "home",
+        points: Math.max(0, Number(options.points || 0)),
+        createdAt: new Date().toISOString(),
+        contentKey: options.contentKey,
+        topicKey: options.topicKey,
+        meta: options.meta,
+      });
+    },
+    [momentumRecordEvent, page],
   );
 
   // Dynamic document title per page
@@ -504,6 +559,7 @@ export default function LifeApp() {
       daily_growth: "Daily Growth — Life.",
       mentorship: "Mentorship — Life.",
       setting_preferences: "Settings — Life.",
+      momentum_hub: "Momentum Hub — Life.",
       premium: "Premium — Life.",
     };
     document.title = titles[page] || "Life. — Knowledge, Growth, Community";
@@ -1073,6 +1129,7 @@ export default function LifeApp() {
 
   // ── APP HELPERS ───────────────────────────────────────────────
   const handleSelect = (key, node) => {
+    const alreadyRead = readKeys.includes(key);
     setSelKey(key);
     setSelContent(node.content);
     setSelNode(node);
@@ -1085,8 +1142,18 @@ export default function LifeApp() {
     setShowSearch(false);
     setResumeTipDismissed(false);
     setResumeTopic(key);
-    if (!readKeys.includes(key)) setReadKeys([...readKeys, key]);
+    if (!alreadyRead) setReadKeys([...readKeys, key]);
     recordReadingDay();
+    trackMomentumEvent("read", {
+      source: "reader",
+      points: alreadyRead ? 3 : 7,
+      contentKey: key,
+      topicKey: key,
+      meta: {
+        firstVisit: !alreadyRead,
+        label: node?.label,
+      },
+    });
   };
 
   const handleSelectRef = useRef(handleSelect);
@@ -1152,9 +1219,19 @@ export default function LifeApp() {
   };
   const saveNote = () => {
     if (!selKey) return;
+    const trimmed = noteInput.trim();
     play("ok");
     setNotes({ ...notes, [selKey]: noteInput });
     setNoteSaved(true);
+    if (trimmed) {
+      trackMomentumEvent("note", {
+        source: "reader",
+        points: 6,
+        contentKey: selKey,
+        topicKey: selKey,
+        meta: { length: trimmed.length },
+      });
+    }
   };
 
   const exportSettingSnapshot = () => {
@@ -1199,8 +1276,15 @@ export default function LifeApp() {
         }),
       );
     } catch {
-      /* quota / private mode */
+      play("err");
     }
+    trackMomentumEvent("community", {
+      source: "reader",
+      points: 6,
+      contentKey: selKey,
+      topicKey: selKey,
+      meta: { action: "share_note" },
+    });
     setPage("postit");
     setSidebarOpen(false);
     setShareToast(true);
@@ -1722,6 +1806,11 @@ export default function LifeApp() {
         <TailorQuestions
           onComplete={(prof) => {
             setProfile(prof);
+            trackMomentumEvent("profile", {
+              source: "profile",
+              points: 10,
+              meta: { action: "tailor_complete", profile: prof || null },
+            });
             play("ok");
             setScreen("tailor_result");
           }}
@@ -4033,6 +4122,13 @@ export default function LifeApp() {
             />
             <SL
               theme={t}
+              label="Momentum Hub"
+              icon="trending"
+              onClick={openMomentumHub}
+              active={page === "momentum_hub"}
+            />
+            <SL
+              theme={t}
               label="Quiz"
               icon="brain"
               onClick={() => {
@@ -4366,6 +4462,21 @@ export default function LifeApp() {
                     )}
                   </div>
                 </button>
+
+                <div
+                  style={{
+                    padding: "14px 20px 0",
+                    maxWidth: 560,
+                    margin: "0 auto",
+                  }}
+                >
+                  <MomentumCard
+                    snapshot={momentumSnapshot}
+                    onOpenHub={openMomentumHub}
+                    compact
+                    title="Daily momentum"
+                  />
+                </div>
 
                 {resumeEntry && !resumeTipDismissed && (
                   <div
@@ -5167,6 +5278,39 @@ export default function LifeApp() {
                 <QuizPage
                   play={play}
                   userId={isSupabaseConfigured ? user?.id : null}
+                  onQuizComplete={(result) => {
+                    trackMomentumEvent("quiz", {
+                      source: "quiz",
+                      points: Math.max(
+                        8,
+                        Math.round(Number(result?.pct || 0) / 10) + 6,
+                      ),
+                      topicKey: result?.topic,
+                      meta: result,
+                    });
+                  }}
+                />
+              </Suspense>
+            )}
+
+            {page === "momentum_hub" && (
+              <Suspense fallback={<RouteFallback />}>
+                <MomentumHubPage
+                  snapshot={momentumSnapshot}
+                  onNavigate={(nextPage) => {
+                    const target = typeof nextPage === "string" ? nextPage : "home";
+                    play("tap");
+                    if (target === "reading") {
+                      setPage(selContent ? "reading" : "where_to_start");
+                    } else {
+                      setPage(target);
+                    }
+                    setSidebarOpen(false);
+                  }}
+                  onQuickEvent={(event) => {
+                    if (!event?.type) return;
+                    trackMomentumEvent(event.type, event);
+                  }}
                 />
               </Suspense>
             )}
@@ -5278,7 +5422,14 @@ export default function LifeApp() {
             {page === "postit" && (
               <div data-page-tag="#post_it">
                 <Suspense fallback={<RouteFallback />}>
-                  <PostItFeed play={play} user={user} />
+                  <PostItFeed
+                    play={play}
+                    user={user}
+                    onMomentumEvent={(event) => {
+                      if (!event?.type) return;
+                      trackMomentumEvent(event.type, event);
+                    }}
+                  />
                 </Suspense>
               </div>
             )}
@@ -5736,6 +5887,13 @@ export default function LifeApp() {
                 >
                   Track your journey and see how far you&apos;ve come.
                 </p>
+                <div style={{ marginBottom: 20 }}>
+                  <MomentumCard
+                    snapshot={momentumSnapshot}
+                    onOpenHub={openMomentumHub}
+                    title="Momentum summary"
+                  />
+                </div>
                 <div
                   style={{
                     background: C.white,
@@ -6607,6 +6765,11 @@ export default function LifeApp() {
                     onClick={() => {
                       setProfile(null);
                       LS.del(`tsd_${uid}`);
+                      trackMomentumEvent("profile", {
+                        source: "settings",
+                        points: 2,
+                        meta: { action: "tailor_reset" },
+                      });
                       play("ok");
                     }}
                     style={{
@@ -6925,6 +7088,13 @@ export default function LifeApp() {
                       </span>
                     </div>
                   ))}
+                </div>
+                <div style={{ marginBottom: 20 }}>
+                  <MomentumCard
+                    snapshot={momentumSnapshot}
+                    onOpenHub={openMomentumHub}
+                    title="Your momentum"
+                  />
                 </div>
                 <div
                   className="life-profile-card"

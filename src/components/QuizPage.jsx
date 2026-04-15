@@ -97,7 +97,7 @@ function TimerRing({ pct, value, color }) {
 }
 
 // ── Main Component ────────────────────────────────────────
-export function QuizPage({ play, userId }) {
+export function QuizPage({ play, userId, onQuizComplete }) {
   const { stats, saveStats } = useQuizStats(userId);
 
   const [phase,     setPhase]    = useState("setup");
@@ -217,6 +217,9 @@ export function QuizPage({ play, userId }) {
 
     saveStats(next);
     if (newly.length) setNewAchs(newly);
+    if (typeof onQuizComplete === "function") {
+      onQuizComplete({ ...result, date: today });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional single persist when phase becomes result
   }, [phase]);
 

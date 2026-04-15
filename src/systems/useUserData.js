@@ -15,6 +15,7 @@ export function useUserData(userId) {
   const [notes,       setNotesState]      = useState({});
   const [readKeys,    setReadKeysState]   = useState([]);
   const [tsdProfile,  setTsdProfileState] = useState(null);
+  const [momentumState, setMomentumStateRaw] = useState(null);
   const [loading,     setLoading]         = useState(false);
 
   const isGuest = !userId || userId === "_";
@@ -26,12 +27,13 @@ export function useUserData(userId) {
       setNotesState({});
       setReadKeysState([]);
       setTsdProfileState(null);
+      setMomentumStateRaw(null);
       return;
     }
     setLoading(true);
     supabase
       .from("user_data")
-      .select("bookmarks, notes, read_keys, tsd_profile")
+      .select("bookmarks, notes, read_keys, tsd_profile, momentum_state")
       .eq("user_id", userId)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -41,6 +43,7 @@ export function useUserData(userId) {
           setNotesState(data.notes          ?? {});
           setReadKeysState(data.read_keys   ?? []);
           setTsdProfileState(data.tsd_profile ?? null);
+          setMomentumStateRaw(data.momentum_state ?? null);
         }
         setLoading(false);
       });
@@ -79,11 +82,17 @@ export function useUserData(userId) {
     persist({ tsd_profile: v });
   }, [persist]);
 
+  const setMomentumState = useCallback((v) => {
+    setMomentumStateRaw(v);
+    persist({ momentum_state: v });
+  }, [persist]);
+
   return {
     bookmarks,  setBookmarks,
     notes,      setNotes,
     readKeys,   setReadKeys,
     tsdProfile, setTsdProfile,
+    momentumState, setMomentumState,
     loading,
   };
 }

@@ -2412,3 +2412,469 @@ button:active:not(:disabled),
   user-select: none;
   -webkit-user-select: none;
 }
+
+/* ── Momentum System — cards, hub, missions, quick actions ─────────────── */
+
+.life-momentum-card {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(74, 140, 92, 0.28);
+  background:
+    radial-gradient(
+      120% 120% at 100% -5%,
+      rgba(74, 140, 92, 0.11),
+      transparent 48%
+    ),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(245, 240, 232, 0.92));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.62) inset,
+    0 10px 24px rgba(20, 20, 20, 0.08);
+}
+
+.life-momentum-card.is-compact {
+  margin-top: 14px;
+  padding: 15px;
+}
+
+.life-momentum-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.life-momentum-card-head h3 {
+  margin: 4px 0 0;
+  font-size: clamp(1rem, 2.8vw, 1.18rem);
+  line-height: 1.2;
+  color: var(--life-ink);
+}
+
+.life-momentum-card-kicker {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--life-green);
+}
+
+.life-momentum-link-btn,
+.life-momentum-go-btn {
+  min-height: 44px;
+  border: 1px solid rgba(74, 140, 92, 0.32);
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--life-green);
+  border-radius: 12px;
+  padding: 9px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-family: var(--life-font);
+  cursor: pointer;
+}
+
+.life-momentum-go-btn {
+  width: 100%;
+  margin-top: 10px;
+  border-color: rgba(74, 140, 92, 0.45);
+  background: rgba(74, 140, 92, 0.12);
+}
+
+.life-momentum-stat-row {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.life-momentum-stat-row > div {
+  min-height: 64px;
+  border-radius: 12px;
+  border: 1px solid rgba(74, 140, 92, 0.2);
+  background: rgba(255, 255, 255, 0.82);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.life-momentum-stat-value {
+  font-size: clamp(0.92rem, 3.4vw, 1.15rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--life-ink);
+}
+
+.life-momentum-stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--life-muted);
+}
+
+.life-momentum-next {
+  margin-top: 12px;
+  border: 1px solid rgba(74, 140, 92, 0.25);
+  border-radius: 14px;
+  background: rgba(234, 243, 236, 0.75);
+  padding: 12px;
+}
+
+.life-momentum-next-kicker {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--life-green);
+}
+
+.life-momentum-next-title {
+  margin: 6px 0 4px;
+  color: var(--life-ink);
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.life-momentum-next-body {
+  margin: 0;
+  color: var(--life-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.life-momentum-progress {
+  margin-top: 12px;
+}
+
+.life-momentum-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--life-muted);
+  font-weight: 600;
+}
+
+.life-momentum-progress-track {
+  margin-top: 6px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(74, 140, 92, 0.14);
+  overflow: hidden;
+}
+
+.life-momentum-progress-track > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4a8c5c, #77b485);
+  transition: width 220ms var(--life-ease-soft);
+}
+
+.life-momentum-highlights {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.life-momentum-highlights > div {
+  border-radius: 12px;
+  border: 1px dashed rgba(74, 140, 92, 0.35);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 9px;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+.life-momentum-highlights > div > span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--life-muted);
+}
+
+.life-momentum-highlights > div > strong {
+  color: var(--life-ink);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.life-momentum-highlight--growth > strong {
+  color: var(--life-green);
+}
+
+.life-momentum-highlight--challenge > strong {
+  color: #a17124;
+}
+
+.life-momentum-highlight--focus > strong {
+  color: #6955a1;
+}
+
+.life-momentum-highlight--default > strong {
+  color: var(--life-ink);
+}
+
+.life-momentum-hub-page {
+  width: min(100%, 880px);
+  margin: 0 auto;
+  padding: 8px 0 20px;
+}
+
+.life-momentum-hub-header {
+  border: 1px solid rgba(74, 140, 92, 0.25);
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      130% 130% at 100% 0%,
+      rgba(74, 140, 92, 0.16),
+      transparent 56%
+    ),
+    rgba(255, 255, 255, 0.88);
+  padding: 16px;
+}
+
+.life-momentum-hub-header > p {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--life-green);
+}
+
+.life-momentum-hub-header > h2 {
+  margin: 6px 0 4px;
+  font-size: clamp(1.2rem, 3.8vw, 1.55rem);
+  color: var(--life-ink);
+}
+
+.life-momentum-hub-header > span {
+  display: block;
+  color: var(--life-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.life-momentum-hub-section {
+  margin-top: 14px;
+  border: 1px solid rgba(74, 140, 92, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 14px;
+}
+
+.life-momentum-hub-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.life-momentum-hub-section-head > h3 {
+  margin: 0;
+  color: var(--life-ink);
+  font-size: 1.02rem;
+}
+
+.life-momentum-hub-section-head > span {
+  font-size: 12px;
+  color: var(--life-muted);
+  font-weight: 600;
+}
+
+.life-momentum-suggestion {
+  margin-top: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(74, 140, 92, 0.22);
+  background: rgba(234, 243, 236, 0.72);
+  padding: 12px;
+}
+
+.life-momentum-suggestion h4 {
+  margin: 0;
+  color: var(--life-ink);
+  font-size: 0.98rem;
+}
+
+.life-momentum-suggestion p {
+  margin: 6px 0 0;
+  color: var(--life-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.life-momentum-mission-list {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.life-momentum-mission-item {
+  border: 1px solid rgba(74, 140, 92, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 12px;
+}
+
+.life-momentum-mission-item.done {
+  border-color: rgba(74, 140, 92, 0.45);
+  box-shadow: 0 0 0 1px rgba(74, 140, 92, 0.2) inset;
+}
+
+.life-momentum-mission-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.life-momentum-mission-top h4 {
+  margin: 0;
+  font-size: 0.94rem;
+  color: var(--life-ink);
+}
+
+.life-momentum-mission-top strong {
+  color: var(--life-green);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.life-momentum-mission-item p {
+  margin: 7px 0 10px;
+  color: var(--life-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.life-momentum-quick-actions {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.life-momentum-quick-actions > button {
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(74, 140, 92, 0.3);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--life-ink);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 10px;
+  cursor: pointer;
+  font-family: var(--life-font);
+}
+
+body.life-dark .life-momentum-card,
+body.life-dark .life-momentum-hub-header,
+body.life-dark .life-momentum-hub-section,
+body.life-dark .life-momentum-mission-item {
+  background: #1e1e1e;
+  border-color: #333;
+  box-shadow: none;
+}
+
+body.life-dark .life-momentum-stat-row > div,
+body.life-dark .life-momentum-next,
+body.life-dark .life-momentum-suggestion,
+body.life-dark .life-momentum-highlights > div {
+  background: #181818;
+  border-color: #3a3a3a;
+}
+
+body.life-dark .life-momentum-card-head h3,
+body.life-dark .life-momentum-hub-header > h2,
+body.life-dark .life-momentum-hub-section-head > h3,
+body.life-dark .life-momentum-mission-top h4,
+body.life-dark .life-momentum-stat-value,
+body.life-dark .life-momentum-next-title,
+body.life-dark .life-momentum-suggestion h4,
+body.life-dark .life-momentum-highlights > div > strong,
+body.life-dark .life-momentum-quick-actions > button {
+  color: #e8e8e8;
+}
+
+body.life-dark .life-momentum-next-body,
+body.life-dark .life-momentum-suggestion p,
+body.life-dark .life-momentum-mission-item p,
+body.life-dark .life-momentum-progress-head,
+body.life-dark .life-momentum-stat-label,
+body.life-dark .life-momentum-hub-header > span,
+body.life-dark .life-momentum-hub-section-head > span,
+body.life-dark .life-momentum-highlights > div > span {
+  color: #b8b8b8;
+}
+
+body.life-dark .life-momentum-link-btn,
+body.life-dark .life-momentum-go-btn,
+body.life-dark .life-momentum-quick-actions > button {
+  border-color: #3b4a3f;
+  background: #222;
+  color: #d6eadc;
+}
+
+body.life-dark .life-momentum-highlight--growth > strong {
+  color: #86d59a;
+}
+
+body.life-dark .life-momentum-highlight--challenge > strong {
+  color: #f0c978;
+}
+
+body.life-dark .life-momentum-highlight--focus > strong {
+  color: #bea8f0;
+}
+
+body.life-dark .life-momentum-progress-track {
+  background: #2a2f2b;
+}
+
+@media (max-width: 840px) {
+  .life-momentum-mission-list {
+    grid-template-columns: 1fr;
+  }
+
+  .life-momentum-quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .life-momentum-card,
+  .life-momentum-hub-header,
+  .life-momentum-hub-section {
+    border-radius: 14px;
+    padding: 13px;
+  }
+
+  .life-momentum-card-head {
+    flex-wrap: wrap;
+  }
+
+  .life-momentum-card-head > button {
+    width: 100%;
+  }
+
+  .life-momentum-stat-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .life-momentum-highlights {
+    grid-template-columns: 1fr;
+  }
+}

@@ -5,7 +5,7 @@ import { usePostIt } from "../systems/usePostIt";
 
 const DRAFT_KEY = "life_postit_draft";
 
-export function PostItFeed({ play, user }) {
+export function PostItFeed({ play, user, onMomentumEvent }) {
   const { posts, addPost, addComment, vote, myVotes, loading, error, reload } = usePostIt(user);
 
   const [sort,        setSort]        = useState("recent");
@@ -50,6 +50,12 @@ export function PostItFeed({ play, user }) {
     }
     play("star");
     vote(id, dir);
+    onMomentumEvent?.({
+      type: "community",
+      points: 4,
+      source: "postit",
+      meta: { action: "vote", postId: id, direction: dir },
+    });
   };
 
   const voteBtn = (active, color, activeBg) => ({
@@ -69,6 +75,12 @@ export function PostItFeed({ play, user }) {
     play("ok");
     addComment(viewing, commentText);
     setCommentText("");
+    onMomentumEvent?.({
+      type: "community",
+      points: 5,
+      source: "postit",
+      meta: { action: "comment", postId: viewing },
+    });
   };
 
   const handleSubmitPost = () => {
@@ -76,6 +88,12 @@ export function PostItFeed({ play, user }) {
     play("ok");
     addPost({ title: newTitle, body: newBody, flair: newFlair });
     setNewTitle(""); setNewBody(""); setShowCompose(false);
+    onMomentumEvent?.({
+      type: "community",
+      points: 8,
+      source: "postit",
+      meta: { action: "post", flair: newFlair },
+    });
   };
 
   // ── DETAIL VIEW ──────────────────────────────────────────
