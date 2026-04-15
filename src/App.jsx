@@ -1083,16 +1083,17 @@ export default function LifeApp() {
 
     setAuthLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: rEmail.toLowerCase().trim(),
-        password: rPass,
-        options: {
-          data: {
-            name: rName.trim(),
-            full_name: rName.trim(),
-            dob: rDob.trim(),
-          },
-        },
+        const { data, error } = await supabase.auth.signUp({  
+        email: rEmail.toLowerCase().trim(),  
+        password: rPass,  
+        options: {  
+          emailRedirectTo: window.location.origin,  
+          data: {  
+            name: rName.trim(),  
+            full_name: rName.trim(),  
+            dob: rDob.trim(),  
+          },  
+        },  
       });
 
       if (error) {
