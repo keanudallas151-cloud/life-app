@@ -9,6 +9,17 @@ import {
   rolloverMomentumState,
 } from "./momentumEngine";
 
+function isSameMomentumState(a, b) {
+  if (a === b) return true;
+  if (!a || !b) return false;
+
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
+
 function getBaseLocalKey({ userId, isGuest }) {
   return isGuest || !userId ? "life_momentum_guest" : `life_momentum_${userId}`;
 }
@@ -43,12 +54,16 @@ export function useMomentum({
           LS.get(localKey, createDefaultMomentumState(getDateKey())),
           getDateKey(),
         );
-    setMomentumState(rolloverMomentumState(next, getDateKey()));
+    const rolled = rolloverMomentumState(next, getDateKey());
+    setMomentumState((prev) => (isSameMomentumState(prev, rolled) ? prev : rolled));
   }, [localKey, persistedState]);
 
   useEffect(() => {
     const today = getDateKey();
-    setMomentumState((prev) => rolloverMomentumState(prev, today));
+    setMomentumState((prev) => {
+      const rolled = rolloverMomentumState(prev, today);
+      return isSameMomentumState(prev, rolled) ? prev : rolled;
+    });
   }, []);
 
   useEffect(() => {
@@ -57,9 +72,15 @@ export function useMomentum({
 
   useEffect(() => {
     if (typeof persist === "function" && !isGuest) {
-      persist(momentumState);
+      const normalizedPersisted = persistedState
+        ? normalizeMomentumState(persistedState, getDateKey())
+        : null;
+
+      if (!isSameMomentumState(momentumState, normalizedPersisted)) {
+        persist(momentumState);
+      }
     }
-  }, [persist, momentumState, isGuest]);
+  }, [persist, momentumState, isGuest, persistedState]);
 
   const snapshot = useMemo(
     () =>

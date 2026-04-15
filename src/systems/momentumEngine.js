@@ -52,8 +52,7 @@ function createMission(template, dateKey) {
   };
 }
 
-export function buildDailyMissions() {
-  const dateKey = getDateKey();
+export function buildDailyMissions(dateKey = getDateKey()) {
   return [
     createMission(MOMENTUM_MISSION_TEMPLATES.read, dateKey),
     createMission(MOMENTUM_MISSION_TEMPLATES.note, dateKey),
@@ -100,29 +99,34 @@ function previousDateKey(dateKey) {
 }
 
 function withSuggestion(state) {
-  const snapshot = deriveMomentumSnapshot({ momentumState: state });
-  return { ...state, nextSuggestion: snapshot.nextSuggestion };
+  return {
+    ...state,
+    nextSuggestion: getNextMomentumSuggestion({ missions: state?.missions || [] }),
+  };
 }
 
-export function createDefaultMomentumState(dateKey = getDateKey()) {
-  const next = {
+function createDefaultMomentumStateRaw(dateKey = getDateKey()) {
+  return {
     version: MOMENTUM_VERSION,
     dateKey,
     score: 0,
     level: 1,
     streakDays: 0,
     lastActiveAt: null,
-    missions: buildDailyMissions(),
+    missions: buildDailyMissions(dateKey),
     completedMissionIds: [],
     recentEvents: [],
     nextSuggestion: MOMENTUM_EMPTY_SUGGESTION,
   };
-  return withSuggestion(next);
 }
 
-export function normalizeMomentumState(state, dateKey = getDateKey()) {
+export function createDefaultMomentumState(dateKey = getDateKey()) {
+  return withSuggestion(createDefaultMomentumStateRaw(dateKey));
+}
+
+function normalizeMomentumStateRaw(state, dateKey = getDateKey()) {
   if (!state || typeof state !== "object") {
-    return createDefaultMomentumState(dateKey);
+    return createDefaultMomentumStateRaw(dateKey);
   }
 
   const missions = Array.isArray(state.missions)
@@ -138,7 +142,8 @@ export function normalizeMomentumState(state, dateKey = getDateKey()) {
     level: Math.max(1, Math.floor(Number(state.level || 1))),
     streakDays: Math.max(0, Math.floor(Number(state.streakDays || 0))),
     lastActiveAt: state.lastActiveAt || null,
-    missions: missions.length > 0 ? missions : buildDailyMissions(),
+    missions:
+      missions.length > 0 ? missions : buildDailyMissions(state.dateKey || dateKey),
     completedMissionIds: Array.isArray(state.completedMissionIds)
       ? state.completedMissionIds.filter(Boolean)
       : [],
@@ -149,7 +154,11 @@ export function normalizeMomentumState(state, dateKey = getDateKey()) {
   };
 
   base.level = scoreToLevel(base.score);
-  return withSuggestion(base);
+  return base;
+}
+
+export function normalizeMomentumState(state, dateKey = getDateKey()) {
+  return withSuggestion(normalizeMomentumStateRaw(state, dateKey));
 }
 
 export function rolloverMomentumState(state, dateKey = getDateKey()) {
@@ -167,7 +176,7 @@ export function rolloverMomentumState(state, dateKey = getDateKey()) {
     ...current,
     dateKey,
     streakDays,
-    missions: buildDailyMissions(),
+    missions: buildDailyMissions(dateKey),
     completedMissionIds: [],
   };
 
@@ -245,7 +254,7 @@ export function deriveMomentumSnapshot({
   quizStats = null,
   profile = null,
 } = {}) {
-  const state = normalizeMomentumState(momentumState);
+  const state = normalizeMomentumStateRaw(momentumState);
   const missions = Array.isArray(state.missions) ? state.missions : [];
   const completedCount = missions.filter((mission) => mission.completed).length;
   const completionRate =
