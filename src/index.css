@@ -82,6 +82,21 @@ body::before {
     linear-gradient(180deg, #f7f3ec 0%, #f5f0e8 52%, #f2ebe1 100%);
 }
 
+body.life-dark::before {
+  background:
+    radial-gradient(
+      1200px 460px at 8% -10%,
+      rgba(90, 157, 108, 0.11),
+      transparent 62%
+    ),
+    radial-gradient(
+      900px 420px at 92% 0%,
+      rgba(208, 174, 108, 0.1),
+      transparent 58%
+    ),
+    linear-gradient(180deg, #1a1a1a 0%, #181818 52%, #151515 100%);
+}
+
 button,
 [role="button"] {
   touch-action: manipulation;
@@ -569,6 +584,79 @@ body.life-dark .life-auth-card {
   background: #1e1e1e !important;
   border-color: #333 !important;
   color: #e8e8e8 !important;
+}
+
+body.life-dark .life-auth-shell,
+body.life-dark .life-landing-shell {
+  background: linear-gradient(165deg, #181818 0%, #202520 45%, #181818 100%) !important;
+}
+
+body.life-dark .life-home-hero {
+  background: linear-gradient(180deg, #1b1b1b 0%, #202520 100%) !important;
+}
+
+body.life-dark .life-auth-card,
+body.life-dark .life-profile-card,
+body.life-dark .life-settings-card,
+body.life-dark .life-home-stats > div,
+body.life-dark .life-search-dropdown button,
+body.life-dark .life-notif-dropdown,
+body.life-dark .scroll-to-top,
+body.life-dark .life-glass-card {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34) !important;
+}
+
+body.life-dark .life-topbar input[type="text"] {
+  background: #222 !important;
+  border-color: #3b3b3b !important;
+  color: #f2f2f2 !important;
+}
+
+body.life-dark .life-topbar input[type="text"]::placeholder {
+  color: #a29d96 !important;
+}
+
+body.life-dark .life-topbar input[type="text"]:focus {
+  background: #2a2a2a !important;
+  border-color: #5a9d6c !important;
+  box-shadow: 0 0 0 3px rgba(90, 157, 108, 0.16) !important;
+}
+
+body.life-dark select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, #a29d96 50%),
+    linear-gradient(135deg, #a29d96 50%, transparent 50%);
+}
+
+body.life-dark .life-auth-card input,
+body.life-dark .life-auth-card textarea,
+body.life-dark .life-auth-card select {
+  background: #202020 !important;
+  color: #f2f2f2 !important;
+  border-color: #3b3b3b !important;
+}
+
+body.life-dark .life-auth-card p,
+body.life-dark .life-auth-card span,
+body.life-dark .life-landing-shell p,
+body.life-dark .life-landing-shell h1,
+body.life-dark .life-landing-shell h2,
+body.life-dark .life-auth-shell h1,
+body.life-dark .life-auth-shell h2 {
+  color: inherit;
+}
+
+body.life-dark .life-home-stats > div,
+body.life-dark .life-settings-action-grid > button,
+body.life-dark .life-card-hover,
+body.life-dark .life-resume-card,
+body.life-dark .life-sidebar button[style*="background: C.white"] {
+  background: #1f1f1f !important;
+  border-color: #3b3b3b !important;
+}
+
+body.life-dark .life-footer {
+  color: #a29d96 !important;
 }
 
 body.life-dark .life-settings-subtitle,

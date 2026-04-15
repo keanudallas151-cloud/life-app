@@ -57,7 +57,9 @@ export function usePostIt(user) {
       setPosts([]);
       setMyVotes({});
       myVotesRef.current = {};
-      setError("Post-It needs Supabase (set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).");
+      setError(
+        "Post-It needs Supabase (set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY)."
+      );
       setLoading(false);
       return;
     }

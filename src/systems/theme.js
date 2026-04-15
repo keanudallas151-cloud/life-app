@@ -13,9 +13,10 @@ export const S = {
 };
 
 if(typeof document!=="undefined"){
-  document.body.style.background="#f5f0e8";
-  document.documentElement.style.background="#f5f0e8";
-  const style=document.createElement("style");
-  style.textContent=`button:active{filter:brightness(0.92)!important;transform:scale(0.985)!important;}button{transition:filter 0.18s cubic-bezier(0.4,0,0.2,1),transform 0.18s cubic-bezier(0.4,0,0.2,1),box-shadow 0.22s ease,background 0.18s ease,border-color 0.18s ease;}`;
-  document.head.appendChild(style);
+  if (!document.getElementById("life-theme-global-style")) {
+    const style=document.createElement("style");
+    style.id = "life-theme-global-style";
+    style.textContent=`button:active{filter:brightness(0.92)!important;transform:scale(0.985)!important;}button{transition:filter 0.18s cubic-bezier(0.4,0,0.2,1),transform 0.18s cubic-bezier(0.4,0,0.2,1),box-shadow 0.22s ease,background 0.18s ease,border-color 0.18s ease;}`;
+    document.head.appendChild(style);
+  }
 }

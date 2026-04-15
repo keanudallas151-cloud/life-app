@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import Image from "next/image";
 import { TreeNode } from "./components/Field";
 import {
   allContent,
@@ -34,17 +35,17 @@ import { MomentumCard } from "./components/MomentumCard";
 
 /* ── Dark Mode palette (P11) ──────────────────────────────────── */
 const DARK = {
-  skin: "#121212",
-  white: "#1e1e1e",
-  green: "#4a8c5c",
-  greenLt: "#1a2e1f",
-  ink: "#e8e8e8",
-  mid: "#c0c0c0",
-  muted: "#888888",
-  border: "#333333",
-  light: "#252525",
-  gold: "#b8975a",
-  red: "#c0392b",
+  skin: "#181818",
+  white: "#242424",
+  green: "#5a9d6c",
+  greenLt: "#223228",
+  ink: "#f2f2f2",
+  mid: "#d1d1d1",
+  muted: "#a29d96",
+  border: "#3b3b3b",
+  light: "#2d2d2d",
+  gold: "#d0ae6c",
+  red: "#d25545",
 };
 
 function useTheme() {
@@ -2951,9 +2952,11 @@ export default function LifeApp() {
                     : C.border;
                 }}
               >
-                <img
+                <Image
                   src={item.file}
                   alt={item.label}
+                  width={28}
+                  height={28}
                   style={{
                     width: 28,
                     height: 28,

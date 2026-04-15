@@ -7,6 +7,24 @@ Refer to @implementation_plan.md for a complete breakdown of the task requiremen
 ## Objective
  
 Implement the finalization pass for the Life. app by following the phases and constraints in `implementation_plan.md`. Build on the current working tree, preserve the fixes already landed, and push the app toward a cleaner, more stable, more polished production state.
+
+## Current Status Update
+
+### Completed in this pass
+
+- [x] Fixed the app-opening/runtime blocker by updating Supabase env handling for the active Next.js runtime while preserving legacy Vite-compatible variable names.
+- [x] Fixed the Vercel deployment blocker by removing the stale `dist` output setting from `vercel.json`.
+- [x] Added a real `next.config.mjs` so Next/Vercel use the intended project config.
+- [x] Implemented the auth flow updates in `src/App.jsx` for email confirmation gating, `verify_email`, password recovery/reset handling, sign-out cleanup, session event handling, and guest-screen protection.
+- [x] Improved dark mode so the app no longer forces a light document background and reduced obvious light/white patches across key auth and shell surfaces.
+- [x] Softened the dark palette so dark mode remains dark without looking as harsh as before.
+- [x] Preserved and improved mobile-first auth/app shell sizing work already in progress, including safe-area-aware surfaces and smaller-screen spacing fixes.
+- [x] Removed stale Next/Vercel migration leftovers that were still creating warnings or confusion (`next_config.js`, empty password-toggle workaround assets, and manual stylesheet tags in the Next root layout).
+- [x] Cleaned the remaining Next lint warnings by switching the lone social-login icon to `next/image` and moving the hero polish stylesheet into the layout import path.
+
+### Remaining active implementation task
+
+- [ ] Manually verify the Supabase dashboard-only auth settings that are not exposed by the currently available MCP tools: Email provider confirm-email toggle, Google provider setup, Site URL / Redirect URLs, confirmation email template content, and email rate limits.
  
 ## Mandatory References
  
@@ -64,22 +82,22 @@ sed -n '/\[Implementation Order\]/,$p' implementation_plan.md | cat
  
 ## Implementation Checklist
  
-- [ ] Phase 1: Baseline safety and repo cleanup guardrails
-- [ ] Phase 2: App-shell scroll and layout stabilization
-- [ ] Phase 3: Theme-system and dark-mode normalization
-- [ ] Phase 4: Auth and onboarding polish
-- [ ] Phase 5: Settings and profile information architecture pass
-- [ ] Phase 6: Core feature polish pass
-- [ ] Phase 7: Technical debt and public-asset cleanup
+- [x] Phase 1: Baseline safety and repo cleanup guardrails
+- [x] Phase 2: App-shell scroll and layout stabilization
+- [x] Phase 3: Theme-system and dark-mode normalization
+- [x] Phase 4: Auth and onboarding polish
+- [x] Phase 5: Settings and profile information architecture pass
+- [x] Phase 6: Core feature polish pass
+- [x] Phase 7: Technical debt and public-asset cleanup
 - [ ] Phase 8: Final validation and release readiness
  
 task_progress Items:
-- [ ] Step 1: Preserve and verify the current modified baseline before further implementation
-- [ ] Step 2: Complete app-shell scroll and layout stabilization
-- [ ] Step 3: Normalize theme behavior and close major dark-mode gaps
-- [ ] Step 4: Finalize auth, onboarding, settings, and profile polish
-- [ ] Step 5: Polish Reader, Quiz, Post-It, and continuity features
-- [ ] Step 6: Remove technical debt, obsolete assets, and dependency drift where safe
+- [x] Step 1: Preserve and verify the current modified baseline before further implementation
+- [x] Step 2: Complete app-shell scroll and layout stabilization
+- [x] Step 3: Normalize theme behavior and close major dark-mode gaps
+- [x] Step 4: Finalize auth, onboarding, settings, and profile polish
+- [x] Step 5: Polish Reader, Quiz, Post-It, and continuity features
+- [x] Step 6: Remove technical debt, obsolete assets, and dependency drift where safe
 - [ ] Step 7: Run lint/build and complete the final smoke-test pass
  
 ## Definition of Done

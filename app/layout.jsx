@@ -1,4 +1,5 @@
-import '../src/index.css'
+import "../public/home-hero-polish.css";
+import "../src/index.css";
 
 export const metadata = {
   title: 'Life. — Knowledge. Finance. Life.',
@@ -30,12 +31,9 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="apple-touch-icon" href="/favicon.svg" />
-        <link rel="stylesheet" href="/password-toggle-fix.css" />
-        <link rel="stylesheet" href="/home-hero-polish.css" />
       </head>
       <body>
         {children}
-        <script src="/password-toggle-fix.js" defer></script>
         <script src="/home-hero-polish.js" defer></script>
       </body>
     </html>

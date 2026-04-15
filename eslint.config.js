@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import nextPlugin from "@next/eslint-plugin-next";
 import reactHooks from "eslint-plugin-react-hooks";
 import { defineConfig, globalIgnores } from "eslint/config";
 
@@ -30,6 +31,7 @@ export default defineConfig([
     files: ["**/*.{js,jsx}"],
     extends: [
       js.configs.recommended,
+      nextPlugin.flatConfig.recommended,
       reactHooks.configs["recommended-latest"],
     ],
     languageOptions: {
