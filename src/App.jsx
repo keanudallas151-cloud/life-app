@@ -351,62 +351,73 @@ export default function LifeApp() {
   ];
 
   // ── SHAPE USER ────────────────────────────────────────────────
-  const shapeUser = (sbUser) => {
-    const meta = sbUser.user_metadata || {};
-    return {
-      id: sbUser.id,
-      email: sbUser.email,
-      name: meta.name || meta.full_name || sbUser.email,
-      username: meta.username || meta.user_name || "",
-    };
+    const shapeUser = (sbUser) => {  
+    const meta = sbUser.user_metadata || {};  
+    return {  
+      id: sbUser.id,  
+      email: sbUser.email,  
+      name: meta.name || meta.full_name || sbUser.email,  
+      username: meta.username || meta.user_name || "",  
+      emailConfirmed: Boolean(sbUser.email_confirmed_at),  
+    };  
   };
 
   // ── SESSION RESTORE ON REFRESH ──────────────────────────────
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(shapeUser(session.user));
-        // P5: restore last screen
-        const lastScreen = LS.get("life_last_screen", "app");
-        const validScreens = [
-          "app",
-          "tailor_intro",
-          "tailor_qs",
-          "tailor_result",
-        ];
-        setScreen(validScreens.includes(lastScreen) ? lastScreen : "app");
-      } else {
-        setScreen("landing");
-      }
-    });
+    supabase.auth.getSession().then(({ data: { session } }) => {  
+      if (session?.user) {  
+        
+        if (!session.user.email_confirmed_at) {  
+          setScreen("verify_email");  
+          return;  
+        }  
+        setUser(shapeUser(session.user));  
+        // P5: restore last screen  
+        const lastScreen = LS.get("life_last_screen", "app");  
+        const validScreens = [  
+          "app",  
+          "tailor_intro",  
+          "tailor_qs",  
+          "tailor_result",  
+        ];  
+        setScreen(validScreens.includes(lastScreen) ? lastScreen : "app");  
+      } else {  
+        setScreen("landing");  
+      }  
+  });
 
     // Listen for auth changes (login, logout, token refresh)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        const shapedUser = shapeUser(session.user);
-        setUser(shapedUser);
-        // Check if first-time user (no onboarding completed) - redirect to tailoring
-        const onboarded = LS.get(`onboarded_${shapedUser.id}`, false);
-        const hasReadContent =
-          LS.get(`rd_${shapedUser.email || shapedUser.id}`, []).length > 0;
-        const hasBookmarks =
-          LS.get(`bk_${shapedUser.email || shapedUser.id}`, []).length > 0;
-        const isNewUser = !onboarded && !hasReadContent && !hasBookmarks;
-        // First-time users (including OAuth) go to tailoring area
-        if (
-          (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
-          isNewUser
-        ) {
-          setScreen("tailor_intro");
-        } else {
-          setScreen("app");
-        }
-      } else {
-        setUser(null);
-        setScreen("landing");
-      }
+      } = supabase.auth.onAuthStateChange((event, session) => {  
+      if (session?.user) {  
+        // Block access if email is not confirmed  
+        if (!session.user.email_confirmed_at) {  
+          setScreen("verify_email");  
+          return;  
+        }  
+        const shapedUser = shapeUser(session.user);  
+        setUser(shapedUser);  
+        // Check if first-time user (no onboarding completed) - redirect to tailoring  
+        const onboarded = LS.get(`onboarded_${shapedUser.id}`, false);  
+        const hasReadContent =  
+          LS.get(`rd_${shapedUser.email || shapedUser.id}`, []).length > 0;  
+        const hasBookmarks =  
+          LS.get(`bk_${shapedUser.email || shapedUser.id}`, []).length > 0;  
+        const isNewUser = !onboarded && !hasReadContent && !hasBookmarks;  
+        // First-time users (including OAuth) go to tailoring area  
+        if (  
+          (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&  
+          isNewUser  
+        ) {  
+          setScreen("tailor_intro");  
+        } else {  
+          setScreen("app");  
+        }  
+      } else {  
+        setUser(null);  
+        setScreen("landing");  
+      }  
     });
 
     return () => subscription.unsubscribe();
@@ -1106,10 +1117,16 @@ export default function LifeApp() {
         return;
       }
 
-      if (data?.user) {
-        setUser(shapeUser(data.user));
-      }
-      play("ok");
+      if (data?.user && !data.user.email_confirmed_at) {  
+        // Email confirmation required — show verify screen  
+        play("ok");  
+        setScreen("verify_email");  
+        return;  
+      }  
+      if (data?.user) {  
+        setUser(shapeUser(data.user));  
+      }  
+      play("ok");  
       setScreen("tailor_intro");
     } catch {
       setRErr({ email: "Something went wrong. Please try again." });
@@ -1782,6 +1799,237 @@ export default function LifeApp() {
           </p>
         </div>
       </div>
+    );
+
+  // ── VERIFY EMAIL SCREEN ──────────────────────────────────────  
+  if (screen === "verify_email")  
+    return (  
+      <div  
+        data-page-tag="#verify_email_page"  
+        className="life-grain life-auth-shell"  
+        style={{  
+          minHeight: "100svh",  
+          background: `linear-gradient(165deg, ${C.skin} 0%, #ebe4d6 50%, ${C.skin} 100%)`,  
+          display: "flex",  
+          flexDirection: "column",  
+          alignItems: "center",  
+          justifyContent: "center",  
+          fontFamily: "Georgia,serif",  
+          padding: "40px 24px calc(40px + env(safe-area-inset-bottom))",  
+          position: "relative",  
+          overflowX: "hidden",  
+        }}  
+      >  
+        <div  
+          style={{  
+            position: "absolute",  
+            top: -40,  
+            right: -50,  
+            width: 170,  
+            height: 170,  
+            borderRadius: "50%",  
+            border: "1.5px solid rgba(74,140,92,0.09)",  
+            pointerEvents: "none",  
+          }}  
+        />  
+        <div  
+          style={{  
+            width: 70,  
+            height: 70,  
+            borderRadius: "20%",  
+            background: `linear-gradient(145deg,${C.green},#2d6e42)`,  
+            display: "flex",  
+            alignItems: "center",  
+            justifyContent: "center",  
+            marginBottom: 24,  
+            boxShadow: "0 8px 32px rgba(74,140,92,0.35)",  
+          }}  
+        >  
+          <span style={{ color: "#fff", fontSize: 28, fontWeight: 800 }}>  
+            l.  
+          </span>  
+        </div>  
+  
+        {/* Email icon */}  
+        <div  
+          style={{  
+            width: 64,  
+            height: 64,  
+            borderRadius: "50%",  
+            background: C.greenLt,  
+            display: "flex",  
+            alignItems: "center",  
+            justifyContent: "center",  
+            marginBottom: 20,  
+          }}  
+        >  
+          <svg  
+            width="28"  
+            height="28"  
+            viewBox="0 0 24 24"  
+            fill="none"  
+            stroke={C.green}  
+            strokeWidth="2"  
+            strokeLinecap="round"  
+            strokeLinejoin="round"  
+          >  
+            <rect x="2" y="4" width="20" height="16" rx="2" />  
+            <path d="M22 7l-10 7L2 7" />  
+          </svg>  
+        </div>  
+  
+        <h2  
+          style={{  
+            fontSize: 26,  
+            fontWeight: 700,  
+            margin: "0 0 8px",  
+            color: C.ink,  
+            fontFamily: "Georgia,serif",  
+            textAlign: "center",  
+          }}  
+        >  
+          Check Your Email  
+        </h2>  
+        <p  
+          style={{  
+            margin: "0 0 8px",  
+            fontSize: 15,  
+            color: C.mid,  
+            textAlign: "center",  
+            maxWidth: 320,  
+            lineHeight: 1.6,  
+          }}  
+        >  
+          We sent a confirmation link to  
+        </p>  
+        <p  
+          style={{  
+            margin: "0 0 24px",  
+            fontSize: 15,  
+            fontWeight: 700,  
+            color: C.ink,  
+            textAlign: "center",  
+            wordBreak: "break-all",  
+          }}  
+        >  
+          {rEmail || "your email"}  
+        </p>  
+        <p  
+          style={{  
+            margin: "0 0 32px",  
+            fontSize: 13,  
+            color: C.muted,  
+            textAlign: "center",  
+            maxWidth: 300,  
+            lineHeight: 1.6,  
+            fontStyle: "italic",  
+          }}  
+        >  
+          Click the link in the email to verify your account and continue to  
+          Life.  
+        </p>  
+  
+        <div  
+          style={{  
+            display: "flex",  
+            flexDirection: "column",  
+            gap: 12,  
+            width: "100%",  
+            maxWidth: 320,  
+          }}  
+        >  
+          {/* Resend email button */}  
+          <button  
+            onClick={async () => {  
+              if (!rEmail) return;  
+              try {  
+                await supabase.auth.resend({  
+                  type: "signup",  
+                  email: rEmail.toLowerCase().trim(),  
+                });  
+                play("ok");  
+              } catch {  
+                play("err");  
+              }  
+            }}  
+            style={{  
+              background: C.white,  
+              border: `1.5px solid ${C.border}`,  
+              borderRadius: 12,  
+              padding: "14px",  
+              color: C.green,  
+              fontSize: 14,  
+              fontWeight: 600,  
+              cursor: "pointer",  
+              fontFamily: "Georgia,serif",  
+              transition: "all 0.2s ease",  
+            }}  
+            onMouseEnter={(e) => {  
+              e.currentTarget.style.borderColor = C.green;  
+            }}  
+            onMouseLeave={(e) => {  
+              e.currentTarget.style.borderColor = C.border;  
+            }}  
+          >  
+            Resend Confirmation Email  
+          </button>  
+  
+          {/* Back to sign in */}  
+          <button  
+            onClick={() => {  
+              play("back");  
+              setScreen("landing");  
+            }}  
+            style={{  
+              background: "none",  
+              border: "none",  
+              color: C.muted,  
+              fontSize: 13,  
+              cursor: "pointer",  
+              fontFamily: "Georgia,serif",  
+              padding: "10px",  
+              display: "flex",  
+              alignItems: "center",  
+              justifyContent: "center",  
+              gap: 6,  
+              transition: "color 0.2s ease",  
+            }}  
+            onMouseEnter={(e) => {  
+              e.currentTarget.style.color = C.ink;  
+            }}  
+            onMouseLeave={(e) => {  
+              e.currentTarget.style.color = C.muted;  
+            }}  
+          >  
+            <svg  
+              width="14"  
+              height="14"  
+              viewBox="0 0 24 24"  
+              fill="none"  
+              stroke="currentColor"  
+              strokeWidth="2"  
+              strokeLinecap="round"  
+              strokeLinejoin="round"  
+            >  
+              <polyline points="15 18 9 12 15 6" />  
+            </svg>  
+            Back to Sign In  
+          </button>  
+        </div>  
+  
+        <p  
+          className="life-footer"  
+          style={{  
+            margin: "32px 0 0",  
+            color: C.muted,  
+            fontSize: 10,  
+            fontStyle: "italic",  
+            textAlign: "center",  
+          }}  
+        >  
+          &copy; 2026 Life. All rights reserved.  
+        </p>  
+      </div>  
     );
 
   if (screen === "tailor_intro")
