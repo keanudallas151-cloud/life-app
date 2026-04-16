@@ -1245,7 +1245,7 @@ export default function LifeApp() {
         const raw = String(error.message || "").trim();
         const msg = raw.toLowerCase();
         if (msg.includes("already")) {
-          setRErr({ email: "An account with this email already exists." });
+          setRErr({ email: "already_registered" });
         } else if (
           msg.includes("password") ||
           msg.includes("character") ||
@@ -3771,11 +3771,31 @@ export default function LifeApp() {
                 style={{
                   margin: 0,
                   fontSize: 12,
-                  color: C.red,
+                  color: rErr.email === "already_registered" ? C.ink : C.red,
                   fontStyle: "italic",
+                  lineHeight: 1.6,
+                  background: rErr.email === "already_registered" ? "#fff8e1" : "transparent",
+                  border: rErr.email === "already_registered" ? "1px solid #f0c040" : "none",
+                  borderRadius: rErr.email === "already_registered" ? 8 : 0,
+                  padding: rErr.email === "already_registered" ? "8px 12px" : 0,
                 }}
               >
-                {rErr.email}
+                {rErr.email === "already_registered" ? (
+                  <>
+                    ⚠️ This email is already registered.{" "}
+                    <span
+                      onClick={() => {
+                        play("tap");
+                        setRErr({});
+                        setScreen("signin");
+                        setSiEmail(rEmail);
+                      }}
+                      style={{ color: C.green, cursor: "pointer", textDecoration: "underline", fontWeight: 700 }}
+                    >
+                      Sign in instead?
+                    </span>
+                  </>
+                ) : rErr.email}
               </p>
             )}
           </div>
