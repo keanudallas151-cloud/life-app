@@ -5313,7 +5313,7 @@ export default function LifeApp() {
                   />
                   <p
                     style={{
-                      margin: "0 0 10px",
+                      margin: "0 130 10px",
                       fontSize: "clamp(0.72rem, 2.8vw, 0.92rem)",
                       fontWeight: 700,
                       letterSpacing: "0.38em",
