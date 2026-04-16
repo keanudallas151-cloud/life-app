@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense } from "react";
 import Image from "next/image";
 import { C } from "../systems/theme";
 
@@ -122,7 +122,7 @@ export function SS({ label, open, setOpen, children, tag, theme, playFn }) {
 
 // ── Sidebar Link item ─────────────────────────────────────────
 // Props: label, icon, onClick, active, theme
-export function SL({ label, icon, onClick, active, theme }) {
+export function SL({ label, icon: _icon, onClick, active, theme }) {
   const th = theme || C;
   return (
     <button
