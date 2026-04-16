@@ -53,6 +53,8 @@ import ProfilePage from "./components/ProfilePage";
 import SettingsPage from "./components/SettingsPage";
 import { WhereToStartPage } from "./components/WhereToStartPage";
 import { HelpPage } from "./components/HelpPage";
+import { ThemePickerPage } from "./components/ThemePickerPage";
+import { CategoryHubPage } from "./components/CategoryHubPage";
 import { CategoriesPage, CATEGORIES } from "./components/CategoriesPage";
 import { ProgressDashboardPage } from "./components/ProgressDashboardPage";
 import { LeaderboardPage } from "./components/LeaderboardPage";
@@ -313,12 +315,12 @@ export default function LifeApp() {
         const hasBookmarks =
           LS.get(`bk_${shapedUser.email || shapedUser.id}`, []).length > 0;
         const isNewUser = !onboarded && !hasReadContent && !hasBookmarks;
-        // First-time users (including OAuth) go to tailoring area
+        // First-time users (including OAuth) go to theme picker then tailoring
         if (
           (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
           isNewUser
         ) {
-          setScreen("tailor_intro");
+          setScreen("theme_picker");
         } else {
           setScreen("app");
         }
@@ -488,6 +490,16 @@ export default function LifeApp() {
       if (typeof setSectionOpen === "function") setSectionOpen(true);
     },
     [play, setPage],
+  );
+
+  const [categoryPageData, setCategoryPageData] = useState(null);
+  const handleFolderSelect = useCallback(
+    (key, node) => {
+      setCategoryPageData({ key, node });
+      setPage("category_hub");
+      setSidebarOpen(false);
+    },
+    [setPage],
   );
 
   const trackMomentumEvent = useCallback(
@@ -1105,7 +1117,7 @@ export default function LifeApp() {
         setUser(shapeUser(data.user));
       }
       play("ok");
-      setScreen("tailor_intro");
+      setScreen("theme_picker");
     } catch {
       setRErr({ email: "Something went wrong. Please try again." });
       play("err");
@@ -1801,6 +1813,20 @@ export default function LifeApp() {
         authLoading={authLoading}
         doResetPassword={doResetPassword}
         passwordRecoveryRef={passwordRecoveryRef}
+      />
+    );
+
+  if (screen === "theme_picker")
+    return (
+      <ThemePickerPage
+        C={C}
+        S={S}
+        play={play}
+        themeMode={themeMode}
+        setThemeMode={setThemeMode}
+        dark={dark}
+        t={t}
+        onContinue={() => setScreen("tailor_intro")}
       />
     );
 
@@ -2696,6 +2722,7 @@ export default function LifeApp() {
                 node={node}
                 depth={0}
                 onSelect={handleSelect}
+                onFolderSelect={handleFolderSelect}
                 selectedKey={selKey}
                 defaultOpen={k === "life"}
                 play={play}
@@ -2904,6 +2931,17 @@ export default function LifeApp() {
             {page === "sidebar_socials" && <SidebarSectionPage sectionKey="sidebar_socials" t={t} />}
             {page === "sidebar_guided" && <SidebarSectionPage sectionKey="sidebar_guided" t={t} />}
             {page === "sidebar_saved" && <SidebarSectionPage sectionKey="sidebar_saved" t={t} />}
+
+            {page === "category_hub" && categoryPageData && (
+              <CategoryHubPage
+                t={t}
+                categoryKey={categoryPageData.key}
+                categoryNode={categoryPageData.node}
+                onSelect={handleSelect}
+                play={play}
+                readKeys={readKeys}
+              />
+            )}
 
             {page === "where_to_start" && (
               <WhereToStartPage

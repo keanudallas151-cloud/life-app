@@ -54,7 +54,7 @@ export function Field({label,type="text",value,onChange,error,placeholder}){
   );
 }
 
-export function TreeNode({nodeKey,node,depth=0,onSelect,selectedKey,defaultOpen=false,play,theme}){
+export function TreeNode({nodeKey,node,depth=0,onSelect,onFolderSelect,selectedKey,defaultOpen=false,play,theme}){
   const[open,setOpen]=useState(defaultOpen);
   const th=theme||C;
 
@@ -73,6 +73,10 @@ export function TreeNode({nodeKey,node,depth=0,onSelect,selectedKey,defaultOpen=
             play("open");
             onSelect(nodeKey,node);
           }else{
+            if(onFolderSelect && depth <= 1){
+              play("tap");
+              onFolderSelect(nodeKey,node);
+            }
             setOpen(!open);
           }
         }}
@@ -162,6 +166,7 @@ export function TreeNode({nodeKey,node,depth=0,onSelect,selectedKey,defaultOpen=
               node={child}
               depth={depth+1}
               onSelect={onSelect}
+              onFolderSelect={onFolderSelect}
               selectedKey={selectedKey}
               play={play}
               theme={th}

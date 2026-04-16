@@ -2,6 +2,15 @@
 
 All notable prototype milestones for Life are tracked here.
 
+## v0.4.8 - Theme picker, category hub pages, clickable sidebar
+
+- added ThemePickerPage — dark/light/system mode selection shown after sign-in before tailoring
+- added CategoryHubPage — browsable hub page for any LIBRARY category (Finance, Psychology, etc.)
+- made sidebar folder nodes clickable — tapping Finance, Psychology, Online, AI & Technology, or 100 Ways to Make Money opens a dedicated category page with grouped topics, read badges, and one-tap navigation to any topic
+- TreeNode component now supports onFolderSelect prop for folder-click navigation
+- auth flow updated: new users → theme picker → tailoring → app
+- auth error messages already implemented in v0.4.7 (email already used / not registered)
+
 ## v0.4.7 - Massive component extraction
 
 - reduced App.jsx from 6,777 → 3,180 lines (53% reduction)
