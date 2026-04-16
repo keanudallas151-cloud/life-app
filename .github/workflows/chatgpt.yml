@@ -10,8 +10,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: ChatGPT Integration
-        uses: kxxt/chatgpt-action@v0.3
-
-      - name: chatgpt-action
-        uses: unsafecoerce/chatgpt-action@release/v2
+      - name: Get ChatGPT completion
+        id: chatgpt
+        uses: cahaseler/openai-api@v1.0.0
+        with:
+          apiKey: ${{ U838La!g-G(e2=# }}
+          prompt: "Write a summary of the latest commit in this repository."
+          input: "Summarize the latest commit clearly and briefly."
+          model: "gpt-4"
