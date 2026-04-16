@@ -2,6 +2,15 @@
 
 All notable prototype milestones for Life are tracked here.
 
+## v0.4.6 - Dependency updates
+
+- bumped Next.js from 15.5.15 to 16.2.4
+- bumped TypeScript from 5.9.3 to 6.0.2
+- bumped @types/node from 20.19.39 to 25.6.0
+- bumped eslint-config-next from 15.5.15 to 16.2.4
+- bumped @supabase/supabase-js from 2.103.0 to 2.103.3
+- bumped actions/checkout from 4 to 6 and actions/setup-node from 4 to 6
+
 ## v0.4.5 - Component extraction and matching MVP
 
 - extracted App.jsx from 8676 → 6777 lines by pulling out 5 page components
