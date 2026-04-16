@@ -4199,6 +4199,11 @@ export default function LifeApp() {
 
       {/* P9c: Notification dropdown */}
       {showNotif && (
+        <>
+        <div
+          onClick={() => setShowNotif(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 199 }}
+        />
         <div
           className="life-notif-dropdown"
           style={{
@@ -4281,13 +4286,14 @@ export default function LifeApp() {
             ))
           )}
         </div>
+        </>
       )}
 
       {/* TOP BAR */}
       <div
         className="life-topbar"
         style={{
-          background: dark ? "rgba(30,30,30,0.92)" : "rgba(255,255,255,0.88)",
+          background: dark ? "rgba(30,30,30,0.96)" : "rgba(255,255,255,0.92)",
           borderBottom: `1px solid ${t.border}`,
           display: "flex",
           alignItems: "center",
@@ -4295,6 +4301,9 @@ export default function LifeApp() {
           position: "sticky",
           top: 0,
           zIndex: 50,
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          backdropFilter: "saturate(1.4) blur(16px)",
+          WebkitBackdropFilter: "saturate(1.4) blur(16px)",
           boxShadow:
             "0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(74,140,92,0.06)",
         }}
@@ -4542,7 +4551,7 @@ export default function LifeApp() {
                 width: 14,
                 height: 14,
                 borderRadius: "50%",
-                background: C.red,
+                background: t.red,
                 color: "#fff",
                 fontSize: 8,
                 fontWeight: 700,
@@ -4725,7 +4734,7 @@ export default function LifeApp() {
           <div
             style={{
               padding: "16px 18px 14px",
-              borderBottom: `1px solid ${C.light}`,
+              borderBottom: `1px solid ${t.light}`,
               display: "flex",
               flexDirection: "column",
               gap: 12,
@@ -4737,7 +4746,7 @@ export default function LifeApp() {
                   width: 40,
                   height: 40,
                   borderRadius: "50%",
-                  background: `linear-gradient(135deg, ${C.green}, #3a7d4a)`,
+                  background: `linear-gradient(135deg, ${t.green}, #3a7d4a)`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -4805,12 +4814,12 @@ export default function LifeApp() {
                     fontWeight: 700,
                     letterSpacing: 2,
                     textTransform: "uppercase",
-                    color: C.muted,
+                    color: t.muted,
                   }}
                 >
                   Your Progress
                 </span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: C.green }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: t.green }}>
                   {progressPercent}%
                 </span>
               </div>
@@ -4827,7 +4836,7 @@ export default function LifeApp() {
                     width: `${progressPercent}%`,
                     height: "100%",
                     borderRadius: 999,
-                    background: `linear-gradient(90deg, ${C.green}, #6FBE77)`,
+                    background: `linear-gradient(90deg, ${t.green}, #6FBE77)`,
                   }}
                 />
               </div>
@@ -4835,7 +4844,7 @@ export default function LifeApp() {
                 style={{
                   margin: "8px 0 0",
                   fontSize: 11,
-                  color: C.muted,
+                  color: t.muted,
                   lineHeight: 1.4,
                 }}
               >
@@ -5051,10 +5060,10 @@ export default function LifeApp() {
               style={{
                 width: "100%",
                 background: t.white,
-                border: `1.5px solid ${C.red}`,
+                border: `1.5px solid ${t.red}`,
                 borderRadius: 10,
                 padding: "12px",
-                color: C.red,
+                color: t.red,
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: "pointer",
@@ -5066,12 +5075,12 @@ export default function LifeApp() {
                 transition: "all 0.2s ease",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = C.red;
+                e.currentTarget.style.background = t.red;
                 e.currentTarget.style.color = "#fff";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = C.white;
-                e.currentTarget.style.color = C.red;
+                e.currentTarget.style.background = t.white;
+                e.currentTarget.style.color = t.red;
               }}
             >
               <svg
@@ -5128,9 +5137,9 @@ export default function LifeApp() {
                     display: "block",
                     width: "100%",
                     padding: "14px 20px 12px",
-                    background: C.white,
+                    background: t.white,
                     border: "none",
-                    borderBottom: `1px solid ${C.border}`,
+                    borderBottom: `1px solid ${t.border}`,
                     cursor: "pointer",
                     textAlign: "left",
                   }}
@@ -5149,7 +5158,7 @@ export default function LifeApp() {
                         fontWeight: 700,
                         letterSpacing: 2,
                         textTransform: "uppercase",
-                        color: C.muted,
+                        color: t.muted,
                       }}
                     >
                       Your Progress
@@ -5157,7 +5166,7 @@ export default function LifeApp() {
                     <span
                       style={{
                         fontSize: 11,
-                        color: C.green,
+                        color: t.green,
                         fontWeight: 700,
                         letterSpacing: 0.5,
                       }}
@@ -5174,7 +5183,7 @@ export default function LifeApp() {
                         flex: 1,
                         minWidth: 0,
                         height: 6,
-                        background: C.light,
+                        background: t.light,
                         borderRadius: 10,
                         overflow: "hidden",
                       }}
@@ -5183,7 +5192,7 @@ export default function LifeApp() {
                         style={{
                           height: "100%",
                           width: `${progressPercent}%`,
-                          background: `linear-gradient(90deg,${C.green},#6FBE77)`,
+                          background: `linear-gradient(90deg,${t.green},#6FBE77)`,
                           borderRadius: 10,
                           transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
                         }}
@@ -5192,14 +5201,14 @@ export default function LifeApp() {
                     <span
                       style={{
                         fontSize: 11,
-                        color: C.green,
+                        color: t.green,
                         fontWeight: 700,
                         letterSpacing: 0.5,
                         flexShrink: 0,
                       }}
                     >
                       {readKeys.length}
-                      <span style={{ color: C.muted, fontWeight: 400 }}>
+                      <span style={{ color: t.muted, fontWeight: 400 }}>
                         /{allContent.length}
                       </span>
                     </span>
@@ -5211,8 +5220,8 @@ export default function LifeApp() {
                           fontWeight: 700,
                           letterSpacing: 1,
                           textTransform: "uppercase",
-                          color: C.green,
-                          background: C.greenLt,
+                          color: t.green,
+                          background: t.greenLt,
                           border: `1px solid rgba(74,140,92,0.35)`,
                           borderRadius: 20,
                           padding: "6px 12px",
@@ -5254,7 +5263,7 @@ export default function LifeApp() {
                     <div
                       className="life-card-hover life-resume-card"
                       style={{
-                        background: `linear-gradient(135deg, ${C.white} 0%, ${C.greenLt} 100%)`,
+                        background: `linear-gradient(135deg, ${t.white} 0%, ${t.greenLt} 100%)`,
                         border: `1px solid rgba(74,140,92,0.35)`,
                         borderRadius: 16,
                         padding: "16px 18px",
@@ -5269,7 +5278,7 @@ export default function LifeApp() {
                           width: 44,
                           height: 44,
                           borderRadius: 12,
-                          background: C.green,
+                          background: t.green,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -5287,7 +5296,7 @@ export default function LifeApp() {
                             fontWeight: 700,
                             letterSpacing: 2.2,
                             textTransform: "uppercase",
-                            color: C.green,
+                            color: t.green,
                           }}
                         >
                           Continue
@@ -5297,7 +5306,7 @@ export default function LifeApp() {
                             margin: 0,
                             fontSize: 15,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                             lineHeight: 1.35,
                           }}
                         >
@@ -5307,7 +5316,7 @@ export default function LifeApp() {
                           style={{
                             margin: "4px 0 0",
                             fontSize: 12,
-                            color: C.muted,
+                            color: t.muted,
                             fontStyle: "italic",
                           }}
                         >
@@ -5332,7 +5341,7 @@ export default function LifeApp() {
                             handleSelect(resumeEntry.key, resumeEntry.node);
                           }}
                           style={{
-                            background: C.green,
+                            background: t.green,
                             border: "none",
                             borderRadius: 10,
                             padding: "10px 16px",
@@ -5357,7 +5366,7 @@ export default function LifeApp() {
                           style={{
                             background: "transparent",
                             border: "none",
-                            color: C.muted,
+                            color: t.muted,
                             fontSize: 11,
                             cursor: "pointer",
                             fontFamily: "Georgia,serif",
@@ -5377,8 +5386,8 @@ export default function LifeApp() {
                   style={{
                     padding: "44px 24px 40px",
                     textAlign: "center",
-                    borderBottom: `1px solid ${C.border}`,
-                    background: `linear-gradient(180deg, ${C.skin} 0%, #ebe4d6 100%)`,
+                    borderBottom: `1px solid ${t.border}`,
+                    background: `linear-gradient(180deg, ${t.skin} 0%, #ebe4d6 100%)`,
                     position: "relative",
                     overflow: "hidden",
                     borderRadius: 0,
@@ -5440,19 +5449,19 @@ export default function LifeApp() {
                       fontWeight: 700,
                       letterSpacing: "0.38em",
                       textTransform: "uppercase",
-                      color: C.muted,
+                      color: t.muted,
                       textAlign: "center",
                       lineHeight: 1.2,
                     }}
                   >
-                    Welcome to
+                    {(() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; })()}{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
                   </p>
                   <h1
                     style={{
                       margin: "0 0 6px",
                       fontSize: "clamp(3.2rem, 15vw, 6.2rem)",
                       fontWeight: 800,
-                      color: C.ink,
+                      color: t.ink,
                       fontFamily: "Georgia,serif",
                       letterSpacing: "-0.04em",
                       lineHeight: 0.92,
@@ -5466,14 +5475,14 @@ export default function LifeApp() {
                     style={{
                       width: 40,
                       height: 2.5,
-                      background: C.green,
+                      background: t.green,
                       borderRadius: 2,
                       margin: "18px auto 22px",
                     }}
                   />
                   <p
                     style={{
-                      color: C.mid,
+                      color: t.mid,
                       fontSize: 13,
                       lineHeight: 1.7,
                       margin: "0 auto 6px",
@@ -5486,7 +5495,7 @@ export default function LifeApp() {
                   </p>
                   <p
                     style={{
-                      color: C.muted,
+                      color: t.muted,
                       fontSize: 10,
                       lineHeight: 1.5,
                       margin: "0 auto 32px",
@@ -5511,7 +5520,7 @@ export default function LifeApp() {
                         setSidebarOpen(true);
                       }}
                       style={{
-                        background: C.green,
+                        background: t.green,
                         border: "none",
                         borderRadius: 14,
                         padding: "15px 32px",
@@ -5532,11 +5541,11 @@ export default function LifeApp() {
                         setPage("where_to_start");
                       }}
                       style={{
-                        background: C.white,
-                        border: `1.5px solid ${C.border}`,
+                        background: t.white,
+                        border: `1.5px solid ${t.border}`,
                         borderRadius: 14,
                         padding: "15px 24px",
-                        color: C.ink,
+                        color: t.ink,
                         fontSize: 15,
                         fontWeight: 600,
                         cursor: "pointer",
@@ -5547,7 +5556,7 @@ export default function LifeApp() {
                         boxShadow: S.sm,
                       }}
                     >
-                      {Ic.leaf("none", C.green, 17)} Daily Growth
+                      {Ic.leaf("none", t.green, 17)} Daily Growth
                     </button>
                     {/* P7: Let's Get Rich → Categories */}
                     <button
@@ -5557,7 +5566,7 @@ export default function LifeApp() {
                         setCatStep(0);
                       }}
                       style={{
-                        background: `linear-gradient(135deg, ${C.gold}, #9a7a3e)`,
+                        background: `linear-gradient(135deg, ${t.gold}, #9a7a3e)`,
                         border: "none",
                         borderRadius: 14,
                         padding: "15px 24px",
@@ -5590,8 +5599,8 @@ export default function LifeApp() {
                       <div
                         key={stat.label}
                         style={{
-                          background: C.white,
-                          border: `1px solid ${C.border}`,
+                          background: t.white,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 14,
                           padding: "14px 12px",
                           textAlign: "center",
@@ -5615,7 +5624,7 @@ export default function LifeApp() {
                             fontWeight: 600,
                             letterSpacing: 1,
                             textTransform: "uppercase",
-                            color: C.muted,
+                            color: t.muted,
                             display: "block",
                             marginTop: 6,
                           }}
@@ -5633,7 +5642,7 @@ export default function LifeApp() {
                     style={{
                       maxWidth: 500,
                       margin: "0 auto",
-                      background: `linear-gradient(135deg, ${C.white} 0%, ${C.greenLt} 100%)`,
+                      background: `linear-gradient(135deg, ${t.white} 0%, ${t.greenLt} 100%)`,
                       border: `1px solid rgba(74,140,92,0.25)`,
                       borderRadius: 18,
                       padding: "28px 24px",
@@ -5653,7 +5662,7 @@ export default function LifeApp() {
                           width: 44,
                           height: 44,
                           borderRadius: "50%",
-                          background: `linear-gradient(135deg, ${C.green}, #3a7d4a)`,
+                          background: `linear-gradient(135deg, ${t.green}, #3a7d4a)`,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -5678,7 +5687,7 @@ export default function LifeApp() {
                             fontWeight: 700,
                             letterSpacing: 2.5,
                             textTransform: "uppercase",
-                            color: C.green,
+                            color: t.green,
                           }}
                         >
                           From the Author
@@ -5688,7 +5697,7 @@ export default function LifeApp() {
                             margin: "2px 0 0",
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           A Message For You
@@ -5699,7 +5708,7 @@ export default function LifeApp() {
                       style={{
                         margin: 0,
                         fontSize: 14,
-                        color: C.mid,
+                        color: t.mid,
                         lineHeight: 1.8,
                         fontFamily: "Georgia,serif",
                         fontStyle: "italic",
@@ -5732,7 +5741,7 @@ export default function LifeApp() {
                       marginBottom: 18,
                     }}
                   >
-                    <div style={{ flex: 1, height: 1, background: C.border }} />
+                    <div style={{ flex: 1, height: 1, background: t.border }} />
                     <p
                       style={{
                         margin: 0,
@@ -5740,13 +5749,13 @@ export default function LifeApp() {
                         fontWeight: 700,
                         letterSpacing: 3,
                         textTransform: "uppercase",
-                        color: C.muted,
+                        color: t.muted,
                         whiteSpace: "nowrap",
                       }}
                     >
                       Start here
                     </p>
-                    <div style={{ flex: 1, height: 1, background: C.border }} />
+                    <div style={{ flex: 1, height: 1, background: t.border }} />
                   </div>
                   {GUIDED_ORDER.slice(0, 4).map((k, i) => {
                     const node = CONTENT[k];
@@ -5763,8 +5772,8 @@ export default function LifeApp() {
                           alignItems: "center",
                           gap: 14,
                           width: "100%",
-                          background: C.white,
-                          border: `1px solid ${C.border}`,
+                          background: t.white,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 14,
                           padding: "16px 18px",
                           cursor: "pointer",
@@ -5781,7 +5790,7 @@ export default function LifeApp() {
                             "0 4px 14px rgba(74,140,92,0.11)";
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = C.border;
+                          e.currentTarget.style.borderColor = t.border;
                           e.currentTarget.style.boxShadow =
                             "0 1px 3px rgba(0,0,0,0.04)";
                         }}
@@ -5791,7 +5800,7 @@ export default function LifeApp() {
                             width: 34,
                             height: 34,
                             borderRadius: 10,
-                            background: C.green,
+                            background: t.green,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -5814,7 +5823,7 @@ export default function LifeApp() {
                             style={{
                               fontSize: 14,
                               fontWeight: 700,
-                              color: C.ink,
+                              color: t.ink,
                             }}
                           >
                             {node.label}
@@ -5822,7 +5831,7 @@ export default function LifeApp() {
                           <div
                             style={{
                               fontSize: 11,
-                              color: C.muted,
+                              color: t.muted,
                               marginTop: 2,
                               fontStyle: "italic",
                             }}
@@ -5834,7 +5843,7 @@ export default function LifeApp() {
                           <polyline
                             points="2,2 8,5 2,8"
                             fill="none"
-                            stroke={C.muted}
+                            stroke={t.muted}
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -5860,7 +5869,7 @@ export default function LifeApp() {
                   style={{
                     fontSize: 26,
                     fontWeight: 700,
-                    color: C.ink,
+                    color: t.ink,
                     margin: "0 0 10px",
                     fontFamily: "Georgia,serif",
                   }}
@@ -5869,7 +5878,7 @@ export default function LifeApp() {
                 </h2>
                 <p
                   style={{
-                    color: C.muted,
+                    color: t.muted,
                     fontSize: 15,
                     lineHeight: 1.8,
                     margin: "0 0 32px",
@@ -5918,8 +5927,8 @@ export default function LifeApp() {
                       alignItems: "flex-start",
                       gap: 16,
                       width: "100%",
-                      background: C.white,
-                      border: `1px solid ${C.border}`,
+                      background: t.white,
+                      border: `1px solid ${t.border}`,
                       borderRadius: 12,
                       padding: "20px",
                       cursor: "pointer",
@@ -5928,10 +5937,10 @@ export default function LifeApp() {
                       fontFamily: "Georgia,serif",
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = C.light)
+                      (e.currentTarget.style.background = t.light)
                     }
                     onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = C.white)
+                      (e.currentTarget.style.background = t.white)
                     }
                   >
                     <div
@@ -5939,7 +5948,7 @@ export default function LifeApp() {
                         width: 32,
                         height: 32,
                         borderRadius: "50%",
-                        background: C.green,
+                        background: t.green,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -5957,7 +5966,7 @@ export default function LifeApp() {
                         style={{
                           fontSize: 15,
                           fontWeight: 700,
-                          color: C.ink,
+                          color: t.ink,
                           marginBottom: 4,
                         }}
                       >
@@ -5966,7 +5975,7 @@ export default function LifeApp() {
                       <div
                         style={{
                           fontSize: 13,
-                          color: C.muted,
+                          color: t.muted,
                           fontStyle: "italic",
                         }}
                       >
@@ -5979,8 +5988,8 @@ export default function LifeApp() {
                   style={{
                     marginTop: 28,
                     padding: 22,
-                    background: C.greenLt,
-                    border: `1px solid ${C.green}`,
+                    background: t.greenLt,
+                    border: `1px solid ${t.green}`,
                     borderRadius: 14,
                   }}
                 >
@@ -5991,7 +6000,7 @@ export default function LifeApp() {
                       fontWeight: 700,
                       letterSpacing: 2.5,
                       textTransform: "uppercase",
-                      color: C.green,
+                      color: t.green,
                     }}
                   >
                     Test yourself
@@ -6000,7 +6009,7 @@ export default function LifeApp() {
                     style={{
                       margin: "0 0 14px",
                       fontSize: 15,
-                      color: C.ink,
+                      color: t.ink,
                       fontFamily: "Georgia,serif",
                     }}
                   >
@@ -6013,7 +6022,7 @@ export default function LifeApp() {
                       setPage("quiz");
                     }}
                     style={{
-                      background: C.green,
+                      background: t.green,
                       border: "none",
                       borderRadius: 10,
                       padding: "12px 22px",
@@ -6093,7 +6102,7 @@ export default function LifeApp() {
                   style={{
                     fontSize: 28,
                     fontWeight: 700,
-                    color: C.ink,
+                    color: t.ink,
                     margin: "0 0 12px",
                   }}
                 >
@@ -6101,7 +6110,7 @@ export default function LifeApp() {
                 </h2>
                 <p
                   style={{
-                    color: C.muted,
+                    color: t.muted,
                     fontSize: 15,
                     lineHeight: 1.8,
                     margin: "0 0 32px",
@@ -6151,8 +6160,8 @@ export default function LifeApp() {
                   <div
                     key={q}
                     style={{
-                      background: C.white,
-                      border: `1px solid ${C.border}`,
+                      background: t.white,
+                      border: `1px solid ${t.border}`,
                       borderRadius: 12,
                       padding: "20px 22px",
                       marginBottom: 12,
@@ -6163,7 +6172,7 @@ export default function LifeApp() {
                         margin: "0 0 8px",
                         fontSize: 15,
                         fontWeight: 700,
-                        color: C.ink,
+                        color: t.ink,
                       }}
                     >
                       {q}
@@ -6172,7 +6181,7 @@ export default function LifeApp() {
                       style={{
                         margin: 0,
                         fontSize: 14,
-                        color: C.mid,
+                        color: t.mid,
                         lineHeight: 1.7,
                         fontFamily: "Georgia,serif",
                       }}
@@ -6212,7 +6221,7 @@ export default function LifeApp() {
                   style={{
                     fontSize: 24,
                     fontWeight: 700,
-                    color: C.ink,
+                    color: t.ink,
                     margin: "0 0 10px",
                   }}
                 >
@@ -6220,7 +6229,7 @@ export default function LifeApp() {
                 </h2>
                 <p
                   style={{
-                    color: C.muted,
+                    color: t.muted,
                     fontSize: 15,
                     lineHeight: 1.8,
                     margin: "0 0 32px",
@@ -6233,8 +6242,8 @@ export default function LifeApp() {
                 {/* P9b: Discord Integration */}
                 <div
                   style={{
-                    background: C.greenLt,
-                    border: `1px solid ${C.green}`,
+                    background: t.greenLt,
+                    border: `1px solid ${t.green}`,
                     borderRadius: 16,
                     padding: 28,
                     textAlign: "center",
@@ -6247,7 +6256,7 @@ export default function LifeApp() {
                       fontWeight: 700,
                       letterSpacing: 2.5,
                       textTransform: "uppercase",
-                      color: C.green,
+                      color: t.green,
                     }}
                   >
                     Life. Community
@@ -6257,15 +6266,15 @@ export default function LifeApp() {
                       margin: "0 0 20px",
                       fontSize: 16,
                       fontWeight: 700,
-                      color: C.ink,
+                      color: t.ink,
                     }}
                   >
                     Join the Discord Server
                   </p>
                   <div
                     style={{
-                      background: C.white,
-                      border: `1px solid ${C.border}`,
+                      background: t.white,
+                      border: `1px solid ${t.border}`,
                       borderRadius: 10,
                       padding: "14px 20px",
                       display: "inline-block",
@@ -6277,7 +6286,7 @@ export default function LifeApp() {
                         fontSize: 22,
                         fontWeight: 800,
                         letterSpacing: 3,
-                        color: C.ink,
+                        color: t.ink,
                         fontFamily: "Georgia,serif",
                       }}
                     >
@@ -6288,7 +6297,7 @@ export default function LifeApp() {
                     style={{
                       margin: "0 0 20px",
                       fontSize: 13,
-                      color: C.muted,
+                      color: t.muted,
                       fontStyle: "italic",
                     }}
                   >
@@ -6321,8 +6330,8 @@ export default function LifeApp() {
                 <div
                   style={{
                     marginTop: 20,
-                    background: C.white,
-                    border: `1px solid ${C.border}`,
+                    background: t.white,
+                    border: `1px solid ${t.border}`,
                     borderRadius: 14,
                     padding: 20,
                     textAlign: "center",
@@ -6335,7 +6344,7 @@ export default function LifeApp() {
                       fontWeight: 700,
                       letterSpacing: 2,
                       textTransform: "uppercase",
-                      color: C.muted,
+                      color: t.muted,
                     }}
                   >
                     Live Community
@@ -6349,7 +6358,7 @@ export default function LifeApp() {
                     sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
                     style={{
                       borderRadius: 10,
-                      border: `1px solid ${C.border}`,
+                      border: `1px solid ${t.border}`,
                     }}
                   />
                 </div>
@@ -6379,7 +6388,7 @@ export default function LifeApp() {
                             fontWeight: 700,
                             letterSpacing: 3,
                             textTransform: "uppercase",
-                            color: C.muted,
+                            color: t.muted,
                           }}
                         >
                           Category {displayNum} of {CATEGORIES.length + 1}
@@ -6389,20 +6398,20 @@ export default function LifeApp() {
                             width: 70,
                             height: 70,
                             borderRadius: 20,
-                            background: C.greenLt,
+                            background: t.greenLt,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             margin: "0 auto 20px",
                           }}
                         >
-                          {Ic[cat.icon]?.("none", C.green, 32)}
+                          {Ic[cat.icon]?.("none", t.green, 32)}
                         </div>
                         <h2
                           style={{
                             fontSize: 28,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                             margin: "0 0 12px",
                           }}
                         >
@@ -6410,7 +6419,7 @@ export default function LifeApp() {
                         </h2>
                         <p
                           style={{
-                            color: C.mid,
+                            color: t.mid,
                             fontSize: 15,
                             lineHeight: 1.7,
                             margin: "0 0 32px",
@@ -6435,11 +6444,11 @@ export default function LifeApp() {
                                 setCatStep(catStep - 1);
                               }}
                               style={{
-                                background: C.white,
-                                border: `1.5px solid ${C.border}`,
+                                background: t.white,
+                                border: `1.5px solid ${t.border}`,
                                 borderRadius: 12,
                                 padding: "14px 24px",
-                                color: C.mid,
+                                color: t.mid,
                                 fontSize: 15,
                                 fontWeight: 600,
                                 cursor: "pointer",
@@ -6455,7 +6464,7 @@ export default function LifeApp() {
                               setCatStep(catStep + 1);
                             }}
                             style={{
-                              background: C.green,
+                              background: t.green,
                               border: "none",
                               borderRadius: 12,
                               padding: "14px 32px",
@@ -6488,7 +6497,7 @@ export default function LifeApp() {
                                 width: 8,
                                 height: 8,
                                 borderRadius: "50%",
-                                background: i <= catStep ? C.green : C.border,
+                                background: i <= catStep ? t.green : t.border,
                                 transition: "background 0.2s",
                               }}
                             />
@@ -6508,7 +6517,7 @@ export default function LifeApp() {
                         width: 90,
                         height: 90,
                         borderRadius: "50%",
-                        background: `linear-gradient(135deg, ${C.green}, #6FBE77)`,
+                        background: `linear-gradient(135deg, ${t.green}, #6FBE77)`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -6522,7 +6531,7 @@ export default function LifeApp() {
                       style={{
                         fontSize: 32,
                         fontWeight: 800,
-                        color: C.ink,
+                        color: t.ink,
                         margin: "0 0 12px",
                       }}
                     >
@@ -6530,7 +6539,7 @@ export default function LifeApp() {
                     </h1>
                     <p
                       style={{
-                        color: C.green,
+                        color: t.green,
                         fontSize: 12,
                         fontWeight: 700,
                         letterSpacing: 3,
@@ -6542,7 +6551,7 @@ export default function LifeApp() {
                     </p>
                     <p
                       style={{
-                        color: C.mid,
+                        color: t.mid,
                         fontSize: 15,
                         lineHeight: 1.7,
                         margin: "0 auto 32px",
@@ -6555,8 +6564,8 @@ export default function LifeApp() {
                     </p>
                     <div
                       style={{
-                        background: C.white,
-                        border: `2px solid ${C.green}`,
+                        background: t.white,
+                        border: `2px solid ${t.green}`,
                         borderRadius: 18,
                         padding: "28px 24px",
                         maxWidth: 380,
@@ -6571,7 +6580,7 @@ export default function LifeApp() {
                           fontWeight: 700,
                           letterSpacing: 2.5,
                           textTransform: "uppercase",
-                          color: C.green,
+                          color: t.green,
                         }}
                       >
                         Certificate of Completion
@@ -6581,7 +6590,7 @@ export default function LifeApp() {
                           margin: "0 0 4px",
                           fontSize: 18,
                           fontWeight: 700,
-                          color: C.ink,
+                          color: t.ink,
                         }}
                       >
                         {user?.name || "User"}
@@ -6590,7 +6599,7 @@ export default function LifeApp() {
                         style={{
                           margin: 0,
                           fontSize: 12,
-                          color: C.muted,
+                          color: t.muted,
                           fontStyle: "italic",
                         }}
                       >
@@ -6603,7 +6612,7 @@ export default function LifeApp() {
                         setPage("home");
                       }}
                       style={{
-                        background: C.green,
+                        background: t.green,
                         border: "none",
                         borderRadius: 12,
                         padding: "14px 32px",
@@ -6635,7 +6644,7 @@ export default function LifeApp() {
                   style={{
                     fontSize: 26,
                     fontWeight: 700,
-                    color: C.ink,
+                    color: t.ink,
                     margin: "0 0 10px",
                   }}
                 >
@@ -6643,7 +6652,7 @@ export default function LifeApp() {
                 </h2>
                 <p
                   style={{
-                    color: C.muted,
+                    color: t.muted,
                     fontSize: 15,
                     lineHeight: 1.8,
                     margin: "0 0 28px",
@@ -6661,8 +6670,8 @@ export default function LifeApp() {
                 </div>
                 <div
                   style={{
-                    background: C.white,
-                    border: `1px solid ${C.border}`,
+                    background: t.white,
+                    border: `1px solid ${t.border}`,
                     borderRadius: 16,
                     padding: 24,
                     marginBottom: 20,
@@ -6682,13 +6691,13 @@ export default function LifeApp() {
                         fontWeight: 700,
                         letterSpacing: 2,
                         textTransform: "uppercase",
-                        color: C.muted,
+                        color: t.muted,
                       }}
                     >
                       Overall Progress
                     </span>
                     <span
-                      style={{ fontSize: 22, fontWeight: 800, color: C.green }}
+                      style={{ fontSize: 22, fontWeight: 800, color: t.green }}
                     >
                       {progressPercent}%
                     </span>
@@ -6697,7 +6706,7 @@ export default function LifeApp() {
                     style={{
                       height: 10,
                       borderRadius: 10,
-                      background: C.light,
+                      background: t.light,
                       overflow: "hidden",
                       marginBottom: 12,
                     }}
@@ -6707,12 +6716,12 @@ export default function LifeApp() {
                         width: `${progressPercent}%`,
                         height: "100%",
                         borderRadius: 10,
-                        background: `linear-gradient(90deg, ${C.green}, #6FBE77)`,
+                        background: `linear-gradient(90deg, ${t.green}, #6FBE77)`,
                         transition: "width 0.6s",
                       }}
                     />
                   </div>
-                  <p style={{ margin: 0, fontSize: 13, color: C.muted }}>
+                  <p style={{ margin: 0, fontSize: 13, color: t.muted }}>
                     {readKeys.length} of {allContent.length} topics completed
                   </p>
                 </div>
@@ -6728,28 +6737,28 @@ export default function LifeApp() {
                     {
                       label: "Topics Read",
                       value: readKeys.length,
-                      color: C.green,
+                      color: t.green,
                     },
                     {
                       label: "Bookmarks",
                       value: bookmarks.length,
-                      color: C.gold,
+                      color: t.gold,
                     },
-                    { label: "Notes", value: completedNotes, color: C.green },
+                    { label: "Notes", value: completedNotes, color: t.green },
                     {
                       label: "Streak",
                       value:
                         readingStreak.count > 0
                           ? `${readingStreak.count}d`
                           : "0d",
-                      color: C.red,
+                      color: t.red,
                     },
                   ].map((s) => (
                     <div
                       key={s.label}
                       style={{
-                        background: C.white,
-                        border: `1px solid ${C.border}`,
+                        background: t.white,
+                        border: `1px solid ${t.border}`,
                         borderRadius: 14,
                         padding: "18px 14px",
                         textAlign: "center",
@@ -6771,7 +6780,7 @@ export default function LifeApp() {
                           fontWeight: 600,
                           letterSpacing: 1,
                           textTransform: "uppercase",
-                          color: C.muted,
+                          color: t.muted,
                           marginTop: 4,
                           display: "block",
                         }}
@@ -6783,8 +6792,8 @@ export default function LifeApp() {
                 </div>
                 <div
                   style={{
-                    background: C.white,
-                    border: `1px solid ${C.border}`,
+                    background: t.white,
+                    border: `1px solid ${t.border}`,
                     borderRadius: 16,
                     padding: 24,
                   }}
@@ -6796,7 +6805,7 @@ export default function LifeApp() {
                       fontWeight: 700,
                       letterSpacing: 2.5,
                       textTransform: "uppercase",
-                      color: C.muted,
+                      color: t.muted,
                     }}
                   >
                     Challenges
@@ -6831,7 +6840,7 @@ export default function LifeApp() {
                         alignItems: "center",
                         gap: 12,
                         padding: "12px 0",
-                        borderBottom: `1px solid ${C.light}`,
+                        borderBottom: `1px solid ${t.light}`,
                       }}
                     >
                       <div
@@ -6839,8 +6848,8 @@ export default function LifeApp() {
                           width: 24,
                           height: 24,
                           borderRadius: "50%",
-                          background: ch.done ? C.green : C.light,
-                          border: `2px solid ${ch.done ? C.green : C.border}`,
+                          background: ch.done ? t.green : t.light,
+                          border: `2px solid ${ch.done ? t.green : t.border}`,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -6865,7 +6874,7 @@ export default function LifeApp() {
                       <span
                         style={{
                           fontSize: 14,
-                          color: ch.done ? C.green : C.mid,
+                          color: ch.done ? t.green : t.mid,
                           fontFamily: "Georgia,serif",
                           textDecoration: ch.done ? "line-through" : "none",
                         }}
@@ -6892,7 +6901,7 @@ export default function LifeApp() {
                   style={{
                     fontSize: 26,
                     fontWeight: 700,
-                    color: C.ink,
+                    color: t.ink,
                     margin: "0 0 10px",
                   }}
                 >
@@ -6900,7 +6909,7 @@ export default function LifeApp() {
                 </h2>
                 <p
                   style={{
-                    color: C.muted,
+                    color: t.muted,
                     fontSize: 15,
                     lineHeight: 1.8,
                     margin: "0 0 28px",
@@ -6909,22 +6918,19 @@ export default function LifeApp() {
                 >
                   See how you stack up against other Life. members.
                 </p>
-                {[
-                  {
-                    rank: 1,
-                    name: "You",
-                    score: readKeys.length * 10 + bookmarks.length * 5,
-                    isUser: true,
-                  },
-                  { rank: 2, name: "Alex T.", score: 420 },
-                  { rank: 3, name: "Jordan M.", score: 380 },
-                  { rank: 4, name: "Sam K.", score: 310 },
-                  { rank: 5, name: "Riley P.", score: 275 },
-                  { rank: 6, name: "Casey L.", score: 220 },
-                  { rank: 7, name: "Morgan D.", score: 185 },
-                ]
-                  .sort((a, b) => b.score - a.score)
-                  .map((entry, idx) => (
+                {(() => {
+                  const userScore = readKeys.length * 10 + bookmarks.length * 5;
+                  const entries = [
+                    { name: "You", score: userScore, isUser: true },
+                    { name: "Alex T.", score: 420 },
+                    { name: "Jordan M.", score: 380 },
+                    { name: "Sam K.", score: 310 },
+                    { name: "Riley P.", score: 275 },
+                    { name: "Casey L.", score: 220 },
+                    { name: "Morgan D.", score: 185 },
+                  ].sort((a, b) => b.score - a.score).map((e, i) => ({ ...e, rank: i + 1 }));
+
+                  return entries.map((entry) => (
                     <div
                       key={entry.name}
                       style={{
@@ -6932,66 +6938,60 @@ export default function LifeApp() {
                         alignItems: "center",
                         gap: 14,
                         padding: "14px 18px",
-                        background: entry.isUser ? C.greenLt : C.white,
-                        border: `1px solid ${entry.isUser ? C.green : C.border}`,
-                        borderRadius: 14,
-                        marginBottom: 8,
+                        background: entry.isUser
+                          ? `linear-gradient(90deg, ${t.greenLt}, transparent)`
+                          : "transparent",
+                        borderRadius: 12,
+                        border: entry.isUser ? `1px solid ${t.green}22` : `1px solid transparent`,
+                        marginBottom: 6,
+                        transition: "background 0.2s",
                       }}
                     >
-                      <div
+                      <span
                         style={{
-                          width: 32,
-                          height: 32,
+                          width: 28,
+                          height: 28,
                           borderRadius: "50%",
-                          background:
-                            idx === 0
-                              ? C.gold
-                              : idx === 1
-                                ? "#C0C0C0"
-                                : idx === 2
-                                  ? "#CD7F32"
-                                  : C.light,
+                          background: entry.rank <= 3
+                            ? ["#FFD700","#C0C0C0","#CD7F32"][entry.rank - 1]
+                            : t.light,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
+                          fontSize: 12,
+                          fontWeight: 800,
+                          color: entry.rank <= 3 ? "#fff" : t.muted,
                           flexShrink: 0,
                         }}
                       >
-                        <span
-                          style={{
-                            color: idx < 3 ? "#fff" : C.mid,
-                            fontSize: 13,
-                            fontWeight: 800,
-                          }}
-                        >
-                          {idx + 1}
-                        </span>
-                      </div>
+                        {entry.rank}
+                      </span>
                       <span
                         style={{
                           flex: 1,
                           fontSize: 15,
                           fontWeight: entry.isUser ? 700 : 500,
-                          color: entry.isUser ? C.green : C.ink,
+                          color: entry.isUser ? t.green : t.ink,
                         }}
                       >
-                        {entry.name}
+                        {entry.name}{entry.isUser ? " (You)" : ""}
                       </span>
                       <span
                         style={{
                           fontSize: 15,
                           fontWeight: 700,
-                          color: C.green,
+                          color: entry.rank === 1 ? t.gold : t.muted,
                         }}
                       >
                         {entry.score} pts
                       </span>
                     </div>
-                  ))}
+                  ));
+                })()}
               </div>
             )}
 
-            {/* Daily Growth page */}
+                        {/* Daily Growth page */}
             {page === "daily_growth" && (
               <div
                 data-page-tag="#daily_growth"
@@ -7005,7 +7005,7 @@ export default function LifeApp() {
                   style={{
                     fontSize: 26,
                     fontWeight: 700,
-                    color: C.ink,
+                    color: t.ink,
                     margin: "0 0 10px",
                   }}
                 >
@@ -7013,7 +7013,7 @@ export default function LifeApp() {
                 </h2>
                 <p
                   style={{
-                    color: C.muted,
+                    color: t.muted,
                     fontSize: 15,
                     lineHeight: 1.8,
                     margin: "0 0 28px",
@@ -7057,8 +7057,8 @@ export default function LifeApp() {
                   <div
                     key={item.title}
                     style={{
-                      background: C.white,
-                      border: `1px solid ${C.border}`,
+                      background: t.white,
+                      border: `1px solid ${t.border}`,
                       borderRadius: 14,
                       padding: "18px 20px",
                       marginBottom: 12,
@@ -7072,14 +7072,14 @@ export default function LifeApp() {
                         width: 38,
                         height: 38,
                         borderRadius: 10,
-                        background: C.greenLt,
+                        background: t.greenLt,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         flexShrink: 0,
                       }}
                     >
-                      {Ic[item.icon]?.("none", C.green, 18)}
+                      {Ic[item.icon]?.("none", t.green, 18)}
                     </div>
                     <div>
                       <p
@@ -7087,7 +7087,7 @@ export default function LifeApp() {
                           margin: "0 0 4px",
                           fontSize: 15,
                           fontWeight: 700,
-                          color: C.ink,
+                          color: t.ink,
                         }}
                       >
                         {item.title}
@@ -7096,7 +7096,7 @@ export default function LifeApp() {
                         style={{
                           margin: 0,
                           fontSize: 13,
-                          color: C.muted,
+                          color: t.muted,
                           lineHeight: 1.6,
                         }}
                       >
@@ -7122,7 +7122,7 @@ export default function LifeApp() {
                   style={{
                     fontSize: 26,
                     fontWeight: 700,
-                    color: C.ink,
+                    color: t.ink,
                     margin: "0 0 10px",
                   }}
                 >
@@ -7130,7 +7130,7 @@ export default function LifeApp() {
                 </h2>
                 <p
                   style={{
-                    color: C.muted,
+                    color: t.muted,
                     fontSize: 15,
                     lineHeight: 1.8,
                     margin: "0 0 28px",
@@ -7162,8 +7162,8 @@ export default function LifeApp() {
                   <div
                     key={s.name}
                     style={{
-                      background: C.white,
-                      border: `1px solid ${C.border}`,
+                      background: t.white,
+                      border: `1px solid ${t.border}`,
                       borderRadius: 16,
                       padding: 22,
                       marginBottom: 14,
@@ -7182,7 +7182,7 @@ export default function LifeApp() {
                           margin: 0,
                           fontSize: 16,
                           fontWeight: 700,
-                          color: C.ink,
+                          color: t.ink,
                         }}
                       >
                         {s.name}
@@ -7193,8 +7193,8 @@ export default function LifeApp() {
                           fontWeight: 700,
                           letterSpacing: 1,
                           textTransform: "uppercase",
-                          color: C.gold,
-                          background: `${C.gold}18`,
+                          color: t.gold,
+                          background: `${t.gold}18`,
                           borderRadius: 6,
                           padding: "3px 8px",
                         }}
@@ -7206,7 +7206,7 @@ export default function LifeApp() {
                       style={{
                         margin: "0 0 12px",
                         fontSize: 13,
-                        color: C.muted,
+                        color: t.muted,
                         lineHeight: 1.6,
                       }}
                     >
@@ -7219,13 +7219,13 @@ export default function LifeApp() {
                         justifyContent: "space-between",
                       }}
                     >
-                      <span style={{ fontSize: 12, color: C.muted }}>
+                      <span style={{ fontSize: 12, color: t.muted }}>
                         ⏱ {s.duration}
                       </span>
                       <button
-                        onClick={() => play("tap")}
+                        onClick={() => { play("tap"); setPage("premium"); }}
                         style={{
-                          background: C.green,
+                          background: t.green,
                           border: "none",
                           borderRadius: 10,
                           padding: "10px 20px",
@@ -7236,7 +7236,7 @@ export default function LifeApp() {
                           fontFamily: "Georgia,serif",
                         }}
                       >
-                        Book Now
+                        Book Now →
                       </button>
                     </div>
                   </div>
@@ -7263,7 +7263,7 @@ export default function LifeApp() {
                   style={{
                     background: "none",
                     border: "none",
-                    color: C.muted,
+                    color: t.muted,
                     fontSize: 13,
                     cursor: "pointer",
                     fontFamily: "Georgia,serif",
@@ -7570,7 +7570,7 @@ export default function LifeApp() {
                   style={{
                     fontSize: 28,
                     fontWeight: 800,
-                    color: C.ink,
+                    color: t.ink,
                     margin: "0 0 8px",
                   }}
                 >
@@ -7578,7 +7578,7 @@ export default function LifeApp() {
                 </h2>
                 <p
                   style={{
-                    color: C.muted,
+                    color: t.muted,
                     fontSize: 15,
                     lineHeight: 1.7,
                     margin: "0 0 32px",
@@ -7590,7 +7590,7 @@ export default function LifeApp() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
                     gap: 14,
                     maxWidth: 420,
                     margin: "0 auto",
@@ -7625,9 +7625,9 @@ export default function LifeApp() {
                       style={{
                         background:
                           plan.tier === "Premium"
-                            ? `linear-gradient(135deg, ${C.greenLt}, ${C.white})`
-                            : C.white,
-                        border: `2px solid ${plan.tier === "Premium" ? C.green : C.border}`,
+                            ? `linear-gradient(135deg, ${t.greenLt}, ${t.white})`
+                            : t.white,
+                        border: `2px solid ${plan.tier === "Premium" ? t.green : t.border}`,
                         borderRadius: 18,
                         padding: "24px 16px",
                         textAlign: "center",
@@ -7640,7 +7640,7 @@ export default function LifeApp() {
                           fontWeight: 700,
                           letterSpacing: 2,
                           textTransform: "uppercase",
-                          color: plan.tier === "Premium" ? C.green : C.muted,
+                          color: plan.tier === "Premium" ? t.green : t.muted,
                         }}
                       >
                         {plan.tier}
@@ -7650,7 +7650,7 @@ export default function LifeApp() {
                           margin: "0 0 16px",
                           fontSize: 24,
                           fontWeight: 800,
-                          color: C.ink,
+                          color: t.ink,
                         }}
                       >
                         {plan.price}
@@ -7661,13 +7661,13 @@ export default function LifeApp() {
                           style={{
                             margin: "0 0 6px",
                             fontSize: 12,
-                            color: C.mid,
+                            color: t.mid,
                             display: "flex",
                             alignItems: "center",
                             gap: 6,
                           }}
                         >
-                          <span style={{ color: C.green }}>✓</span> {f}
+                          <span style={{ color: t.green }}>✓</span> {f}
                         </p>
                       ))}
                       <button
@@ -7676,14 +7676,14 @@ export default function LifeApp() {
                           marginTop: 16,
                           width: "100%",
                           background:
-                            plan.tier === "Premium" ? C.green : C.light,
+                            plan.tier === "Premium" ? t.green : t.light,
                           border:
                             plan.tier === "Premium"
                               ? "none"
-                              : `1px solid ${C.border}`,
+                              : `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "12px",
-                          color: plan.tier === "Premium" ? "#fff" : C.mid,
+                          color: plan.tier === "Premium" ? "#fff" : t.mid,
                           fontSize: 13,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -7716,23 +7716,25 @@ export default function LifeApp() {
                     marginBottom: 36,
                   }}
                 >
-                  <div
-                    style={{
-                      width: 70,
-                      height: 70,
-                      borderRadius: "50%",
-                      background: t.white,
-                      border: `2px solid ${t.border}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <span
-                      style={{ fontSize: 24, fontWeight: 700, color: t.ink }}
+                  <div style={{ position: "relative", flexShrink: 0 }}>
+                    <div
+                      style={{
+                        width: 74,
+                        height: 74,
+                        borderRadius: "50%",
+                        background: `linear-gradient(135deg, ${t.green}, #2d6e42)`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxShadow: `0 0 0 3px ${t.white}, 0 0 0 5px ${t.green}44`,
+                      }}
                     >
-                      {initials}
-                    </span>
+                      <span
+                        style={{ fontSize: 26, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}
+                      >
+                        {initials}
+                      </span>
+                    </div>
                   </div>
                   <div style={{ flex: 1 }}>
                     <h2
@@ -7830,7 +7832,7 @@ export default function LifeApp() {
                         display: "flex",
                         justifyContent: "space-between",
                         padding: "12px 0",
-                        borderBottom: `1px solid ${C.light}`,
+                        borderBottom: `1px solid ${t.light}`,
                       }}
                     >
                       <span
@@ -7926,7 +7928,7 @@ export default function LifeApp() {
                           fontWeight: 700,
                           letterSpacing: 2.2,
                           textTransform: "uppercase",
-                          color: C.muted,
+                          color: t.muted,
                         }}
                       >
                         Quick Presets
@@ -7945,12 +7947,12 @@ export default function LifeApp() {
                           style={{
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Experience Profile
                         </span>
-                        <span style={{ fontSize: 12, color: C.muted }}>
+                        <span style={{ fontSize: 12, color: t.muted }}>
                           Quick apply
                         </span>
                       </div>
@@ -7961,11 +7963,11 @@ export default function LifeApp() {
                           type="button"
                           onClick={() => applySettingProfile("focus")}
                           style={{
-                            background: C.white,
-                            border: `1px solid ${C.border}`,
+                            background: t.white,
+                            border: `1px solid ${t.border}`,
                             borderRadius: 10,
                             padding: "8px 12px",
-                            color: C.mid,
+                            color: t.mid,
                             fontSize: 12,
                             fontWeight: 700,
                             cursor: "pointer",
@@ -7978,11 +7980,11 @@ export default function LifeApp() {
                           type="button"
                           onClick={() => applySettingProfile("immersive")}
                           style={{
-                            background: C.greenLt,
-                            border: `1px solid ${C.green}`,
+                            background: t.greenLt,
+                            border: `1px solid ${t.green}`,
                             borderRadius: 10,
                             padding: "8px 12px",
-                            color: C.green,
+                            color: t.green,
                             fontSize: 12,
                             fontWeight: 700,
                             cursor: "pointer",
@@ -7995,11 +7997,11 @@ export default function LifeApp() {
                           type="button"
                           onClick={() => applySettingProfile("calm")}
                           style={{
-                            background: C.light,
-                            border: `1px solid ${C.border}`,
+                            background: t.light,
+                            border: `1px solid ${t.border}`,
                             borderRadius: 10,
                             padding: "8px 12px",
-                            color: C.mid,
+                            color: t.mid,
                             fontSize: 12,
                             fontWeight: 700,
                             cursor: "pointer",
@@ -8015,7 +8017,7 @@ export default function LifeApp() {
                       style={{
                         marginTop: 4,
                         paddingTop: 10,
-                        borderTop: `1px solid ${C.light}`,
+                        borderTop: `1px solid ${t.light}`,
                       }}
                     >
                       <p
@@ -8025,7 +8027,7 @@ export default function LifeApp() {
                           fontWeight: 700,
                           letterSpacing: 2.2,
                           textTransform: "uppercase",
-                          color: C.muted,
+                          color: t.muted,
                         }}
                       >
                         Sound
@@ -8045,7 +8047,7 @@ export default function LifeApp() {
                             margin: 0,
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Sound Effects
@@ -8054,7 +8056,7 @@ export default function LifeApp() {
                           style={{
                             margin: "3px 0 0",
                             fontSize: 12,
-                            color: C.muted,
+                            color: t.muted,
                             fontStyle: "italic",
                           }}
                         >
@@ -8069,7 +8071,7 @@ export default function LifeApp() {
                           if (next) play("ok");
                           updateUiPrefs({ soundEnabled: next });
                         }}
-                        style={{ width: 20, height: 20, accentColor: C.green }}
+                        style={{ width: 20, height: 20, accentColor: t.green }}
                       />
                     </label>
 
@@ -8086,12 +8088,12 @@ export default function LifeApp() {
                           style={{
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Sound Volume
                         </span>
-                        <span style={{ fontSize: 12, color: C.muted }}>
+                        <span style={{ fontSize: 12, color: t.muted }}>
                           {uiPrefs.soundVolume}%
                         </span>
                       </div>
@@ -8105,7 +8107,7 @@ export default function LifeApp() {
                         onChange={(e) =>
                           updateUiPrefs({ soundVolume: Number(e.target.value) })
                         }
-                        style={{ accentColor: C.green }}
+                        style={{ accentColor: t.green }}
                       />
                     </label>
 
@@ -8122,7 +8124,7 @@ export default function LifeApp() {
                           style={{
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Sound Style
@@ -8130,7 +8132,7 @@ export default function LifeApp() {
                         <span
                           style={{
                             fontSize: 12,
-                            color: C.muted,
+                            color: t.muted,
                             textTransform: "capitalize",
                           }}
                         >
@@ -8144,11 +8146,11 @@ export default function LifeApp() {
                           updateUiPrefs({ soundMode: e.target.value })
                         }
                         style={{
-                          background: C.white,
-                          border: `1px solid ${C.border}`,
+                          background: t.white,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 12px",
-                          color: C.ink,
+                          color: t.ink,
                           fontSize: 13,
                           fontFamily: "Georgia,serif",
                         }}
@@ -8172,7 +8174,7 @@ export default function LifeApp() {
                           style={{
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Sound Scope
@@ -8180,7 +8182,7 @@ export default function LifeApp() {
                         <span
                           style={{
                             fontSize: 12,
-                            color: C.muted,
+                            color: t.muted,
                             textTransform: "capitalize",
                           }}
                         >
@@ -8194,11 +8196,11 @@ export default function LifeApp() {
                           updateUiPrefs({ soundScope: e.target.value })
                         }
                         style={{
-                          background: C.white,
-                          border: `1px solid ${C.border}`,
+                          background: t.white,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 12px",
-                          color: C.ink,
+                          color: t.ink,
                           fontSize: 13,
                           fontFamily: "Georgia,serif",
                         }}
@@ -8215,7 +8217,7 @@ export default function LifeApp() {
                       style={{
                         marginTop: 4,
                         paddingTop: 10,
-                        borderTop: `1px solid ${C.light}`,
+                        borderTop: `1px solid ${t.light}`,
                       }}
                     >
                       <p
@@ -8225,7 +8227,7 @@ export default function LifeApp() {
                           fontWeight: 700,
                           letterSpacing: 2.2,
                           textTransform: "uppercase",
-                          color: C.muted,
+                          color: t.muted,
                         }}
                       >
                         Display
@@ -8244,12 +8246,12 @@ export default function LifeApp() {
                           style={{
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Text Size
                         </span>
-                        <span style={{ fontSize: 12, color: C.muted }}>
+                        <span style={{ fontSize: 12, color: t.muted }}>
                           {uiPrefs.textScale || 100}%
                         </span>
                       </div>
@@ -8262,7 +8264,7 @@ export default function LifeApp() {
                         onChange={(e) =>
                           updateUiPrefs({ textScale: Number(e.target.value) })
                         }
-                        style={{ accentColor: C.green }}
+                        style={{ accentColor: t.green }}
                       />
                     </label>
 
@@ -8279,7 +8281,7 @@ export default function LifeApp() {
                           style={{
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Reading Density
@@ -8287,7 +8289,7 @@ export default function LifeApp() {
                         <span
                           style={{
                             fontSize: 12,
-                            color: C.muted,
+                            color: t.muted,
                             textTransform: "capitalize",
                           }}
                         >
@@ -8300,11 +8302,11 @@ export default function LifeApp() {
                           updateUiPrefs({ readingDensity: e.target.value })
                         }
                         style={{
-                          background: C.white,
-                          border: `1px solid ${C.border}`,
+                          background: t.white,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 12px",
-                          color: C.ink,
+                          color: t.ink,
                           fontSize: 13,
                           fontFamily: "Georgia,serif",
                         }}
@@ -8329,7 +8331,7 @@ export default function LifeApp() {
                             margin: 0,
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           High Contrast
@@ -8338,7 +8340,7 @@ export default function LifeApp() {
                           style={{
                             margin: "3px 0 0",
                             fontSize: 12,
-                            color: C.muted,
+                            color: t.muted,
                             fontStyle: "italic",
                           }}
                         >
@@ -8351,7 +8353,7 @@ export default function LifeApp() {
                         onChange={(e) =>
                           updateUiPrefs({ highContrast: e.target.checked })
                         }
-                        style={{ width: 20, height: 20, accentColor: C.green }}
+                        style={{ width: 20, height: 20, accentColor: t.green }}
                       />
                     </label>
 
@@ -8369,7 +8371,7 @@ export default function LifeApp() {
                             margin: 0,
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Data Saver
@@ -8378,7 +8380,7 @@ export default function LifeApp() {
                           style={{
                             margin: "3px 0 0",
                             fontSize: 12,
-                            color: C.muted,
+                            color: t.muted,
                             fontStyle: "italic",
                           }}
                         >
@@ -8391,7 +8393,7 @@ export default function LifeApp() {
                         onChange={(e) =>
                           updateUiPrefs({ dataSaver: e.target.checked })
                         }
-                        style={{ width: 20, height: 20, accentColor: C.green }}
+                        style={{ width: 20, height: 20, accentColor: t.green }}
                       />
                     </label>
 
@@ -8399,7 +8401,7 @@ export default function LifeApp() {
                       style={{
                         marginTop: 4,
                         paddingTop: 10,
-                        borderTop: `1px solid ${C.light}`,
+                        borderTop: `1px solid ${t.light}`,
                       }}
                     >
                       <p
@@ -8409,7 +8411,7 @@ export default function LifeApp() {
                           fontWeight: 700,
                           letterSpacing: 2.2,
                           textTransform: "uppercase",
-                          color: C.muted,
+                          color: t.muted,
                         }}
                       >
                         Motion & Speed
@@ -8429,7 +8431,7 @@ export default function LifeApp() {
                             margin: 0,
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Reduce Motion
@@ -8438,7 +8440,7 @@ export default function LifeApp() {
                           style={{
                             margin: "3px 0 0",
                             fontSize: 12,
-                            color: C.muted,
+                            color: t.muted,
                             fontStyle: "italic",
                           }}
                         >
@@ -8451,7 +8453,7 @@ export default function LifeApp() {
                         onChange={(e) =>
                           updateUiPrefs({ reduceMotion: e.target.checked })
                         }
-                        style={{ width: 20, height: 20, accentColor: C.green }}
+                        style={{ width: 20, height: 20, accentColor: t.green }}
                       />
                     </label>
 
@@ -8469,7 +8471,7 @@ export default function LifeApp() {
                             margin: 0,
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Instant Button Response
@@ -8478,7 +8480,7 @@ export default function LifeApp() {
                           style={{
                             margin: "3px 0 0",
                             fontSize: 12,
-                            color: C.muted,
+                            color: t.muted,
                             fontStyle: "italic",
                           }}
                         >
@@ -8491,7 +8493,7 @@ export default function LifeApp() {
                         onChange={(e) =>
                           updateUiPrefs({ instantButtons: e.target.checked })
                         }
-                        style={{ width: 20, height: 20, accentColor: C.green }}
+                        style={{ width: 20, height: 20, accentColor: t.green }}
                       />
                     </label>
 
@@ -8508,12 +8510,12 @@ export default function LifeApp() {
                           style={{
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Button Press Strength
                         </span>
-                        <span style={{ fontSize: 12, color: C.muted }}>
+                        <span style={{ fontSize: 12, color: t.muted }}>
                           {uiPrefs.pressIntensity}%
                         </span>
                       </div>
@@ -8529,7 +8531,7 @@ export default function LifeApp() {
                             pressIntensity: Number(e.target.value),
                           })
                         }
-                        style={{ accentColor: C.green }}
+                        style={{ accentColor: t.green }}
                       />
                     </label>
 
@@ -8546,12 +8548,12 @@ export default function LifeApp() {
                           style={{
                             fontSize: 14,
                             fontWeight: 700,
-                            color: C.ink,
+                            color: t.ink,
                           }}
                         >
                           Sidebar Open Speed
                         </span>
-                        <span style={{ fontSize: 12, color: C.muted }}>
+                        <span style={{ fontSize: 12, color: t.muted }}>
                           {uiPrefs.sidebarSpeed}%
                         </span>
                       </div>
@@ -8567,7 +8569,7 @@ export default function LifeApp() {
                             sidebarSpeed: Number(e.target.value),
                           })
                         }
-                        style={{ accentColor: C.green }}
+                        style={{ accentColor: t.green }}
                       />
                     </label>
 
@@ -8575,7 +8577,7 @@ export default function LifeApp() {
                       style={{
                         marginTop: 4,
                         paddingTop: 10,
-                        borderTop: `1px solid ${C.light}`,
+                        borderTop: `1px solid ${t.light}`,
                       }}
                     >
                       <p
@@ -8585,7 +8587,7 @@ export default function LifeApp() {
                           fontWeight: 700,
                           letterSpacing: 2.2,
                           textTransform: "uppercase",
-                          color: C.muted,
+                          color: t.muted,
                         }}
                       >
                         Tools & Legal
@@ -8604,11 +8606,11 @@ export default function LifeApp() {
                         onClick={() => play("star")}
                         disabled={!uiPrefs.soundEnabled}
                         style={{
-                          background: C.white,
-                          border: `1px solid ${C.border}`,
+                          background: t.white,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: uiPrefs.soundEnabled ? C.mid : C.border,
+                          color: uiPrefs.soundEnabled ? t.mid : t.border,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: uiPrefs.soundEnabled ? "pointer" : "default",
@@ -8621,11 +8623,11 @@ export default function LifeApp() {
                         type="button"
                         onClick={() => updateUiPrefs(PREF_DEFAULTS)}
                         style={{
-                          background: C.light,
-                          border: `1px solid ${C.border}`,
+                          background: t.light,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: C.mid,
+                          color: t.mid,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -8651,11 +8653,11 @@ export default function LifeApp() {
                           }))
                         }
                         style={{
-                          background: C.white,
-                          border: `1px solid ${C.border}`,
+                          background: t.white,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: C.mid,
+                          color: t.mid,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -8668,11 +8670,11 @@ export default function LifeApp() {
                         type="button"
                         onClick={resetReadingProgress}
                         style={{
-                          background: C.white,
-                          border: `1px solid ${C.border}`,
+                          background: t.white,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: C.mid,
+                          color: t.mid,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -8685,11 +8687,11 @@ export default function LifeApp() {
                         type="button"
                         onClick={exportSettingSnapshot}
                         style={{
-                          background: C.white,
-                          border: `1px solid ${C.border}`,
+                          background: t.white,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: C.mid,
+                          color: t.mid,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -8708,11 +8710,11 @@ export default function LifeApp() {
                           )
                         }
                         style={{
-                          background: C.light,
-                          border: `1px solid ${C.border}`,
+                          background: t.light,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: C.mid,
+                          color: t.mid,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -8731,11 +8733,11 @@ export default function LifeApp() {
                           )
                         }
                         style={{
-                          background: C.light,
-                          border: `1px solid ${C.border}`,
+                          background: t.light,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: C.mid,
+                          color: t.mid,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -8754,11 +8756,11 @@ export default function LifeApp() {
                           )
                         }
                         style={{
-                          background: C.light,
-                          border: `1px solid ${C.border}`,
+                          background: t.light,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: C.mid,
+                          color: t.mid,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -8777,11 +8779,11 @@ export default function LifeApp() {
                           )
                         }
                         style={{
-                          background: C.light,
-                          border: `1px solid ${C.border}`,
+                          background: t.light,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: C.mid,
+                          color: t.mid,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -8800,11 +8802,11 @@ export default function LifeApp() {
                           )
                         }
                         style={{
-                          background: C.light,
-                          border: `1px solid ${C.border}`,
+                          background: t.light,
+                          border: `1px solid ${t.border}`,
                           borderRadius: 10,
                           padding: "10px 14px",
-                          color: C.mid,
+                          color: t.mid,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -8824,7 +8826,7 @@ export default function LifeApp() {
                       fontWeight: 700,
                       letterSpacing: 2.2,
                       textTransform: "uppercase",
-                      color: C.muted,
+                      color: t.muted,
                     }}
                   >
                     Account
@@ -8835,10 +8837,10 @@ export default function LifeApp() {
                   style={{
                     width: "100%",
                     background: "none",
-                    border: `1.5px solid ${C.border}`,
+                    border: `1.5px solid ${t.border}`,
                     borderRadius: 12,
                     padding: "15px",
-                    color: C.red,
+                    color: t.red,
                     fontSize: 15,
                     fontWeight: 600,
                     cursor: "pointer",
