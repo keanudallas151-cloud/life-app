@@ -1,6 +1,5 @@
 // v1.0.1 - auth fixes: DOB validation, 3s loading, Supabase hardcoded
 import {
-  lazy,
   Suspense,
   useCallback,
   useEffect,
