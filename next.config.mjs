@@ -9,8 +9,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  distDir: "dist",
   outputFileTracingRoot: __dirname,
-  // Cache bust: forces Next.js to regenerate all chunks fresh
   generateBuildId: async () => "build-" + Date.now(),
 };
 
