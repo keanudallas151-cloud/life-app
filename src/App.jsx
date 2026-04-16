@@ -2824,16 +2824,7 @@ export default function LifeApp() {
           </h1>
           <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: C.muted, fontFamily: "Georgia,serif", fontStyle: "italic" }}>
             Sign in to continue
-        <p
-          style={{
-            margin: "0 0 28px",
-            fontSize: 14,
-            color: C.muted,
-            fontStyle: "italic",
-          }}
-        >
-          Welcome Back
-        </p>
+          </p>
 
         <div
           className="life-auth-card"
