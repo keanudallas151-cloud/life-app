@@ -2,6 +2,17 @@
 
 All notable prototype milestones for Life are tracked here.
 
+## v0.4.5 - Component extraction and matching MVP
+
+- extracted App.jsx from 8676 → 6777 lines by pulling out 5 page components
+- new HomePage component with "Continue Reading" resume card using localStorage topic tracking
+- new SidebarSectionPage component consolidating 5 sidebar explanation pages into one data-driven file
+- new ConnectPage component: investor/inventor matching MVP with pitch cards, role selection, industry filters, and create-pitch form
+- new ProfilePage component extracted from the profile page block
+- new SettingsPage component with theme choice, motion, sound, and account reset controls
+- removed 966 lines of dead Settings Hub code (showProfileSettingsHub was always false)
+- removed orphaned exportSettingSnapshot and resetReadingProgress functions
+
 ## v0.4.4 - Backend fix and product identity
 
 - created the `user_data` table in Supabase with RLS policies so signed-in users can sync bookmarks, notes, highlights, and momentum state
