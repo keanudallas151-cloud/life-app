@@ -1,4 +1,4 @@
-// src/components/AppShell.jsx
+// src/components/AppShell.jsx// 16.04.26
 // ─────────────────────────────────────────────────────────────
 // Pure components and hooks extracted from App.jsx.
 // These have NO dependency on LifeApp state — all values come

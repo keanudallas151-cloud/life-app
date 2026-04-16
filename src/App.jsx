@@ -1,4 +1,4 @@
-// v1.0.1 - auth fixes: DOB validation, 3s loading, Supabase hardcoded
+// v1.0.1 - auth fixes
 import {
   Suspense,
   useCallback,
