@@ -2,6 +2,14 @@
 
 All notable prototype milestones for Life are tracked here.
 
+## v0.4.2 - Reader, shell, and preference polish
+
+- added saved reader quotes/highlights across Reader, Saved, momentum summaries, and progress surfaces
+- simplified the homepage into a focused landing experience and added sidebar category explanation pages
+- cleaned up sidebar hierarchy by keeping section labels informational, moving Daily Growth under Life, and keeping the shell visually more consistent in dark mode
+- upgraded theme selection from a simple toggle to a real user preference with system, light, and dark modes
+- fixed the main app shell scroll behavior so desktop and mobile scrolling work through the content area again
+
 ## v0.4.1 - Next, Supabase, and workflow alignment
 
 - moved the app onto an env-driven Next.js and Vercel-friendly Supabase setup

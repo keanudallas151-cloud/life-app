@@ -29,6 +29,7 @@ export function useMomentum({
   persistedState,
   readKeys,
   notes,
+  highlights,
   quizStats,
   profile,
   isGuest,
@@ -88,10 +89,11 @@ export function useMomentum({
         momentumState,
         readKeys,
         notes,
+        highlights,
         quizStats,
         profile,
       }),
-    [momentumState, readKeys, notes, quizStats, profile],
+    [momentumState, readKeys, notes, highlights, quizStats, profile],
   );
 
   const recordEvent = useCallback((event) => {

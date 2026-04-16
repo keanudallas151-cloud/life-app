@@ -29,7 +29,7 @@ Without env vars the shell still runs, but auth, cloud-synced library data, quiz
 
 ## Supabase schema (expected)
 
-The app assumes tables such as `user_data`, `quiz_stats`, `posts`, `comments`, and `post_votes` with RLS appropriate for your security model. If a table is missing, the UI degrades gracefully (console errors; Post-It shows a clear message when the feed cannot load).
+The app assumes tables such as `user_data`, `quiz_stats`, `posts`, `comments`, and `post_votes` with RLS appropriate for your security model. The `user_data` record is expected to hold fields like bookmarks, notes, read progress, momentum state, and saved reader highlights. If a table or newer field is missing, the UI degrades as safely as possible (console errors; Post-It shows a clear message when the feed cannot load).
 
 ## Scripts
 

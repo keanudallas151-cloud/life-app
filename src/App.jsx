@@ -20,11 +20,10 @@ import { Ic } from "./icons/Ic";
 import { getReadingStreak, recordReadingDay } from "./systems/readingStreak";
 import {
   clearResumeTopic,
-  getResumeTopic,
   setResumeTopic,
 } from "./systems/resumeReading";
 import { LS } from "./systems/storage";
-import { C, S } from "./systems/theme";
+import { C, S, THEME_MODES, useTheme } from "./systems/theme";
 import { useMomentum } from "./systems/useMomentum";
 import { useQuizStats } from "./systems/useQuizStats";
 import { useSound } from "./systems/useSound";
@@ -50,32 +49,6 @@ import {
   TailorQuestions,
   TailorResult,
 } from "./components/AppShell";
-
-/* ── Dark Mode palette (P11) ──────────────────────────────────── */
-const DARK = {
-  skin: "#181818",
-  white: "#242424",
-  green: "#5a9d6c",
-  greenLt: "#223228",
-  ink: "#f2f2f2",
-  mid: "#d1d1d1",
-  muted: "#a29d96",
-  border: "#3b3b3b",
-  light: "#2d2d2d",
-  gold: "#d0ae6c",
-  red: "#d25545",
-};
-
-function useTheme() {
-  const [dark, setDark] = useState(() => LS.get("life_dark_mode", false));
-  const toggle = () => {
-    const next = !dark;
-    setDark(next);
-    LS.set("life_dark_mode", next);
-  };
-  const t = dark ? DARK : C;
-  return { dark, toggle, t };
-}
 
 /* ── Categories data (P7) ─────────────────────────────────────── */
 const CATEGORIES = [
@@ -135,7 +108,7 @@ const PREF_DEFAULTS = {
 
 export default function LifeApp() {
   // ── DARK MODE (P11) ───────────────────────────────────────────
-  const { dark, toggle: toggleDark, t } = useTheme();
+  const { dark, toggleTheme, t, themeMode, setThemeMode, systemDark } = useTheme();
 
   // ── iOS dark-mode body class (for CSS :root overrides) ───────
   useEffect(() => {
@@ -430,6 +403,9 @@ export default function LifeApp() {
   const [localReadKeys, setLocalReadKeysRaw] = useState(() =>
     LS.get(`rd_${uid}`, []),
   );
+  const [localHighlights, setLocalHighlightsRaw] = useState(() =>
+    LS.get(`hl_${uid}`, []),
+  );
   const [localProfile, setLocalProfileRaw] = useState(() =>
     LS.get(`tsd_${uid}`, null),
   );
@@ -440,6 +416,10 @@ export default function LifeApp() {
   const bookmarks = userIdForData ? cloud.bookmarks : localBookmarks;
   const notes = userIdForData ? cloud.notes : localNotes;
   const readKeys = userIdForData ? cloud.readKeys : localReadKeys;
+  const highlights =
+    userIdForData && (cloud.highlights?.length ?? 0) > 0
+      ? cloud.highlights
+      : localHighlights;
   const profile = userIdForData ? cloud.tsdProfile : localProfile;
   const momentumState = userIdForData
     ? cloud.momentumState
@@ -469,6 +449,17 @@ export default function LifeApp() {
       LS.set(`rd_${uid}`, next);
     }
   };
+  const setHighlights = useCallback(
+    (v) => {
+      const next = typeof v === "function" ? v(highlights) : v;
+      setLocalHighlightsRaw(next);
+      LS.set(`hl_${uid}`, next);
+      if (userIdForData) {
+        cloud.setHighlights(next);
+      }
+    },
+    [cloud, highlights, uid, userIdForData],
+  );
   const setMomentumState = (v) => {
     const next = typeof v === "function" ? v(momentumState) : v;
     if (userIdForData) cloud.setMomentumState(next);
@@ -486,6 +477,7 @@ export default function LifeApp() {
       persistedState: momentumState,
       readKeys,
       notes,
+      highlights,
       quizStats,
       profile,
       isGuest: !userIdForData,
@@ -510,6 +502,15 @@ export default function LifeApp() {
     setPage("momentum_hub");
     setSidebarOpen(false);
   }, [play, setPage]);
+
+  const openSidebarSectionPage = useCallback(
+    (sectionPage, setSectionOpen) => {
+      play("tap");
+      setPage(sectionPage);
+      if (typeof setSectionOpen === "function") setSectionOpen(true);
+    },
+    [play, setPage],
+  );
 
   const trackMomentumEvent = useCallback(
     (type, options = {}) => {
@@ -546,6 +547,11 @@ export default function LifeApp() {
       mentorship: "Mentorship — Life.",
       setting_preferences: "Settings — Life.",
       momentum_hub: "Momentum Hub — Life.",
+      sidebar_life: "Life — Life.",
+      sidebar_library: "Library — Life.",
+      sidebar_socials: "Socials — Life.",
+      sidebar_guided: "Guided — Life.",
+      sidebar_saved: "Saved — Life.",
       premium: "Premium — Life.",
     };
     document.title = titles[page] || "Life. — Knowledge, Growth, Community";
@@ -577,7 +583,6 @@ export default function LifeApp() {
   const [guidedOpen, setGuidedOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [shareToast, setShareToast] = useState(false);
-  const [resumeTipDismissed, setResumeTipDismissed] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   // ── Add-To-Home-Screen (A2HS) — iOS Safari install prompt ────
@@ -856,6 +861,7 @@ export default function LifeApp() {
       (cloud.bookmarks?.length ?? 0) > 0 ||
       Object.keys(cloud.notes || {}).some((k) => cloud.notes[k]) ||
       (cloud.readKeys?.length ?? 0) > 0 ||
+      (cloud.highlights?.length ?? 0) > 0 ||
       cloud.tsdProfile != null;
     if (hasCloud) {
       migratedRef.current = true;
@@ -865,17 +871,20 @@ export default function LifeApp() {
     const lb = LS.get(`bk_${email}`, []);
     const ln = LS.get(`nt_${email}`, {});
     const lr = LS.get(`rd_${email}`, []);
+    const lh = LS.get(`hl_${email}`, []);
     const lp = LS.get(`tsd_${email}`, null);
     const hasLocal =
       lb.length > 0 ||
       Object.keys(ln).some((k) => ln[k]) ||
       lr.length > 0 ||
+      lh.length > 0 ||
       lp != null;
     migratedRef.current = true;
     if (hasLocal) {
       cloud.setBookmarks(lb);
       cloud.setNotes(ln);
       cloud.setReadKeys(lr);
+      cloud.setHighlights(lh);
       if (lp) cloud.setTsdProfile(lp);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- see block comment above
@@ -885,11 +894,13 @@ export default function LifeApp() {
     cloud.bookmarks,
     cloud.notes,
     cloud.readKeys,
+    cloud.highlights,
     cloud.tsdProfile,
     user?.email,
     cloud.setBookmarks,
     cloud.setNotes,
     cloud.setReadKeys,
+    cloud.setHighlights,
     cloud.setTsdProfile,
   ]);
 
@@ -901,6 +912,7 @@ export default function LifeApp() {
       setLocalBookmarksRaw(LS.get(`bk_${uid}`, []));
       setLocalNotesRaw(LS.get(`nt_${uid}`, {}));
       setLocalReadKeysRaw(LS.get(`rd_${uid}`, []));
+      setLocalHighlightsRaw(LS.get(`hl_${uid}`, []));
       setLocalProfileRaw(LS.get(`tsd_${uid}`, null));
     }
   }, [uid, userIdForData]);
@@ -1201,7 +1213,6 @@ export default function LifeApp() {
     setPage("reading");
     setSearch("");
     setShowSearch(false);
-    setResumeTipDismissed(false);
     setResumeTopic(key);
     if (!alreadyRead) setReadKeys([...readKeys, key]);
     recordReadingDay();
@@ -1294,6 +1305,53 @@ export default function LifeApp() {
       });
     }
   };
+
+  const saveHighlight = useCallback(
+    ({ text, topicTitle, page }) => {
+      if (!selKey) return { status: "error", message: "No topic selected." };
+      const normalizedText = String(text || "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!normalizedText) {
+        return { status: "error", message: "Choose a passage to save." };
+      }
+      const alreadySaved = highlights.some(
+        (item) =>
+          item?.contentKey === selKey &&
+          String(item?.text || "").trim() === normalizedText,
+      );
+      if (alreadySaved) {
+        return { status: "duplicate", message: "Quote already saved." };
+      }
+
+      const nextItem = {
+        id: `hl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        contentKey: selKey,
+        topicTitle: topicTitle || selContent?.title || selKey,
+        text: normalizedText,
+        page: Number(page ?? 0),
+        createdAt: new Date().toISOString(),
+      };
+      setHighlights((prev) => [...prev, nextItem]);
+      trackMomentumEvent("note", {
+        source: "reader",
+        points: 4,
+        contentKey: selKey,
+        topicKey: selKey,
+        meta: { kind: "highlight", length: normalizedText.length },
+      });
+      return { status: "saved", item: nextItem };
+    },
+    [highlights, selContent?.title, selKey, setHighlights, trackMomentumEvent],
+  );
+
+  const removeHighlight = useCallback(
+    (highlightId) => {
+      if (!highlightId) return;
+      setHighlights((prev) => prev.filter((item) => item?.id !== highlightId));
+    },
+    [setHighlights],
+  );
 
   const exportSettingSnapshot = () => {
     try {
@@ -1411,22 +1469,13 @@ export default function LifeApp() {
         .slice(0, 2)
     : "??";
 
-  const resumeSnap = getResumeTopic();
-  const resumePack = resumeSnap?.key ? MAP[resumeSnap.key] : null;
-  const resumeEntry = resumePack
-    ? { key: resumePack.key, node: resumePack.node }
-    : null;
   const readingStreak = getReadingStreak();
   const progressPercent =
     allContent.length > 0
       ? Math.round((readKeys.length / allContent.length) * 100)
       : 0;
   const completedNotes = Object.keys(notes).filter((key) => notes[key]).length;
-  const homeStats = [
-    { label: "Topics Read", value: readKeys.length, color: C.green },
-    { label: "Bookmarks", value: bookmarks.length, color: "#b8975a" },
-    { label: "Notes", value: completedNotes, color: "#7B6FA8" },
-  ];
+  const savedHighlightsCount = highlights.length;
   const passwordHasMinLength = rPass.length >= 8;
   const passwordHasUpper = /[A-Z]/.test(rPass);
   const passwordHasNumber = /\d/.test(rPass);
@@ -3685,7 +3734,7 @@ export default function LifeApp() {
               >
                 {rErr.email === "already_registered" ? (
                   <>
-                    ⚠️ This email is already registered.{" "}
+                    Email already in use.{" "}
                     <span
                       onClick={() => {
                         play("tap");
@@ -3700,7 +3749,7 @@ export default function LifeApp() {
                         fontWeight: 700,
                       }}
                     >
-                      Sign in instead?
+                      Please sign in.
                     </span>
                   </>
                 ) : (
@@ -4074,12 +4123,14 @@ export default function LifeApp() {
     <div
       data-page-tag="#dashboard_home"
       style={{
+        height: "100svh",
         minHeight: "100svh",
         background: t.skin,
         display: "flex",
         flexDirection: "column",
         fontFamily: "Georgia,serif",
         color: t.ink,
+        overflow: "hidden",
       }}
     >
       {shareToast && (
@@ -4402,9 +4453,10 @@ export default function LifeApp() {
           className="life-topbar-dark"
           onClick={() => {
             play("tap");
-            toggleDark();
+            toggleTheme();
           }}
-          title={dark ? "Light mode" : "Dark mode"}
+          title={dark ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
           style={{
             width: 32,
             height: 32,
@@ -4776,17 +4828,6 @@ export default function LifeApp() {
             }}
             active={page === "home"}
           />
-          <SL
-            theme={t}
-            label="Daily Growth"
-            icon="star"
-            onClick={() => {
-              play("tap");
-              setPage("daily_growth");
-              setSidebarOpen(false);
-            }}
-            active={page === "daily_growth"}
-          />
           <SS
             theme={t}
             playFn={play}
@@ -4794,6 +4835,8 @@ export default function LifeApp() {
             open={lifeOpen}
             setOpen={setLifeOpen}
             tag="#side_bar_life"
+            onLabelClick={() => openSidebarSectionPage("sidebar_life", setLifeOpen)}
+            active={page === "sidebar_life"}
           >
             <SL
               theme={t}
@@ -4812,6 +4855,17 @@ export default function LifeApp() {
               icon="trending"
               onClick={openMomentumHub}
               active={page === "momentum_hub"}
+            />
+            <SL
+              theme={t}
+              label="Daily Growth"
+              icon="star"
+              onClick={() => {
+                play("tap");
+                setPage("daily_growth");
+                setSidebarOpen(false);
+              }}
+              active={page === "daily_growth"}
             />
             <SL
               theme={t}
@@ -4843,6 +4897,10 @@ export default function LifeApp() {
             open={libOpen}
             setOpen={setLibOpen}
             tag="#side_bar_library"
+            onLabelClick={() =>
+              openSidebarSectionPage("sidebar_library", setLibOpen)
+            }
+            active={page === "sidebar_library"}
           >
             {Object.entries(LIBRARY).map(([k, node]) => (
               <TreeNode
@@ -4854,6 +4912,7 @@ export default function LifeApp() {
                 selectedKey={selKey}
                 defaultOpen={k === "life"}
                 play={play}
+                theme={t}
               />
             ))}
           </SS>
@@ -4864,6 +4923,10 @@ export default function LifeApp() {
             open={socialsOpen}
             setOpen={setSocialsOpen}
             tag="#side_bar_socials"
+            onLabelClick={() =>
+              openSidebarSectionPage("sidebar_socials", setSocialsOpen)
+            }
+            active={page === "sidebar_socials"}
           >
             <SL
               theme={t}
@@ -4905,6 +4968,10 @@ export default function LifeApp() {
             label="Guided"
             open={guidedOpen}
             setOpen={setGuidedOpen}
+            onLabelClick={() =>
+              openSidebarSectionPage("sidebar_guided", setGuidedOpen)
+            }
+            active={page === "sidebar_guided"}
           >
             {GUIDED_ORDER.map((k) => {
               const node = CONTENT[k];
@@ -4928,6 +4995,10 @@ export default function LifeApp() {
             open={savedOpen}
             setOpen={setSavedOpen}
             tag="#side_bar_saved"
+            onLabelClick={() =>
+              openSidebarSectionPage("sidebar_saved", setSavedOpen)
+            }
+            active={page === "sidebar_saved"}
           >
             {bookmarks.length === 0 ? (
               <p
@@ -5038,271 +5109,19 @@ export default function LifeApp() {
                     "calc(60px + env(safe-area-inset-bottom, 0px))",
                 }}
               >
-                {/* PROGRESS BAR — P6: clickable → progress_dashboard */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    play("tap");
-                    setPage("progress_dashboard");
-                  }}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    padding: "14px 20px 12px",
-                    background: t.white,
-                    border: "none",
-                    borderBottom: `1px solid ${t.border}`,
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginBottom: 8,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        letterSpacing: 2,
-                        textTransform: "uppercase",
-                        color: t.muted,
-                      }}
-                    >
-                      Your Progress
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: t.green,
-                        fontWeight: 700,
-                        letterSpacing: 0.5,
-                      }}
-                    >
-                      {progressPercent}%
-                    </span>
-                  </div>
-                  <div
-                    className="life-home-progress-row"
-                    style={{ display: "flex", alignItems: "center", gap: 14 }}
-                  >
-                    <div
-                      style={{
-                        flex: 1,
-                        minWidth: 0,
-                        height: 6,
-                        background: t.light,
-                        borderRadius: 10,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        style={{
-                          height: "100%",
-                          width: `${progressPercent}%`,
-                          background: `linear-gradient(90deg,${t.green},#6FBE77)`,
-                          borderRadius: 10,
-                          transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
-                        }}
-                      />
-                    </div>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: t.green,
-                        fontWeight: 700,
-                        letterSpacing: 0.5,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {readKeys.length}
-                      <span style={{ color: t.muted, fontWeight: 400 }}>
-                        /{allContent.length}
-                      </span>
-                    </span>
-                    {readingStreak.count > 0 && (
-                      <span
-                        title="Consecutive days you've opened a topic"
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          letterSpacing: 1,
-                          textTransform: "uppercase",
-                          color: t.green,
-                          background: t.greenLt,
-                          border: `1px solid rgba(74,140,92,0.35)`,
-                          borderRadius: 20,
-                          padding: "6px 12px",
-                          flexShrink: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 4,
-                        }}
-                      >
-                        🔥 {readingStreak.count} day streak
-                      </span>
-                    )}
-                  </div>
-                </button>
-
-                <div
-                  style={{
-                    padding: "14px 20px 0",
-                    maxWidth: 560,
-                    margin: "0 auto",
-                  }}
-                >
-                  <MomentumCard
-                    snapshot={momentumSnapshot}
-                    onOpenHub={openMomentumHub}
-                    compact
-                    title="Daily momentum"
-                  />
-                </div>
-
-                {resumeEntry && !resumeTipDismissed && (
-                  <div
-                    style={{
-                      padding: "14px 20px 0",
-                      maxWidth: 520,
-                      margin: "0 auto",
-                    }}
-                  >
-                    <div
-                      className="life-card-hover life-resume-card"
-                      style={{
-                        background: `linear-gradient(135deg, ${t.white} 0%, ${t.greenLt} 100%)`,
-                        border: `1px solid rgba(74,140,92,0.35)`,
-                        borderRadius: 16,
-                        padding: "16px 18px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 14,
-                        boxShadow: S.md,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: 12,
-                          background: t.green,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                          boxShadow: "0 4px 12px rgba(74,140,92,0.35)",
-                        }}
-                      >
-                        <span style={{ color: "#fff", fontSize: 18 }}>↻</span>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p
-                          style={{
-                            margin: "0 0 4px",
-                            fontSize: 9,
-                            fontWeight: 700,
-                            letterSpacing: 2.2,
-                            textTransform: "uppercase",
-                            color: t.green,
-                          }}
-                        >
-                          Continue
-                        </p>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontSize: 15,
-                            fontWeight: 700,
-                            color: t.ink,
-                            lineHeight: 1.35,
-                          }}
-                        >
-                          {resumeEntry.node.label}
-                        </p>
-                        <p
-                          style={{
-                            margin: "4px 0 0",
-                            fontSize: 12,
-                            color: t.muted,
-                            fontStyle: "italic",
-                          }}
-                        >
-                          {resumeEntry.node.content?.readTime
-                            ? `${resumeEntry.node.content.readTime} read · `
-                            : ""}
-                          Pick up where you left off
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 6,
-                          flexShrink: 0,
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            play("tap");
-                            handleSelect(resumeEntry.key, resumeEntry.node);
-                          }}
-                          style={{
-                            background: t.green,
-                            border: "none",
-                            borderRadius: 10,
-                            padding: "10px 16px",
-                            color: "#fff",
-                            fontSize: 13,
-                            fontWeight: 700,
-                            cursor: "pointer",
-                            fontFamily: "Georgia,serif",
-                            whiteSpace: "nowrap",
-                            boxShadow: "0 4px 14px rgba(74,140,92,0.28)",
-                          }}
-                        >
-                          Open
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            play("tap");
-                            setResumeTipDismissed(true);
-                            clearResumeTopic();
-                          }}
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            color: t.muted,
-                            fontSize: 11,
-                            cursor: "pointer",
-                            fontFamily: "Georgia,serif",
-                            textDecoration: "underline",
-                          }}
-                        >
-                          Dismiss
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* HERO */}
                 <div
                   className="life-grain life-home-hero"
                   style={{
-                    padding: "44px 24px 40px",
+                    minHeight:
+                      "calc(100svh - 132px - env(safe-area-inset-top, 0px))",
+                    padding: "72px 24px 64px",
                     textAlign: "center",
-                    borderBottom: `1px solid ${t.border}`,
                     background: `linear-gradient(180deg, ${t.skin} 0%, #ebe4d6 100%)`,
                     position: "relative",
                     overflow: "hidden",
-                    borderRadius: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
                   <div
@@ -5320,18 +5139,6 @@ export default function LifeApp() {
                   <div
                     style={{
                       position: "absolute",
-                      top: "18%",
-                      left: "10%",
-                      width: 54,
-                      height: 54,
-                      borderRadius: "50%",
-                      border: "1.5px solid rgba(74,140,92,0.16)",
-                      pointerEvents: "none",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
                       bottom: -80,
                       left: -40,
                       width: 160,
@@ -5341,438 +5148,186 @@ export default function LifeApp() {
                       pointerEvents: "none",
                     }}
                   />
-                  <div
-                    style={{
-                      position: "absolute",
-                      right: "12%",
-                      bottom: "18%",
-                      width: 126,
-                      height: 126,
-                      borderRadius: "50%",
-                      background:
-                        "radial-gradient(circle, rgba(255,255,255,0.46) 0%, rgba(74,140,92,0.08) 68%, rgba(74,140,92,0) 100%)",
-                      pointerEvents: "none",
-                    }}
-                  />
-                  <p
-                    style={{
-                      margin: "0 130 10px",
-                      fontSize: "clamp(0.72rem, 2.8vw, 0.92rem)",
-                      fontWeight: 700,
-                      letterSpacing: "0.38em",
-                      textTransform: "uppercase",
-                      color: t.muted,
-                      textAlign: "center",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {(() => {
-                      const h = new Date().getHours();
-                      return h < 12
-                        ? "Good morning"
-                        : h < 17
-                          ? "Good afternoon"
-                          : "Good evening";
-                    })()}
-                    {user?.name ? `, ${user.name.split(" ")[0]}` : ""}
-                  </p>
-                  <h1
-                    style={{
-                      margin: "10 0 6px",
-                      fontSize: "clamp(3.2rem, 15vw, 6.2rem)",
-                      fontWeight: 800,
-                      color: t.ink,
-                      fontFamily: "Nunito, sans-serif",
-                      letterSpacing: "scaleX(1)",
-                      lineHeight: 0.92,
-                      textAlign: "center",
-                      WebkitTextSizeAdjust: "325%",
-                    }}
-                  >
-                    Life.
-                  </h1>
-                  <div
-                    style={{
-                      width: 40,
-                      height: 2.5,
-                      background: t.green,
-                      borderRadius: 2,
-                      margin: "18px auto 22px",
-                    }}
-                  />
-                  <p
-                    style={{
-                      color: t.mid,
-                      fontSize: 13,
-                      lineHeight: 1.7,
-                      margin: "0 auto 6px",
-                      maxWidth: 340,
-                      fontFamily: "Georgia,serif",
-                    }}
-                  >
-                    All-In-One Access To Tailored Networking, Insights, And
-                    Comprehensive Guides
-                  </p>
-                  <p
-                    style={{
-                      color: t.muted,
-                      fontSize: 10,
-                      lineHeight: 1.5,
-                      margin: "0 auto 32px",
-                      maxWidth: 300,
-                      fontStyle: "italic",
-                    }}
-                  >
-                    "The 1st Million Is Hard, But The 2nd Is Imminent" - Without
-                    Knowledge, You Can’t Identify The Right Opportunities
-                  </p>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 10,
-                      justifyContent: "center",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <button
-                      onClick={() => {
-                        play("open");
-                        setSidebarOpen(true);
-                      }}
-                      style={{
-                        background: t.green,
-                        border: "none",
-                        borderRadius: 14,
-                        padding: "15px 32px",
-                        color: "#fff",
-                        fontSize: 15,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        fontFamily: "Georgia,serif",
-                        boxShadow: S.glow,
-                        letterSpacing: 0.3,
-                      }}
-                    >
-                      Start Reading →
-                    </button>
-                    <button
-                      onClick={() => {
-                        play("tap");
-                        setPage("where_to_start");
-                      }}
-                      style={{
-                        background: t.white,
-                        border: `1.5px solid ${t.border}`,
-                        borderRadius: 14,
-                        padding: "15px 24px",
-                        color: t.ink,
-                        fontSize: 15,
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        fontFamily: "Georgia,serif",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        boxShadow: S.sm,
-                      }}
-                    >
-                      {Ic.leaf("none", t.green, 17)} Daily Growth
-                    </button>
-                    {/* P7: Let's Get Rich → Categories */}
-                    <button
-                      onClick={() => {
-                        play("ok");
-                        setPage("categories");
-                        setCatStep(0);
-                      }}
-                      style={{
-                        background: `linear-gradient(135deg, ${t.gold}, #9a7a3e)`,
-                        border: "none",
-                        borderRadius: 14,
-                        padding: "15px 24px",
-                        color: "#fff",
-                        fontSize: 15,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        fontFamily: "Georgia,serif",
-                        boxShadow: "0 4px 16px rgba(184,151,90,0.35)",
-                        letterSpacing: 0.3,
-                      }}
-                    >
-                      Let&apos;s Get Rich 💰
-                    </button>
-                  </div>
-                </div>
-
-                <div style={{ padding: "18px 20px 0" }}>
-                  <div
-                    className="life-home-stats"
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                      gap: 10,
-                      maxWidth: 560,
-                      margin: "0 auto",
-                    }}
-                  >
-                    {homeStats.map((stat) => (
-                      <div
-                        key={stat.label}
-                        style={{
-                          background: t.white,
-                          border: `1px solid ${t.border}`,
-                          borderRadius: 14,
-                          padding: "14px 12px",
-                          textAlign: "center",
-                          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: 20,
-                            fontWeight: 800,
-                            color: stat.color,
-                            display: "block",
-                            lineHeight: 1,
-                          }}
-                        >
-                          {stat.value}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: 9,
-                            fontWeight: 600,
-                            letterSpacing: 1,
-                            textTransform: "uppercase",
-                            color: t.muted,
-                            display: "block",
-                            marginTop: 6,
-                          }}
-                        >
-                          {stat.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* P3: Author Message (replaces "What's Inside") */}
-                <div style={{ padding: "32px 20px 0" }}>
-                  <div
-                    style={{
-                      maxWidth: 500,
-                      margin: "0 auto",
-                      background: `linear-gradient(135deg, ${t.white} 0%, ${t.greenLt} 100%)`,
-                      border: `1px solid rgba(74,140,92,0.25)`,
-                      borderRadius: 18,
-                      padding: "28px 24px",
-                      boxShadow: S.md,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        marginBottom: 16,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: "50%",
-                          background: `linear-gradient(135deg, ${t.green}, #3a7d4a)`,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <span
-                          style={{
-                            color: "#fff",
-                            fontSize: 16,
-                            fontWeight: 800,
-                          }}
-                        >
-                          l.
-                        </span>
-                      </div>
-                      <div>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontSize: 10,
-                            fontWeight: 700,
-                            letterSpacing: 2.5,
-                            textTransform: "uppercase",
-                            color: t.green,
-                          }}
-                        >
-                          From the Author
-                        </p>
-                        <p
-                          style={{
-                            margin: "2px 0 0",
-                            fontSize: 14,
-                            fontWeight: 700,
-                            color: t.ink,
-                          }}
-                        >
-                          A Message For You
-                        </p>
-                      </div>
-                    </div>
+                  <div style={{ maxWidth: 580, width: "100%", position: "relative" }}>
                     <p
                       style={{
-                        margin: 0,
-                        fontSize: 14,
+                        margin: "0 0 14px",
+                        fontSize: "clamp(0.72rem, 2.8vw, 0.9rem)",
+                        fontWeight: 700,
+                        letterSpacing: "0.32em",
+                        textTransform: "uppercase",
+                        color: t.green,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Welcome to
+                    </p>
+                    <h1
+                      style={{
+                        margin: "0 0 18px",
+                        fontSize: "clamp(3.6rem, 16vw, 6.4rem)",
+                        fontWeight: 800,
+                        color: t.ink,
+                        fontFamily: "Nunito, sans-serif",
+                        letterSpacing: "-0.04em",
+                        lineHeight: 0.92,
+                        WebkitTextSizeAdjust: "100%",
+                      }}
+                    >
+                      Life.
+                    </h1>
+                    <p
+                      style={{
                         color: t.mid,
-                        lineHeight: 1.8,
+                        fontSize: "clamp(1rem, 3.8vw, 1.18rem)",
+                        lineHeight: 1.7,
+                        margin: "0 auto 28px",
+                        maxWidth: 460,
                         fontFamily: "Georgia,serif",
                         fontStyle: "italic",
                       }}
                     >
-                      &ldquo;I built Life. because I wished someone had given me
-                      this when I was starting out. No fluff, no gatekeeping —
-                      just the real knowledge about money, mindset, and growth
-                      that actually moves the needle. This isn&apos;t another
-                      course or motivational speech. It&apos;s the structured
-                      friend I never had. Welcome — let&apos;s build something
-                      real together.&rdquo;
+                      The first million is the hardest, the second is imminent
                     </p>
-                  </div>
-                </div>
-
-                {/* GUIDED — START HERE */}
-                <div
-                  style={{
-                    padding: "36px 20px 0",
-                    maxWidth: 500,
-                    margin: "0 auto",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      marginBottom: 18,
-                    }}
-                  >
-                    <div style={{ flex: 1, height: 1, background: t.border }} />
-                    <p
+                    <div
                       style={{
-                        margin: 0,
-                        fontSize: 10,
-                        fontWeight: 700,
-                        letterSpacing: 3,
-                        textTransform: "uppercase",
-                        color: t.muted,
-                        whiteSpace: "nowrap",
+                        maxWidth: 560,
+                        margin: "0 auto",
+                        background: `linear-gradient(135deg, ${t.white} 0%, ${t.greenLt} 100%)`,
+                        border: `1px solid rgba(74,140,92,0.22)`,
+                        borderRadius: 22,
+                        padding: "28px 24px",
+                        boxShadow: S.md,
                       }}
                     >
-                      Start here
-                    </p>
-                    <div style={{ flex: 1, height: 1, background: t.border }} />
-                  </div>
-                  {GUIDED_ORDER.slice(0, 4).map((k, i) => {
-                    const node = CONTENT[k];
-                    if (!node) return null;
-                    return (
-                      <button
-                        key={k}
-                        onClick={() => {
-                          play("open");
-                          handleSelect(k, node);
-                        }}
+                      <p
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 14,
-                          width: "100%",
-                          background: t.white,
-                          border: `1px solid ${t.border}`,
-                          borderRadius: 14,
-                          padding: "16px 18px",
-                          cursor: "pointer",
-                          marginBottom: 10,
-                          textAlign: "left",
-                          fontFamily: "Georgia,serif",
-                          boxSizing: "border-box",
-                          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                          transition: "all 0.18s",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = "#c8ddc8";
-                          e.currentTarget.style.boxShadow =
-                            "0 4px 14px rgba(74,140,92,0.11)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = t.border;
-                          e.currentTarget.style.boxShadow =
-                            "0 1px 3px rgba(0,0,0,0.04)";
+                          margin: "0 0 10px",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          letterSpacing: 2.5,
+                          textTransform: "uppercase",
+                          color: t.green,
                         }}
                       >
-                        <div
-                          style={{
-                            width: 34,
-                            height: 34,
-                            borderRadius: 10,
-                            background: t.green,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
-                          }}
-                        >
-                          <span
-                            style={{
-                              color: "#fff",
-                              fontSize: 13,
-                              fontWeight: 800,
-                              fontFamily: "Georgia,serif",
-                            }}
-                          >
-                            {i + 1}
-                          </span>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div
-                            style={{
-                              fontSize: 14,
-                              fontWeight: 700,
-                              color: t.ink,
-                            }}
-                          >
-                            {node.label}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: 11,
-                              color: t.muted,
-                              marginTop: 2,
-                              fontStyle: "italic",
-                            }}
-                          >
-                            {node.content?.level}
-                          </div>
-                        </div>
-                        <svg width="8" height="8" viewBox="0 0 10 10">
-                          <polyline
-                            points="2,2 8,5 2,8"
-                            fill="none"
-                            stroke={t.muted}
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                    );
-                  })}
+                        From the author
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          color: t.mid,
+                          fontSize: 15,
+                          lineHeight: 1.9,
+                          fontFamily: "Georgia,serif",
+                        }}
+                      >
+                        I built Life. to make money, growth, and opportunity
+                        feel less hidden and less confusing. This should be a
+                        place where you can learn clearly, move with purpose,
+                        and build toward something real. Let&apos;s get rich.
+                      </p>
+                    </div>
+                  </div>
                 </div>
+              </div>
+            )}
+
+            {page === "sidebar_life" && (
+              <div
+                data-page-tag="#sidebar_life_page"
+                style={{ padding: "48px 28px", maxWidth: 620, margin: "0 auto" }}
+              >
+                <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: t.green }}>
+                  Sidebar category
+                </p>
+                <h2 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 700, color: t.ink, fontFamily: "Georgia,serif" }}>
+                  Life
+                </h2>
+                <p style={{ margin: "0 0 22px", color: t.mid, fontSize: 15, lineHeight: 1.85, fontFamily: "Georgia,serif" }}>
+                  Life is the core section of the app. It is where users move from motivation into action through guided reading, quizzes, help, and deeper understanding of the system they are trying to win inside.
+                </p>
+                <div style={{ display: "grid", gap: 12 }}>
+                  {[
+                    ["Where to Start", "A simple entry point for new users who need direction."],
+                    ["Momentum Hub", "A progress-focused view of consistency, missions, and momentum."],
+                    ["Daily Growth", "A focused daily page for keeping momentum visible without hunting through the app."],
+                    ["Quiz", "A way to test understanding and turn reading into retained knowledge."],
+                    ["Help", "A quick explanation of how the app works and how to use it well."],
+                  ].map(([label, body]) => (
+                    <div key={label} style={{ background: t.white, border: `1px solid ${t.border}`, borderRadius: 16, padding: "18px 18px" }}>
+                      <p style={{ margin: "0 0 6px", color: t.ink, fontSize: 15, fontWeight: 700 }}>{label}</p>
+                      <p style={{ margin: 0, color: t.muted, fontSize: 13, lineHeight: 1.7 }}>{body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {page === "sidebar_library" && (
+              <div
+                data-page-tag="#sidebar_library_page"
+                style={{ padding: "48px 28px", maxWidth: 620, margin: "0 auto" }}
+              >
+                <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: t.green }}>
+                  Sidebar category
+                </p>
+                <h2 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 700, color: t.ink, fontFamily: "Georgia,serif" }}>
+                  Library
+                </h2>
+                <p style={{ margin: 0, color: t.mid, fontSize: 15, lineHeight: 1.85, fontFamily: "Georgia,serif" }}>
+                  The Library is the knowledge base of Life. It organizes the reading material into categories and branches so users can explore the app by topic instead of only following one fixed path.
+                </p>
+              </div>
+            )}
+
+            {page === "sidebar_socials" && (
+              <div
+                data-page-tag="#sidebar_socials_page"
+                style={{ padding: "48px 28px", maxWidth: 620, margin: "0 auto" }}
+              >
+                <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: t.green }}>
+                  Sidebar category
+                </p>
+                <h2 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 700, color: t.ink, fontFamily: "Georgia,serif" }}>
+                  Socials
+                </h2>
+                <p style={{ margin: 0, color: t.mid, fontSize: 15, lineHeight: 1.85, fontFamily: "Georgia,serif" }}>
+                  Socials is where learning connects with people. This section holds the community feed, networking, and competitive views so users can move from private learning into public conversation and connection.
+                </p>
+              </div>
+            )}
+
+            {page === "sidebar_guided" && (
+              <div
+                data-page-tag="#sidebar_guided_page"
+                style={{ padding: "48px 28px", maxWidth: 620, margin: "0 auto" }}
+              >
+                <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: t.green }}>
+                  Sidebar category
+                </p>
+                <h2 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 700, color: t.ink, fontFamily: "Georgia,serif" }}>
+                  Guided
+                </h2>
+                <p style={{ margin: 0, color: t.mid, fontSize: 15, lineHeight: 1.85, fontFamily: "Georgia,serif" }}>
+                  Guided is the curated path through Life. It gives users a simpler route when they do not want to explore the full library and would rather follow a recommended sequence.
+                </p>
+              </div>
+            )}
+
+            {page === "sidebar_saved" && (
+              <div
+                data-page-tag="#sidebar_saved_page"
+                style={{ padding: "48px 28px", maxWidth: 620, margin: "0 auto" }}
+              >
+                <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: t.green }}>
+                  Sidebar category
+                </p>
+                <h2 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 700, color: t.ink, fontFamily: "Georgia,serif" }}>
+                  Saved
+                </h2>
+                <p style={{ margin: 0, color: t.mid, fontSize: 15, lineHeight: 1.85, fontFamily: "Georgia,serif" }}>
+                  Saved is the user&apos;s personal shelf. It collects bookmarked topics and saved quotes so important ideas are easy to revisit without searching through the full app again.
+                </p>
               </div>
             )}
 
@@ -6649,7 +6204,8 @@ export default function LifeApp() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    gridTemplateColumns:
+                      "repeat(auto-fit, minmax(min(140px, 100%), 1fr))",
                     gap: 12,
                     marginBottom: 20,
                   }}
@@ -6666,6 +6222,11 @@ export default function LifeApp() {
                       color: t.gold,
                     },
                     { label: "Notes", value: completedNotes, color: t.green },
+                    {
+                      label: "Quotes",
+                      value: savedHighlightsCount,
+                      color: t.green,
+                    },
                     {
                       label: "Streak",
                       value:
@@ -7249,10 +6810,20 @@ export default function LifeApp() {
                     desc: "Theme, contrast, and reading comfort",
                     items: [
                       {
-                        label: "Dark Mode",
-                        desc: "Switch between light and dark themes",
-                        value: dark,
-                        onChange: toggleDark,
+                        type: "choice",
+                        label: "Theme",
+                        desc: "Choose how Life should look on this device",
+                        value: themeMode,
+                        helper:
+                          themeMode === THEME_MODES.system
+                            ? `Currently following your device in ${systemDark ? "dark" : "light"} mode.`
+                            : null,
+                        options: [
+                          { label: "System", value: THEME_MODES.system },
+                          { label: "Light", value: THEME_MODES.light },
+                          { label: "Dark", value: THEME_MODES.dark },
+                        ],
+                        onChange: setThemeMode,
                       },
                       {
                         label: "High Contrast",
@@ -7363,12 +6934,13 @@ export default function LifeApp() {
                       </p>
                     )}
                     {section.items.map((item) => (
-                      <label
+                      <div
                         className="life-settings-row"
                         key={item.label}
                         style={{
                           display: "flex",
-                          alignItems: "center",
+                          alignItems: item.type === "choice" ? "stretch" : "center",
+                          flexDirection: item.type === "choice" ? "column" : "row",
                           justifyContent: "space-between",
                           gap: 12,
                           padding: "10px 0",
@@ -7395,24 +6967,74 @@ export default function LifeApp() {
                           >
                             {item.desc}
                           </p>
+                          {item.helper && (
+                            <p
+                              style={{
+                                margin: "6px 0 0",
+                                fontSize: 11,
+                                color: t.green,
+                              }}
+                            >
+                              {item.helper}
+                            </p>
+                          )}
                         </div>
-                        <input
-                          type="checkbox"
-                          checked={!!item.value}
-                          onChange={(e) =>
-                            item.onChange(
-                              typeof item.value === "boolean"
-                                ? e.target.checked
-                                : e.target.checked,
-                            )
-                          }
-                          style={{
-                            width: 20,
-                            height: 20,
-                            accentColor: t.green,
-                          }}
-                        />
-                      </label>
+                        {item.type === "choice" ? (
+                          <div
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              padding: 4,
+                              borderRadius: 999,
+                              background: t.light,
+                              border: `1px solid ${t.border}`,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            {item.options.map((option) => {
+                              const selected = item.value === option.value;
+                              return (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  onClick={() => item.onChange(option.value)}
+                                  style={{
+                                    border: "none",
+                                    borderRadius: 999,
+                                    padding: "9px 14px",
+                                    background: selected ? t.green : "transparent",
+                                    color: selected ? "#fff" : t.ink,
+                                    fontSize: 12,
+                                    fontWeight: 700,
+                                    fontFamily: "Georgia,serif",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  {option.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <input
+                            type="checkbox"
+                            checked={!!item.value}
+                            onChange={(e) =>
+                              item.onChange(
+                                typeof item.value === "boolean"
+                                  ? e.target.checked
+                                  : e.target.checked,
+                              )
+                            }
+                            style={{
+                              width: 20,
+                              height: 20,
+                              accentColor: t.green,
+                            }}
+                          />
+                        )}
+                      </div>
                     ))}
                   </div>
                 ))}
@@ -7756,6 +7378,7 @@ export default function LifeApp() {
                     ["Topics Read", readKeys.length],
                     ["Bookmarks Saved", bookmarks.length],
                     ["Notes Written", completedNotes],
+                    ["Quotes Saved", savedHighlightsCount],
                     [
                       "Reading streak",
                       readingStreak.count > 0
@@ -8808,6 +8431,9 @@ export default function LifeApp() {
                   related={related}
                   handleSelect={handleSelect}
                   bookmarks={bookmarks}
+                  highlights={highlights}
+                  onSaveHighlight={saveHighlight}
+                  onRemoveHighlight={removeHighlight}
                   allContent={allContent}
                   profile={profile}
                   savedReaderPage={readerPages[selKey] ?? 0}

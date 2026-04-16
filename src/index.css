@@ -559,7 +559,9 @@ canvas {
 }
 
 .life-main-scroll {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
 }
@@ -1106,7 +1108,7 @@ select {
 
 /* ── Sidebar section hover ──────────────────────────────── */
 .life-sidebar button:hover {
-  background: rgba(74, 140, 92, 0.04);
+  background: transparent;
 }
 
 /* ── Premium button press ───────────────────────────────── */
@@ -1664,18 +1666,7 @@ button,
 }
 
 .life-sidebar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      120% 90% at 0% 50%,
-      rgba(255, 255, 255, 0.35),
-      transparent 55%
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
-  mix-blend-mode: soft-light;
+  content: none;
 }
 
 .life-sidebar-backdrop {
@@ -2687,6 +2678,48 @@ button:active:not(:disabled),
   line-height: 1.45;
 }
 
+.life-momentum-quotes {
+  margin-top: 12px;
+}
+
+.life-momentum-quotes-kicker {
+  margin: 0 0 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--life-green);
+}
+
+.life-momentum-quote-list {
+  display: grid;
+  gap: 8px;
+}
+
+.life-momentum-quote-item {
+  border-radius: 14px;
+  border: 1px solid rgba(74, 140, 92, 0.24);
+  background: rgba(255, 255, 255, 0.78);
+  padding: 12px;
+}
+
+.life-momentum-quote-item p {
+  margin: 0;
+  color: var(--life-ink);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.life-momentum-quote-item span {
+  display: block;
+  margin-top: 8px;
+  color: var(--life-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .life-momentum-progress {
   margin-top: 12px;
 }
@@ -2933,7 +2966,8 @@ body.life-dark .life-momentum-mission-item {
 body.life-dark .life-momentum-stat-row > div,
 body.life-dark .life-momentum-next,
 body.life-dark .life-momentum-suggestion,
-body.life-dark .life-momentum-highlights > div {
+body.life-dark .life-momentum-highlights > div,
+body.life-dark .life-momentum-quote-item {
   background: #181818;
   border-color: #3a3a3a;
 }
@@ -2946,6 +2980,7 @@ body.life-dark .life-momentum-stat-value,
 body.life-dark .life-momentum-next-title,
 body.life-dark .life-momentum-suggestion h4,
 body.life-dark .life-momentum-highlights > div > strong,
+body.life-dark .life-momentum-quote-item p,
 body.life-dark .life-momentum-quick-actions > button {
   color: #e8e8e8;
 }
@@ -2957,7 +2992,8 @@ body.life-dark .life-momentum-progress-head,
 body.life-dark .life-momentum-stat-label,
 body.life-dark .life-momentum-hub-header > span,
 body.life-dark .life-momentum-hub-section-head > span,
-body.life-dark .life-momentum-highlights > div > span {
+body.life-dark .life-momentum-highlights > div > span,
+body.life-dark .life-momentum-quote-item span {
   color: #b8b8b8;
 }
 

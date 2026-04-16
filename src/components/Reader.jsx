@@ -6,6 +6,23 @@ import { AudioPlayer } from "./AudioPlayer";
 import { FINANCE_KEYS } from "../data/content";
 import { computeEssentialScore } from "../data/tailoring";
 
+function stripReaderMarkup(text = "") {
+  return String(text)
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function formatSavedDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export function FinanceDisclaimer(){
   return(
     <div style={{margin:"32px 0 0",padding:"18px 20px",background:"#fdfaf5",border:`1px solid ${C.border}`,borderRadius:10}}>
@@ -112,13 +129,14 @@ export function NotesTab({noteInput,setNoteInput,noteSaved,setNoteSaved,saveNote
   );
 }
 
-export function EbookReader({selKey,selContent,tab,setTab,isBookmarked,toggleBk,play,noteInput,setNoteInput,noteSaved,setNoteSaved,saveNote,shareNote,related,handleSelect,bookmarks,allContent,profile,savedReaderPage=0,onReaderPageSave}){
+export function EbookReader({selKey,selContent,tab,setTab,isBookmarked,toggleBk,play,noteInput,setNoteInput,noteSaved,setNoteSaved,saveNote,shareNote,related,handleSelect,bookmarks,highlights=[],onSaveHighlight,onRemoveHighlight,allContent,profile,savedReaderPage=0,onReaderPageSave}){
   const PARAS=4;
   const paragraphs=(selContent?.text||"").split("\n\n").filter(p=>p.trim());
   const totalPages=Math.max(1,Math.ceil(paragraphs.length/PARAS));
   const[pageNum,setPageNum]=useState(0);
   const[anim,setAnim]=useState(null);
   const[linkCopied,setLinkCopied]=useState(false);
+  const[quoteStatus,setQuoteStatus]=useState(null);
   const pageRef=useRef(null);
   const sx=useRef(null);
 
@@ -127,6 +145,12 @@ export function EbookReader({selKey,selContent,tab,setTab,isBookmarked,toggleBk,
     setPageNum(t);
     setAnim(null);
   },[selKey,totalPages,savedReaderPage]);
+
+  useEffect(()=>{
+    if(!quoteStatus)return;
+    const timer=setTimeout(()=>setQuoteStatus(null),2200);
+    return()=>clearTimeout(timer);
+  },[quoteStatus]);
 
   const commitPage=(n)=>{
     const clamped=Math.max(0,Math.min(n,totalPages-1));
@@ -158,12 +182,38 @@ export function EbookReader({selKey,selContent,tab,setTab,isBookmarked,toggleBk,
   const cur=paragraphs.slice(pageNum*PARAS,(pageNum+1)*PARAS);
   const isFirst=pageNum===0;const isLast=pageNum===totalPages-1;
   const animStyle=anim?{opacity:0,transform:anim==="l"?"translateX(-18px)":"translateX(18px)",transition:"opacity 0.15s,transform 0.15s"}:{opacity:1,transform:"translateX(0)",transition:"opacity 0.18s,transform 0.18s"};
+  const topicHighlights=Array.isArray(highlights)?highlights.filter(item=>item?.contentKey===selKey).slice().reverse():[];
+  const otherHighlights=Array.isArray(highlights)?highlights.filter(item=>item?.contentKey!==selKey).slice().reverse():[];
+  const saveQuote=(rawText)=>{
+    const clean=stripReaderMarkup(rawText);
+    if(!clean){
+      setQuoteStatus({tone:"error",text:"Choose a passage to save."});
+      play("err");
+      return;
+    }
+    const result=onSaveHighlight?.({text:clean,topicTitle:selContent?.title,page:pageNum});
+    if(result?.status==="saved"){
+      setQuoteStatus({tone:"success",text:"Quote saved"});
+      play("ok");
+      return;
+    }
+    if(result?.status==="duplicate"){
+      setQuoteStatus({tone:"info",text:"Quote already saved"});
+      play("tap");
+      return;
+    }
+    setQuoteStatus({tone:"error",text:result?.message||"Could not save quote"});
+    play("err");
+  };
   if(!selContent)return null;
   const throughPct=Math.round(((pageNum+1)/totalPages)*100);
   return(
     <div style={{display:"flex",flexDirection:"column",position:"relative"}}>
       {linkCopied&&(
         <div role="status" style={{position:"fixed",bottom:"max(24px, env(safe-area-inset-bottom, 0px))",left:"50%",transform:"translateX(-50%)",background:C.ink,color:"#fff",padding:"10px 20px",borderRadius:99,fontSize:13,zIndex:300,boxShadow:"0 8px 28px rgba(0,0,0,0.2)",fontFamily:"Georgia,serif"}}>Link copied</div>
+      )}
+      {quoteStatus&&(
+        <div role="status" style={{position:"fixed",bottom:"max(74px, calc(24px + env(safe-area-inset-bottom, 0px)))",left:"50%",transform:"translateX(-50%)",background:quoteStatus.tone==="error"?"#7a2e2a":quoteStatus.tone==="info"?"#2f4f62":C.green,color:"#fff",padding:"10px 20px",borderRadius:99,fontSize:13,zIndex:300,boxShadow:"0 8px 28px rgba(0,0,0,0.2)",fontFamily:"Georgia,serif",maxWidth:"min(88vw, 320px)",textAlign:"center"}}>{quoteStatus.text}</div>
       )}
       <div className="life-reader-toolbar" style={{display:"flex",borderBottom:`1px solid ${C.border}`,background:C.white,padding:"0 12px",overflowX:"auto",flexShrink:0,alignItems:"center",gap:4}}>
         {[{id:"content",label:"Read"},{id:"notes",label:"Notes"},{id:"suggestions",label:"Related"},{id:"saved",label:"Saved"}].map(t=>(
@@ -240,8 +290,15 @@ export function EbookReader({selKey,selContent,tab,setTab,isBookmarked,toggleBk,
           {!isFirst&&<p style={{margin:"0 0 32px",fontSize:11,color:C.muted,fontWeight:700,letterSpacing:2.5,textTransform:"uppercase",fontFamily:"Georgia,serif"}}>{selContent.title}</p>}
           <div style={animStyle}>
             {cur.map((para,i)=>(
-              <p key={i} style={{margin:"0 0 28px",color:C.mid,fontSize:17,lineHeight:2,fontFamily:"Georgia,serif"}}
-                dangerouslySetInnerHTML={{__html:para.replaceAll(/\*\*(.*?)\*\*/g,`<strong style="color:${C.ink};font-weight:700">$1</strong>`)}}/>
+              <div key={i} className="life-reader-quote-row" style={{marginBottom:24}}>
+                <p style={{margin:"0 0 10px",color:C.mid,fontSize:17,lineHeight:2,fontFamily:"Georgia,serif"}}
+                  dangerouslySetInnerHTML={{__html:para.replaceAll(/\*\*(.*?)\*\*/g,`<strong style="color:${C.ink};font-weight:700">$1</strong>`)}}/>
+                <div style={{display:"flex",justifyContent:"flex-end"}}>
+                  <button type="button" className="life-reader-quote-btn" onClick={()=>saveQuote(para)} style={{background:C.greenLt,border:`1px solid ${C.border}`,borderRadius:999,padding:"8px 12px",color:C.green,fontSize:12,fontWeight:700,fontFamily:"Georgia,serif",cursor:"pointer"}}>
+                    Save quote
+                  </button>
+                </div>
+              </div>
             ))}
             {isLast&&(<><FinanceChart topicKey={selKey}/><AudioPlayer title={selContent.title} playSound={play}/>{FINANCE_KEYS.includes(selKey)&&<FinanceDisclaimer/>}</>)}
           </div>
@@ -279,13 +336,48 @@ export function EbookReader({selKey,selContent,tab,setTab,isBookmarked,toggleBk,
       )}
       {tab==="saved"&&(
         <div style={{padding:"40px 28px",maxWidth:660,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
-          <h3 style={{margin:"0 0 10px",fontSize:22,fontWeight:700,color:C.ink}}>Saved Topics</h3>
-          {bookmarks.length===0?<p style={{color:C.border,fontSize:15,fontStyle:"italic"}}>Tap ☆ while reading to save a topic.</p>:allContent.filter(c=>bookmarks.includes(c.key)).map(item=>(
-            <button key={item.key} onClick={()=>handleSelect(item.key,item.node)} style={{display:"flex",alignItems:"center",gap:14,width:"100%",background:C.white,border:`1px solid ${C.border}`,borderRadius:12,padding:"16px 18px",cursor:"pointer",marginBottom:10,textAlign:"left",fontFamily:"Georgia,serif"}}>
-              <div style={{width:42,height:42,borderRadius:10,background:C.greenLt,border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{Ic[item.node.icon]?Ic[item.node.icon]("none","#4a8c5c",20):Ic.book("none","#4a8c5c",20)}</div>
-              <div style={{flex:1,fontSize:15,fontWeight:600,color:C.ink}}>{item.node.label}</div>
-            </button>
-          ))}
+          <h3 style={{margin:"0 0 10px",fontSize:22,fontWeight:700,color:C.ink}}>Saved Library</h3>
+          <p style={{margin:"0 0 18px",fontSize:14,color:C.muted,fontFamily:"Georgia,serif",lineHeight:1.7}}>Keep the best passages you want to revisit, then return to your saved topics anytime.</p>
+          <div style={{display:"grid",gap:24}}>
+            <section>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:12,flexWrap:"wrap"}}>
+                <h4 style={{margin:0,fontSize:17,fontWeight:700,color:C.ink}}>Saved quotes</h4>
+                <span style={{fontSize:12,color:C.muted,fontWeight:600}}>{highlights.length} total</span>
+              </div>
+              {highlights.length===0?<p style={{color:C.border,fontSize:15,fontStyle:"italic"}}>Tap “Save quote” while reading to build your quote library.</p>:(
+                <div style={{display:"grid",gap:12}}>
+                  {[...topicHighlights,...otherHighlights].map(item=>(
+                    <article key={item.id} className="life-reader-saved-card" style={{background:C.white,border:`1px solid ${C.border}`,borderRadius:14,padding:"16px 16px 14px",boxShadow:"0 2px 8px rgba(0,0,0,0.04)"}}>
+                      <p style={{margin:"0 0 12px",fontSize:15,lineHeight:1.8,color:C.ink,fontFamily:"Georgia,serif"}}>&ldquo;{item.text}&rdquo;</p>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
+                        <div>
+                          <div style={{fontSize:13,fontWeight:700,color:C.green,fontFamily:"Georgia,serif"}}>{item.topicTitle || "Saved passage"}</div>
+                          <div style={{fontSize:11,color:C.muted,marginTop:4}}>Page {Number(item.page || 0)+1}{item.createdAt?` • ${formatSavedDate(item.createdAt)}`:""}</div>
+                        </div>
+                        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                          <button type="button" onClick={()=>{const match=allContent.find(entry=>entry.key===item.contentKey);if(match)handleSelect(match.key,match.node);}} style={{background:C.greenLt,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 12px",color:C.green,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"Georgia,serif"}}>
+                            Open topic
+                          </button>
+                          <button type="button" onClick={()=>onRemoveHighlight?.(item.id)} style={{background:C.white,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 12px",color:C.muted,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"Georgia,serif"}}>
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+            <section>
+              <h4 style={{margin:"0 0 12px",fontSize:17,fontWeight:700,color:C.ink}}>Saved topics</h4>
+              {bookmarks.length===0?<p style={{color:C.border,fontSize:15,fontStyle:"italic"}}>Tap ☆ while reading to save a topic.</p>:allContent.filter(c=>bookmarks.includes(c.key)).map(item=>(
+                <button key={item.key} onClick={()=>handleSelect(item.key,item.node)} style={{display:"flex",alignItems:"center",gap:14,width:"100%",background:C.white,border:`1px solid ${C.border}`,borderRadius:12,padding:"16px 18px",cursor:"pointer",marginBottom:10,textAlign:"left",fontFamily:"Georgia,serif"}}>
+                  <div style={{width:42,height:42,borderRadius:10,background:C.greenLt,border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{Ic[item.node.icon]?Ic[item.node.icon]("none","#4a8c5c",20):Ic.book("none","#4a8c5c",20)}</div>
+                  <div style={{flex:1,fontSize:15,fontWeight:600,color:C.ink}}>{item.node.label}</div>
+                </button>
+              ))}
+            </section>
+          </div>
         </div>
       )}
     </div>

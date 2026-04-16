@@ -251,6 +251,7 @@ export function deriveMomentumSnapshot({
   momentumState,
   readKeys = [],
   notes = {},
+  highlights = [],
   quizStats = null,
   profile = null,
 } = {}) {
@@ -260,10 +261,13 @@ export function deriveMomentumSnapshot({
   const completionRate =
     missions.length > 0 ? Math.round((completedCount / missions.length) * 100) : 0;
   const notesCount = Object.keys(notes || {}).filter((key) => notes?.[key]).length;
+  const savedHighlights = Array.isArray(highlights) ? highlights.filter(Boolean) : [];
+  const highlightsCount = savedHighlights.length;
   const quizzesPlayed = Number(quizStats?.totalPlayed || 0);
-  const highlights = [
+  const highlightStats = [
     { label: "Topics", value: readKeys.length, tone: "growth" },
     { label: "Notes", value: notesCount, tone: "focus" },
+    { label: "Quotes", value: highlightsCount, tone: "growth" },
     { label: "Quizzes", value: quizzesPlayed, tone: "challenge" },
     {
       label: "Profile",
@@ -279,7 +283,8 @@ export function deriveMomentumSnapshot({
     completionRate,
     missions,
     nextSuggestion: state.nextSuggestion,
-    highlights,
+    highlights: highlightStats,
+    recentHighlights: savedHighlights.slice(-3).reverse(),
   };
 
   return {

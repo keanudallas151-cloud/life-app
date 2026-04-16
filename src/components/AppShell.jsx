@@ -55,7 +55,17 @@ export function RouteFallback() {
 
 // ── Sidebar Section wrapper ───────────────────────────────────
 // Props: label, open, setOpen, children, tag, theme, playFn
-export function SS({ label, open, setOpen, children, tag, theme, playFn }) {
+export function SS({
+  label,
+  open,
+  setOpen,
+  children,
+  tag,
+  theme,
+  playFn,
+  onLabelClick,
+  active = false,
+}) {
   const th = theme || C;
   return (
     <div
@@ -64,25 +74,28 @@ export function SS({ label, open, setOpen, children, tag, theme, playFn }) {
         borderTop: `1px solid ${th.border}22`,
       }}
     >
-      <button
-        onClick={() => {
-          playFn("tap");
-          setOpen(!open);
-        }}
+      <div
         style={{
           display: "flex",
           alignItems: "center",
           width: "100%",
           padding: "10px 18px 10px",
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          minHeight: 44,
+          gap: 8,
         }}
       >
-        <p
+        <button
+          type="button"
+          onClick={() => {
+            playFn("tap");
+            if (onLabelClick) {
+              setOpen(true);
+              onLabelClick();
+              return;
+            }
+            setOpen(!open);
+          }}
           style={{
-            color: th.muted,
+            color: active ? th.green : th.muted,
             fontSize: 9,
             fontWeight: 700,
             letterSpacing: 2,
@@ -91,30 +104,57 @@ export function SS({ label, open, setOpen, children, tag, theme, playFn }) {
             flex: 1,
             textAlign: "left",
             fontFamily: "Georgia,serif",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            minHeight: 44,
+            padding: 0,
           }}
         >
           {label}
-        </p>
-        <svg
-          width="9"
-          height="9"
-          viewBox="0 0 10 10"
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            playFn("tap");
+            setOpen(!open);
+          }}
           style={{
-            transform: open ? "rotate(90deg)" : "none",
-            transition: "transform 0.18s ease",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 32,
+            height: 32,
+            minHeight: 32,
+            padding: 0,
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
             flexShrink: 0,
           }}
+          aria-label={open ? `Collapse ${label}` : `Expand ${label}`}
         >
-          <polyline
-            points="2,2 8,5 2,8"
-            fill="none"
-            stroke={th.muted}
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+          <svg
+            width="9"
+            height="9"
+            viewBox="0 0 10 10"
+            style={{
+              transform: open ? "rotate(90deg)" : "none",
+              transition: "transform 0.18s ease",
+              flexShrink: 0,
+            }}
+          >
+            <polyline
+              points="2,2 8,5 2,8"
+              fill="none"
+              stroke={th.muted}
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
       {open && children}
     </div>
   );

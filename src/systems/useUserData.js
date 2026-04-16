@@ -14,11 +14,21 @@ export function useUserData(userId) {
   const [bookmarks,   setBookmarksState]  = useState([]);
   const [notes,       setNotesState]      = useState({});
   const [readKeys,    setReadKeysState]   = useState([]);
+  const [highlights,  setHighlightsState] = useState([]);
   const [tsdProfile,  setTsdProfileState] = useState(null);
   const [momentumState, setMomentumStateRaw] = useState(null);
   const [loading,     setLoading]         = useState(false);
 
   const isGuest = !userId || userId === "_";
+
+  const applyFetchedData = useCallback((data = {}) => {
+    setBookmarksState(data.bookmarks  ?? []);
+    setNotesState(data.notes          ?? {});
+    setReadKeysState(data.read_keys   ?? []);
+    setHighlightsState(data.highlights ?? []);
+    setTsdProfileState(data.tsd_profile ?? null);
+    setMomentumStateRaw(data.momentum_state ?? null);
+  }, []);
 
   // ── FETCH on userId change ─────────────────────────────────
   useEffect(() => {
@@ -26,6 +36,7 @@ export function useUserData(userId) {
       setBookmarksState([]);
       setNotesState({});
       setReadKeysState([]);
+      setHighlightsState([]);
       setTsdProfileState(null);
       setMomentumStateRaw(null);
       return;
@@ -33,21 +44,39 @@ export function useUserData(userId) {
     setLoading(true);
     supabase
       .from("user_data")
-      .select("bookmarks, notes, read_keys, tsd_profile, momentum_state")
+      .select("bookmarks, notes, read_keys, highlights, tsd_profile, momentum_state")
       .eq("user_id", userId)
       .maybeSingle()
       .then(({ data, error }) => {
-        if (error) { console.error("useUserData fetch:", error.message); setLoading(false); return; }
-        if (data) {
-          setBookmarksState(data.bookmarks  ?? []);
-          setNotesState(data.notes          ?? {});
-          setReadKeysState(data.read_keys   ?? []);
-          setTsdProfileState(data.tsd_profile ?? null);
-          setMomentumStateRaw(data.momentum_state ?? null);
+        if (!error) {
+          if (data) applyFetchedData(data);
+          setLoading(false);
+          return;
         }
-        setLoading(false);
+
+        if (!String(error.message || "").toLowerCase().includes("highlights")) {
+          console.error("useUserData fetch:", error.message);
+          setLoading(false);
+          return;
+        }
+
+        console.error("useUserData fetch: highlights column missing, using fallback query.");
+        supabase
+          .from("user_data")
+          .select("bookmarks, notes, read_keys, tsd_profile, momentum_state")
+          .eq("user_id", userId)
+          .maybeSingle()
+          .then(({ data: fallbackData, error: fallbackError }) => {
+            if (fallbackError) {
+              console.error("useUserData fallback fetch:", fallbackError.message);
+              setLoading(false);
+              return;
+            }
+            if (fallbackData) applyFetchedData({ ...fallbackData, highlights: [] });
+            setLoading(false);
+          });
       });
-  }, [userId, isGuest]);
+  }, [applyFetchedData, userId, isGuest]);
 
   // ── PERSIST to Supabase ────────────────────────────────────
   const persist = useCallback(async (patch) => {
@@ -55,7 +84,16 @@ export function useUserData(userId) {
     const { error } = await supabase
       .from("user_data")
       .upsert({ user_id: userId, ...patch, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-    if (error) console.error("useUserData persist:", error.message);
+    if (error) {
+      if (
+        Object.prototype.hasOwnProperty.call(patch, "highlights") &&
+        String(error.message || "").toLowerCase().includes("highlights")
+      ) {
+        console.error("useUserData persist: highlights column missing, keeping quotes local only.");
+        return;
+      }
+      console.error("useUserData persist:", error.message);
+    }
   }, [userId, isGuest]);
 
   // Debounced persist — notes can change rapidly while typing
@@ -77,6 +115,11 @@ export function useUserData(userId) {
     persist({ read_keys: v });
   }, [persist]);
 
+  const setHighlights = useCallback((v) => {
+    setHighlightsState(v);
+    persist({ highlights: v });
+  }, [persist]);
+
   const setTsdProfile = useCallback((v) => {
     setTsdProfileState(v);
     persist({ tsd_profile: v });
@@ -91,6 +134,7 @@ export function useUserData(userId) {
     bookmarks,  setBookmarks,
     notes,      setNotes,
     readKeys,   setReadKeys,
+    highlights, setHighlights,
     tsdProfile, setTsdProfile,
     momentumState, setMomentumState,
     loading,

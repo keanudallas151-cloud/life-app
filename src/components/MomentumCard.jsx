@@ -10,6 +10,9 @@ export function MomentumCard({
   const suggestion = snapshot.nextSuggestion;
   const missions = Array.isArray(snapshot.missions) ? snapshot.missions : [];
   const nextMission = missions.find((mission) => !mission.completed) || missions[0];
+  const recentHighlights = Array.isArray(snapshot.recentHighlights)
+    ? snapshot.recentHighlights.slice(0, compact ? 1 : 3)
+    : [];
 
   return (
     <section className={`life-momentum-card${compact ? " is-compact" : ""}`}>
@@ -72,6 +75,20 @@ export function MomentumCard({
                 )}%`,
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {recentHighlights.length > 0 && (
+        <div className="life-momentum-quotes">
+          <p className="life-momentum-quotes-kicker">Saved quotes</p>
+          <div className="life-momentum-quote-list">
+            {recentHighlights.map((item) => (
+              <article key={item.id || `${item.contentKey}-${item.createdAt}`} className="life-momentum-quote-item">
+                <p>&ldquo;{item.text}&rdquo;</p>
+                <span>{item.topicTitle || "Saved passage"}</span>
+              </article>
+            ))}
           </div>
         </div>
       )}
