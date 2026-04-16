@@ -1,41 +1,40 @@
 # Versioning
 
-Life is still in prototype phase. The project uses simple semantic versioning with a `v` prefix on Git tags and GitHub releases.
+Life is still in prototype phase. The project uses semantic versioning with a `v` prefix on Git tags and GitHub releases.
 
 ## Canonical format
 
-- Git tag: `v0.0.1`
-- GitHub release title: `v0.0.1 - Initial prototype`
-- `package.json` version: `0.0.1`
+- Git tag: `v0.4.1`
+- GitHub release title: `v0.4.1 - Next, Supabase, and workflow alignment`
+- `package.json` version: `0.4.1`
 
 ## Prototype bump rules
 
-- Use `v0.0.x` for normal prototype snapshots.
-- Move from `v0.0.9` to `v0.1.0`.
-- Use `v0.1.x` once the prototype is more stable but still not production-ready.
+- Use `v0.4.x` for current prototype snapshots.
+- Increment the patch version for each substantial completed release batch.
+- Move from `v0.4.9` to `v0.5.0`.
 - Use `v1.0.0` only for the first real public release.
 
 ## Release naming rules
 
-- Keep tags exact: `v0.0.4`
-- Keep release titles short and readable: `v0.0.4 - Build recovery baseline`
+- Keep tags exact: `v0.4.1`
+- Keep release titles short and readable.
 - Keep `package.json` aligned with the same numeric version, without the `v`
+- Avoid tiny release commits; prefer one commit per meaningful completed project batch.
 
 ## Branch naming rules
 
 - Stable branch: `main`
-- Backup branches: `backup-main-YYYY-MM-DD`
+- Backup branch: `main_backup`
 - Feature branches: `feature/<short-name>`
 - Fix branches: `fix/<short-name>`
 - Chore branches: `chore/<short-name>`
 
 ## Prototype sequence
 
-- `v0.0.1`: first repository upload
-- `v0.0.2`: second prototype snapshot
-- `v0.0.3`: merged prototype baseline before build recovery
-- `v0.0.4`: current buildable recovery baseline
+- `v0.4.0`: prototype baseline before the current release rules
+- `v0.4.1`: Next.js, Supabase, GitHub workflow, and planning-doc cleanup release
 
 ## Current target
 
-The current `main` branch should be treated as the `v0.0.4` prototype baseline.
+The current `main` branch should be treated as the `v0.4.1` prototype baseline, with `main_backup` kept aligned as a backup branch.

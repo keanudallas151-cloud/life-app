@@ -30,7 +30,11 @@ import { useQuizStats } from "./systems/useQuizStats";
 import { useSound } from "./systems/useSound";
 // P4: Constellation removed
 import { MomentumCard } from "./components/MomentumCard";
-import { isSupabaseConfigured, supabase } from "./supabaseClient";
+import {
+  getAuthRedirectUrl,
+  isSupabaseConfigured,
+  supabase,
+} from "./supabaseClient";
 import { useUserData } from "./systems/useUserData";
 
 // ── Shell components extracted for maintainability ───────────
@@ -269,6 +273,12 @@ export default function LifeApp() {
 
   // ── SESSION RESTORE ON REFRESH ──────────────────────────────
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setUser(null);
+      setScreen("landing");
+      return undefined;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         if (!session.user.email_confirmed_at) {
@@ -906,7 +916,7 @@ export default function LifeApp() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: getAuthRedirectUrl(),
           queryParams: { prompt: "select_account" },
         },
       });
@@ -993,7 +1003,7 @@ export default function LifeApp() {
       const { error } = await supabase.auth.resetPasswordForEmail(
         fpEmail.toLowerCase().trim(),
         {
-          redirectTo: window.location.origin,
+          redirectTo: getAuthRedirectUrl(),
         },
       );
       if (error) {
@@ -1113,7 +1123,7 @@ export default function LifeApp() {
         email: rEmail.toLowerCase().trim(),
         password: rPass,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: getAuthRedirectUrl(),
           data: {
             name: rName.trim(),
             full_name: rName.trim(),

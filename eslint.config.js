@@ -23,6 +23,9 @@ const browserGlobals = {
   HTMLInputElement: "readonly",
   HTMLTextAreaElement: "readonly",
   HTMLSelectElement: "readonly",
+  HTMLElement: "readonly",
+  Element: "readonly",
+  MutationObserver: "readonly",
   process: "readonly",
 };
 
@@ -48,6 +51,12 @@ export default defineConfig([
       "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/static-components": "off",
+    },
+  },
+  {
+    files: ["app/layout.jsx"],
+    rules: {
+      "@next/next/no-css-tags": "off",
     },
   },
 ]);

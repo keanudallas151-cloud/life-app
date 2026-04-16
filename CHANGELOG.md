@@ -2,7 +2,15 @@
 
 All notable prototype milestones for Life are tracked here.
 
-## v0.0.4 - Build recovery baseline
+## v0.4.1 - Next, Supabase, and workflow alignment
+
+- moved the app onto an env-driven Next.js and Vercel-friendly Supabase setup
+- centralized auth redirect handling for local, production, and preview deployments
+- replaced unsafe placeholder GitHub workflows with real CI and Dependabot automation
+- removed obsolete implementation/planning markdown files and replaced them with `implementation_idea_gitco.md`
+- aligned release rules around the `v0.4.x` format and the `main` / `main_backup` branch model
+
+## v0.4.0 - Build recovery baseline
 
 - restored a working production build on `main`
 - removed duplicate `ErrorBoundary` declarations and duplicate app rendering

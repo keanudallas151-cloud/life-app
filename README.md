@@ -1,23 +1,31 @@
 # Life.
 
-A production-minded web app for curated reading on money, psychology, and philosophy — with quizzes, notes, bookmarks, and a community **Post-It** feed. Built with **React (Vite)** and **Supabase** (auth, Postgres, realtime).
+A production-minded web app for curated reading on money, psychology, and philosophy — with quizzes, notes, bookmarks, and a community **Post-It** feed. Built with **Next.js** and **Supabase**, and ready to ship through **Vercel + GitHub**.
 
 ## Local development
 
 ```bash
 npm install
 cp .env.example .env
-# Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY from your Supabase project (Settings → API)
+# Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+# from your Supabase project (Settings -> API Keys)
 npm run dev
 ```
 
-Without env vars the shell still runs, but auth, cloud-synced library data, quiz stats, and Post-It stay offline.
+Without env vars the shell still runs, but auth, cloud-synced library data, quiz stats, and Post-It stay offline. If you still have the repo's older `VITE_*` env names locally, `next.config.mjs` maps them into the new `NEXT_PUBLIC_*` runtime names during the migration.
 
-## Deploying on Netlify
+## Vercel + Supabase + GitHub setup
 
-1. Connect the repo and set the same `VITE_*` environment variables in **Site configuration → Environment variables**.
-2. Build command: `npm run build`, publish directory: `dist` (already set in `netlify.toml`).
-3. In **Supabase → Authentication → URL configuration**, add your Netlify URL to **Redirect URLs** and set **Site URL** to match production (needed for OAuth email links and Google sign-in).
+1. Import the GitHub repository into **Vercel** so pushes and pull requests create deployments automatically.
+2. In **Vercel → Project Settings → Environment Variables**, add:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   - `NEXT_PUBLIC_SITE_URL` (your production origin, for example `https://life.example.com`)
+3. In **Supabase → Authentication → URL Configuration**:
+   - Set **Site URL** to the same production origin used in Vercel.
+   - Add `http://localhost:3000` to **Redirect URLs** for local auth flows.
+   - Add your Vercel production domain and any preview URL wildcard pattern you use for preview deployments.
+4. GitHub Actions now runs lint + build on pushes and pull requests, while Dependabot keeps npm packages and GitHub Actions dependencies moving.
 
 ## Supabase schema (expected)
 
@@ -25,9 +33,9 @@ The app assumes tables such as `user_data`, `quiz_stats`, `posts`, `comments`, a
 
 ## Scripts
 
-| Command        | Description        |
-| -------------- | ------------------ |
-| `npm run dev`  | Vite dev server    |
-| `npm run build`| Production bundle  |
-| `npm run preview` | Preview production build |
-| `npm run lint` | ESLint             |
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Next.js dev server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build locally |
+| `npm run lint` | ESLint |
