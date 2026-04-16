@@ -27,6 +27,12 @@
   --life-bottom-nav-height: 0px;
 }
 
+body.life-dark {
+  background: #181818;
+  color: #f2f2f2;
+  color-scheme: dark;
+}
+
 *,
 *::before,
 *::after {
@@ -276,6 +282,7 @@ p {
   box-shadow: 0 16px 36px rgba(20, 20, 20, 0.08);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
+  transition: box-shadow 0.2s ease;
 }
 
 .life-home-hero-actions {
@@ -288,6 +295,16 @@ p {
 .life-footer {
   width: 100%;
   padding-bottom: calc(10px + env(safe-area-inset-bottom));
+}
+
+/* ── Interactive card hover (desktop) ──────────────────────── */
+@media (hover: hover) {
+  .life-content-card:hover,
+  .life-topic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(74,140,92,0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
 }
 
 /* ── Social Login Buttons ───────────────────────────────────── */
@@ -549,6 +566,16 @@ canvas {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Page content fade-in */
+[data-page-tag] {
+  animation: life-page-in 0.18s ease-out both;
+}
+
+@keyframes life-page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .life-settings-page,
 .life-profile-page {
   width: min(100%, 760px);
@@ -708,6 +735,7 @@ body.life-dark .life-main-scroll {
     left: max(8px, var(--safe-left)) !important;
     right: max(8px, var(--safe-right)) !important;
     width: auto !important;
+    top: calc(56px + env(safe-area-inset-top, 0px)) !important;
   }
 
   .life-settings-page,
@@ -2143,6 +2171,18 @@ button:active:not(:disabled),
     transform: translateY(-1px);
   }
 
+  .life-bottom-nav-item--active::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 2.5px;
+    border-radius: 2px;
+    background: var(--life-green, #4a8c5c);
+  }
+
   .life-bottom-nav-label {
     font-size: 9.5px;
     font-weight: 600;
@@ -2980,4 +3020,89 @@ body.life-dark .life-momentum-progress-track {
   .life-momentum-highlights {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Enhanced focus/interaction states ───────────────────────────────── */
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--life-green, #4a8c5c);
+  outline-offset: 0px;
+}
+
+/* ── Prevent text size adjust on landscape rotate ────────────────────── */
+@media (max-width: 640px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* ── Smooth scrollbar hide on mobile ────────────────────────────────── */
+.life-main-scroll::-webkit-scrollbar {
+  display: none;
+}
+.life-main-scroll {
+  scrollbar-width: none;
+}
+
+/* ── Toast animation ─────────────────────────────────────────────────── */
+.life-toast {
+  animation: life-toast-in 0.22s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes life-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+/* ── Bottom nav label font ───────────────────────────────────────────── */
+.life-bottom-nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  transition: color 0.15s ease;
+}
+
+/* ── Card interactive press feedback ────────────────────────────────── */
+button:active .life-card-inner,
+.life-card-press:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* ── Progress bar shimmer ────────────────────────────────────── */
+@keyframes life-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ── Number badge pulse ──────────────────────────────────────── */
+@keyframes life-badge-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.life-unread-badge {
+  animation: life-badge-pop 0.3s ease;
+}
+
+/* ── Sidebar overlay backdrop ────────────────────────────────── */
+.life-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.28);
+  z-index: 49;
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  animation: life-fade-in 0.18s ease;
+}
+
+@keyframes life-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Certified badge glow ────────────────────────────────────── */
+.life-cert-badge {
+  box-shadow: 0 0 0 3px rgba(208,174,108,0.2), 0 4px 16px rgba(208,174,108,0.25);
 }
