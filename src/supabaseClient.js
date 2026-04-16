@@ -1,26 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+// The anon/publishable key is intentionally public — safe to hardcode.
+// These values are also set as NEXT_PUBLIC_ env vars in Vercel as a backup.
+const SUPABASE_URL = "https://bjptrcyfdflowioxwasf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_TaKQ7VgdMjuKdwjymwpd7Q_sVSi6u0G";
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error(
-    "[Life.] Missing Supabase env vars.\n" +
-    "Set NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.\n" +
-    "Auth and network features will be unavailable until env vars are set."
-  );
-}
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
 
-export const supabase = createClient(
-  SUPABASE_URL || "https://placeholder.supabase.co",
-  SUPABASE_KEY || "placeholder-key",
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  }
-);
-
-export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_KEY);
+export const isSupabaseConfigured = true;
