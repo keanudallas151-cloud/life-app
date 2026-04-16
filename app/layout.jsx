@@ -1,8 +1,8 @@
 import '../src/index.css'
 
 export const metadata = {
-  title: 'Life. — Knowledge. Finance. Life.',
-  description: 'Life. is a free educational platform covering finance, psychology, philosophy, and the systems that shape everyday life.',
+  title: 'Life. — Build Wealth. Learn Everything. Connect.',
+  description: 'Life. helps you make money, learn anything, and connect with investors and creators. Finance, psychology, philosophy — everything you need to build the life you want.',
   appleWebApp: {
     capable: true,
     title: 'Life.',
@@ -10,9 +10,14 @@ export const metadata = {
   },
   robots: 'index,follow',
   openGraph: {
-    title: 'Life. — Knowledge. Finance. Life.',
-    description: 'Free educational platform covering finance, psychology, philosophy, and the systems that shape everyday life.',
+    title: 'Life. — Build Wealth. Learn Everything. Connect.',
+    description: 'Make money, learn anything, and connect with investors and creators. The first million is the hardest — the second is imminent.',
     type: 'website'
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Life. — Build Wealth. Learn Everything. Connect.',
+    description: 'Make money, learn anything, and connect with investors and creators.'
   }
 }
 

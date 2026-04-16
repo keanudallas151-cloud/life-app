@@ -2,6 +2,13 @@
 
 All notable prototype milestones for Life are tracked here.
 
+## v0.4.4 - Backend fix and product identity
+
+- created the `user_data` table in Supabase with RLS policies so signed-in users can sync bookmarks, notes, highlights, and momentum state
+- updated all production metadata (title, description, OG, Twitter, PWA manifest) from "free educational platform" to match the real product vision: build wealth, learn anything, connect with investors and creators
+- expanded implementation_idea_gitco.md with categorized audit findings: investor matching, monetization, community, mobile polish, and backend hardening
+- added Supabase MCP server config for future direct database management
+
 ## v0.4.3 - Profile cleanup and workspace optimization
 
 - removed Settings Hub from the profile page; settings are now only accessible via the gear icon

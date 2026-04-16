@@ -4,9 +4,9 @@ Life is still in prototype phase. The project uses semantic versioning with a `v
 
 ## Canonical format
 
-- Git tag: `v0.4.3`
-- GitHub release title: `v0.4.3 - Profile cleanup and workspace optimization`
-- `package.json` version: `0.4.3`
+- Git tag: `v0.4.4`
+- GitHub release title: `v0.4.4 - Backend fix and product identity`
+- `package.json` version: `0.4.4`
 
 ## Prototype bump rules
 

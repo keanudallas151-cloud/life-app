@@ -31,5 +31,6 @@
   "todo-tree.tree.showCountsInTree": true,
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|\\*)\\s*(TODO|FIXME|NOTE|IDEA)\\b",
   "mediaPreview.video.loop": true,
-  "workbench.externalBrowser": "chrome"
+  "workbench.externalBrowser": "chrome",
+  "github.copilot.chat.claudeAgent.allowDangerouslySkipPermissions": true
 }
