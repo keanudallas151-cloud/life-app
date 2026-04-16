@@ -34,6 +34,20 @@ import { isSupabaseConfigured, supabase } from "./supabaseClient";
 import { useUserData } from "./systems/useUserData";
 import { MomentumCard } from "./components/MomentumCard";
 
+// ── Shell components extracted for maintainability ───────────
+import {
+  SS,
+  SL,
+  RouteFallback,
+  EbookReader,
+  QuizPage,
+  PostItFeed,
+  TailorIntro,
+  TailorQuestions,
+  TailorResult,
+  MomentumHubPage,
+} from "./components/AppShell";
+
 /* ── Dark Mode palette (P11) ──────────────────────────────────── */
 const DARK = {
   skin: "#181818",
@@ -50,7 +64,7 @@ const DARK = {
 };
 
 function useTheme() {
-  const [dark, setDark] = useState(() => LS.get("life_dark_mode", true)); // dark mode default
+  const [dark, setDark] = useState(() => LS.get("life_dark_mode", false));
   const toggle = () => {
     const next = !dark;
     setDark(next);
@@ -101,150 +115,6 @@ const CATEGORIES = [
 ];
 
 /* ── Sidebar components (extracted for react-hooks/static-components) ── */
-function SS({ label, open, setOpen, children, tag, theme, playFn }) {
-  const th = theme || C;
-  return (
-    <div
-      data-page-tag={tag}
-      style={{
-        borderTop: `1px solid ${th.border}22`,
-      }}
-    >
-      <button
-        onClick={() => {
-          playFn("tap");
-          setOpen(!open);
-        }}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-          padding: "10px 18px 10px",
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          minHeight: 44,
-        }}
-      >
-        <p
-          style={{
-            color: th.muted,
-            fontSize: 9,
-            fontWeight: 700,
-            letterSpacing: 2,
-            margin: 0,
-            textTransform: "uppercase",
-            flex: 1,
-            textAlign: "left",
-            fontFamily: "Georgia,serif",
-          }}
-        >
-          {label}
-        </p>
-        <svg
-          width="9"
-          height="9"
-          viewBox="0 0 10 10"
-          style={{
-            transform: open ? "rotate(90deg)" : "none",
-            transition: "transform 0.18s ease",
-            flexShrink: 0,
-          }}
-        >
-          <polyline
-            points="2,2 8,5 2,8"
-            fill="none"
-            stroke={th.muted}
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      {open && children}
-    </div>
-  );
-}
-
-function SL({ label, icon, onClick, active, theme }) {
-  const th = theme || C;
-  const ic = icon && Ic[icon];
-  const stroke = active ? th.green : "#8a8070";
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 9,
-        width: "100%",
-        padding: "8px 18px",
-        background: active ? th.greenLt : "transparent",
-        border: "none",
-        borderLeft: active ? `3px solid ${th.green}` : "3px solid transparent",
-        cursor: "pointer",
-        color: active ? th.green : th.mid,
-        fontSize: 13,
-        textAlign: "left",
-        fontFamily: "Georgia,serif",
-        fontWeight: active ? 600 : 400,
-      }}
-      onMouseEnter={(e) => {
-        if (!active) e.currentTarget.style.background = th.light;
-      }}
-      onMouseLeave={(e) => {
-        if (!active) e.currentTarget.style.background = "transparent";
-      }}
-    >
-      {ic && (
-        <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-          {ic("none", stroke, 18)}
-        </span>
-      )}
-      <span style={{ flex: 1 }}>{label}</span>
-    </button>
-  );
-}
-
-const EbookReader = lazy(() =>
-  import("./components/Reader").then((m) => ({ default: m.EbookReader })),
-);
-const QuizPage = lazy(() =>
-  import("./components/QuizPage").then((m) => ({ default: m.QuizPage })),
-);
-const PostItFeed = lazy(() =>
-  import("./components/PostItFeed").then((m) => ({ default: m.PostItFeed })),
-);
-const TailorIntro = lazy(() =>
-  import("./components/Tailor").then((m) => ({ default: m.TailorIntro })),
-);
-const TailorQuestions = lazy(() =>
-  import("./components/Tailor").then((m) => ({ default: m.TailorQuestions })),
-);
-const TailorResult = lazy(() =>
-  import("./components/Tailor").then((m) => ({ default: m.TailorResult })),
-);
-const MomentumHubPage = lazy(() =>
-  import("./components/MomentumHub").then((m) => ({ default: m.MomentumHub })),
-);
-
-function RouteFallback() {
-  return (
-    <div
-      className="life-page-suspense-fallback"
-      role="status"
-      aria-busy="true"
-      aria-label="Loading"
-    >
-      <div className="life-page-suspense-dots" aria-hidden>
-        <span />
-        <span />
-        <span />
-      </div>
-    </div>
-  );
-}
-
 const PREF_DEFAULTS = {
   soundEnabled: true,
   soundVolume: 58,
@@ -1581,7 +1451,6 @@ export default function LifeApp() {
   if (screen === "loading")
     return (
       <div
-      data-page-tag="#loading_screen"
         style={{
           minHeight: "100vh",
           background: `linear-gradient(135deg, ${C.skin} 0%, #ebe4d6 50%, ${C.skin} 100%)`,
@@ -2583,182 +2452,481 @@ export default function LifeApp() {
     return (
       <div
         data-page-tag="#landing_page"
-        className={`life-grain${dark ? " life-dark-bg" : ""}`}
+        className="life-grain life-landing-shell"
         style={{
           minHeight: "100svh",
-          background: dark
-            ? `linear-gradient(180deg, #141414 0%, #0d0d0d 100%)`
-            : `linear-gradient(180deg, ${C.skin} 0%, #e8e0d0 100%)`,
+          background: `linear-gradient(165deg, ${C.skin} 0%, #ebe4d6 45%, ${C.skin} 100%)`,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           fontFamily: "Georgia,serif",
-          padding: `calc(env(safe-area-inset-top, 0px) + 40px) 28px calc(env(safe-area-inset-bottom, 0px) + 40px)`,
+          padding: "40px 24px calc(44px + env(safe-area-inset-bottom))",
           position: "relative",
           overflowX: "hidden",
-          gap: 0,
         }}
       >
         <style>{`
-          @keyframes life-fade-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-          @keyframes life-logo-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
-        `}</style>
-
-        {/* ── CENTERED HERO ─────────────────────────────── */}
+        @keyframes life-logo-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes life-glow-pulse { 0%,100%{box-shadow:0 8px 32px rgba(74,140,92,0.3)} 50%{box-shadow:0 12px 48px rgba(74,140,92,0.5)} }
+        @keyframes life-tag-fade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+      `}</style>
+        {/* Decorative circles */}
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            width: "100%",
-            maxWidth: 340,
+            position: "absolute",
+            top: -80,
+            right: -80,
+            width: 240,
+            height: 240,
+            borderRadius: "50%",
+            border: "1.5px solid rgba(74,140,92,0.1)",
+            pointerEvents: "none",
           }}
-        >
-          {/* Welcome To */}
-          <p
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "14%",
+            right: "9%",
+            width: 72,
+            height: 72,
+            borderRadius: "50%",
+            background: "rgba(74,140,92,0.1)",
+            filter: "blur(1px)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: -60,
+            left: -60,
+            width: 180,
+            height: 180,
+            borderRadius: "50%",
+            border: "1.5px solid rgba(74,140,92,0.08)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "30%",
+            left: -40,
+            width: 100,
+            height: 100,
+            borderRadius: "50%",
+            background: "rgba(74,140,92,0.05)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "18%",
+            right: "12%",
+            width: 132,
+            height: 132,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(74,140,92,0.06) 70%, rgba(74,140,92,0) 100%)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "56%",
+            left: "8%",
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            border: "1.5px solid rgba(74,140,92,0.14)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div style={{ marginBottom: 24, textAlign: "center" }}>
+          <div
             style={{
-              margin: "0 0 4px",
-              fontSize: 13,
-              fontWeight: 700,
-              letterSpacing: "0.32em",
-              textTransform: "uppercase",
-              color: dark ? "#a29d96" : C.muted,
-              fontStyle: "italic",
-              animation: "life-fade-up 0.5s ease both",
+              width: 120,
+              height: 120,
+              borderRadius: "22%",
+              background: `linear-gradient(145deg,${C.green},#2d6e42)`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 18px",
+              boxShadow: S.glow,
+              animation:
+                "life-logo-float 4s ease-in-out infinite, life-glow-pulse 3s ease-in-out infinite",
             }}
           >
-            Welcome To
-          </p>
-
-          {/* Life. */}
+            <span
+              style={{
+                color: "#fff",
+                fontSize: 52,
+                fontWeight: 800,
+                fontFamily: "Georgia,serif",
+                letterSpacing: -2,
+              }}
+            >
+              l.
+            </span>
+          </div>
           <h1
             style={{
-              margin: "0 0 32px",
-              fontSize: "clamp(5rem, 22vw, 8rem)",
+              margin: 0,
+              fontSize: "clamp(2.8rem, 10vw, 4rem)",
               fontWeight: 800,
-              color: dark ? "#f2f2f2" : C.ink,
+              color: C.ink,
               fontFamily: "Georgia,serif",
-              letterSpacing: "-0.04em",
-              lineHeight: 1,
-              animation: "life-logo-float 4s ease-in-out infinite, life-fade-up 0.5s ease 0.05s both",
+              letterSpacing: -1,
             }}
           >
             Life.
           </h1>
-
-          {/* Buttons */}
-          <div
+          <p
             style={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              animation: "life-fade-up 0.5s ease 0.15s both",
+              margin: "8px 0 0",
+              fontSize: 15,
+              color: C.muted,
+              fontStyle: "italic",
             }}
           >
-            <button
-              onClick={() => { play("tap"); setScreen("signin"); }}
-              style={{
-                background: dark ? "#242424" : C.white,
-                border: `1.5px solid ${dark ? "#3b3b3b" : C.border}`,
-                borderRadius: 14,
-                padding: "16px 20px",
-                color: dark ? "#f2f2f2" : C.ink,
-                fontSize: 16,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "Georgia,serif",
-                boxShadow: S.sm,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-              }}
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={dark ? "#f2f2f2" : C.ink} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" />
-              </svg>
-              Sign In
-            </button>
-            <button
-              onClick={() => { play("tap"); setScreen("register"); }}
-              style={{
-                background: `linear-gradient(135deg, ${C.green}, #3a7d4a)`,
-                border: "none",
-                borderRadius: 14,
-                padding: "16px 20px",
-                color: "#fff",
-                fontSize: 16,
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: "Georgia,serif",
-                boxShadow: S.glow,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-              }}
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" />
-              </svg>
-              Create Account
-            </button>
+            Knowledge, Growth, Community
+          </p>
+        </div>
 
-            {/* Divider */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "2px 0" }}>
-              <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${C.border})` }} />
-              <span style={{ color: C.muted, fontSize: 11, fontStyle: "italic", whiteSpace: "nowrap" }}>or continue with</span>
-              <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${C.border}, transparent)` }} />
-            </div>
-
-            {/* Social buttons */}
-            <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
-              {AUTH_PROVIDERS.map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => doProviderSignIn(item)}
-                  aria-label={`Continue with ${item.label}`}
-                  className="social-btn"
+        {/* Value Proposition */}
+        <div style={{ width: "100%", maxWidth: 360, marginBottom: 28 }}>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}
+          >
+            {[
+              {
+                icon: "users",
+                label: "Networking",
+                sub: "Connect with driven people",
+              },
+              {
+                icon: "lock",
+                label: "Secret Knowledge",
+                sub: "What they don't teach you",
+              },
+              {
+                icon: "star",
+                label: "Tailored Growth",
+                sub: "Personalised to your goals",
+              },
+              {
+                icon: "compass",
+                label: "Structured Path",
+                sub: "Your friend to success",
+              },
+            ].map((v, i) => (
+              <div
+                key={v.label}
+                style={{
+                  background: "rgba(255,255,255,0.7)",
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 12,
+                  padding: "12px 10px",
+                  textAlign: "center",
+                  animation: `life-tag-fade 0.5s ease-out ${0.2 + i * 0.1}s both`,
+                }}
+              >
+                <div style={{ marginBottom: 6 }}>
+                  {Ic[v.icon]?.("none", C.green, 20)}
+                </div>
+                <p
                   style={{
-                    width: 56, height: 56,
-                    background: C.white,
-                    border: `1.5px solid ${item.live ? item.color : C.border}`,
-                    borderRadius: 14,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: item.live ? "pointer" : "not-allowed",
-                    padding: 12,
-                    opacity: item.live ? 1 : 0.5,
-                    transition: "all 0.2s ease",
-                    boxShadow: item.live ? `0 2px 10px ${item.color}20` : S.sm,
-                    position: "relative",
+                    margin: 0,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: C.ink,
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.08)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
                 >
-                  <Image src={item.file} alt={item.label} width={26} height={26} style={{ width: 26, height: 26, objectFit: "contain", display: "block" }} />
-                  {!item.live && (
-                    <span style={{ position: "absolute", bottom: 3, fontSize: 7, fontWeight: 700, color: C.muted, letterSpacing: 0.5, textTransform: "uppercase" }}>Soon</span>
-                  )}
-                </button>
-              ))}
-            </div>
-            {siSocialErr && (
-              <p style={{ margin: 0, fontSize: 12, color: C.red, textAlign: "center", fontStyle: "italic" }}>{siSocialErr}</p>
-            )}
-          </div>
-
-          {/* Footer links */}
-          <div style={{ display: "flex", gap: 20, marginTop: 28 }}>
-            <button onClick={() => { play("tap"); setScreen("privacy_policy"); }} style={{ background: "none", border: "none", color: C.muted, fontSize: 10, cursor: "pointer", fontFamily: "Georgia,serif", textDecoration: "underline" }}>Privacy</button>
-            <button onClick={() => { play("tap"); setScreen("terms_conditions"); }} style={{ background: "none", border: "none", color: C.muted, fontSize: 10, cursor: "pointer", fontFamily: "Georgia,serif", textDecoration: "underline" }}>Terms</button>
+                  {v.label}
+                </p>
+                <p
+                  style={{
+                    margin: "2px 0 0",
+                    fontSize: 10,
+                    color: C.muted,
+                    fontStyle: "italic",
+                  }}
+                >
+                  {v.sub}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
+
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 340,
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
+          <button
+            className="life-card-hover"
+            onClick={() => {
+              play("tap");
+              setScreen("signin");
+            }}
+            style={{
+              background: C.white,
+              border: `1.5px solid ${C.border}`,
+              borderRadius: 14,
+              padding: "18px 20px",
+              color: C.ink,
+              fontSize: 17,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "Georgia,serif",
+              boxShadow: S.sm,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={C.ink}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
+            Sign In
+          </button>
+          <button
+            className="life-card-hover"
+            onClick={() => {
+              play("tap");
+              setScreen("register");
+            }}
+            style={{
+              background: `linear-gradient(135deg, ${C.green}, #3a7d4a)`,
+              border: "none",
+              borderRadius: 14,
+              padding: "18px 20px",
+              color: "#fff",
+              fontSize: 17,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: "Georgia,serif",
+              boxShadow: S.glow,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <line x1="20" y1="8" x2="20" y2="14" />
+              <line x1="23" y1="11" x2="17" y2="11" />
+            </svg>
+            Register
+          </button>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              margin: "4px 16px",
+            }}
+          >
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: `linear-gradient(90deg, transparent, ${C.border})`,
+              }}
+            />
+            <span
+              style={{
+                color: C.muted,
+                fontSize: 12,
+                fontStyle: "italic",
+                whiteSpace: "nowrap",
+              }}
+            >
+              or continue with
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: `linear-gradient(90deg, ${C.border}, transparent)`,
+              }}
+            />
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
+            {AUTH_PROVIDERS.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => doProviderSignIn(item)}
+                title={
+                  item.live
+                    ? `Continue with ${item.label}`
+                    : `${item.label} coming soon`
+                }
+                aria-label={`Continue with ${item.label}`}
+                className="social-btn"
+                style={{
+                  width: 60,
+                  height: 60,
+                  background: C.white,
+                  border: `1.5px solid ${item.live ? item.color : C.border}`,
+                  borderRadius: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: item.live ? "pointer" : "not-allowed",
+                  padding: 14,
+                  boxSizing: "border-box",
+                  opacity: item.live ? 1 : 0.5,
+                  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                  boxShadow: item.live ? `0 2px 12px ${item.color}18` : S.sm,
+                  transform: "scale(1)",
+                  position: "relative",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "scale(1.1)";
+                  e.currentTarget.style.boxShadow = `0 6px 20px ${item.color}30`;
+                  e.currentTarget.style.borderColor = item.color;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.boxShadow = item.live
+                    ? `0 2px 12px ${item.color}18`
+                    : S.sm;
+                  e.currentTarget.style.borderColor = item.live
+                    ? item.color
+                    : C.border;
+                }}
+              >
+                <Image
+                  src={item.file}
+                  alt={item.label}
+                  width={28}
+                  height={28}
+                  style={{
+                    width: 28,
+                    height: 28,
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
+                {!item.live && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      bottom: 4,
+                      fontSize: 7,
+                      fontWeight: 700,
+                      color: C.muted,
+                      letterSpacing: 0.5,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Soon
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          {siSocialErr && (
+            <p
+              style={{
+                margin: "-8px 0 0",
+                fontSize: 12,
+                color: C.red,
+                textAlign: "center",
+                fontStyle: "italic",
+                lineHeight: 1.5,
+              }}
+            >
+              {siSocialErr}
+            </p>
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: 16, marginTop: 16 }}>
+          <button
+            onClick={() => {
+              play("tap");
+              setScreen("privacy_policy");
+            }}
+            style={{
+              background: "none",
+              border: "none",
+              color: C.muted,
+              fontSize: 10,
+              cursor: "pointer",
+              fontFamily: "Georgia,serif",
+              textDecoration: "underline",
+            }}
+          >
+            Privacy Policy
+          </button>
+          <button
+            onClick={() => {
+              play("tap");
+              setScreen("terms_conditions");
+            }}
+            style={{
+              background: "none",
+              border: "none",
+              color: C.muted,
+              fontSize: 10,
+              cursor: "pointer",
+              fontFamily: "Georgia,serif",
+              textDecoration: "underline",
+            }}
+          >
+            Terms & Conditions
+          </button>
+        </div>
+        <p
+          className="life-footer"
+          style={{
+            margin: "28px 0 0",
+            color: C.muted,
+            fontSize: 10,
+            fontStyle: "italic",
+            textAlign: "center",
+          }}
+        >
+          © 2026 Life. All rights reserved.
+        </p>
       </div>
     );
-
 
   // Sign In
   if (screen === "signin")
@@ -2816,16 +2984,46 @@ export default function LifeApp() {
             pointerEvents: "none",
           }}
         />
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, letterSpacing: "0.32em", textTransform: "uppercase", color: C.muted, fontStyle: "italic" }}>
-            Welcome To
-          </p>
-          <h1 style={{ margin: "0 0 16px", fontSize: "clamp(3.8rem, 17vw, 6rem)", fontWeight: 800, color: C.ink, fontFamily: "Georgia,serif", letterSpacing: "-0.04em", lineHeight: 0.95 }}>
-            Life.
-          </h1>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: C.muted, fontFamily: "Georgia,serif", fontStyle: "italic" }}>
-            Sign in to continue
-          </p>
+        <div
+          style={{
+            width: 70,
+            height: 70,
+            borderRadius: "20%",
+            background: `linear-gradient(145deg,${C.green},#2d6e42)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 20,
+            boxShadow: S.md,
+            animation: "life-logo-float 4s ease-in-out infinite",
+          }}
+        >
+          <span style={{ color: C.white, fontSize: 28, fontWeight: 800 }}>
+            l.
+          </span>
+        </div>
+
+        <h2
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            margin: "0 0 4px",
+            color: C.ink,
+            fontFamily: "Georgia,serif",
+          }}
+        >
+          Sign In To Life.
+        </h2>
+        <p
+          style={{
+            margin: "0 0 28px",
+            fontSize: 14,
+            color: C.muted,
+            fontStyle: "italic",
+          }}
+        >
+          Welcome Back
+        </p>
 
         <div
           className="life-auth-card"
@@ -3285,17 +3483,45 @@ export default function LifeApp() {
             pointerEvents: "none",
           }}
         />
-        <div style={{ textAlign: "center", marginBottom: 8 }}>
-          <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: C.muted, fontStyle: "italic" }}>
-            Welcome To
-          </p>
-          <h1 style={{ margin: 0, fontSize: "clamp(3.5rem, 16vw, 5.5rem)", fontWeight: 800, color: C.ink, fontFamily: "Georgia,serif", letterSpacing: "-0.04em", lineHeight: 0.95 }}>
-            Life.
-          </h1>
-          <p style={{ margin: "6px 0 20px", fontSize: 13, color: C.muted, fontStyle: "italic" }}>
-            Create your account
-          </p>
+        <div
+          style={{
+            width: 70,
+            height: 70,
+            borderRadius: "20%",
+            background: `linear-gradient(145deg,${C.green},#2d6e42)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 20,
+            boxShadow: S.md,
+            animation: "life-logo-float 4s ease-in-out infinite",
+          }}
+        >
+          <span style={{ color: "#fff", fontSize: 28, fontWeight: 800 }}>
+            l.
+          </span>
         </div>
+        <h2
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            margin: "0 0 4px",
+            color: C.ink,
+            fontFamily: "Georgia,serif",
+          }}
+        >
+          Create Account
+        </h2>
+        <p
+          style={{
+            margin: "0 0 28px",
+            fontSize: 14,
+            color: C.muted,
+            fontStyle: "italic",
+          }}
+        >
+          Welcome To Life
+        </p>
 
         <div
           className="life-auth-card"
@@ -3850,7 +4076,6 @@ export default function LifeApp() {
         />
         <div
           className="life-notif-dropdown"
-          data-page-tag="#notification_dropdown"
           style={{
             position: "fixed",
             top: 56,
@@ -3937,7 +4162,6 @@ export default function LifeApp() {
       {/* TOP BAR */}
       <div
         className="life-topbar"
-        data-page-tag="#topbar"
         style={{
           background: dark ? "rgba(30,30,30,0.96)" : "rgba(255,255,255,0.92)",
           borderBottom: `1px solid ${t.border}`,
@@ -4248,7 +4472,6 @@ export default function LifeApp() {
       {showSearch && search.length > 1 && (
         <div
           className="life-search-dropdown"
-            data-page-tag="#search_dropdown"
           style={{
             position: "fixed",
             left: 0,
@@ -4359,7 +4582,6 @@ export default function LifeApp() {
         {/* SIDEBAR */}
         <div
           className="life-sidebar"
-          data-page-tag="#sidebar"
           style={{
             position: "fixed",
             top: 0,
@@ -4380,13 +4602,12 @@ export default function LifeApp() {
         >
           {/* User card */}
           <div
-            data-page-tag="#sidebar_user_card"
             style={{
-              padding: "12px 16px 10px",
-              borderBottom: `1px solid ${t.border}22`,
+              padding: "16px 18px 14px",
+              borderBottom: `1px solid ${t.light}`,
               display: "flex",
               flexDirection: "column",
-              gap: 8,
+              gap: 12,
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -4777,7 +4998,6 @@ export default function LifeApp() {
               >
                 {/* PROGRESS BAR — P6: clickable → progress_dashboard */}
                 <button
-                  data-page-tag="#home_progress_bar"
                   type="button"
                   onClick={() => {
                     play("tap");
@@ -4889,32 +5109,17 @@ export default function LifeApp() {
 
                 <div
                   style={{
-                    padding: "10px 20px 0",
+                    padding: "14px 20px 0",
                     maxWidth: 560,
                     margin: "0 auto",
                   }}
                 >
-                  <button
-                    data-page-tag="#home_momentum_pill"
-                    onClick={openMomentumHub}
-                    style={{
-                      width: "100%",
-                      background: "none",
-                      border: `1px solid ${t.border}`,
-                      borderRadius: 12,
-                      padding: "10px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      cursor: "pointer",
-                      fontFamily: "Georgia,serif",
-                    }}
-                  >
-                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: t.muted }}>
-                      ⚡ Life Momentum
-                    </span>
-                    <span style={{ fontSize: 11, color: t.green, fontWeight: 600 }}>View →</span>
-                  </button>
+                  <MomentumCard
+                    snapshot={momentumSnapshot}
+                    onOpenHub={openMomentumHub}
+                    compact
+                    title="Daily momentum"
+                  />
                 </div>
 
                 {resumeEntry && !resumeTipDismissed && (
@@ -5047,31 +5252,79 @@ export default function LifeApp() {
 
                 {/* HERO */}
                 <div
-                  className="life-home-hero"
-                  data-page-tag="#home_hero"
+                  className="life-grain life-home-hero"
                   style={{
-                    padding: "36px 24px 32px",
+                    padding: "44px 24px 40px",
                     textAlign: "center",
                     borderBottom: `1px solid ${t.border}`,
-                    background: dark
-                      ? `linear-gradient(180deg, ${t.skin} 0%, #111 100%)`
-                      : `linear-gradient(180deg, ${t.skin} 0%, #e8e0d0 100%)`,
+                    background: `linear-gradient(180deg, ${t.skin} 0%, #ebe4d6 100%)`,
+                    position: "relative",
+                    overflow: "hidden",
+                    borderRadius: 0,
                   }}
                 >
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: -60,
+                      right: -60,
+                      width: 200,
+                      height: 200,
+                      borderRadius: "50%",
+                      border: "1.5px solid rgba(74,140,92,0.1)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "18%",
+                      left: "10%",
+                      width: 54,
+                      height: 54,
+                      borderRadius: "50%",
+                      border: "1.5px solid rgba(74,140,92,0.16)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: -80,
+                      left: -40,
+                      width: 160,
+                      height: 160,
+                      borderRadius: "50%",
+                      border: "1.5px solid rgba(74,140,92,0.08)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: "12%",
+                      bottom: "18%",
+                      width: 126,
+                      height: 126,
+                      borderRadius: "50%",
+                      background:
+                        "radial-gradient(circle, rgba(255,255,255,0.46) 0%, rgba(74,140,92,0.08) 68%, rgba(74,140,92,0) 100%)",
+                      pointerEvents: "none",
+                    }}
+                  />
                   <p
                     style={{
-                      margin: "0 0 4px",
-                      fontSize: 12,
+                      margin: "0 0 10px",
+                      fontSize: "clamp(0.72rem, 2.8vw, 0.92rem)",
                       fontWeight: 700,
-                      letterSpacing: "0.34em",
+                      letterSpacing: "0.38em",
                       textTransform: "uppercase",
                       color: t.muted,
                       textAlign: "center",
                       lineHeight: 1.2,
-                      fontStyle: "italic",
                     }}
                   >
-                    Welcome To
+                    {(() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; })()}{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
                   </p>
                   <h1
                     style={{
@@ -5088,17 +5341,6 @@ export default function LifeApp() {
                   >
                     Life.
                   </h1>
-                  <p
-                    style={{
-                      margin: "6px 0 0",
-                      fontSize: 11,
-                      color: t.muted,
-                      textAlign: "center",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {(() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; })()}{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
-                  </p>
                   <div
                     style={{
                       width: 40,
@@ -5215,7 +5457,6 @@ export default function LifeApp() {
                 <div style={{ padding: "18px 20px 0" }}>
                   <div
                     className="life-home-stats"
-                    data-page-tag="#home_stats_grid"
                     style={{
                       display: "grid",
                       gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
@@ -5266,10 +5507,8 @@ export default function LifeApp() {
                 </div>
 
                 {/* P3: Author Message (replaces "What's Inside") */}
-                {/* data-page-tag="#home_author_card" is on the inner div below */}
                 <div style={{ padding: "32px 20px 0" }}>
                   <div
-                    data-page-tag="#home_author_card"
                     style={{
                       maxWidth: 500,
                       margin: "0 auto",
@@ -5356,7 +5595,7 @@ export default function LifeApp() {
                   </div>
                 </div>
 
-                {/* GUIDED — START HERE — data-page-tag="#home_guided_list" */}
+                {/* GUIDED — START HERE */}
                 <div
                   style={{
                     padding: "36px 20px 0",
@@ -7446,33 +7685,47 @@ export default function LifeApp() {
                   >
                     Your Stats
                   </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                    {[
-                      { label: "Topics Read", value: readKeys.length, icon: "📖", color: t.green },
-                      { label: "Bookmarks", value: bookmarks.length, icon: "🔖", color: t.gold },
-                      { label: "Notes", value: completedNotes, icon: "✏️", color: t.mid },
-                      { label: readingStreak.count > 0 ? `${readingStreak.count} day streak` : "Streak", value: readingStreak.count > 0 ? "🔥" : "—", icon: "", color: t.green },
-                    ].map((stat) => (
-                      <div
-                        key={stat.label}
+                  {[
+                    ["Topics Read", readKeys.length],
+                    ["Bookmarks Saved", bookmarks.length],
+                    ["Notes Written", completedNotes],
+                    [
+                      "Reading streak",
+                      readingStreak.count > 0
+                        ? `${readingStreak.count} day${readingStreak.count === 1 ? "" : "s"}`
+                        : "Open a topic to start",
+                    ],
+                  ].map(([label, val]) => (
+                    <div
+                      key={label}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "12px 0",
+                        borderBottom: `1px solid ${t.light}`,
+                      }}
+                    >
+                      <span
                         style={{
-                          background: t.skin,
-                          border: `1px solid ${t.border}`,
-                          borderRadius: 12,
-                          padding: "14px 12px",
-                          textAlign: "center",
+                          fontSize: 15,
+                          color: t.mid,
+                          fontFamily: "Georgia,serif",
                         }}
                       >
-                        <div style={{ fontSize: 22, marginBottom: 4 }}>{stat.icon}</div>
-                        <div style={{ fontSize: 22, fontWeight: 800, color: stat.color, fontFamily: "Georgia,serif", lineHeight: 1 }}>
-                          {stat.value}
-                        </div>
-                        <div style={{ fontSize: 10, color: t.muted, marginTop: 4, fontWeight: 600, letterSpacing: 0.5 }}>
-                          {stat.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>                </div>
+                        {label}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 700,
+                          color: t.green,
+                        }}
+                      >
+                        {val}
+                      </span>
+                    </div>
+                  ))}
+                </div>
                 <div style={{ marginBottom: 20 }}>
                   <MomentumCard
                     snapshot={momentumSnapshot}
@@ -8500,8 +8753,7 @@ export default function LifeApp() {
       </div>
 
       {isOffline && (
-        <div className="life-offline-banner"
-        data-page-tag="#offline_banner" role="status" aria-live="polite">
+        <div className="life-offline-banner" role="status" aria-live="polite">
           Offline mode: cached content only until connection returns.
         </div>
       )}
@@ -8510,7 +8762,6 @@ export default function LifeApp() {
       <button
         onClick={scrollToTop}
         className={`scroll-to-top ${showScrollTop ? "visible" : ""}`}
-        data-page-tag="#scroll_to_top_btn"
         aria-label="Scroll to top"
         title="Scroll to top"
       >
@@ -8531,7 +8782,6 @@ export default function LifeApp() {
       {/* ── BOTTOM NAVIGATION BAR (mobile only) ─────────────── */}
       <nav
         className={`life-bottom-nav${dark ? " life-bottom-nav-dark" : ""}`}
-        data-page-tag="#bottom_nav"
         role="navigation"
         aria-label="Main navigation"
       >
@@ -8732,7 +8982,6 @@ export default function LifeApp() {
       {showA2hs && !isStandalone && (
         <div
           className="life-a2hs-banner"
-          data-page-tag="#a2hs_banner"
           role="complementary"
           aria-label="Install app"
         >
