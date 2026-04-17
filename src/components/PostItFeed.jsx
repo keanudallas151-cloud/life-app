@@ -96,7 +96,6 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
     });
   };
 
-  // ── DETAIL VIEW ──────────────────────────────────────────
   const vp = posts.find(p => p.id === viewing);
   if (vp) return (
     <div className="life-postit-page" style={{ padding:"20px max(16px, env(safe-area-inset-left, 0px)) 28px max(16px, env(safe-area-inset-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
@@ -163,7 +162,6 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
     </div>
   );
 
-  // ── FEED VIEW ────────────────────────────────────────────
   return (
     <div className="life-postit-page" style={{ padding:"20px max(16px, env(safe-area-inset-left, 0px)) max(28px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
       {error && (

@@ -4,7 +4,6 @@
 
 export const QUIZ_QUESTIONS = {
 
-  // ─── FINANCE ────────────────────────────────────────────
   finance: {
     easy: [
       {q:"What does inflation mean?",opts:["Prices rise over time","Stock market crashes","Banks print less money","Interest rates fall"],a:0,explain:"Inflation is the rate at which the general price level rises, eroding purchasing power.",tag:"Basics"},
@@ -62,7 +61,6 @@ export const QUIZ_QUESTIONS = {
     ],
   },
 
-  // ─── PSYCHOLOGY ─────────────────────────────────────────
   psychology: {
     easy: [
       {q:"What is confirmation bias?",opts:["Believing what matches existing views","Always trusting experts","Ignoring all information","Changing your mind constantly"],a:0,explain:"We naturally seek and prefer information that confirms what we already believe, ignoring contradicting evidence.",tag:"Bias"},
@@ -120,7 +118,6 @@ export const QUIZ_QUESTIONS = {
     ],
   },
 
-  // ─── MONEY ──────────────────────────────────────────────
   money: {
     easy: [
       {q:"What is the 50/30/20 rule?",opts:["50 stocks 30 bonds 20 cash","50% needs 30% wants 20% savings","Save 50% always","50% tax 30% spend 20% invest"],a:1,explain:"Split after-tax income: 50% for needs, 30% for wants, 20% for savings and debt repayment.",tag:"Budgeting"},
@@ -178,7 +175,6 @@ export const QUIZ_QUESTIONS = {
     ],
   },
 
-  // ─── PHILOSOPHY ─────────────────────────────────────────
   philosophy: {
     easy: [
       {q:"What is stoicism?",opts:["A philosophy of controlling others","A philosophy of focusing on what you can control","A religion","A political ideology"],a:1,explain:"Stoicism, founded in ancient Greece, teaches that wellbeing comes from focusing only on what lies within our control.",tag:"Schools"},
@@ -236,7 +232,6 @@ export const QUIZ_QUESTIONS = {
     ],
   },
 
-  // ─── BUSINESS ───────────────────────────────────────────
   business: {
     easy: [
       {q:"What is revenue?",opts:["Profit after costs","Total income from sales before expenses","Money borrowed","Net worth"],a:1,explain:"Revenue is the total amount generated from sales before any costs are deducted — the 'top line' of a business.",tag:"Basics"},
@@ -294,7 +289,6 @@ export const QUIZ_QUESTIONS = {
     ],
   },
 
-  // ─── COMMUNICATION ──────────────────────────────────────
   communication: {
     easy: [
       {q:"Ben is an accountant so he deals with ____.",opts:["paintings","numbers and finances","motors","recipes"],a:1,explain:"Accountants work with numbers — budgets, ledgers, taxes, and financial statements.",tag:"Sentence"},
@@ -352,7 +346,6 @@ export const QUIZ_QUESTIONS = {
     ],
   },
 
-  // ─── COMMUNICATION · VOCAL WARMUPS & AUDIO PRACTICE ─────
   // Placeholder structure — mp3 URLs to be wired in later.
   // Each item is tagged with `audio: true` and `mp3Url` reserved for integration.
   communication_audio: {

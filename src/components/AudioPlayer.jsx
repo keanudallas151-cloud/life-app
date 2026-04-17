@@ -18,8 +18,8 @@ export function AudioPlayer({title,playSound}){
         <span style={{fontSize:11,color:C.muted}}>{fmt(elapsed)}</span><span style={{fontSize:11,color:C.muted}}>{fmt(total)}</span>
       </div>
       <div style={{display:"flex",gap:10}}>
-        <button onClick={toggle} style={{flex:1,background:C.green,border:"none",borderRadius:10,padding:"13px",color:C.white,fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"Georgia,serif"}}>{playing?"⏸  Pause":"▶  Play AI Narration"}</button>
-        <button onClick={reset} style={{background:C.white,border:`1px solid ${C.border}`,borderRadius:10,padding:"13px 18px",color:C.mid,fontSize:16,cursor:"pointer"}}>↺</button>
+        <button onClick={toggle} aria-label={playing ? "Pause audio narration" : "Play audio narration"} style={{flex:1,background:C.green,border:"none",borderRadius:10,padding:"13px",color:C.white,fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"Georgia,serif"}}>{playing?"⏸  Pause":"▶  Play AI Narration"}</button>
+        <button onClick={reset} aria-label="Restart audio narration" style={{background:C.white,border:`1px solid ${C.border}`,borderRadius:10,padding:"13px 18px",color:C.mid,fontSize:16,cursor:"pointer"}}>↺</button>
       </div>
     </div>
   );

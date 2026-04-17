@@ -1,4 +1,3 @@
-import React from "react";
 import { THEME_MODES } from "../systems/theme";
 
 const PREF_DEFAULTS = {

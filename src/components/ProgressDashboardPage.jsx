@@ -7,7 +7,6 @@ export function ProgressDashboardPage({
   readKeys,
   bookmarks,
   completedNotes,
-  savedHighlightsCount,
   readingStreak,
   profile,
   totalTopics,
@@ -15,7 +14,43 @@ export function ProgressDashboardPage({
   play,
   setPage,
   setScreen,
+  openCommunicationQuiz,
 }) {
+  const nextAction = !profile
+    ? {
+        title: "Complete your tailoring",
+        desc: "Unlock more personal recommendations before your next session.",
+        cta: "Open tailoring",
+        onClick: () => setScreen?.("tailor_intro"),
+      }
+    : readKeys.length === 0
+      ? {
+          title: "Read your first topic",
+          desc: "Start the compounding effect with one focused reading session.",
+          cta: "Open library",
+          onClick: () => setPage?.("where_to_start"),
+        }
+      : completedNotes === 0
+        ? {
+            title: "Write your first note",
+            desc: "Capture one key takeaway so your progress becomes reusable.",
+            cta: "Keep reading",
+            onClick: () => setPage?.("where_to_start"),
+          }
+        : readingStreak.count < 3
+          ? {
+              title: "Protect your streak",
+              desc: "Open Daily Growth and complete one action to stay consistent.",
+              cta: "Open Daily Growth",
+              onClick: () => setPage?.("daily_growth"),
+            }
+          : {
+              title: "Level up communication",
+              desc: "Push your speaking confidence with a guided quiz or audio drill.",
+              cta: "Start communication",
+              onClick: () => openCommunicationQuiz?.("audio"),
+            };
+
   return (
     <div
       data-page-tag="#progress_dashboard"
@@ -121,7 +156,6 @@ export function ProgressDashboardPage({
           { label: "Topics Read", value: readKeys.length, color: t.green },
           { label: "Bookmarks", value: bookmarks.length, color: t.gold },
           { label: "Notes", value: completedNotes, color: t.green },
-          { label: "Quotes", value: savedHighlightsCount, color: t.green },
           {
             label: "Streak",
             value: readingStreak.count > 0 ? `${readingStreak.count}d` : "0d",
@@ -163,6 +197,90 @@ export function ProgressDashboardPage({
             </span>
           </div>
         ))}
+      </div>
+      <div
+        style={{
+          background: `linear-gradient(135deg, ${t.white} 0%, ${t.greenLt} 100%)`,
+          border: `1px solid ${t.border}`,
+          borderRadius: 16,
+          padding: 20,
+          marginBottom: 20,
+        }}
+      >
+        <p
+          style={{
+            margin: "0 0 8px",
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 2.5,
+            textTransform: "uppercase",
+            color: t.green,
+          }}
+        >
+          Next Best Step
+        </p>
+        <h3 style={{ margin: "0 0 8px", fontSize: 20, color: t.ink }}>
+          {nextAction.title}
+        </h3>
+        <p
+          style={{
+            margin: "0 0 14px",
+            fontSize: 13,
+            lineHeight: 1.7,
+            color: t.mid,
+          }}
+        >
+          {nextAction.desc}
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+          <button
+            type="button"
+            onClick={() => {
+              play?.("tap");
+              nextAction.onClick?.();
+            }}
+            style={{
+              background: t.green,
+              color: t.white,
+              border: "none",
+              borderRadius: 12,
+              padding: "12px 16px",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: "Georgia,serif",
+            }}
+          >
+            {nextAction.cta}
+          </button>
+          {[
+            ["Momentum Hub", openMomentumHub],
+            ["Daily Growth", () => setPage?.("daily_growth")],
+            ["Goals", () => setPage?.("goal_setting")],
+          ].map(([label, handler]) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => {
+                play?.("tap");
+                handler?.();
+              }}
+              style={{
+                background: t.white,
+                color: t.ink,
+                border: `1px solid ${t.border}`,
+                borderRadius: 12,
+                padding: "12px 16px",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: "Georgia,serif",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Challenges */}
@@ -229,10 +347,11 @@ export function ProgressDashboardPage({
           },
         ].map((ch) => {
           const handleClick = () => {
-            if (ch.done) return;
             play?.("tap");
-            if (ch.action === "communication" && setPage) {
-              setPage("quiz");
+            if (ch.action === "communication" && openCommunicationQuiz) {
+              openCommunicationQuiz(
+                ch.text.includes("Record yourself") ? "audio" : "quiz",
+              );
             } else if (ch.action === "tailor" && setScreen) {
               setScreen("tailor_intro");
             } else if (ch.action === "goal" && setPage) {
@@ -246,7 +365,6 @@ export function ProgressDashboardPage({
               key={ch.text}
               type="button"
               onClick={handleClick}
-              disabled={ch.done}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -259,13 +377,13 @@ export function ProgressDashboardPage({
                 borderBottomWidth: 1,
                 borderBottomStyle: "solid",
                 borderBottomColor: t.light,
-                cursor: ch.done ? "default" : "pointer",
+                cursor: "pointer",
                 textAlign: "left",
                 fontFamily: "Georgia,serif",
                 transition: "background 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                if (!ch.done) e.currentTarget.style.background = t.greenLt + "44";
+                e.currentTarget.style.background = t.greenLt + "44";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = "transparent";
@@ -310,21 +428,19 @@ export function ProgressDashboardPage({
               >
                 {ch.text}
               </span>
-              {!ch.done && (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={t.muted}
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ flexShrink: 0 }}
-                >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              )}
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={ch.done ? t.green : t.muted}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ flexShrink: 0 }}
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </button>
           );
         })}

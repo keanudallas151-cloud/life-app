@@ -34,7 +34,7 @@ const STEPS = [
   },
 ];
 
-export function WhereToStartPage({ t, play, setPage, onSelect }) {
+export function WhereToStartPage({ t, play, setPage, onSelect, onOpenQuiz }) {
   return (
     <div
       data-page-tag="#where_to_start"
@@ -153,7 +153,8 @@ export function WhereToStartPage({ t, play, setPage, onSelect }) {
         <button
           onClick={() => {
             play("open");
-            setPage("quiz");
+            if (typeof onOpenQuiz === "function") onOpenQuiz();
+            else setPage("quiz");
           }}
           style={{
             background: t.green,

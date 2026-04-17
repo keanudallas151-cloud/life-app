@@ -1,6 +1,4 @@
 "use client";
-import React from "react";
-
 export function VerifyEmailPage({ C, play, setScreen, verifyTargetEmail, supabase }) {
   return (
     <div

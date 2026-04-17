@@ -1,4 +1,3 @@
-import React from "react";
 import { MomentumCard } from "./MomentumCard";
 
 export default function ProfilePage({
@@ -10,7 +9,6 @@ export default function ProfilePage({
   bookmarks,
   readingStreak,
   completedNotes,
-  savedHighlightsCount,
   momentumSnapshot,
   openMomentumHub,
   initials,
@@ -147,7 +145,6 @@ export default function ProfilePage({
                     ["Topics Read", readKeys.length],
                     ["Bookmarks Saved", bookmarks.length],
                     ["Notes Written", completedNotes],
-                    ["Quotes Saved", savedHighlightsCount],
                     [
                       "Reading streak",
                       readingStreak.count > 0
@@ -191,6 +188,63 @@ export default function ProfilePage({
                     onOpenHub={openMomentumHub}
                     title="Your momentum"
                   />
+                </div>
+                <div
+                  style={{
+                    background: t.white,
+                    border: `1px solid ${t.border}`,
+                    borderRadius: 14,
+                    padding: 16,
+                    marginBottom: 20,
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: "0 0 12px",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: 2.2,
+                      textTransform: "uppercase",
+                      color: t.muted,
+                    }}
+                  >
+                    Quick Actions
+                  </p>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+                      gap: 10,
+                    }}
+                  >
+                    {[
+                      ["Dashboard", "progress_dashboard"],
+                      ["Daily Growth", "daily_growth"],
+                      ["Settings", "setting_preferences"],
+                    ].map(([label, nextPage]) => (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => {
+                          play("tap");
+                          setPage(nextPage);
+                        }}
+                        style={{
+                          border: `1px solid ${t.border}`,
+                          borderRadius: 12,
+                          background: t.light,
+                          color: t.ink,
+                          padding: "12px 14px",
+                          fontSize: 13,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          fontFamily: "Georgia,serif",
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div style={{ marginBottom: 8 }}>
                   <p

@@ -1,5 +1,4 @@
 // v1.0.1 - auth fixes: DOB validation, 3s loading, Supabase hardcoded
-import Image from "next/image";
 import {
   Suspense,
   useCallback,
@@ -24,7 +23,6 @@ import { C, S, THEME_MODES, useTheme } from "./systems/theme";
 import { useMomentum } from "./systems/useMomentum";
 import { useQuizStats } from "./systems/useQuizStats";
 import { useSound } from "./systems/useSound";
-// P4: Constellation removed
 import { MomentumCard } from "./components/MomentumCard";
 import {
   getAuthRedirectUrl,
@@ -33,7 +31,6 @@ import {
 } from "./supabaseClient";
 import { useUserData } from "./systems/useUserData";
 
-// ── Shell components extracted for maintainability ───────────
 import {
   EbookReader,
   MomentumHubPage,
@@ -69,9 +66,7 @@ import { BottomNav } from "./components/BottomNav";
 import { SignInPage } from "./components/SignInPage";
 import { RegisterPage } from "./components/RegisterPage";
 
-/* ── Categories data (P7) — moved to CategoriesPage.jsx, re-exported ── */
 
-/* ── Sidebar components (extracted for react-hooks/static-components) ── */
 const PREF_DEFAULTS = {
   soundEnabled: true,
   soundVolume: 58,
@@ -87,11 +82,7 @@ const PREF_DEFAULTS = {
   sidebarSpeed: 62,
 };
 
-/* ── Swipe-to-delete Notification item ─────────────────────────
-   Horizontal swipe left > 80px reveals & triggers delete.
-   Tap (no drag) triggers the onTap callback → navigates.
-   Works with both touch and mouse events.
-   ──────────────────────────────────────────────────────────── */
+// Swipe left beyond 80px to delete a notification; taps still navigate.
 // Horizontal movement must exceed vertical by this factor to trigger swipe-to-delete
 // (prevents accidental swipes while scrolling the notification list)
 const SWIPE_HORIZONTAL_BIAS = 1.5;
@@ -222,15 +213,12 @@ function SwipeableNotification({ n, theme, onTap, onDelete }) {
 }
 
 export default function LifeApp() {
-  // ── DARK MODE (P11) ───────────────────────────────────────────
   const { dark, toggleTheme, t, themeMode, setThemeMode, systemDark } = useTheme();
 
-  // ── iOS dark-mode body class (for CSS :root overrides) ───────
   useEffect(() => {
     document.body.classList.toggle("life-dark", dark);
   }, [dark]);
 
-  // ── AUTH STATE ──────────────────────────────────────────────
   const [screen, setScreen] = useState("loading"); // start loading until session resolved
   const [user, setUser] = useState(null); // { id, email, name, username }
   const [authLoading, setAuthLoading] = useState(false);
@@ -321,7 +309,6 @@ export default function LifeApp() {
     setRpErr("");
   }, []);
 
-  // ── AUTH PROVIDERS ────────────────────────────────────────────
   // Only 3 providers on landing page: Google, Phone, Facebook
   const AUTH_PROVIDERS = [
     {
@@ -347,7 +334,6 @@ export default function LifeApp() {
     },
   ];
 
-  // ── SHAPE USER ────────────────────────────────────────────────
   const shapeUser = useCallback((sbUser) => {
     const meta = sbUser.user_metadata || {};
     return {
@@ -359,7 +345,6 @@ export default function LifeApp() {
     };
   }, []);
 
-  // ── SESSION RESTORE ON REFRESH ──────────────────────────────
   useEffect(() => {
     if (!isSupabaseConfigured) {
       setUser(null);
@@ -376,7 +361,6 @@ export default function LifeApp() {
           return;
         }
         setUser(shapeUser(session.user));
-        // P5: restore last screen
         const lastScreen = LS.get("life_last_screen", "app");
         const validScreens = [
           "app",
@@ -484,14 +468,12 @@ export default function LifeApp() {
     }
   }, [screen, user]);
 
-  // P5: persist screen to localStorage
   useEffect(() => {
     if (screen && screen !== "loading") {
       LS.set("life_last_screen", screen);
     }
   }, [screen]);
 
-  // ── USER-SCOPED STATE: Supabase user_data when configured, else localStorage ─
   const uid = user?.email || "_";
   const userIdForData = isSupabaseConfigured && user?.id ? user.id : null;
   const [uiPrefs, setUiPrefs] = useState(() => ({
@@ -518,9 +500,6 @@ export default function LifeApp() {
   const [localReadKeys, setLocalReadKeysRaw] = useState(() =>
     LS.get(`rd_${uid}`, []),
   );
-  const [localHighlights, setLocalHighlightsRaw] = useState(() =>
-    LS.get(`hl_${uid}`, []),
-  );
   const [localProfile, setLocalProfileRaw] = useState(() =>
     LS.get(`tsd_${uid}`, null),
   );
@@ -531,10 +510,6 @@ export default function LifeApp() {
   const bookmarks = userIdForData ? cloud.bookmarks : localBookmarks;
   const notes = userIdForData ? cloud.notes : localNotes;
   const readKeys = userIdForData ? cloud.readKeys : localReadKeys;
-  const highlights =
-    userIdForData && (cloud.highlights?.length ?? 0) > 0
-      ? cloud.highlights
-      : localHighlights;
   const profile = userIdForData ? cloud.tsdProfile : localProfile;
   const momentumState = userIdForData
     ? cloud.momentumState
@@ -564,17 +539,6 @@ export default function LifeApp() {
       LS.set(`rd_${uid}`, next);
     }
   };
-  const setHighlights = useCallback(
-    (v) => {
-      const next = typeof v === "function" ? v(highlights) : v;
-      setLocalHighlightsRaw(next);
-      LS.set(`hl_${uid}`, next);
-      if (userIdForData) {
-        cloud.setHighlights(next);
-      }
-    },
-    [cloud, highlights, uid, userIdForData],
-  );
   const setMomentumState = (v) => {
     const next = typeof v === "function" ? v(momentumState) : v;
     if (userIdForData) cloud.setMomentumState(next);
@@ -592,17 +556,17 @@ export default function LifeApp() {
       persistedState: momentumState,
       readKeys,
       notes,
-      highlights,
       quizStats,
       profile,
       isGuest: !userIdForData,
       persist: setMomentumState,
     });
 
-  // ── APP PAGE STATE ────────────────────────────────────────────
-  // P5: restore last page from localStorage
   const [page, setPageRaw] = useState(() =>
     LS.get(`life_last_page_${uid}`, "home"),
+  );
+  const [quizPreset, setQuizPreset] = useState(() =>
+    LS.get(`life_quiz_preset_${uid}`, { topic: "finance", activity: "quiz" }),
   );
   const setPage = useCallback(
     (p) => {
@@ -611,6 +575,31 @@ export default function LifeApp() {
     },
     [uid],
   );
+  const setQuizContext = useCallback(
+    (next) => {
+      const normalized = {
+        topic: next?.topic || "finance",
+        activity: next?.activity || "quiz",
+      };
+      setQuizPreset(normalized);
+      LS.set(`life_quiz_preset_${uid}`, normalized);
+    },
+    [uid],
+  );
+
+  const openCommunicationQuiz = useCallback(
+    (activity = "quiz") => {
+      setQuizContext({ topic: "communication", activity });
+      setPage("quiz");
+      setSidebarOpen(false);
+    },
+    [setPage, setQuizContext],
+  );
+  const openQuizHome = useCallback(() => {
+    setQuizContext({ topic: "finance", activity: "quiz" });
+    setPage("quiz");
+    setSidebarOpen(false);
+  }, [setPage, setQuizContext]);
 
   const openMomentumHub = useCallback(() => {
     play("tap");
@@ -690,6 +679,16 @@ export default function LifeApp() {
   const [noteSaved, setNoteSaved] = useState(false);
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [isNarrowViewport, setIsNarrowViewport] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const media = window.matchMedia("(max-width: 767px)");
+    const syncViewport = () => setIsNarrowViewport(media.matches);
+    syncViewport();
+    media.addEventListener("change", syncViewport);
+    return () => media.removeEventListener("change", syncViewport);
+  }, []);
 
   useEffect(() => {
     if (!showSearch || search.length <= 1) return;
@@ -710,7 +709,6 @@ export default function LifeApp() {
   const [shareToast, setShareToast] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  // ── Add-To-Home-Screen (A2HS) — iOS Safari install prompt ────
   const [a2hsPrompt, setA2hsPrompt] = useState(null); // Android/Chrome BeforeInstallPromptEvent
   const [showA2hs, setShowA2hs] = useState(false);
   const [a2hsDismissed, setA2hsDismissed] = useState(() =>
@@ -772,7 +770,6 @@ export default function LifeApp() {
     }
   };
 
-  // ── Notifications (P9c) ───────────────────────────────────────
   const [notifications, setNotifications] = useState(() =>
     LS.get(`notif_${uid}`, [
       {
@@ -780,6 +777,7 @@ export default function LifeApp() {
         text: "Welcome to Life. — start your journey today!",
         time: "Just now",
         read: false,
+        targetPage: "home",
       },
       {
         id: 2,
@@ -792,6 +790,15 @@ export default function LifeApp() {
         text: "New content available: Advanced Finance strategies.",
         time: "1h ago",
         read: false,
+        targetPage: "where_to_start",
+      },
+      {
+        id: 4,
+        text: "Improve Communication with a guided speaking practice.",
+        time: "2h ago",
+        read: false,
+        targetPage: "communication_quiz",
+        activity: "audio",
       },
     ]),
   );
@@ -818,7 +825,11 @@ export default function LifeApp() {
     setShowNotif(false);
     play("tap");
     if (n.targetPage) {
-      setPage(n.targetPage);
+      if (n.targetPage === "communication_quiz") {
+        openCommunicationQuiz(n.activity || "quiz");
+      } else {
+        setPage(n.targetPage);
+      }
     } else if (n.text && /tailor/i.test(n.text)) {
       setScreen("tailor_intro");
     } else {
@@ -826,10 +837,8 @@ export default function LifeApp() {
     }
   };
 
-  // ── Categories flow (P7) ──────────────────────────────────────
   const [catStep, setCatStep] = useState(0);
 
-  // ── Dark mode body effect (P11) ───────────────────────────────
   useEffect(() => {
     document.body.style.background = t.skin;
     document.documentElement.style.background = t.skin;
@@ -956,7 +965,6 @@ export default function LifeApp() {
       (cloud.bookmarks?.length ?? 0) > 0 ||
       Object.keys(cloud.notes || {}).some((k) => cloud.notes[k]) ||
       (cloud.readKeys?.length ?? 0) > 0 ||
-      (cloud.highlights?.length ?? 0) > 0 ||
       cloud.tsdProfile != null;
     if (hasCloud) {
       migratedRef.current = true;
@@ -966,20 +974,17 @@ export default function LifeApp() {
     const lb = LS.get(`bk_${email}`, []);
     const ln = LS.get(`nt_${email}`, {});
     const lr = LS.get(`rd_${email}`, []);
-    const lh = LS.get(`hl_${email}`, []);
     const lp = LS.get(`tsd_${email}`, null);
     const hasLocal =
       lb.length > 0 ||
       Object.keys(ln).some((k) => ln[k]) ||
       lr.length > 0 ||
-      lh.length > 0 ||
       lp != null;
     migratedRef.current = true;
     if (hasLocal) {
       cloud.setBookmarks(lb);
       cloud.setNotes(ln);
       cloud.setReadKeys(lr);
-      cloud.setHighlights(lh);
       if (lp) cloud.setTsdProfile(lp);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- see block comment above
@@ -989,13 +994,11 @@ export default function LifeApp() {
     cloud.bookmarks,
     cloud.notes,
     cloud.readKeys,
-    cloud.highlights,
     cloud.tsdProfile,
     user?.email,
     cloud.setBookmarks,
     cloud.setNotes,
     cloud.setReadKeys,
-    cloud.setHighlights,
     cloud.setTsdProfile,
   ]);
 
@@ -1007,12 +1010,10 @@ export default function LifeApp() {
       setLocalBookmarksRaw(LS.get(`bk_${uid}`, []));
       setLocalNotesRaw(LS.get(`nt_${uid}`, {}));
       setLocalReadKeysRaw(LS.get(`rd_${uid}`, []));
-      setLocalHighlightsRaw(LS.get(`hl_${uid}`, []));
       setLocalProfileRaw(LS.get(`tsd_${uid}`, null));
     }
   }, [uid, userIdForData]);
 
-  // ── GOOGLE SIGN IN (live) ─────────────────────────────────────
   const doGoogleSignIn = async () => {
     if (authLoading) return;
     play("tap");
@@ -1041,7 +1042,6 @@ export default function LifeApp() {
     }
   };
 
-  // ── PROVIDER BUTTON HANDLER ────────────────────────────────────
   const doProviderSignIn = (item) => {
     if (!item.live) {
       play("tap");
@@ -1053,7 +1053,6 @@ export default function LifeApp() {
     }
   };
 
-  // ── EMAIL / PASSWORD SIGN IN ──────────────────────────────────
   const doEmailSignIn = async () => {
     if (authLoading) return;
     setSiErr("");
@@ -1095,7 +1094,6 @@ export default function LifeApp() {
     }
   };
 
-  // ── FORGOT PASSWORD (P9a) ──────────────────────────────────────
   const doForgotPassword = async () => {
     if (authLoading) return;
     setFpErr("");
@@ -1179,7 +1177,6 @@ export default function LifeApp() {
     }
   };
 
-  // ── SUPABASE REGISTER ─────────────────────────────────────────
   const doRegister = async () => {
     if (authLoading) return;
     setRErr({});
@@ -1284,7 +1281,6 @@ export default function LifeApp() {
     }
   };
 
-  // ── SUPABASE SIGN OUT ─────────────────────────────────────────
   const doSignOut = async () => {
     postAuthScreenRef.current = "landing";
     passwordRecoveryRef.current = false;
@@ -1295,7 +1291,6 @@ export default function LifeApp() {
     setSiSocialErr("");
   };
 
-  // ── APP HELPERS ───────────────────────────────────────────────
   const handleSelect = (key, node) => {
     const alreadyRead = readKeys.includes(key);
     setSelKey(key);
@@ -1401,53 +1396,6 @@ export default function LifeApp() {
     }
   };
 
-  const _saveHighlight = useCallback(
-    ({ text, topicTitle, page }) => {
-      if (!selKey) return { status: "error", message: "No topic selected." };
-      const normalizedText = String(text || "")
-        .replace(/\s+/g, " ")
-        .trim();
-      if (!normalizedText) {
-        return { status: "error", message: "Choose a passage to save." };
-      }
-      const alreadySaved = highlights.some(
-        (item) =>
-          item?.contentKey === selKey &&
-          String(item?.text || "").trim() === normalizedText,
-      );
-      if (alreadySaved) {
-        return { status: "duplicate", message: "Quote already saved." };
-      }
-
-      const nextItem = {
-        id: `hl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        contentKey: selKey,
-        topicTitle: topicTitle || selContent?.title || selKey,
-        text: normalizedText,
-        page: Number(page ?? 0),
-        createdAt: new Date().toISOString(),
-      };
-      setHighlights((prev) => [...prev, nextItem]);
-      trackMomentumEvent("note", {
-        source: "reader",
-        points: 4,
-        contentKey: selKey,
-        topicKey: selKey,
-        meta: { kind: "highlight", length: normalizedText.length },
-      });
-      return { status: "saved", item: nextItem };
-    },
-    [highlights, selContent?.title, selKey, setHighlights, trackMomentumEvent],
-  );
-
-  const _removeHighlight = useCallback(
-    (highlightId) => {
-      if (!highlightId) return;
-      setHighlights((prev) => prev.filter((item) => item?.id !== highlightId));
-    },
-    [setHighlights],
-  );
-
   const shareNote = () => {
     if (!selKey || !noteInput.trim()) return;
     play("ok");
@@ -1477,7 +1425,6 @@ export default function LifeApp() {
     setTimeout(() => setShareToast(false), 3200);
   };
 
-  // ── SCROLL TO TOP ─────────────────────────────────────────────
   useEffect(() => {
     if (screen !== "app") {
       setShowScrollTop(false);
@@ -1542,12 +1489,9 @@ export default function LifeApp() {
       ? Math.round((readKeys.length / allContent.length) * 100)
       : 0;
   const completedNotes = Object.keys(notes).filter((key) => notes[key]).length;
-  const savedHighlightsCount = highlights.length;
   const verifyTargetEmail = verifyEmailAddress || rEmail || user?.email || "";
 
-  // ── SIDEBAR HELPERS (extracted outside component — see SS/SL above) ──
 
-  // ── SCREENS ───────────────────────────────────────────────────
 
   // Loading splash — shown while Supabase resolves session
   if (screen === "loading")
@@ -1939,7 +1883,6 @@ export default function LifeApp() {
       </div>
     );
 
-  // ── VERIFY EMAIL SCREEN ──────────────────────────────────────
   if (screen === "verify_email")
     return (
       <VerifyEmailPage
@@ -2091,7 +2034,6 @@ export default function LifeApp() {
       />
     );
 
-  // ── MAIN APP ──────────────────────────────────────────────────
   // Keep the layout primitives straightforward because this will likely be ported into a native app shell later.
   return (
     <div
@@ -2143,14 +2085,17 @@ export default function LifeApp() {
             className="life-notif-dropdown"
             style={{
               position: "fixed",
-              top: 56,
-              right: 60,
+              top: `calc(56px + env(safe-area-inset-top, 0px))`,
+              left: isNarrowViewport ? 12 : "auto",
+              right: isNarrowViewport
+                ? 12
+                : "max(12px, env(safe-area-inset-right, 0px))",
               zIndex: 200,
               background: t.white,
               border: `1px solid ${t.border}`,
               borderRadius: 14,
               boxShadow: S.lg,
-              width: 320,
+              width: isNarrowViewport ? "auto" : 320,
               maxHeight: "min(460px, calc(100dvh - 80px))",
               display: "flex",
               flexDirection: "column",
@@ -2270,7 +2215,7 @@ export default function LifeApp() {
               /* Match height of logo/search so it's perfectly centered */
               width: 40,
               height: 40,
-              padding: "0 4px",
+              padding: "4px 4px 0",
               boxSizing: "border-box",
               transition: "opacity 0.2s ease",
             }}
@@ -2853,8 +2798,7 @@ export default function LifeApp() {
               icon="brain"
               onClick={() => {
                 play("tap");
-                setPage("quiz");
-                setSidebarOpen(false);
+                openQuizHome();
               }}
               active={page === "quiz"}
             />
@@ -3101,6 +3045,12 @@ export default function LifeApp() {
                   const pack = MAP[key];
                   if (pack) handleSelect(pack.key, pack.node);
                 }}
+                onOpenQuiz={openQuizHome}
+                onOpenDailyGrowth={() => {
+                  play("tap");
+                  setPage("daily_growth");
+                }}
+                onOpenMomentumHub={openMomentumHub}
               />
             )}
 
@@ -3126,6 +3076,7 @@ export default function LifeApp() {
                 t={t}
                 play={play}
                 setPage={setPage}
+                onOpenQuiz={openQuizHome}
                 onSelect={handleSelect}
               />
             )}
@@ -3136,6 +3087,10 @@ export default function LifeApp() {
                   play={play}
                   t={t}
                   userId={isSupabaseConfigured ? user?.id : null}
+                  initialTopic={quizPreset?.topic}
+                  initialActivity={quizPreset?.activity}
+                  readKeys={readKeys}
+                  totalTopics={allContent.length}
                   onQuizComplete={(result) => {
                     trackMomentumEvent("quiz", {
                       source: "quiz",
@@ -3209,23 +3164,23 @@ export default function LifeApp() {
 
             {/* P6: Progress Dashboard */}
             {page === "progress_dashboard" && (
-              <ProgressDashboardPage
-                t={t}
-                momentumSnapshot={momentumSnapshot}
-                openMomentumHub={openMomentumHub}
-                readKeys={readKeys}
-                bookmarks={bookmarks}
-                completedNotes={completedNotes}
-                savedHighlightsCount={savedHighlightsCount}
-                readingStreak={readingStreak}
-                profile={profile}
-                totalTopics={allContent.length}
-                progressPercent={progressPercent}
-                play={play}
-                setPage={setPage}
-                setScreen={setScreen}
-              />
-            )}
+                <ProgressDashboardPage
+                  t={t}
+                  momentumSnapshot={momentumSnapshot}
+                  openMomentumHub={openMomentumHub}
+                  readKeys={readKeys}
+                  bookmarks={bookmarks}
+                  completedNotes={completedNotes}
+                  readingStreak={readingStreak}
+                  profile={profile}
+                  totalTopics={allContent.length}
+                  progressPercent={progressPercent}
+                  play={play}
+                  setPage={setPage}
+                  setScreen={setScreen}
+                  openCommunicationQuiz={openCommunicationQuiz}
+                />
+              )}
 
             {/* P9d: Leaderboard */}
             {page === "leaderboard" && (
@@ -3233,7 +3188,17 @@ export default function LifeApp() {
             )}
 
             {/* Daily Growth page */}
-            {page === "daily_growth" && <DailyGrowthPage t={t} play={play} setPage={setPage} />}
+            {page === "daily_growth" && (
+              <DailyGrowthPage
+                t={t}
+                play={play}
+                setPage={setPage}
+                onMomentumEvent={(event) => {
+                  if (!event?.type) return;
+                  trackMomentumEvent(event.type, event);
+                }}
+              />
+            )}
 
             {page === "goal_setting" && <GoalSettingPage t={t} play={play} />}
 
@@ -3274,7 +3239,6 @@ export default function LifeApp() {
                 bookmarks={bookmarks}
                 readingStreak={readingStreak}
                 completedNotes={completedNotes}
-                savedHighlightsCount={savedHighlightsCount}
                 momentumSnapshot={momentumSnapshot}
                 openMomentumHub={openMomentumHub}
                 initials={initials}
@@ -3340,13 +3304,13 @@ export default function LifeApp() {
         </svg>
       </button>
 
-      {/* ── BOTTOM NAVIGATION BAR (mobile only) ─────────────── */}
       <BottomNav
         t={t}
         dark={dark}
         page={page}
         play={play}
         setPage={setPage}
+        onOpenQuiz={openQuizHome}
         setSidebarOpen={setSidebarOpen}
         showNotif={showNotif}
         setShowNotif={setShowNotif}
@@ -3354,7 +3318,6 @@ export default function LifeApp() {
         initials={initials}
       />
 
-      {/* ── ADD TO HOME SCREEN BANNER ────────────────────────── */}
       {showA2hs && !isStandalone && (
         <div
           className="life-a2hs-banner"

@@ -2,9 +2,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { C } from "../systems/theme";
 import { Ic } from "../icons/Ic";
 import { QUIZ_QUESTIONS } from "../data/quiz";
+import { LS } from "../systems/storage";
 import { useQuizStats } from "../systems/useQuizStats";
 
-// ── Constants ─────────────────────────────────────────────
 const TOPIC_META = {
   finance:    { label:"Finance",    col:"#4a8c5c", bg:"#eaf3ec",  icon:"wallet"  },
   psychology: { label:"Psychology", col:"#7B6FA8", bg:"#f0edf8",  icon:"brain"   },
@@ -25,6 +25,30 @@ const FORMAT_META = {
   truefalse: { label:"True / False",    icon:"⚡", desc:"Quick-fire judgement" },
   blitz:     { label:"Blitz Mode",      icon:"🚀", desc:"8 seconds — no mercy" },
   daily:     { label:"Daily Challenge", icon:"📅", desc:"Same for everyone today" },
+};
+const GOAL_KEY = "life_personal_goals";
+const COMMUNICATION_ACTIVITY_KEY = "life_comm_activity_log";
+const COMMUNICATION_ACTIVITIES = {
+  quiz: {
+    label: "Quiz Drill",
+    icon: "🎯",
+    desc: "Classic communication questions with explanations.",
+  },
+  sentence: {
+    label: "Sentence Completion",
+    icon: "✍️",
+    desc: "Fill in the missing idea and sharpen spoken vocabulary.",
+  },
+  warmup: {
+    label: "Vocal Warmups",
+    icon: "🎙️",
+    desc: "Breathing, resonance, and articulation prompts before speaking.",
+  },
+  audio: {
+    label: "Audio Practice",
+    icon: "🎧",
+    desc: "Conversation practice with an MP3-ready placeholder flow.",
+  },
 };
 
 const ACHIEVEMENTS = [
@@ -57,7 +81,6 @@ function seededShuffle(arr, seed) {
   return a;
 }
 
-// ── Sub-components ────────────────────────────────────────
 function StatCard({ label, value, col, t }) {
   return (
     <div style={{ background:t.white, border:`1px solid ${t.border}`, borderRadius:12, padding:"14px 16px", textAlign:"center" }}>
@@ -80,12 +103,12 @@ function AchievementBadge({ ach, unlocked, t }) {
     </div>
   );
 }
-function TimerRing({ pct, value, color }) {
+function TimerRing({ pct, value, color, t }) {
   const r = 35, circ = 2 * Math.PI * r;
   return (
     <div style={{ position:"relative", width:84, height:84 }}>
       <svg width="84" height="84" style={{ transform:"rotate(-90deg)" }}>
-        <circle cx="42" cy="42" r={r} fill="none" stroke={C.light} strokeWidth="7"/>
+        <circle cx="42" cy="42" r={r} fill="none" stroke={t.light} strokeWidth="7"/>
         <circle cx="42" cy="42" r={r} fill="none" stroke={color} strokeWidth="7"
           strokeDasharray={circ} strokeDashoffset={circ*(1-pct)}
           strokeLinecap="round" style={{ transition:"stroke-dashoffset 1s linear,stroke 0.3s" }}/>
@@ -97,8 +120,368 @@ function TimerRing({ pct, value, color }) {
   );
 }
 
-// ── Main Component ────────────────────────────────────────
-export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
+function getGoalSignals() {
+  const goals = LS.get(GOAL_KEY, []);
+  const joined = goals
+    .map((goal) => `${goal?.title || ""} ${goal?.target || ""}`)
+    .join(" ");
+  return {
+    count: goals.length,
+    hasThousandGoal: /\b1,?000\b|\$1,?000\b/.test(joined),
+    hasMillionGoal: /\b1,?000,?000\b|\$1,?000,?000\b/.test(joined),
+    hasCompletedGoal: goals.some((goal) => goal?.done),
+  };
+}
+
+function buildPrestigeBadges({ stats, readKeys, totalTopics }) {
+  const goals = getGoalSignals();
+  const communicationLog = LS.get(COMMUNICATION_ACTIVITY_KEY, []);
+  const topicsPlayed = Object.keys(stats.topicsPlayed || {}).length;
+  return [
+    {
+      id: "quiz-first-step",
+      label: "First Step",
+      icon: "🎯",
+      desc: "Complete your first quiz.",
+      unlocked: (stats.totalPlayed || 0) >= 1,
+    },
+    {
+      id: "communication-builder",
+      label: "Voice Builder",
+      icon: "🎙️",
+      desc: "Complete a Communication quiz or practice session.",
+      unlocked:
+        Number(stats.topicsPlayed?.communication || 0) >= 1 ||
+        communicationLog.length >= 1,
+    },
+    {
+      id: "well-rounded",
+      label: "Well Rounded",
+      icon: "🌍",
+      desc: "Play across at least 3 different quiz subjects.",
+      unlocked: topicsPlayed >= 3,
+    },
+    {
+      id: "goal-architect",
+      label: "Goal Architect",
+      icon: "🏁",
+      desc: "Create your first personal goal.",
+      unlocked: goals.count >= 1,
+    },
+    {
+      id: "four-figures",
+      label: "First $1,000 Vision",
+      icon: "💸",
+      desc: "Set a concrete four-figure milestone in your goals.",
+      unlocked: goals.hasThousandGoal,
+    },
+    {
+      id: "seven-figures",
+      label: "First $1,000,000 Vision",
+      icon: "👑",
+      desc: "Think bigger with a seven-figure milestone goal.",
+      unlocked: goals.hasMillionGoal,
+    },
+    {
+      id: "goal-finished",
+      label: "Promise Kept",
+      icon: "✅",
+      desc: "Complete a personal goal you committed to.",
+      unlocked: goals.hasCompletedGoal,
+    },
+    {
+      id: "subject-mastery",
+      label: "Complete Every Subject",
+      icon: "🏆",
+      desc: "Read every subject across the app library.",
+      unlocked: totalTopics > 0 && readKeys >= totalTopics,
+    },
+    {
+      id: "legend-run",
+      label: "Prestige Run",
+      icon: "💎",
+      desc: "Finish 25 quizzes with consistent effort.",
+      unlocked: (stats.totalPlayed || 0) >= 25,
+    },
+  ];
+}
+
+function PrestigeBadgeCard({ badge, t }) {
+  return (
+    <div
+      style={{
+        background: badge.unlocked ? t.white : t.light,
+        border: `1px solid ${badge.unlocked ? `${t.green}55` : t.border}`,
+        borderRadius: 18,
+        padding: "18px 16px",
+        minHeight: 150,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        boxShadow: badge.unlocked ? "0 12px 26px rgba(74,140,92,0.12)" : "none",
+        opacity: badge.unlocked ? 1 : 0.74,
+      }}
+    >
+      <div>
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 14,
+            background: badge.unlocked ? t.greenLt : t.white,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 24,
+            marginBottom: 14,
+          }}
+        >
+          {badge.icon}
+        </div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: t.ink, marginBottom: 6 }}>
+          {badge.label}
+        </div>
+        <div style={{ fontSize: 12, color: t.muted, lineHeight: 1.65 }}>
+          {badge.desc}
+        </div>
+      </div>
+      <div
+        style={{
+          marginTop: 14,
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: 2,
+          textTransform: "uppercase",
+          color: badge.unlocked ? t.green : t.muted,
+        }}
+      >
+        {badge.unlocked ? "Unlocked" : "Locked"}
+      </div>
+    </div>
+  );
+}
+
+function CommunicationPracticePage({ activity, t, play, onBack }) {
+  const sentencePrompts = [
+    { prompt: "Ben is an accountant so he deals with ____.", answer: "numbers and finances" },
+    { prompt: "Active ____ means fully concentrating on what the speaker says.", answer: "listening" },
+    { prompt: "Body ____ communicates even when we're silent.", answer: "language" },
+  ];
+  const warmups = [
+    "Take 5 deep breaths, expanding the ribs instead of the shoulders.",
+    "Hum for 20 seconds, then glide from low to high pitch.",
+    "Repeat: red leather, yellow leather — slowly, then clearly at pace.",
+    "Say one sentence with a full stop and deliberate pause after each clause.",
+  ];
+
+  return (
+    <div
+      style={{
+        padding:
+          "28px max(16px, env(safe-area-inset-left, 0px)) max(40px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px))",
+        maxWidth: 560,
+        margin: "0 auto",
+        boxSizing: "border-box",
+      }}
+    >
+      <button
+        onClick={onBack}
+        style={{
+          background: "none",
+          border: "none",
+          color: t.muted,
+          fontSize: 13,
+          cursor: "pointer",
+          fontFamily: "Georgia,serif",
+          marginBottom: 18,
+          padding: 0,
+        }}
+      >
+        ← Back to setup
+      </button>
+      <div
+        style={{
+          background: t.white,
+          border: `1px solid ${t.border}`,
+          borderRadius: 22,
+          padding: 24,
+          boxShadow: "0 14px 34px rgba(20,20,20,0.08)",
+        }}
+      >
+        <p
+          style={{
+            margin: "0 0 8px",
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 2.5,
+            textTransform: "uppercase",
+            color: t.muted,
+          }}
+        >
+          Communication practice
+        </p>
+        <h2
+          style={{
+            margin: "0 0 10px",
+            fontSize: 26,
+            fontWeight: 800,
+            color: t.ink,
+            fontFamily: "Georgia,serif",
+          }}
+        >
+          {COMMUNICATION_ACTIVITIES[activity]?.label || "Communication"}
+        </h2>
+        <p
+          style={{
+            margin: "0 0 20px",
+            color: t.muted,
+            fontSize: 14,
+            lineHeight: 1.7,
+            fontStyle: "italic",
+          }}
+        >
+          {COMMUNICATION_ACTIVITIES[activity]?.desc}
+        </p>
+
+        {activity === "sentence" && (
+          <div style={{ display: "grid", gap: 12 }}>
+            {sentencePrompts.map((item) => (
+              <div
+                key={item.prompt}
+                style={{
+                  background: t.light,
+                  border: `1px solid ${t.border}`,
+                  borderRadius: 16,
+                  padding: "16px 18px",
+                }}
+              >
+                <p style={{ margin: "0 0 10px", color: t.ink, fontSize: 15, lineHeight: 1.7 }}>
+                  {item.prompt}
+                </p>
+                <p style={{ margin: 0, color: t.green, fontSize: 13, fontWeight: 700 }}>
+                  Answer: {item.answer}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activity === "warmup" && (
+          <div style={{ display: "grid", gap: 12 }}>
+            {warmups.map((item, index) => (
+              <div
+                key={item}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 12,
+                  background: index === 1 ? t.greenLt : t.light,
+                  border: `1px solid ${index === 1 ? `${t.green}44` : t.border}`,
+                  borderRadius: 16,
+                  padding: "16px 18px",
+                }}
+              >
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: t.white,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: t.green,
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  {index + 1}
+                </div>
+                <p style={{ margin: 0, color: t.ink, fontSize: 14, lineHeight: 1.7 }}>{item}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activity === "audio" && (
+          <div style={{ display: "grid", gap: 14 }}>
+            <div
+              style={{
+                background: t.light,
+                border: `1px solid ${t.border}`,
+                borderRadius: 16,
+                padding: "18px 18px 16px",
+              }}
+            >
+              <p style={{ margin: "0 0 8px", fontSize: 15, color: t.ink, fontWeight: 700 }}>
+                Prompt
+              </p>
+              <p style={{ margin: 0, color: t.mid, lineHeight: 1.75, fontSize: 14 }}>
+                Explain a recent challenge, how you handled it, and what you would do even
+                better next time.
+              </p>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 12,
+              }}
+            >
+              {["Record audio (MP3 soon)", "Upload MP3 (placeholder)"].map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => play("tap")}
+                  style={{
+                    background: t.white,
+                    border: `1.5px dashed ${t.border}`,
+                    borderRadius: 16,
+                    padding: "18px 16px",
+                    color: t.mid,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    fontFamily: "Georgia,serif",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div
+              style={{
+                background: t.greenLt,
+                border: `1px solid ${t.green}33`,
+                borderRadius: 16,
+                padding: "16px 18px",
+              }}
+            >
+              <p style={{ margin: "0 0 6px", color: t.green, fontSize: 12, fontWeight: 700 }}>
+                Placeholder structure ready
+              </p>
+              <p style={{ margin: 0, color: t.mid, fontSize: 13, lineHeight: 1.7 }}>
+                This screen is ready for future MP3 recording/upload plumbing without changing
+                the user-facing practice flow.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function QuizPage({
+  play,
+  userId,
+  onQuizComplete,
+  initialTopic,
+  initialActivity,
+  readKeys = [],
+  totalTopics = 0,
+  t: theme,
+}) {
   const t = theme || C;
   const { stats, saveStats } = useQuizStats(userId);
 
@@ -117,15 +500,39 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
   const [newAchs,   setNewAchs]  = useState([]);
   const [showFact,  setShowFact] = useState(false);
   const [activeTab, setActiveTab]= useState("play");
+  const [communicationActivity, setCommunicationActivity] = useState("quiz");
 
   const timerRef = useRef(null);
   const handleAnswerRef = useRef(null);
   const maxTime  = fmt==="blitz" ? 8 : QUIZ_SECS[diff];
   const timerPct   = maxTime > 0 ? timeLeft / maxTime : 0;
   const timerColor = timerPct>0.5 ? t.green : timerPct>0.25 ? t.gold : t.red;
+  const prestigeBadges = buildPrestigeBadges({
+    stats,
+    readKeys: readKeys.length,
+    totalTopics,
+  });
+
+  useEffect(() => {
+    if (!initialTopic || !TOPIC_META[initialTopic]) return;
+    setTopic(initialTopic);
+    setActiveTab("play");
+    if (initialTopic === "communication") {
+      setCommunicationActivity(initialActivity || "quiz");
+    }
+  }, [initialActivity, initialTopic]);
 
   const startQuiz = useCallback(() => {
     play("ok");
+    if (topic === "communication" && communicationActivity !== "quiz") {
+      const current = LS.get(COMMUNICATION_ACTIVITY_KEY, []);
+      LS.set(
+        COMMUNICATION_ACTIVITY_KEY,
+        [...current, { activity: communicationActivity, createdAt: Date.now() }].slice(-12),
+      );
+      setPhase("communication_practice");
+      return;
+    }
     let selected;
     if (fmt === "daily") {
       const seed    = getDailySeed();
@@ -142,7 +549,7 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
     setStreak(0); setBest(0); setAnswers([]); setShowFact(false);
     setTimeLeft(fmt==="blitz" ? 8 : QUIZ_SECS[diff]);
     setPhase("playing");
-  }, [topic, diff, fmt, play]);
+  }, [topic, diff, fmt, play, communicationActivity]);
 
   const handleAnswer = useCallback((picked) => {
     if (chosen !== null) return;
@@ -190,7 +597,6 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
     return () => clearInterval(timerRef.current);
   }, [idx, phase, chosen]);
 
-  // ── SAVE STATS on result ──────────────────────────────
   useEffect(() => {
     if (phase !== "result") return;
     const pct    = Math.round((score / qs.length) * 100);
@@ -231,7 +637,6 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
     ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100)
     : 0;
 
-  // ── SETUP ────────────────────────────────────────────────
   if (phase === "setup") {
     const todayDone = stats.dailyDate === new Date().toLocaleDateString();
     return (
@@ -250,12 +655,28 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
         </div>
 
         {activeTab === "achievements" && (
-          <div className="life-quiz-panel" style={{ padding:"28px max(16px, env(safe-area-inset-left, 0px)) 28px max(16px, env(safe-area-inset-right, 0px))", maxWidth:520, margin:"0 auto", boxSizing:"border-box" }}>
-            <p style={{ margin:"0 0 20px", fontSize:11, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted }}>
-              {stats.achievements?.length||0}/{ACHIEVEMENTS.length} Unlocked
+          <div className="life-quiz-panel" style={{ padding:"28px max(16px, env(safe-area-inset-left, 0px)) 28px max(16px, env(safe-area-inset-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
+            <div style={{ background:`linear-gradient(135deg, ${t.white}, ${t.greenLt})`, border:`1px solid ${t.border}`, borderRadius:20, padding:"22px 22px 18px", marginBottom:18 }}>
+              <p style={{ margin:"0 0 6px", fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted }}>
+                Prestige badges
+              </p>
+              <h2 style={{ margin:"0 0 6px", fontSize:24, fontWeight:800, color:t.ink, fontFamily:"Georgia,serif" }}>
+                Earned, not handed out
+              </h2>
+              <p style={{ margin:0, color:t.mid, fontSize:14, lineHeight:1.7 }}>
+                A cleaner badge wall with longer-range milestones across learning, goals, and communication.
+              </p>
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(180px, 1fr))", gap:12, marginBottom:20 }}>
+              {prestigeBadges.map((badge) => (
+                <PrestigeBadgeCard key={badge.id} badge={badge} t={t} />
+              ))}
+            </div>
+            <p style={{ margin:"0 0 12px", fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted }}>
+              Quiz streak badges
             </p>
             <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-              {ACHIEVEMENTS.map(a => (
+              {ACHIEVEMENTS.map((a) => (
                 <AchievementBadge t={t} key={a.id} ach={a} unlocked={stats.achievements?.includes(a.id)} />
               ))}
             </div>
@@ -365,8 +786,8 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
 
             {/* Format */}
             <p style={{ fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Format</p>
-            <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:28 }}>
-              {["multiple","truefalse","blitz"].map(f => {
+             <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:28 }}>
+               {["multiple","truefalse","blitz"].map(f => {
                 const fm  = FORMAT_META[f];
                 const sel = fmt===f;
                 return (
@@ -382,22 +803,72 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
                     {sel && <div style={{ width:20,height:20,borderRadius:"50%",background:t.green,display:"flex",alignItems:"center",justifyContent:"center" }}><span style={{ color:"#fff",fontSize:11 }}>✓</span></div>}
                   </button>
                 );
-              })}
-            </div>
+               })}
+             </div>
 
-            <button onClick={startQuiz}
-              style={{ width:"100%", background:t.green, border:"none", borderRadius:14, padding:"18px", color:"#fff",
-                fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"Georgia,serif",
-                boxShadow:"0 6px 20px rgba(74,140,92,0.30)" }}>
-              {fmt==="daily" ? "Start Daily Challenge 📅" : "Start Quiz →"}
-            </button>
-          </div>
-        )}
+             {topic === "communication" && (
+               <>
+                 <p style={{ fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Communication Activity</p>
+                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:28 }}>
+                   {Object.entries(COMMUNICATION_ACTIVITIES).map(([id, meta]) => {
+                     const selected = communicationActivity === id;
+                     return (
+                       <button
+                         key={id}
+                         onClick={() => setCommunicationActivity(id)}
+                         style={{
+                           background: selected ? t.greenLt : t.white,
+                           border: `1.5px solid ${selected ? t.green : t.border}`,
+                           borderRadius: 14,
+                           padding: "15px 14px",
+                           cursor: "pointer",
+                           textAlign: "left",
+                           fontFamily: "Georgia,serif",
+                         }}
+                       >
+                         <div style={{ fontSize: 22, marginBottom: 8 }}>{meta.icon}</div>
+                         <div style={{ fontSize: 14, fontWeight: 700, color: selected ? t.green : t.ink, marginBottom: 4 }}>
+                           {meta.label}
+                         </div>
+                         <div style={{ fontSize: 11, color: t.muted, lineHeight: 1.55 }}>
+                           {meta.desc}
+                         </div>
+                       </button>
+                     );
+                   })}
+                 </div>
+               </>
+             )}
+
+             <button onClick={startQuiz}
+               style={{ width:"100%", background:t.green, border:"none", borderRadius:14, padding:"18px", color:"#fff",
+                 fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"Georgia,serif",
+                 boxShadow:"0 6px 20px rgba(74,140,92,0.30)" }}>
+              {topic === "communication" && communicationActivity !== "quiz"
+                ? `Start ${COMMUNICATION_ACTIVITIES[communicationActivity].label} →`
+                : fmt==="daily" ? "Start Daily Challenge 📅" : "Start Quiz →"}
+             </button>
+           </div>
+         )}
       </div>
     );
   }
 
-  // ── RESULT ───────────────────────────────────────────────
+  if (phase === "communication_practice") {
+    return (
+      <CommunicationPracticePage
+        activity={communicationActivity}
+        t={t}
+        play={play}
+        onBack={() => {
+          play("tap");
+          setPhase("setup");
+          setActiveTab("play");
+        }}
+      />
+    );
+  }
+
   if (phase === "result") {
     const pct      = Math.round((score / qs.length) * 100);
     const grade    = pct===100?"Perfect! 🎉":pct>=90?"Excellent":pct>=70?"Good work":pct>=50?"Decent":"Keep reading";
@@ -405,10 +876,10 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
     return (
       <div className="life-quiz-page life-quiz-result-wrap" style={{ padding:"32px max(16px, env(safe-area-inset-left, 0px)) max(60px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px))", maxWidth:500, margin:"0 auto", boxSizing:"border-box" }}>
         {newAchs.length > 0 && (
-          <div style={{ background:t.ink, borderRadius:14, padding:"16px 20px", marginBottom:20, display:"flex", alignItems:"center", gap:12 }}>
+        <div style={{ background:t.ink, borderRadius:14, padding:"16px 20px", marginBottom:20, display:"flex", alignItems:"center", gap:12 }}>
             <span style={{ fontSize:24 }}>{newAchs[0].icon}</span>
             <div>
-              <div style={{ fontSize:12, color:"rgba(255,255,255,0.6)", fontFamily:"Georgia,serif" }}>Achievement Unlocked</div>
+              <div style={{ fontSize:12, color:"rgba(255,255,255,0.72)", fontFamily:"Georgia,serif" }}>Achievement Unlocked</div>
               <div style={{ fontSize:15, fontWeight:700, color:"#fff", fontFamily:"Georgia,serif" }}>{newAchs[0].label}</div>
             </div>
           </div>
@@ -449,7 +920,7 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
           <div style={{ marginBottom:20 }}>
             <p style={{ fontSize:10, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:t.red, margin:"0 0 10px" }}>Review missed questions</p>
             {answers.filter(a=>!a.correct).map((a,i) => (
-              <div key={i} style={{ background:"#fff8f8", border:`1px solid ${t.red}22`, borderRadius:12, padding:"14px 16px", marginBottom:8 }}>
+              <div key={i} style={{ background:t.ink === C.ink ? "#fff8f8" : t.light, border:`1px solid ${t.red}22`, borderRadius:12, padding:"14px 16px", marginBottom:8 }}>
                 <p style={{ margin:"0 0 6px", fontSize:13, fontWeight:700, color:t.ink, fontFamily:"Georgia,serif" }}>{a.q?.q}</p>
                 <p style={{ margin:"0 0 4px", fontSize:12, color:t.green }}>✓ {a.q?.opts?.[a.q?.a]}</p>
                 {a.q?.explain && <p style={{ margin:0, fontSize:11, color:t.muted, fontStyle:"italic", lineHeight:1.6 }}>{a.q.explain}</p>}
@@ -472,7 +943,6 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
     );
   }
 
-  // ── PLAYING ──────────────────────────────────────────────
   const q         = qs[idx];
   if (!q) return null;
   const opts       = fmt==="truefalse" ? ["True","False"] : q.opts;
@@ -490,7 +960,7 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
         </div>
         <div style={{ display:"flex", gap:8, alignItems:"center" }}>
           {streak >= 2 && (
-            <span style={{ display:"inline-flex", alignItems:"center", gap:4, fontSize:12, color:t.gold, fontWeight:700, background:"#fdf6e8", padding:"3px 8px", borderRadius:20 }}>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:4, fontSize:12, color:t.gold, fontWeight:700, background:t.ink === C.ink ? "#fdf6e8" : t.light, padding:"3px 8px", borderRadius:20 }}>
               🔥 {streak}
             </span>
           )}
@@ -508,7 +978,7 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
       </div>
 
       <div style={{ display:"flex", justifyContent:"center", marginBottom:18 }}>
-        <TimerRing pct={timerPct} value={timeLeft} color={timerColor}/>
+        <TimerRing pct={timerPct} value={timeLeft} color={timerColor} t={t}/>
       </div>
 
       {q.tag && (

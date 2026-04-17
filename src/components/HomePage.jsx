@@ -3,7 +3,13 @@ import { S } from "../systems/theme";
 import { getResumeTopic, clearResumeTopic } from "../systems/resumeReading";
 import { MAP } from "../data/content";
 
-export function HomePage({ t, onResume }) {
+export function HomePage({
+  t,
+  onResume,
+  onOpenQuiz,
+  onOpenDailyGrowth,
+  onOpenMomentumHub,
+}) {
   const [dismissed, setDismissed] = useState(false);
   const resumeTopic = useMemo(() => {
     const saved = getResumeTopic();
@@ -30,7 +36,7 @@ export function HomePage({ t, onResume }) {
           minHeight: "calc(100svh - 132px - env(safe-area-inset-top, 0px))",
           padding: "72px 24px 64px",
           textAlign: "center",
-          background: `linear-gradient(180deg, ${t.skin} 0%, #ebe4d6 100%)`,
+          background: `linear-gradient(180deg, ${t.skin} 0%, ${t.light} 100%)`,
           position: "relative",
           overflow: "hidden",
           display: "flex",
@@ -277,6 +283,71 @@ export function HomePage({ t, onResume }) {
                 }}
               >&rdquo;</span>
             </p>
+          </div>
+          <div
+            style={{
+              margin: "18px auto 0",
+              maxWidth: 560,
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+              gap: 10,
+            }}
+          >
+            {[
+              {
+                label: "Practice Quiz",
+                desc: "Jump straight into your next round.",
+                onClick: onOpenQuiz,
+              },
+              {
+                label: "Daily Growth",
+                desc: "Keep your momentum alive today.",
+                onClick: onOpenDailyGrowth,
+              },
+              {
+                label: "Momentum Hub",
+                desc: "Review streaks, missions, and wins.",
+                onClick: onOpenMomentumHub,
+              },
+            ].map((action) => (
+              <button
+                key={action.label}
+                type="button"
+                onClick={action.onClick}
+                style={{
+                  textAlign: "left",
+                  background: t.white,
+                  border: `1px solid ${t.border}`,
+                  borderRadius: 16,
+                  padding: "16px 18px",
+                  boxShadow: S.sm,
+                  cursor: "pointer",
+                  fontFamily: "Georgia,serif",
+                }}
+              >
+                <span
+                  style={{
+                    display: "block",
+                    marginBottom: 6,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: t.ink,
+                  }}
+                >
+                  {action.label}
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    lineHeight: 1.55,
+                    color: t.muted,
+                  }}
+                >
+                  {action.desc}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
       </div>

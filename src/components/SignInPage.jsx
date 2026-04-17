@@ -1,6 +1,4 @@
 "use client";
-import React from "react";
-
 export function SignInPage({
   C, S, play, setScreen,
   siEmail, setSiEmail, siPass, setSiPass,
@@ -121,7 +119,6 @@ export function SignInPage({
             border: `1px solid ${C.border}`,
           }}
         >
-          {/* ── Email field ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <label
               style={{
@@ -166,7 +163,6 @@ export function SignInPage({
             />
           </div>
 
-          {/* ── Password field ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <label
               style={{
@@ -257,7 +253,6 @@ export function SignInPage({
             </p>
           )}
 
-          {/* ── Sign In button ── */}
           <button
             onClick={doEmailSignIn}
             disabled={authLoading}

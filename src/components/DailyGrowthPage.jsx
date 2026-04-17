@@ -18,7 +18,7 @@ const GROWTH_ITEMS = [
     desc: "Read at least one topic in Life. today. Knowledge compounds.",
     icon: "lightbulb",
     tool: "redirect",
-    redirect: "home",
+    redirect: "where_to_start",
   },
   {
     key: "network",
@@ -61,18 +61,53 @@ const GROWTH_ITEMS = [
   },
 ];
 
-export function DailyGrowthPage({ t, play, setPage }) {
+export function DailyGrowthPage({ t, play, setPage, onMomentumEvent }) {
   const [activeItem, setActiveItem] = useState(null);
   const today = new Date().toISOString().slice(0, 10);
   const [completed, setCompleted] = useState(() =>
     LS.get(`daily_growth_${today}`, []),
   );
+  const weeklyHistory = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - index));
+    const key = date.toISOString().slice(0, 10);
+    const entries = LS.get(`daily_growth_${key}`, []);
+    return {
+      key,
+      label: date
+        .toLocaleDateString(undefined, { weekday: "short" })
+        .slice(0, 2),
+      count: entries.length,
+    };
+  });
+  const streakDays = (() => {
+    let streak = 0;
+    const cursor = new Date();
+    while (true) {
+      const key = cursor.toISOString().slice(0, 10);
+      const entries = LS.get(`daily_growth_${key}`, []);
+      if (!entries.length) break;
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return streak;
+  })();
+  const nextUp = GROWTH_ITEMS.find((item) => !completed.includes(item.key)) || null;
 
   const markDone = (key) => {
     if (completed.includes(key)) return;
     const next = [...completed, key];
     setCompleted(next);
     LS.set(`daily_growth_${today}`, next);
+    onMomentumEvent?.({
+      type: "streak",
+      source: "daily_growth",
+      points: 4,
+      meta: {
+        taskKey: key,
+        completedToday: next.length,
+      },
+    });
     play?.("correct");
   };
 
@@ -111,6 +146,78 @@ export function DailyGrowthPage({ t, play, setPage }) {
       >
         Small daily actions that compound into life-changing results.
       </p>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: 12,
+          marginBottom: 20,
+        }}
+      >
+        <div
+          style={{
+            background: t.white,
+            border: `1px solid ${t.border}`,
+            borderRadius: 14,
+            padding: 16,
+          }}
+        >
+          <p
+            style={{
+              margin: "0 0 6px",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 2.2,
+              textTransform: "uppercase",
+              color: t.muted,
+            }}
+          >
+            Current Streak
+          </p>
+          <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: t.green }}>
+            {streakDays} day{streakDays === 1 ? "" : "s"}
+          </p>
+        </div>
+        <div
+          style={{
+            background: t.white,
+            border: `1px solid ${t.border}`,
+            borderRadius: 14,
+            padding: 16,
+          }}
+        >
+          <p
+            style={{
+              margin: "0 0 8px",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 2.2,
+              textTransform: "uppercase",
+              color: t.muted,
+            }}
+          >
+            Weekly Rhythm
+          </p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {weeklyHistory.map((day) => (
+              <div
+                key={day.key}
+                style={{
+                  minWidth: 44,
+                  padding: "8px 6px",
+                  borderRadius: 10,
+                  textAlign: "center",
+                  background: day.count ? `${t.green}18` : t.light,
+                  color: day.count ? t.green : t.muted,
+                }}
+              >
+                <div style={{ fontSize: 10, fontWeight: 700 }}>{day.label}</div>
+                <div style={{ fontSize: 12, marginTop: 2 }}>{day.count}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Progress strip */}
       <div
@@ -154,6 +261,53 @@ export function DailyGrowthPage({ t, play, setPage }) {
           {completed.length}/{GROWTH_ITEMS.length} TODAY
         </span>
       </div>
+      {nextUp && (
+        <div
+          style={{
+            background: `linear-gradient(135deg, ${t.white} 0%, ${t.greenLt} 100%)`,
+            border: `1px solid ${t.border}`,
+            borderRadius: 16,
+            padding: 18,
+            marginBottom: 18,
+          }}
+        >
+          <p
+            style={{
+              margin: "0 0 8px",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 2.2,
+              textTransform: "uppercase",
+              color: t.green,
+            }}
+          >
+            Next Up
+          </p>
+          <p style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700, color: t.ink }}>
+            {nextUp.title}
+          </p>
+          <p style={{ margin: "0 0 12px", fontSize: 13, lineHeight: 1.6, color: t.mid }}>
+            {nextUp.desc}
+          </p>
+          <button
+            type="button"
+            onClick={() => openItem(nextUp)}
+            style={{
+              background: t.green,
+              border: "none",
+              borderRadius: 12,
+              padding: "12px 16px",
+              color: t.white,
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: "Georgia,serif",
+            }}
+          >
+            Continue today&apos;s growth
+          </button>
+        </div>
+      )}
 
       {GROWTH_ITEMS.map((item) => {
         const isDone = completed.includes(item.key);

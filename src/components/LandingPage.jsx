@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import Image from "next/image";
 
 export function LandingPage({ C, S, Ic, play, setScreen, AUTH_PROVIDERS, doProviderSignIn, siSocialErr }) {

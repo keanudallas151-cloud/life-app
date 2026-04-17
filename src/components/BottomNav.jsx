@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 
 export function BottomNav({
   t,
@@ -7,6 +6,7 @@ export function BottomNav({
   page,
   play,
   setPage,
+  onOpenQuiz,
   setSidebarOpen,
   showNotif,
   setShowNotif,
@@ -96,7 +96,8 @@ export function BottomNav({
         className={`life-bottom-nav-item${page === "quiz" ? " life-bottom-nav-item--active" : ""}`}
         onClick={() => {
           play("tap");
-          setPage("quiz");
+          if (typeof onOpenQuiz === "function") onOpenQuiz();
+          else setPage("quiz");
           setSidebarOpen(false);
         }}
         aria-label="Quiz"

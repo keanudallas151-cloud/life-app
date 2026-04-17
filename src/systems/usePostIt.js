@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase, isSupabaseConfigured } from "../supabaseClient";
 
-// ── Shape helpers ─────────────────────────────────────────
 // Transforms a Supabase post row + its comments array into the
 // shape PostItFeed already expects so the component needs zero changes.
 function shapePosts(rows, commentsMap, votesMap) {
@@ -32,7 +31,6 @@ function formatAge(iso) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-// ── Main hook ─────────────────────────────────────────────
 export function usePostIt(user) {
   const [posts,    setPosts]   = useState([]);
   const [loading,  setLoading] = useState(true);
@@ -48,7 +46,6 @@ export function usePostIt(user) {
   // between optimistic updates and realtime subscription events
   const pendingVoteIds = useRef({});  // { postId: pendingCount }
 
-  // ── INITIAL LOAD ────────────────────────────────────────
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -126,7 +123,6 @@ export function usePostIt(user) {
 
   useEffect(() => { load(); }, [load]);
 
-  // ── REALTIME SUBSCRIPTION ───────────────────────────────
   useEffect(() => {
     if (!isSupabaseConfigured) return;
     const channel = supabase
@@ -180,7 +176,6 @@ export function usePostIt(user) {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // ── ADD POST ────────────────────────────────────────────
   const addPost = useCallback(async ({ title, body, flair }) => {
     if (!isSupabaseConfigured || !user?.id) return;
     const author = user.name
@@ -199,7 +194,6 @@ export function usePostIt(user) {
     // Realtime INSERT event will update state
   }, [user]);
 
-  // ── ADD COMMENT ─────────────────────────────────────────
   const addComment = useCallback(async (postId, text) => {
     if (!isSupabaseConfigured || !user?.id || !text.trim()) return;
     const author = user.name
@@ -216,7 +210,6 @@ export function usePostIt(user) {
     // Realtime INSERT event will update state
   }, [user]);
 
-  // ── VOTE ────────────────────────────────────────────────
   // Upserts into post_votes. Realtime handles the UI update.
   // We do an optimistic update here as well so it feels instant.
   const vote = useCallback(async (postId, dir) => {

@@ -30,7 +30,6 @@ export function useUserData(userId) {
     setMomentumStateRaw(data.momentum_state ?? null);
   }, []);
 
-  // ── FETCH on userId change ─────────────────────────────────
   useEffect(() => {
     if (isGuest) {
       setBookmarksState([]);
@@ -78,7 +77,6 @@ export function useUserData(userId) {
       });
   }, [applyFetchedData, userId, isGuest]);
 
-  // ── PERSIST to Supabase ────────────────────────────────────
   const persist = useCallback(async (patch) => {
     if (isGuest) return;
     const { error } = await supabase
@@ -89,7 +87,7 @@ export function useUserData(userId) {
         Object.prototype.hasOwnProperty.call(patch, "highlights") &&
         String(error.message || "").toLowerCase().includes("highlights")
       ) {
-        console.error("useUserData persist: highlights column missing, keeping quotes local only.");
+        console.error("useUserData persist: legacy highlights column missing; skipping that field.");
         return;
       }
       console.error("useUserData persist:", error.message);
@@ -99,7 +97,6 @@ export function useUserData(userId) {
   // Debounced persist — notes can change rapidly while typing
   const debouncedPersist = useDebouncedCallback(persist, 800);
 
-  // ── SETTERS (update state + persist) ─────────────────────
   const setBookmarks = useCallback((v) => {
     setBookmarksState(v);
     persist({ bookmarks: v });

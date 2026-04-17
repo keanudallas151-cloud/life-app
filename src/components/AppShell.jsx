@@ -1,16 +1,12 @@
 // src/components/AppShell.jsx// 16.04.26
-// ─────────────────────────────────────────────────────────────
 // Pure components and hooks extracted from App.jsx.
 // These have NO dependency on LifeApp state — all values come
 // through props. Safe to edit independently.
-// ─────────────────────────────────────────────────────────────
 "use client";
 
 import { lazy, Suspense } from "react";
-import Image from "next/image";
 import { C } from "../systems/theme";
 
-// ── Lazy-loaded heavy components ─────────────────────────────
 export const EbookReader = lazy(() =>
   import("./Reader").then((m) => ({ default: m.EbookReader })),
 );
@@ -33,7 +29,6 @@ export const MomentumHubPage = lazy(() =>
   import("./MomentumHub").then((m) => ({ default: m.MomentumHubPage })),
 );
 
-// ── Loading fallback ─────────────────────────────────────────
 export function RouteFallback() {
   return (
     <div
@@ -53,7 +48,6 @@ export function RouteFallback() {
   );
 }
 
-// ── Sidebar Section wrapper ───────────────────────────────────
 // Props: label, open, setOpen, children, tag, theme, playFn
 export function SS({
   label,
@@ -160,7 +154,6 @@ export function SS({
   );
 }
 
-// ── Sidebar Link item ─────────────────────────────────────────
 // Props: label, icon, onClick, active, theme
 export function SL({ label, onClick, active, theme }) {
   const th = theme || C;

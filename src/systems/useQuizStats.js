@@ -48,7 +48,6 @@ export function useQuizStats(userId) {
 
   const isGuest = !userId || userId === "_" || !isSupabaseConfigured;
 
-  // ── FETCH ──────────────────────────────────────────────
   useEffect(() => {
     if (isGuest) { setStatsState({ ...DEFAULT_STATS }); return; }
     setLoading(true);
@@ -64,7 +63,6 @@ export function useQuizStats(userId) {
       });
   }, [userId, isGuest]);
 
-  // ── SAVE ───────────────────────────────────────────────
   const saveStats = useCallback(async (next) => {
     setStatsState(next);
     if (isGuest) return;

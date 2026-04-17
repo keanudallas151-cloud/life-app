@@ -24,7 +24,7 @@ const SECTIONS = {
   },
   sidebar_saved: {
     title: "Saved",
-    desc: "Saved is the user\u2019s personal shelf. It collects bookmarked topics and saved quotes so important ideas are easy to revisit without searching through the full app again.",
+    desc: "Saved is the user\u2019s personal shelf. It collects bookmarked topics so important ideas are easy to revisit without searching through the full app again.",
   },
 };
 

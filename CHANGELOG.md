@@ -2,6 +2,19 @@
 
 All notable prototype milestones for Life are tracked here.
 
+## v0.5.0 — Full polish sweep, workflow upgrades, and cleanup
+
+- removed AI-style decorative banner comments from `src/` and cleaned leftover section markers
+- removed unused imports across the app shell, auth screens, profile, settings, and navigation components
+- upgraded Home with quick action launch cards for quiz, Daily Growth, and Momentum Hub
+- upgraded Progress Dashboard with a dynamic "Next Best Step" card plus one-tap shortcuts
+- upgraded Daily Growth with streak tracking, weekly rhythm history, smarter "Next Up" guidance, and momentum event syncing
+- upgraded Profile with quick action shortcuts for dashboard, Daily Growth, and settings
+- fixed notification dropdown sizing on narrow screens so it stays inside the viewport
+- improved home hero theming so the gradient respects the active theme
+- improved reader share handling and audio player accessibility labels
+- lint and production build pass clean
+
 ## v0.4.9 — Consolidated UI fixes, dark mode polish, ESLint cleanup
 
 - fixed sidebar gaps on mobile — removed inline width/maxWidth/padding, CSS now controls all sizing with flex-column layout
