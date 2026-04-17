@@ -1757,11 +1757,11 @@ button:active:not(:disabled) {
 button,
 [role="button"] {
   transition:
-    transform 0.16s var(--life-ease-soft),
-    box-shadow 0.22s var(--life-ease-soft),
-    filter 0.16s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+    transform 0.08s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.18s var(--life-ease-soft),
+    filter 0.12s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   transform-origin: center;
 }
