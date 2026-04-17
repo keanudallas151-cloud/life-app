@@ -2857,7 +2857,6 @@ export default function LifeApp() {
             <SL
               theme={t}
               label="Goals"
-              icon="target"
               onClick={() => {
                 play("tap");
                 setPage("goal_setting");

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Ic } from "../icons/Ic";
 import { LS } from "../systems/storage";
 
@@ -264,10 +264,36 @@ export function DailyGrowthPage({ t, play, setPage }) {
 }
 
 function DailyGrowthModal({ item, t, play, onClose, onComplete }) {
+  // Android back button: push a history entry when modal opens,
+  // listen for popstate to close instead of navigating away.
+  const closedByUI = React.useRef(false);
+
+  useEffect(() => {
+    window.history.pushState({ dailyGrowthModal: true }, "");
+    const handlePop = () => {
+      if (!closedByUI.current) {
+        onClose();
+      }
+    };
+    window.addEventListener("popstate", handlePop);
+    return () => {
+      window.removeEventListener("popstate", handlePop);
+      // If modal unmounts from UI close (not back button), pop the history entry
+      if (closedByUI.current) {
+        window.history.back();
+      }
+    };
+  }, [onClose]);
+
+  const handleUIClose = () => {
+    closedByUI.current = true;
+    onClose();
+  };
+
   return (
     <>
       <div
-        onClick={onClose}
+        onClick={handleUIClose}
         style={{
           position: "fixed",
           inset: 0,
@@ -312,7 +338,7 @@ function DailyGrowthModal({ item, t, play, onClose, onComplete }) {
             {item.title}
           </h3>
           <button
-            onClick={onClose}
+            onClick={handleUIClose}
             aria-label="Close"
             style={{
               width: 32,
