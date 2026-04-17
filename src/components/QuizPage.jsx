@@ -58,7 +58,7 @@ function seededShuffle(arr, seed) {
 }
 
 // ── Sub-components ────────────────────────────────────────
-function StatCard({ label, value, col, _t = C }) {
+function StatCard({ label, value, col }) {
   return (
     <div style={{ background:_t.white, border:`1px solid ${_t.border}`, borderRadius:12, padding:"14px 16px", textAlign:"center" }}>
       <div style={{ fontSize:22, fontWeight:800, color:col||_t.ink, fontFamily:"Georgia,serif" }}>{value}</div>
@@ -66,7 +66,7 @@ function StatCard({ label, value, col, _t = C }) {
     </div>
   );
 }
-function AchievementBadge({ ach, unlocked, _t = C }) {
+function AchievementBadge({ ach, unlocked }) {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px",
       background:unlocked?_t.greenLt:_t.white, border:`1px solid ${unlocked?_t.green:_t.border}`,
