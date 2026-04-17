@@ -3358,30 +3358,6 @@ export default function LifeApp() {
             />
             <SL
               theme={t}
-              label="Sounds"
-              icon="chat"
-              onClick={() => {
-                play("tap");
-                setExperienceTopic("sounds");
-                setPage("setting_preferences");
-                setSidebarOpen(false);
-              }}
-              active={page === "setting_preferences" && experienceTopic === "sounds"}
-            />
-            <SL
-              theme={t}
-              label="Animations"
-              icon="bolt"
-              onClick={() => {
-                play("tap");
-                setExperienceTopic("animations");
-                setPage("setting_preferences");
-                setSidebarOpen(false);
-              }}
-              active={page === "setting_preferences" && experienceTopic === "animations"}
-            />
-            <SL
-              theme={t}
               label="Mobile Integration"
               icon="globe"
               onClick={() => {

@@ -37,8 +37,8 @@ export default function SettingsPage({
       className="life-settings-page"
       data-page-tag="#setting_preferences"
       style={{
-        padding: "48px 28px",
-        maxWidth: 720,
+        padding: "32px 20px",
+        maxWidth: 520,
         margin: "0 auto",
       }}
     >
@@ -54,10 +54,11 @@ export default function SettingsPage({
           fontSize: 13,
           cursor: "pointer",
           fontFamily: "Georgia,serif",
-          marginBottom: 20,
+          marginBottom: 16,
           display: "flex",
           alignItems: "center",
           gap: 6,
+          padding: 0,
         }}
       >
         <svg
@@ -76,42 +77,26 @@ export default function SettingsPage({
       </button>
       <h2
         style={{
-          fontSize: 26,
+          fontSize: 22,
           fontWeight: 700,
           color: t.ink,
-          margin: "0 0 8px",
+          margin: "0 0 20px",
         }}
       >
         Settings
       </h2>
-      <p
-        className="life-settings-subtitle"
-        style={{
-          margin: "0 0 24px",
-          color: t.muted,
-          fontSize: 14,
-          lineHeight: 1.7,
-          fontStyle: "italic",
-        }}
-      >
-        Cleanly organised controls for appearance, accessibility, motion, sound,
-        privacy, and account tools.
-      </p>
       {[
         {
           tag: "#setting_appearance",
           title: "Appearance",
-          desc: "Theme, contrast, and reading comfort",
           items: [
             {
               type: "choice",
               label: "Theme",
-              desc: "Choose how Life should look on this device",
+              desc: themeMode === THEME_MODES.system
+                ? `Following device (${systemDark ? "dark" : "light"})`
+                : null,
               value: themeMode,
-              helper:
-                themeMode === THEME_MODES.system
-                  ? `Currently following your device in ${systemDark ? "dark" : "light"} mode.`
-                  : null,
               options: [
                 { label: "System", value: THEME_MODES.system },
                 { label: "Light", value: THEME_MODES.light },
@@ -121,7 +106,7 @@ export default function SettingsPage({
             },
             {
               label: "High Contrast",
-              desc: "Sharpen separation and text readability",
+              desc: "Sharper text & separation",
               value: uiPrefs.highContrast,
               onChange: (v) => updateUiPrefs({ highContrast: v }),
             },
@@ -130,23 +115,22 @@ export default function SettingsPage({
         {
           tag: "#setting_motion",
           title: "Motion & Performance",
-          desc: "Make the app feel smoother, lighter, and easier to scan",
           items: [
             {
               label: "Reduce Motion",
-              desc: "Calmer animations and less movement",
+              desc: "Calmer animations",
               value: uiPrefs.reduceMotion,
               onChange: (v) => updateUiPrefs({ reduceMotion: v }),
             },
             {
               label: "Data Saver",
-              desc: "Lower visual effect cost and heavy rendering",
+              desc: "Lower visual cost",
               value: uiPrefs.dataSaver,
               onChange: (v) => updateUiPrefs({ dataSaver: v }),
             },
             {
-              label: "Instant Button Response",
-              desc: "Reduce perceived tap delay on fast interactions",
+              label: "Instant Buttons",
+              desc: "Reduce tap delay",
               value: uiPrefs.instantButtons,
               onChange: (v) => updateUiPrefs({ instantButtons: v }),
             },
@@ -155,11 +139,10 @@ export default function SettingsPage({
         {
           tag: "#setting_sound",
           title: "Sound",
-          desc: "Feedback sounds and listening comfort",
           items: [
             {
               label: "Sound Effects",
-              desc: "Toggle all sound effects",
+              desc: "Toggle all feedback sounds",
               value: uiPrefs.soundEnabled,
               onChange: (v) => updateUiPrefs({ soundEnabled: v }),
             },
@@ -167,15 +150,31 @@ export default function SettingsPage({
         },
         {
           tag: "#setting_account",
-          title: "Account & Progress",
-          desc: "Reset tools and account actions live below",
+          title: "Account & Data",
           items: [],
-        },
-        {
-          tag: "#setting_privacy",
-          title: "Privacy & Legal",
-          desc: "Policy links and export tools live below",
-          items: [],
+          actions: [
+            {
+              label: "Restore Defaults",
+              onClick: () => { updateUiPrefs(PREF_DEFAULTS); play("ok"); },
+            },
+            {
+              label: "Reset Progress",
+              onClick: () => { setReadKeys([]); play("ok"); },
+            },
+            {
+              label: "Reset Tailoring",
+              onClick: () => {
+                setProfile(null);
+                LS.del(`tsd_${uid}`);
+                trackMomentumEvent("profile", {
+                  source: "settings",
+                  points: 2,
+                  meta: { action: "tailor_reset" },
+                });
+                play("ok");
+              },
+            },
+          ],
         },
       ].map((section) => (
         <div
@@ -185,14 +184,14 @@ export default function SettingsPage({
           style={{
             background: t.white,
             border: `1px solid ${t.border}`,
-            borderRadius: 16,
-            padding: 22,
-            marginBottom: 16,
+            borderRadius: 14,
+            padding: "16px 18px",
+            marginBottom: 12,
           }}
         >
           <p
             style={{
-              margin: "0 0 14px",
+              margin: "0 0 10px",
               fontSize: 10,
               fontWeight: 700,
               letterSpacing: 2.5,
@@ -202,31 +201,6 @@ export default function SettingsPage({
           >
             {section.title}
           </p>
-          {section.desc && (
-            <p
-              style={{
-                margin: "-6px 0 14px",
-                fontSize: 13,
-                color: t.muted,
-                lineHeight: 1.55,
-                fontStyle: "italic",
-              }}
-            >
-              {section.desc}
-            </p>
-          )}
-          {section.items.length === 0 && (
-            <p
-              style={{
-                margin: 0,
-                fontSize: 13,
-                color: t.muted,
-                fontStyle: "italic",
-              }}
-            >
-              Organised tools for this section are available below.
-            </p>
-          )}
           {section.items.map((item) => (
             <div
               className="life-settings-row"
@@ -236,12 +210,12 @@ export default function SettingsPage({
                 alignItems: item.type === "choice" ? "stretch" : "center",
                 flexDirection: item.type === "choice" ? "column" : "row",
                 justifyContent: "space-between",
-                gap: 12,
-                padding: "10px 0",
+                gap: 8,
+                padding: "8px 0",
                 borderBottom: `1px solid ${t.light}`,
               }}
             >
-              <div>
+              <div style={{ flex: 1 }}>
                 <p
                   style={{
                     margin: 0,
@@ -252,24 +226,15 @@ export default function SettingsPage({
                 >
                   {item.label}
                 </p>
-                <p
-                  style={{
-                    margin: "2px 0 0",
-                    fontSize: 12,
-                    color: t.muted,
-                  }}
-                >
-                  {item.desc}
-                </p>
-                {item.helper && (
+                {item.desc && (
                   <p
                     style={{
-                      margin: "6px 0 0",
+                      margin: "2px 0 0",
                       fontSize: 11,
-                      color: t.green,
+                      color: t.muted,
                     }}
                   >
-                    {item.helper}
+                    {item.desc}
                   </p>
                 )}
               </div>
@@ -278,12 +243,13 @@ export default function SettingsPage({
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 6,
-                    padding: 4,
+                    gap: 4,
+                    padding: 3,
                     borderRadius: 999,
                     background: t.light,
                     border: `1px solid ${t.border}`,
                     flexWrap: "wrap",
+                    marginTop: 6,
                   }}
                 >
                   {item.options.map((option) => {
@@ -296,7 +262,7 @@ export default function SettingsPage({
                         style={{
                           border: "none",
                           borderRadius: 999,
-                          padding: "9px 14px",
+                          padding: "7px 12px",
                           background: selected ? t.green : "transparent",
                           color: selected ? "#fff" : t.ink,
                           fontSize: 12,
@@ -314,92 +280,42 @@ export default function SettingsPage({
                 <input
                   type="checkbox"
                   checked={!!item.value}
-                  onChange={(e) =>
-                    item.onChange(
-                      typeof item.value === "boolean"
-                        ? e.target.checked
-                        : e.target.checked,
-                    )
-                  }
+                  onChange={(e) => item.onChange(e.target.checked)}
                   style={{
                     width: 20,
                     height: 20,
                     accentColor: t.green,
+                    flexShrink: 0,
                   }}
                 />
               )}
             </div>
           ))}
+          {section.actions && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+              {section.actions.map((action) => (
+                <button
+                  key={action.label}
+                  onClick={action.onClick}
+                  style={{
+                    background: t.light,
+                    border: `1px solid ${t.border}`,
+                    borderRadius: 10,
+                    padding: "8px 14px",
+                    color: t.mid,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    fontFamily: "Georgia,serif",
+                  }}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       ))}
-      <div
-        className="life-settings-action-grid"
-        style={{ display: "flex", flexWrap: "wrap", gap: 8 }}
-      >
-        <button
-          onClick={() => {
-            updateUiPrefs(PREF_DEFAULTS);
-            play("ok");
-          }}
-          style={{
-            background: t.light,
-            border: `1px solid ${t.border}`,
-            borderRadius: 10,
-            padding: "10px 16px",
-            color: t.mid,
-            fontSize: 12,
-            fontWeight: 700,
-            cursor: "pointer",
-            fontFamily: "Georgia,serif",
-          }}
-        >
-          Restore Defaults
-        </button>
-        <button
-          onClick={() => {
-            setReadKeys([]);
-            play("ok");
-          }}
-          style={{
-            background: t.light,
-            border: `1px solid ${t.border}`,
-            borderRadius: 10,
-            padding: "10px 16px",
-            color: t.mid,
-            fontSize: 12,
-            fontWeight: 700,
-            cursor: "pointer",
-            fontFamily: "Georgia,serif",
-          }}
-        >
-          Reset Progress
-        </button>
-        <button
-          onClick={() => {
-            setProfile(null);
-            LS.del(`tsd_${uid}`);
-            trackMomentumEvent("profile", {
-              source: "settings",
-              points: 2,
-              meta: { action: "tailor_reset" },
-            });
-            play("ok");
-          }}
-          style={{
-            background: t.light,
-            border: `1px solid ${t.border}`,
-            borderRadius: 10,
-            padding: "10px 16px",
-            color: t.mid,
-            fontSize: 12,
-            fontWeight: 700,
-            cursor: "pointer",
-            fontFamily: "Georgia,serif",
-          }}
-        >
-          Reset Tailoring
-        </button>
-      </div>
     </div>
   );
 }

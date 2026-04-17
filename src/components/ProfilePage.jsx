@@ -19,7 +19,7 @@ export default function ProfilePage({
                 className="life-profile-page"
                 data-page-tag="#profile"
                 style={{
-                  padding: "48px 28px",
+                  padding: "36px 28px",
                   maxWidth: 480,
                   margin: "0 auto",
                 }}
@@ -80,7 +80,7 @@ export default function ProfilePage({
                     </p>
                   </div>
                   {/* P10: Gear icon → setting_preferences — FORCED perfect circle */}
-                  <div style={{ flexShrink: 0, width: 40, height: 40 }}>
+                  <div style={{ flexShrink: 0 }}>
                     <button
                       onClick={() => {
                         play("tap");
@@ -89,9 +89,8 @@ export default function ProfilePage({
                       title="Settings"
                       aria-label="Settings"
                       style={{
-                        width: "100%",
-                        height: "100%",
-                        aspectRatio: "1 / 1",
+                        width: 40,
+                        height: 40,
                         borderRadius: "50%",
                         background: t.light,
                         border: `1px solid ${t.border}`,
@@ -101,6 +100,7 @@ export default function ProfilePage({
                         cursor: "pointer",
                         padding: 0,
                         boxSizing: "border-box",
+                        overflow: "hidden",
                       }}
                     >
                       <svg
@@ -112,6 +112,7 @@ export default function ProfilePage({
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                      style={{ display: "block", flexShrink: 0 }}
                     >
                       <circle cx="12" cy="12" r="3" />
                       <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
@@ -149,7 +150,7 @@ export default function ProfilePage({
                       "Reading streak",
                       readingStreak.count > 0
                         ? `${readingStreak.count} day${readingStreak.count === 1 ? "" : "s"}`
-                        : "Open a topic to start",
+                        : "0",
                     ],
                   ].map(([label, val]) => (
                     <div
@@ -188,77 +189,6 @@ export default function ProfilePage({
                     onOpenHub={openMomentumHub}
                     title="Your momentum"
                   />
-                </div>
-                <div
-                  style={{
-                    background: t.white,
-                    border: `1px solid ${t.border}`,
-                    borderRadius: 14,
-                    padding: 16,
-                    marginBottom: 20,
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: "0 0 12px",
-                      fontSize: 10,
-                      fontWeight: 700,
-                      letterSpacing: 2.2,
-                      textTransform: "uppercase",
-                      color: t.muted,
-                    }}
-                  >
-                    Quick Actions
-                  </p>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-                      gap: 10,
-                    }}
-                  >
-                    {[
-                      ["Dashboard", "progress_dashboard"],
-                      ["Daily Growth", "daily_growth"],
-                      ["Settings", "setting_preferences"],
-                    ].map(([label, nextPage]) => (
-                      <button
-                        key={label}
-                        type="button"
-                        onClick={() => {
-                          play("tap");
-                          setPage(nextPage);
-                        }}
-                        style={{
-                          border: `1px solid ${t.border}`,
-                          borderRadius: 12,
-                          background: t.light,
-                          color: t.ink,
-                          padding: "12px 14px",
-                          fontSize: 13,
-                          fontWeight: 700,
-                          cursor: "pointer",
-                          fontFamily: "Georgia,serif",
-                        }}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ marginBottom: 8 }}>
-                  <p
-                    style={{
-                      margin: "0 0 8px",
-                      fontSize: 10,
-                      fontWeight: 700,
-                      letterSpacing: 2.2,
-                      textTransform: "uppercase",
-                      color: t.muted,
-                    }}
-                  >
-                    Account
-                  </p>
                 </div>
                 <button
                   onClick={doSignOut}

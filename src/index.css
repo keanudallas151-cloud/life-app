@@ -2872,6 +2872,8 @@ button:active:not(:disabled),
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  text-align: center;
   gap: 4px;
 }
 
@@ -2895,6 +2897,7 @@ button:active:not(:disabled),
   border-radius: 14px;
   background: rgba(234, 243, 236, 0.75);
   padding: 12px;
+  text-align: center;
 }
 
 .life-momentum-next-kicker {
@@ -2904,6 +2907,7 @@ button:active:not(:disabled),
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--life-green);
+  text-align: center;
 }
 
 .life-momentum-next-title {
@@ -2911,6 +2915,7 @@ button:active:not(:disabled),
   color: var(--life-ink);
   font-size: 0.98rem;
   font-weight: 700;
+  text-align: center;
 }
 
 .life-momentum-next-body {
@@ -2918,6 +2923,7 @@ button:active:not(:disabled),
   color: var(--life-muted);
   font-size: 13px;
   line-height: 1.45;
+  text-align: center;
 }
 
 .life-momentum-quotes {

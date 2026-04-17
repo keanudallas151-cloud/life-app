@@ -47,6 +47,22 @@ export function RegisterPage({
   const passwordStrengthColors = [C.red, C.red, "#e6a23c", C.gold, C.green];
   const confirmMismatch = rPass2.length > 0 && rPass !== rPass2;
 
+  // Live age check: user must be 13+ (born 2013 or earlier)
+  const dobUnderAge = (() => {
+    const digits = rDob.replace(/\D/g, "");
+    if (digits.length < 8) return false;
+    const day = parseInt(digits.slice(0, 2), 10);
+    const month = parseInt(digits.slice(2, 4), 10);
+    const year = parseInt(digits.slice(4, 8), 10);
+    if (!year || !month || !day || month < 1 || month > 12 || day < 1 || day > 31) return false;
+    const today = new Date();
+    const dob = new Date(year, month - 1, day);
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) age--;
+    return age < 13;
+  })();
+
   return (
     <div
       data-page-tag="#register_page"
@@ -356,6 +372,19 @@ export function RegisterPage({
               {rErr.dob}
             </p>
           )}
+          {dobUnderAge && !rErr.dob && (
+            <p
+              style={{
+                margin: 0,
+                fontSize: 12,
+                color: C.red,
+                fontWeight: 600,
+                fontStyle: "italic",
+              }}
+            >
+              You must be 13 or older to use Life.
+            </p>
+          )}
         </div>
 
         {/* Password */}
@@ -595,20 +624,20 @@ export function RegisterPage({
 
         <button
           onClick={doRegister}
-          disabled={authLoading}
+          disabled={authLoading || dobUnderAge}
           style={{
-            background: `linear-gradient(135deg, ${C.green}, #3a7d4a)`,
+            background: dobUnderAge ? C.light : `linear-gradient(135deg, ${C.green}, #3a7d4a)`,
             border: "none",
             borderRadius: 12,
             padding: "17px",
-            color: "#fff",
+            color: dobUnderAge ? C.muted : "#fff",
             fontSize: 16,
             fontWeight: 700,
-            cursor: authLoading ? "default" : "pointer",
+            cursor: authLoading || dobUnderAge ? "default" : "pointer",
             fontFamily: "Georgia,serif",
             marginTop: 4,
             opacity: authLoading ? 0.7 : 1,
-            boxShadow: "0 4px 16px rgba(74,140,92,0.35)",
+            boxShadow: dobUnderAge ? "none" : "0 4px 16px rgba(74,140,92,0.35)",
             transition: "all 0.2s ease",
           }}
           onMouseEnter={(e) => {
