@@ -221,7 +221,7 @@ function PrestigeBadgeCard({ badge, t }) {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        boxShadow: badge.unlocked ? "0 12px 26px rgba(74,140,92,0.12)" : "none",
+        boxShadow: badge.unlocked ? "0 12px 26px rgba(61,90,76,0.12)" : "none",
         opacity: badge.unlocked ? 1 : 0.74,
       }}
     >
@@ -846,7 +846,7 @@ export function QuizPage({
              <button onClick={startQuiz}
                style={{ width:"100%", background:t.green, border:"none", borderRadius:14, padding:"18px", color:"#fff",
                  fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"Georgia,serif",
-                 boxShadow:"0 6px 20px rgba(74,140,92,0.30)" }}>
+                 boxShadow:"0 6px 20px rgba(61,90,76,0.30)" }}>
               {topic === "communication" && communicationActivity !== "quiz"
                 ? `Start ${COMMUNICATION_ACTIVITIES[communicationActivity].label} →`
                 : fmt==="daily" ? "Start Daily Challenge 📅" : "Start Quiz →"}

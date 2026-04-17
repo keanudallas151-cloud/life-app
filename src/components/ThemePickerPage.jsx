@@ -137,7 +137,7 @@ export function ThemePickerPage({
       className="life-grain life-auth-shell"
       style={{
         minHeight: "100svh",
-        background: `linear-gradient(165deg, ${_C.skin} 0%, ${dark ? "#1e1e1e" : "#ebe4d6"} 50%, ${_C.skin} 100%)`,
+        background: `linear-gradient(165deg, ${_C.skin} 0%, ${dark ? "#1e1e1e" : "${_C.border}"} 50%, ${_C.skin} 100%)`,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -158,7 +158,7 @@ export function ThemePickerPage({
           width: 170,
           height: 170,
           borderRadius: "50%",
-          border: "1.5px solid rgba(74,140,92,0.09)",
+          border: "1.5px solid rgba(61,90,76,0.09)",
           pointerEvents: "none",
         }}
       />
@@ -170,7 +170,7 @@ export function ThemePickerPage({
           width: 62,
           height: 62,
           borderRadius: "50%",
-          background: "rgba(74,140,92,0.08)",
+          background: "rgba(61,90,76,0.08)",
           pointerEvents: "none",
         }}
       />
@@ -182,7 +182,7 @@ export function ThemePickerPage({
           width: 110,
           height: 110,
           borderRadius: "50%",
-          border: "1.5px solid rgba(74,140,92,0.07)",
+          border: "1.5px solid rgba(61,90,76,0.07)",
           pointerEvents: "none",
         }}
       />

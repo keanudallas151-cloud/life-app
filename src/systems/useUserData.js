@@ -73,6 +73,10 @@ export function useUserData(userId) {
             }
             if (fallbackData) applyFetchedData({ ...fallbackData, highlights: [] });
             setLoading(false);
+          })
+          .catch(() => {
+            console.error("useUserData fallback query failed");
+            setLoading(false);
           });
       });
   }, [applyFetchedData, userId, isGuest]);

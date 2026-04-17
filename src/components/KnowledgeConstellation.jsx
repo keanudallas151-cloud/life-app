@@ -164,7 +164,7 @@ export function KnowledgeConstellation({ allContent, readKeys, onPick, onClose, 
                     y1={p1.y}
                     x2={p2.x}
                     y2={p2.y}
-                    stroke={lit ? `url(#life-edge-grad)` : "rgba(74,140,92,0.12)"}
+                    stroke={lit ? `url(#life-edge-grad)` : "rgba(61,90,76,0.12)"}
                     strokeWidth={lit ? 1.4 : 0.7}
                     className={lit ? "life-constellation-line-lit" : ""}
                   />

@@ -1044,7 +1044,7 @@ export function EbookReader({
                               background: t.greenLt,
                               padding: "5px 10px",
                               borderRadius: 20,
-                              border: `1px solid rgba(74,140,92,0.35)`,
+                              border: `1px solid rgba(61,90,76,0.35)`,
                             }}
                           >
                             {selContent.level}

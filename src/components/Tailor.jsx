@@ -159,7 +159,7 @@ export function TailorQuestions({onComplete,onBack,t:theme}){
               <input type="range" min="0" max="100" value={answers.time}
                 onChange={e=>setAnswers(a=>({...a,time:Number(e.target.value)}))}
                 style={{position:"absolute",left:0,right:0,width:"100%",opacity:0,height:44,cursor:"pointer",zIndex:2}}/>
-              <div style={{position:"absolute",left:`calc(${answers.time}% - 14px)`,width:28,height:28,borderRadius:"50%",background:t.green,boxShadow:`0 2px 10px rgba(74,140,92,0.45)`,border:`3px solid ${t.white}`,pointerEvents:"none",transition:"left 0.05s"}}/>
+              <div style={{position:"absolute",left:`calc(${answers.time}% - 14px)`,width:28,height:28,borderRadius:"50%",background:t.green,boxShadow:`0 2px 10px rgba(61,90,76,0.45)`,border:`3px solid ${t.white}`,pointerEvents:"none",transition:"left 0.05s"}}/>
             </div>
             <p style={{marginTop:16,textAlign:"center",fontSize:14,fontWeight:700,color:t.green,fontFamily:"Georgia,serif"}}>{getNearestLabel(answers.time)}</p>
           </div>

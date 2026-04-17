@@ -15,6 +15,14 @@ export function localDateStr(d = new Date()) {
 export function recordReadingDay() {
   const today = localDateStr();
   const s = LS.get(KEY, { lastDate: "", count: 0 });
+
+  // Validate lastDate format to prevent corrupted date math
+  if (s.lastDate && !/^\d{4}-\d{2}-\d{2}$/.test(s.lastDate)) {
+    const next = { lastDate: today, count: 1 };
+    LS.set(KEY, next);
+    return next;
+  }
+
   if (s.lastDate === today) return { ...s, count: s.count || 0 };
 
   const y = new Date();

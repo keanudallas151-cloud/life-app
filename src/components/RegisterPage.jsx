@@ -70,7 +70,7 @@ export function RegisterPage({
       className="life-grain life-auth-shell"
       style={{
         minHeight: "100svh",
-        background: `linear-gradient(165deg, ${C.skin} 0%, #ebe4d6 50%, ${C.skin} 100%)`,
+        background: `linear-gradient(165deg, ${C.skin} 0%, ${C.border} 50%, ${C.skin} 100%)`,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -89,7 +89,7 @@ export function RegisterPage({
           width: 176,
           height: 176,
           borderRadius: "50%",
-          border: "1.5px solid rgba(74,140,92,0.09)",
+          border: "1.5px solid rgba(61,90,76,0.09)",
           pointerEvents: "none",
         }}
       />
@@ -101,7 +101,7 @@ export function RegisterPage({
           width: 46,
           height: 46,
           borderRadius: "50%",
-          border: "1.5px solid rgba(74,140,92,0.16)",
+          border: "1.5px solid rgba(61,90,76,0.16)",
           pointerEvents: "none",
         }}
       />
@@ -113,7 +113,7 @@ export function RegisterPage({
           width: 112,
           height: 112,
           borderRadius: "50%",
-          background: "rgba(74,140,92,0.07)",
+          background: "rgba(61,90,76,0.07)",
           pointerEvents: "none",
         }}
       />
@@ -637,7 +637,7 @@ export function RegisterPage({
           onClick={doRegister}
           disabled={authLoading || dobUnderAge}
           style={{
-            background: dobUnderAge ? C.light : `linear-gradient(135deg, ${C.green}, #3a7d4a)`,
+            background: dobUnderAge ? C.light : `linear-gradient(135deg, ${C.green}, ${C.greenAlt})`,
             border: "none",
             borderRadius: 12,
             padding: "17px",
@@ -648,20 +648,20 @@ export function RegisterPage({
             fontFamily: "Georgia,serif",
             marginTop: 4,
             opacity: authLoading ? 0.7 : 1,
-            boxShadow: dobUnderAge ? "none" : "0 4px 16px rgba(74,140,92,0.35)",
+            boxShadow: dobUnderAge ? "none" : "0 4px 16px rgba(61,90,76,0.35)",
             transition: "all 0.2s ease",
           }}
           onMouseEnter={(e) => {
             if (!authLoading) {
               e.currentTarget.style.transform = "translateY(-1px)";
               e.currentTarget.style.boxShadow =
-                "0 6px 20px rgba(74,140,92,0.4)";
+                "0 6px 20px rgba(61,90,76,0.4)";
             }
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "translateY(0)";
             e.currentTarget.style.boxShadow =
-              "0 4px 16px rgba(74,140,92,0.35)";
+              "0 4px 16px rgba(61,90,76,0.35)";
           }}
         >
           {authLoading ? "Creating account…" : "Create Account"}

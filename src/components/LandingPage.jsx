@@ -288,7 +288,7 @@ export function LandingPage({ Ic, play, setScreen, AUTH_PROVIDERS, doProviderSig
             fontWeight: 700,
             cursor: "pointer",
             fontFamily: "Georgia,serif",
-            boxShadow: "0 8px 24px rgba(74,140,92,0.4), 0 2px 8px rgba(74,140,92,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
+            boxShadow: "0 8px 24px rgba(61,90,76,0.4), 0 2px 8px rgba(61,90,76,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

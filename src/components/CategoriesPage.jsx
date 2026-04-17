@@ -194,7 +194,7 @@ export function CategoriesPage({ t, play, catStep, setCatStep, setPage, userName
               alignItems: "center",
               justifyContent: "center",
               margin: "0 auto 24px",
-              boxShadow: "0 8px 32px rgba(74,140,92,0.35)",
+              boxShadow: "0 8px 32px rgba(61,90,76,0.35)",
             }}
           >
             <span style={{ fontSize: 40 }}>🏆</span>

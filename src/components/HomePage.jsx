@@ -136,7 +136,7 @@ export function HomePage({
               gap: 10,
               margin: "0 auto 36px",
               padding: "16px 32px",
-              background: `linear-gradient(135deg, ${t.green}, #3a7d4a)`,
+              background: `linear-gradient(135deg, ${t.green}, ${t.greenAlt})`,
               color: "#fff",
               border: "none",
               borderRadius: 999,
@@ -145,7 +145,7 @@ export function HomePage({
               letterSpacing: 0.3,
               fontFamily: "Georgia,serif",
               cursor: "pointer",
-              boxShadow: "0 10px 28px rgba(74,140,92,0.35), 0 2px 6px rgba(74,140,92,0.2)",
+              boxShadow: "0 10px 28px rgba(61,90,76,0.35), 0 2px 6px rgba(61,90,76,0.2)",
               minHeight: 52,
               minWidth: 220,
             }}

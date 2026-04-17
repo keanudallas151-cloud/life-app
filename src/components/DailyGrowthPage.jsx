@@ -240,7 +240,7 @@ export function DailyGrowthPage({ t, play, setPage, onMomentumEvent }) {
           marginBottom: 22,
           padding: "10px 14px",
           background: t.greenLt,
-          border: `1px solid rgba(74,140,92,0.3)`,
+          border: `1px solid rgba(61,90,76,0.3)`,
           borderRadius: 12,
         }}
       >

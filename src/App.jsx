@@ -200,7 +200,7 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
           padding: "13px 14px",
           background: n.read
             ? (dark ? "#1e1e1e" : "#ffffff")
-            : (dark ? "rgba(74,140,92,0.10)" : "rgba(74,140,92,0.06)"),
+            : (dark ? "rgba(61,90,76,0.10)" : "rgba(61,90,76,0.06)"),
           cursor: "pointer",
           transform: `translateX(${offset}px)`,
           transition: dragging.current ? "none" : "transform 0.3s cubic-bezier(0.22,1,0.36,1)",
@@ -215,7 +215,7 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
             width: 36,
             height: 36,
             borderRadius: 10,
-            background: dark ? "rgba(255,255,255,0.06)" : "rgba(74,140,92,0.1)",
+            background: dark ? "rgba(255,255,255,0.06)" : "rgba(61,90,76,0.1)",
             display: "grid",
             placeItems: "center",
             fontSize: 16,
@@ -1651,7 +1651,7 @@ export default function LifeApp() {
       <div
         style={{
           minHeight: "100vh",
-          background: `linear-gradient(135deg, ${C.skin} 0%, #ebe4d6 50%, ${C.skin} 100%)`,
+          background: `linear-gradient(135deg, ${C.skin} 0%, ${C.border} 50%, ${C.skin} 100%)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -1756,7 +1756,7 @@ export default function LifeApp() {
                   width: 10,
                   height: 10,
                   borderRadius: "50%",
-                  background: i === 1 ? C.green : `rgba(74,140,92,0.4)`,
+                  background: i === 1 ? C.green : `rgba(61,90,76,0.4)`,
                   animation: `life-bounce 1.4s ease-in-out ${delay}s infinite`,
                 }}
               />
@@ -2368,7 +2368,7 @@ export default function LifeApp() {
           backdropFilter: "saturate(1.4) blur(16px)",
           WebkitBackdropFilter: "saturate(1.4) blur(16px)",
           boxShadow:
-            "0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(74,140,92,0.06)",
+            "0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(61,90,76,0.06)",
         }}
       >
         <div
@@ -2663,7 +2663,7 @@ export default function LifeApp() {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = t.green;
-            e.currentTarget.style.boxShadow = "0 2px 8px rgba(74,140,92,0.2)";
+            e.currentTarget.style.boxShadow = "0 2px 8px rgba(61,90,76,0.2)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.borderColor = t.border;
@@ -2824,12 +2824,12 @@ export default function LifeApp() {
                   width: 34,
                   height: 34,
                   borderRadius: "50%",
-                  background: `linear-gradient(135deg, ${t.green}, #3a7d4a)`,
+                  background: `linear-gradient(135deg, ${t.green}, ${t.greenAlt})`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
-                  boxShadow: "0 2px 8px rgba(74,140,92,0.2)",
+                  boxShadow: "0 2px 8px rgba(61,90,76,0.2)",
                 }}
               >
                 <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>

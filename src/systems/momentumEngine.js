@@ -27,7 +27,8 @@ function isMomentumType(value) {
 }
 
 function scoreToLevel(score = 0) {
-  return Math.max(1, Math.floor(Number(score || 0) / 100) + 1);
+  const safe = isNaN(score) ? 0 : Math.max(0, Math.floor(Number(score)));
+  return Math.max(1, Math.floor(safe / 100) + 1);
 }
 
 function coerceProgress(progressCount = 0, targetCount = 1) {

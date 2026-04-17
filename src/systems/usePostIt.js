@@ -132,46 +132,48 @@ export function usePostIt(user) {
       .channel("postit_realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" },
         payload => {
-          const newPost = shapePosts([payload.new], {}, { [payload.new.id]: payload.new.votes })[0];
-          setPosts(prev => [newPost, ...prev]);
+          if (!payload.new?.id) return;
+          const newPost = shapePosts([payload.new], {}, { [payload.new.id]: payload.new.votes ?? 0 })[0];
+          if (newPost) setPosts(prev => [newPost, ...prev]);
         })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "posts" },
         payload => {
+          if (!payload.old?.id) return;
           setPosts(prev => prev.filter(p => p.id !== payload.old.id));
         })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "comments" },
         payload => {
           const c = payload.new;
-          const shaped = { id: c.id, author: c.author, text: c.text, time: "just now" };
+          if (!c?.id || !c?.post_id) return;
+          const shaped = { id: c.id, author: c.author || "Anon", text: c.text || "", time: "just now" };
           setPosts(prev => prev.map(p =>
             p.id === c.post_id
-              ? { ...p, comments: [...p.comments, shaped] }
+              ? { ...p, comments: [...(p.comments || []), shaped] }
               : p
           ));
         })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "post_votes" },
         payload => {
+          if (!payload.new?.post_id) return;
           const { post_id, dir } = payload.new;
-          // Skip if already applied by our own optimistic update
           if ((pendingVoteIds.current[post_id] ?? 0) > 0) {
             pendingVoteIds.current[post_id] = Math.max(0, pendingVoteIds.current[post_id] - 1);
             return;
           }
           setPosts(prev => prev.map(p =>
-            p.id === post_id ? { ...p, votes: p.votes + dir } : p
+            p.id === post_id ? { ...p, votes: (p.votes || 0) + (dir || 0) } : p
           ));
         })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "post_votes" },
         payload => {
-          // User changed their vote (e.g. ▲ then ▼): diff = new - old
+          if (!payload.new?.post_id || payload.new.dir == null || payload.old?.dir == null) return;
           const diff = payload.new.dir - payload.old.dir;
-          // Skip if already applied by our own optimistic update
           if ((pendingVoteIds.current[payload.new.post_id] ?? 0) > 0) {
             pendingVoteIds.current[payload.new.post_id] = Math.max(0, pendingVoteIds.current[payload.new.post_id] - 1);
             return;
           }
           setPosts(prev => prev.map(p =>
-            p.id === payload.new.post_id ? { ...p, votes: p.votes + diff } : p
+            p.id === payload.new.post_id ? { ...p, votes: (p.votes || 0) + diff } : p
           ));
         })
       .subscribe();
