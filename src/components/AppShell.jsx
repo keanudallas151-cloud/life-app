@@ -6,6 +6,7 @@
 
 import { lazy, Suspense } from "react";
 import { C } from "../systems/theme";
+import { Ic } from "../icons/Ic";
 
 export const EbookReader = lazy(() =>
   import("./Reader").then((m) => ({ default: m.EbookReader })),
@@ -118,9 +119,9 @@ export function SS({
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 32,
-            height: 32,
-            minHeight: 32,
+            width: 44,
+            height: 44,
+            minHeight: 44,
             padding: 0,
             border: "none",
             background: "transparent",
@@ -156,8 +157,9 @@ export function SS({
 }
 
 // Props: label, icon, onClick, active, theme
-export function SL({ label, onClick, active, theme }) {
+export function SL({ label, icon, onClick, active, theme }) {
   const th = theme || C;
+  const Icon = icon && typeof Ic[icon] === "function" ? Ic[icon] : null;
   return (
     <button
       className="life-sidebar-link"
@@ -177,6 +179,22 @@ export function SL({ label, onClick, active, theme }) {
         transition: "background 0.15s",
       }}
     >
+      {Icon && (
+        <span
+          aria-hidden
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 20,
+            height: 20,
+            color: active ? th.green : th.muted,
+            flexShrink: 0,
+          }}
+        >
+          {Icon("none", active ? th.green : th.muted, 17)}
+        </span>
+      )}
       <span style={{ fontSize: 13, color: active ? th.green : th.muted, flex: 1, fontWeight: active ? 700 : 500 }}>
         {label}
       </span>

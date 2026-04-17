@@ -611,6 +611,7 @@ export default function LifeApp() {
     (sectionPage, setSectionOpen) => {
       play("tap");
       setPage(sectionPage);
+      setSidebarOpen(false);
       if (typeof setSectionOpen === "function") setSectionOpen(true);
     },
     [play, setPage],
@@ -666,6 +667,7 @@ export default function LifeApp() {
       sidebar_socials: "Socials — Life.",
       sidebar_guided: "Guided — Life.",
       sidebar_saved: "Saved — Life.",
+      sidebar_experience: "Experience — Life.",
       premium: "Premium — Life.",
     };
     document.title = titles[page] || "Life. — Knowledge, Growth, Community";
@@ -707,6 +709,8 @@ export default function LifeApp() {
   const [socialsOpen, setSocialsOpen] = useState(false);
   const [guidedOpen, setGuidedOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
+  const [experienceOpen, setExperienceOpen] = useState(false);
+  const [experienceTopic, setExperienceTopic] = useState(null);
 
   const sidebarSearchResults = useMemo(() => {
     const query = sidebarQuery.trim().toLowerCase();
@@ -3204,6 +3208,67 @@ export default function LifeApp() {
                 ))
             )}
           </SS>
+          <SS
+            theme={t}
+            playFn={play}
+            label="Experience"
+            open={experienceOpen}
+            setOpen={setExperienceOpen}
+            tag="#side_bar_experience"
+            onLabelClick={() =>
+              openSidebarSectionPage("sidebar_experience", setExperienceOpen)
+            }
+            active={page === "sidebar_experience"}
+          >
+            <SL
+              theme={t}
+              label="Visualization"
+              icon="eye"
+              onClick={() => {
+                play("tap");
+                setExperienceTopic("visualization");
+                setPage("daily_growth");
+                setSidebarOpen(false);
+              }}
+              active={page === "daily_growth" && experienceTopic === "visualization"}
+            />
+            <SL
+              theme={t}
+              label="Sounds"
+              icon="chat"
+              onClick={() => {
+                play("tap");
+                setExperienceTopic("sounds");
+                setPage("setting_preferences");
+                setSidebarOpen(false);
+              }}
+              active={page === "setting_preferences" && experienceTopic === "sounds"}
+            />
+            <SL
+              theme={t}
+              label="Animations"
+              icon="bolt"
+              onClick={() => {
+                play("tap");
+                setExperienceTopic("animations");
+                setPage("setting_preferences");
+                setSidebarOpen(false);
+              }}
+              active={page === "setting_preferences" && experienceTopic === "animations"}
+            />
+            <SL
+              theme={t}
+              label="Mobile Integration"
+              icon="globe"
+              onClick={() => {
+                play("tap");
+                setExperienceTopic("mobile_integration");
+                setPage("help");
+                setSidebarOpen(false);
+              }}
+              active={page === "help" && experienceTopic === "mobile_integration"}
+            />
+          </SS>
           <div
             data-page-tag="#side_bar_sign_out"
             className="life-sidebar-signout"
@@ -3298,6 +3363,7 @@ export default function LifeApp() {
             {page === "sidebar_socials" && <SidebarSectionPage sectionKey="sidebar_socials" t={t} />}
             {page === "sidebar_guided" && <SidebarSectionPage sectionKey="sidebar_guided" t={t} />}
             {page === "sidebar_saved" && <SidebarSectionPage sectionKey="sidebar_saved" t={t} />}
+            {page === "sidebar_experience" && <SidebarSectionPage sectionKey="sidebar_experience" t={t} />}
 
             {page === "category_hub" && categoryPageData && (
               <CategoryHubPage

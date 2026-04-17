@@ -26,6 +26,17 @@ const SECTIONS = {
     title: "Saved",
     desc: "Saved is the user\u2019s personal shelf. It collects bookmarked topics so important ideas are easy to revisit without searching through the full app again.",
   },
+  sidebar_experience: {
+    title: "Experience",
+    desc: "Experience focuses on how Life feels across devices: cleaner visualization, responsive mobile layout, thoughtful sounds, and smoother animations without overwhelming motion.",
+    items: [
+      ["Visualization", "Improve readability and information clarity with better visual hierarchy and layout balance."],
+      ["Sounds", "Tune sound behavior with practical defaults and settings that work in both focused and full modes."],
+      ["Animations", "Use subtle motion to communicate state changes and navigation without harming performance."],
+      ["Mobile Integration", "Keep touch targets, safe-area spacing, and navigation reliable across modern phone sizes."],
+      ["Sidebar Quality", "Keep the sidebar scannable with clear grouping, meaningful labels, and consistent interaction patterns."],
+    ],
+  },
 };
 
 export function SidebarSectionPage({ sectionKey, t }) {
@@ -35,7 +46,7 @@ export function SidebarSectionPage({ sectionKey, t }) {
   return (
     <div
       data-page-tag={`#${sectionKey}_page`}
-      style={{ padding: "48px 28px", maxWidth: 620, margin: "0 auto" }}
+      style={{ padding: "clamp(24px, 5vw, 48px) clamp(16px, 4vw, 28px)", maxWidth: 620, margin: "0 auto" }}
     >
       <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: t.green }}>
         Sidebar category
@@ -49,7 +60,11 @@ export function SidebarSectionPage({ sectionKey, t }) {
       {section.items && (
         <div style={{ display: "grid", gap: 12 }}>
           {section.items.map(([label, body]) => (
-            <div key={label} style={{ background: t.white, border: `1px solid ${t.border}`, borderRadius: 16, padding: "18px 18px" }}>
+            <div
+              key={label}
+              className="life-card-hover"
+              style={{ background: t.white, border: `1px solid ${t.border}`, borderRadius: 16, padding: "18px 18px" }}
+            >
               <p style={{ margin: "0 0 6px", color: t.ink, fontSize: 15, fontWeight: 700 }}>{label}</p>
               <p style={{ margin: 0, color: t.muted, fontSize: 13, lineHeight: 1.7 }}>{body}</p>
             </div>
