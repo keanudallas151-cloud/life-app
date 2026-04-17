@@ -265,10 +265,11 @@ p {
   width: 288px;
   max-width: min(288px, 100vw);
   top: calc(62px + env(safe-area-inset-top, 0px));
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  padding-top: 0;
+  padding-bottom: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 .life-sidebar-backdrop {
   top: calc(62px + env(safe-area-inset-top, 0px));
@@ -1153,12 +1154,12 @@ select:focus-visible {
   .life-sidebar {
     top: 0 !important;
     bottom: 0 !important;
-    padding-top: calc(52px + env(safe-area-inset-top, 0px)) !important;
-    padding-bottom: calc(var(--life-bottom-nav-height) + 16px) !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
     width: 92vw !important;
     max-width: 320px !important;
     border-radius: 0 !important;
-    overflow-y: auto !important;
+    overflow: hidden !important;
   }
 
   .life-sidebar-backdrop {
@@ -2590,10 +2591,12 @@ button:active:not(:disabled),
     */
 
 @media (max-width: 640px) {
-  /* All full-page containers need bottom padding for bottom nav */
-  .life-home-page,
-  [data-page-tag] {
-    padding-bottom: calc(var(--life-bottom-nav-height) + 24px) !important;
+  /* All full-page containers need bottom padding for bottom nav.
+     Note: .life-main-scroll already adds this, so [data-page-tag] inside
+     it does NOT need its own padding-bottom (that was causing double-stack
+     making the user unable to scroll back to the top of the hero). */
+  .life-home-page {
+    padding-bottom: calc(var(--life-bottom-nav-height) + 16px) !important;
   }
 
   /* Sidebar padding-bottom is set in the mobile sidebar block above */

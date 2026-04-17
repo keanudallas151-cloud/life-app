@@ -2718,7 +2718,7 @@ export default function LifeApp() {
           />
         )}
 
-        {/* SIDEBAR — CSS handles mobile overrides via .life-sidebar class */}
+        {/* SIDEBAR — 3-part flex layout: header / scrollable body / sign out */}
         <div
           className="life-sidebar"
           style={{
@@ -2728,32 +2728,33 @@ export default function LifeApp() {
             bottom: 0,
             background: t.white,
             borderRight: `1px solid ${t.border}`,
-            overflowY: "auto",
-            WebkitOverflowScrolling: "touch",
             zIndex: 40,
             transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
             transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
+          {/* HEADER — pinned to top, never scrolls */}
           <div
             className="life-sidebar-header"
             style={{
-              padding: isNarrowViewport ? "14px 14px 12px" : "16px 18px 14px",
+              padding: isNarrowViewport
+                ? "calc(10px + env(safe-area-inset-top, 0px)) 12px 10px"
+                : "12px 14px 10px",
               borderBottom: `1px solid ${t.light}`,
               display: "flex",
               flexDirection: "column",
-              gap: 12,
-              position: "sticky",
-              top: 0,
-              zIndex: 2,
+              gap: 8,
               background: t.white,
+              flexShrink: 0,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div
                 style={{
-                  width: 40,
-                  height: 40,
+                  width: 34,
+                  height: 34,
                   borderRadius: "50%",
                   background: `linear-gradient(135deg, ${t.green}, #3a7d4a)`,
                   display: "flex",
@@ -2763,44 +2764,34 @@ export default function LifeApp() {
                   boxShadow: "0 2px 8px rgba(74,140,92,0.2)",
                 }}
               >
-                <span style={{ color: "#fff", fontSize: 14, fontWeight: 700 }}>
+                <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>
                   {initials.slice(0, 2)}
                 </span>
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p
                   style={{
-                    margin: "0 0 2px",
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: 2,
-                    textTransform: "uppercase",
-                    color: t.green,
-                  }}
-                >
-                  Navigation
-                </p>
-                <p
-                  style={{
                     margin: 0,
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: 700,
                     color: t.ink,
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
+                    lineHeight: 1.2,
                   }}
                 >
                   {user?.name || "User"}
                 </p>
                 <p
                   style={{
-                    margin: 0,
-                    fontSize: 11,
+                    margin: "1px 0 0",
+                    fontSize: 10.5,
                     color: t.muted,
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
+                    lineHeight: 1.25,
                   }}
                 >
                     {user?.email || ""}
@@ -2813,8 +2804,8 @@ export default function LifeApp() {
               style={{
                 background: t.light,
                 border: `1px solid ${t.border}`,
-                borderRadius: 14,
-                padding: isNarrowViewport ? "10px 12px" : "11px 12px",
+                borderRadius: 10,
+                padding: "8px 10px",
                 cursor: "pointer",
                 textAlign: "left",
               }}
@@ -2829,27 +2820,27 @@ export default function LifeApp() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  marginBottom: 8,
+                  marginBottom: 5,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 9,
+                    fontSize: 8.5,
                     fontWeight: 700,
-                    letterSpacing: 2,
+                    letterSpacing: 1.6,
                     textTransform: "uppercase",
                     color: t.muted,
                   }}
                 >
-                  Your Progress
+                  Progress &middot; {readKeys.length}/{allContent.length}
                 </span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: t.green }}>
+                <span style={{ fontSize: 10.5, fontWeight: 700, color: t.green }}>
                   {progressPercent}%
                 </span>
               </div>
               <div
                 style={{
-                  height: 6,
+                  height: 4,
                   borderRadius: 999,
                   background: t.white,
                   overflow: "hidden",
@@ -2864,40 +2855,30 @@ export default function LifeApp() {
                   }}
                 />
               </div>
-              <p
-                style={{
-                  margin: "8px 0 0",
-                  fontSize: 11,
-                  color: t.muted,
-                  lineHeight: 1.4,
-                }}
-              >
-                {readKeys.length}/{allContent.length} topics explored
-              </p>
             </button>
             <div
               className="life-sidebar-search-wrap"
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 8,
+                gap: 6,
               }}
             >
               <input
                 type="search"
                 value={sidebarQuery}
                 onChange={(e) => setSidebarQuery(e.target.value)}
-                placeholder="Search topics, sections, or categories"
+                placeholder="Search topics"
                 aria-label="Search sidebar topics"
                 style={{
                   width: "100%",
-                  minHeight: 42,
-                  borderRadius: 12,
+                  minHeight: 36,
+                  borderRadius: 10,
                   border: `1px solid ${t.border}`,
                   background: t.skin,
                   color: t.ink,
-                  padding: "0 14px",
-                  fontSize: 14,
+                  padding: "0 12px",
+                  fontSize: 13,
                   fontFamily: "Georgia,serif",
                   boxSizing: "border-box",
                 }}
@@ -2923,12 +2904,12 @@ export default function LifeApp() {
                       setSidebarOpen(false);
                     }}
                     style={{
-                      minHeight: 38,
-                      borderRadius: 11,
+                      minHeight: 32,
+                      borderRadius: 9,
                       border: `1px solid ${page === target ? `${t.green}55` : t.border}`,
                       background: page === target ? t.greenLt : t.white,
                       color: page === target ? t.green : t.mid,
-                      fontSize: 11,
+                      fontSize: 10.5,
                       fontWeight: 700,
                       letterSpacing: 0.3,
                       cursor: "pointer",
@@ -2941,6 +2922,18 @@ export default function LifeApp() {
               </div>
             </div>
           </div>
+
+          {/* SCROLLABLE BODY — takes remaining flex space, scrolls internally */}
+          <div
+            className="life-sidebar-body"
+            style={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+              overscrollBehavior: "contain",
+            }}
+          >
 
           {sidebarQuery.trim().length >= 2 && (
             <div
@@ -3354,13 +3347,15 @@ export default function LifeApp() {
               active={page === "help" && experienceTopic === "mobile_integration"}
             />
           </SS>
+          </div>{/* /life-sidebar-body */}
           <div
             data-page-tag="#side_bar_sign_out"
             className="life-sidebar-signout"
             style={{
-              padding: "20px 18px 8px",
+              padding: "12px 14px calc(12px + env(safe-area-inset-bottom, 0px))",
               borderTop: `1px solid ${t.light}`,
-              marginTop: "auto",
+              background: t.white,
+              flexShrink: 0,
             }}
           >
             <button
@@ -3370,7 +3365,7 @@ export default function LifeApp() {
                 background: t.white,
                 border: `1.5px solid ${t.red}`,
                 borderRadius: 10,
-                padding: "12px",
+                padding: "10px",
                 color: t.red,
                 fontSize: 13,
                 fontWeight: 600,

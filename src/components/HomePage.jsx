@@ -26,7 +26,7 @@ export function HomePage({
   };
 
   return (
-    <div style={{ paddingBottom: "calc(60px + env(safe-area-inset-bottom, 0px))" }}>
+    <div>
       {/* HERO SECTION */}
       <div
         className="life-grain life-home-hero"
