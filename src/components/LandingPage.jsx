@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 
-export function LandingPage({ C, S, Ic, play, setScreen, AUTH_PROVIDERS, doProviderSignIn, siSocialErr }) {
+export function LandingPage({ Ic, play, setScreen, AUTH_PROVIDERS, doProviderSignIn, siSocialErr }) {
   return (
     <div
       data-page-tag="#landing_page"

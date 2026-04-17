@@ -1,6 +1,6 @@
 "use client";
 export function SignInPage({
-  C, S, play, setScreen,
+  C, play, setScreen,
   siEmail, setSiEmail, siPass, setSiPass,
   siShowPass, setSiShowPass, siErr, setSiErr,
   authLoading, doEmailSignIn,

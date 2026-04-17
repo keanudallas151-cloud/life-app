@@ -1,7 +1,6 @@
 "use client";
 export function RegisterPage({
   C,
-  S,
   play,
   setScreen,
   rName,

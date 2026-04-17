@@ -2116,8 +2116,6 @@ export default function LifeApp() {
   if (screen === "landing")
     return (
       <LandingPage
-        C={C}
-        S={S}
         Ic={Ic}
         play={play}
         setScreen={setScreen}
@@ -2131,7 +2129,7 @@ export default function LifeApp() {
   if (screen === "signin")
     return (
       <SignInPage
-        C={C} S={S} play={play} setScreen={setScreen}
+        C={C} play={play} setScreen={setScreen}
         siEmail={siEmail} setSiEmail={setSiEmail}
         siPass={siPass} setSiPass={setSiPass}
         siShowPass={siShowPass} setSiShowPass={setSiShowPass}
@@ -2150,7 +2148,7 @@ export default function LifeApp() {
   if (screen === "register")
     return (
       <RegisterPage
-        C={C} S={S} play={play} setScreen={setScreen}
+        C={C} play={play} setScreen={setScreen}
         rName={rName} setRName={setRName} rEmail={rEmail} setREmail={setREmail}
         rDob={rDob} setRDob={setRDob} rPass={rPass} setRPass={setRPass}
         rPass2={rPass2} setRPass2={setRPass2}
