@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { S } from "../systems/theme";
 import { getResumeTopic, clearResumeTopic } from "../systems/resumeReading";
 import { MAP } from "../data/content";
@@ -29,8 +29,17 @@ export function HomePage({
     return { key: saved.key, label: MAP[saved.key].node?.label || saved.key };
   }, []);
 
-  // Compute greeting once — use user's local hour via Date.
-  const greeting = useMemo(() => greetingFor(new Date().getHours()), []);
+  // Compute greeting. Re-check every 5 minutes so it updates if the app
+  // stays open across a time-of-day boundary (morning → afternoon, etc.).
+  const [greetHour, setGreetHour] = useState(() => new Date().getHours());
+  useEffect(() => {
+    const id = setInterval(() => {
+      const h = new Date().getHours();
+      setGreetHour((prev) => (prev === h ? prev : h));
+    }, 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+  const greeting = useMemo(() => greetingFor(greetHour), [greetHour]);
   const firstName = useMemo(() => {
     if (!userName) return "";
     return String(userName).trim().split(/\s+/)[0] || "";

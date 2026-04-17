@@ -234,7 +234,33 @@ p {
 }
 
 .life-card-hover:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.985);
+}
+
+/* ─── A11Y: keyboard focus rings ──────────────────────────────────────
+   Visible only for keyboard users (not mouse) so the UI stays clean for
+   most people but remains navigable via tab. */
+button:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--life-green, #4a8c5c);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* Crisp rendering for small SVG icons on Retina displays */
+svg {
+  -webkit-font-smoothing: antialiased;
+  shape-rendering: geometricPrecision;
+}
+
+/* Prevent iOS Safari from auto-enlarging text on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Top bar glass + iOS safe area (notch / status bar) */

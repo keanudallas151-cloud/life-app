@@ -194,6 +194,9 @@ export function RegisterPage({
             }}
             placeholder="Your full name"
             autoComplete="name"
+            inputMode="text"
+            enterKeyHint="next"
+            autoCapitalize="words"
             style={{
               background: C.skin,
               border: `1.5px solid ${rErr.name ? C.red : C.border}`,
@@ -250,6 +253,11 @@ export function RegisterPage({
             }}
             placeholder="you@example.com"
             autoComplete="email"
+            inputMode="email"
+            enterKeyHint="next"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
             style={{
               background: C.skin,
               border: `1.5px solid ${rErr.email ? C.red : C.border}`,
@@ -411,6 +419,7 @@ export function RegisterPage({
               }}
               placeholder="Use 8+ characters"
               autoComplete="new-password"
+              enterKeyHint="next"
               style={{
                 background: C.skin,
                 border: `1.5px solid ${rErr.pass ? C.red : C.border}`,
@@ -563,6 +572,7 @@ export function RegisterPage({
               }}
               placeholder="Repeat password"
               autoComplete="new-password"
+              enterKeyHint="done"
               style={{
                 background: C.skin,
                 border: `1.5px solid ${rErr.pass2 || confirmMismatch ? C.red : C.border}`,

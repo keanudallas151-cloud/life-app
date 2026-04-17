@@ -103,8 +103,12 @@ export function SignInPage({
           Welcome Back
         </p>
 
-        <div
+        <form
           className="life-auth-card"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!authLoading) doEmailSignIn();
+          }}
           style={{
             width: "100%",
             maxWidth: 320,
@@ -141,6 +145,11 @@ export function SignInPage({
               onKeyDown={(e) => e.key === "Enter" && doEmailSignIn()}
               placeholder="you@example.com"
               autoComplete="email"
+              inputMode="email"
+              enterKeyHint="next"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
               style={{
                 background: C.skin,
                 border: `1.5px solid ${siErr ? C.red : C.border}`,
@@ -186,6 +195,7 @@ export function SignInPage({
                 onKeyDown={(e) => e.key === "Enter" && doEmailSignIn()}
                 placeholder="Your password"
                 autoComplete="current-password"
+                enterKeyHint="done"
                 style={{
                   background: C.skin,
                   border: `1.5px solid ${C.border}`,
@@ -254,6 +264,7 @@ export function SignInPage({
           )}
 
           <button
+            type="submit"
             onClick={doEmailSignIn}
             disabled={authLoading}
             style={{
@@ -289,6 +300,7 @@ export function SignInPage({
 
           {/* P9a: Forgot Password */}
           <button
+            type="button"
             onClick={() => {
               play("tap");
               setForgotMode(true);
@@ -369,6 +381,7 @@ export function SignInPage({
               )}
               <div style={{ display: "flex", gap: 8 }}>
                 <button
+                  type="button"
                   onClick={doForgotPassword}
                   disabled={authLoading}
                   style={{
@@ -387,6 +400,7 @@ export function SignInPage({
                   {authLoading ? "Sending…" : "Send Reset Email"}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setForgotMode(false)}
                   style={{
                     background: C.light,
@@ -406,6 +420,7 @@ export function SignInPage({
           )}
 
           <button
+            type="button"
             onClick={() => {
               play("tap");
               setScreen("landing");
@@ -461,6 +476,7 @@ export function SignInPage({
           >
             No account?{" "}
             <button
+              type="button"
               onClick={() => {
                 play("tap");
                 setScreen("register");
@@ -487,7 +503,7 @@ export function SignInPage({
               Register
             </button>
           </p>
-        </div>
+        </form>
         <p
           className="life-footer"
           style={{

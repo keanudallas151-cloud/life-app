@@ -50,6 +50,15 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
       audio.removeEventListener("loadedmetadata", onLoaded);
       audio.removeEventListener("error", onError);
       audio.removeEventListener("ended", onEnded);
+      // iOS-specific: clear src + reload to fully release audio buffer.
+      // Without this, Safari retains the audio element in memory and
+      // eventually kills the tab with "Too many audio elements" error.
+      try {
+        audio.src = "";
+        audio.load();
+      } catch {
+        /* ignore */
+      }
       audioRef.current = null;
     };
   }, [mp3Url, hasAudio]);

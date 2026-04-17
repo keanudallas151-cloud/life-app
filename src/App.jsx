@@ -917,6 +917,30 @@ export default function LifeApp() {
   );
   const [showNotif, setShowNotif] = useState(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // Android back button / iOS swipe-back: close open overlays before the
+  // browser tries to navigate away. Pushes a history entry when any
+  // overlay opens, pops it when it closes or when the user presses back.
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const anyOverlay = sidebarOpen || showNotif;
+    if (!anyOverlay) return undefined;
+    window.history.pushState({ lifeOverlay: true }, "");
+    const handlePop = () => {
+      if (sidebarOpen) setSidebarOpen(false);
+      if (showNotif) setShowNotif(false);
+    };
+    window.addEventListener("popstate", handlePop);
+    return () => {
+      window.removeEventListener("popstate", handlePop);
+      // If overlay closed via UI (not back-button), pop the pushed entry
+      // so we don't accumulate stale history.
+      if (window.history.state?.lifeOverlay) {
+        window.history.back();
+      }
+    };
+  }, [sidebarOpen, showNotif]);
+
   const markAllRead = () => {
     const next = notifications.map((n) => ({ ...n, read: true }));
     setNotifications(next);
