@@ -277,10 +277,10 @@ export function QuizPage({ play, userId, onQuizComplete, t: theme }) {
               <>
                 <p style={{ margin:"0 0 12px", fontSize:11, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:t.muted }}>Topics played</p>
                 <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:24 }}>
-                  {Object.entries(stats.topicsPlayed).sort((a,b)=>b[1]-a[1]).map(([t,n]) => {
-                    const meta = TOPIC_META[t];
+                  {Object.entries(stats.topicsPlayed).sort((a,b)=>b[1]-a[1]).map(([topic,n]) => {
+                    const meta = TOPIC_META[topic];
                     return (
-                      <div key={t} style={{ display:"flex", alignItems:"center", gap:12, background:t.white, border:`1px solid ${t.border}`, borderRadius:10, padding:"12px 14px" }}>
+                      <div key={topic} style={{ display:"flex", alignItems:"center", gap:12, background:t.white, border:`1px solid ${t.border}`, borderRadius:10, padding:"12px 14px" }}>
                         <div style={{ width:32, height:32, borderRadius:8, background:meta.bg, display:"flex", alignItems:"center", justifyContent:"center" }}>
                           {Ic[meta.icon]?.("none",meta.col,16)}
                         </div>
