@@ -8,18 +8,22 @@ Open this file in VS Code when you want the fastest map of how the app is put to
   - Main application controller.
   - Holds auth state, screen routing, bookmarks, notes, read tracking, search, profile state, and most UI flow.
   - If you want to understand "what the app does," this is the first file to inspect.
- 
+
+- `app/page.jsx`
+  - Active Next.js route entry for `/`.
+  - Dynamically loads `src/App.jsx` with SSR disabled and wraps it in the shared error boundary and toast provider.
+
 - `src/main.jsx`
-  - React entry point.
-  - Mounts `App.jsx` into the DOM.
+  - Legacy standalone React entry point kept in the repo.
+  - Still mounts `App.jsx` into the DOM, but it is not the primary startup path used by `npm run dev` / `next dev`.
  
 - `src/supabaseClient.js`
   - Creates the Supabase client.
-  - Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from env.
+  - Reads `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` from env, with legacy fallback support for older public key names.
  
 ## Internal flow
  
-1. `src/main.jsx` renders `src/App.jsx`.
+1. `app/page.jsx` renders `src/App.jsx` through a dynamic client-only import.
 2. `src/App.jsx` restores the Supabase session on load.
 3. Authenticated users move into the main app screen.
 4. App content is loaded from `src/data/content.js`.
@@ -29,16 +33,18 @@ Open this file in VS Code when you want the fastest map of how the app is put to
 ## Most important files
  
 ### Core app shell
+- `app/page.jsx` - active Next.js page shell for the home route
 - `src/App.jsx` - main logic and screen switching
 - `src/App.css` - main app styling
 - `src/index.css` - global styling
-- `index.html` - Vite HTML shell
-- `vite.config.js` - Vite config
+- `src/main.jsx` - legacy standalone entry kept alongside the Next.js shell
+- `index.html` - legacy Vite HTML shell still present in the repo
+- `vite.config.js` - legacy Vite config still present in the repo
 - `package.json` - scripts and dependencies
  
 ### Auth and backend
-- `src/supabaseClient.js` - active Supabase client used by the app (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)
-- `src/.env` - local env values for development (see `.env.example`)
+- `src/supabaseClient.js` - active Supabase client used by the app (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, plus legacy fallbacks)
+- `.env` - local env values for development (see `.env.example`)
  
 ### Content and data
 - `src/data/content.js` - main content tree, guided content, content map
@@ -92,8 +98,8 @@ These are the main responsibilities currently combined in that file:
 ## If you want the fastest code-reading path
  
 Read files in this order:
- 
-1. `src/main.jsx`
+
+1. `app/page.jsx`
 2. `src/App.jsx`
 3. `src/data/content.js`
 4. `src/components/Field.jsx`
@@ -103,7 +109,9 @@ Read files in this order:
  
 ## Quick repo notes
  
-- This is a Vite + React app.
+- The active app shell is Next.js 16 + React 19.
+- `app/page.jsx` is the active entry point and dynamically loads `src/App.jsx`.
+- Legacy Vite startup files (`src/main.jsx`, `index.html`, `vite.config.js`) are still present in the repo but are not the main startup path.
 - React 19 and Supabase are the main runtime dependencies.
 - A lot of the app logic is centralized in `src/App.jsx`, so that is the closest thing to an "all internals" file right now.
  
