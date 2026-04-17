@@ -6,13 +6,16 @@ import { LS } from "../systems/storage";
 import { useQuizStats } from "../systems/useQuizStats";
 
 const TOPIC_META = {
-  finance:    { label:"Finance",    col:"#4a8c5c", bg:"#eaf3ec",  icon:"wallet"  },
-  psychology: { label:"Psychology", col:"#7B6FA8", bg:"#f0edf8",  icon:"brain"   },
-  money:      { label:"Money",      col:"#b8975a", bg:"#f7f0e3",  icon:"lock"    },
-  philosophy: { label:"Philosophy", col:"#4a7ab8", bg:"#e8f0f8",  icon:"book"    },
-  business:   { label:"Business",   col:"#c0604a", bg:"#faecea",  icon:"barChart"},
+  finance:    { label:"Finance",       col:"#4a8c5c", bg:"#eaf3ec",  icon:"wallet"  },
+  psychology: { label:"Psychology",    col:"#7B6FA8", bg:"#f0edf8",  icon:"brain"   },
+  money:      { label:"Money",         col:"#b8975a", bg:"#f7f0e3",  icon:"lock"    },
+  philosophy: { label:"Philosophy",    col:"#4a7ab8", bg:"#e8f0f8",  icon:"book"    },
+  business:   { label:"Business",      col:"#c0604a", bg:"#faecea",  icon:"barChart"},
   communication: { label:"Communication", col:"#3a7a9e", bg:"#e5f1f8", icon:"users" },
-  general:    { label:"General",    col:"#6c757d", bg:"#f8f9fa",  icon:"globe"   },
+  mindset:    { label:"Mindset",       col:"#2d8a6e", bg:"#e6f5ee",  icon:"bolt"    },
+  discipline: { label:"Discipline",    col:"#6b4c9a", bg:"#efe8f6",  icon:"shield"  },
+  health:     { label:"Health",        col:"#d4694a", bg:"#fdf0ec",  icon:"leaf"    },
+  general:    { label:"General",       col:"#6c757d", bg:"#f8f9fa",  icon:"globe"   },
 };
 const DIFF_COLORS = { easy:C.green, medium:C.gold, hard:C.red };
 const DIFF_META   = {

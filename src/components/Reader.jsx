@@ -1188,7 +1188,7 @@ export function EbookReader({
 
                     {isLast && (
                       <>
-                        <AudioPlayer title={selContent.title} playSound={play} />
+                        <AudioPlayer title={selContent.title} playSound={play} t={t} />
                         {FINANCE_KEYS.includes(selKey) && <FinanceDisclaimer t={t} />}
                       </>
                     )}

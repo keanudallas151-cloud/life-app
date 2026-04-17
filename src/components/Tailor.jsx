@@ -46,17 +46,37 @@ export function TailorIntro({userName,onExplore,onTailor,t:theme}){
 export function TailorQuestions({onComplete,onBack,t:theme}){
   const t = theme || C;
   const[step,setStep]=useState(0);
-  const[answers,setAnswers]=useState({goals:null,motivation:null,finance_level:null,english_level:null,learning_style:null,time:40,life_areas:[]});
+  const[answers,setAnswers]=useState({
+    goals:null,motivation:null,finance_level:null,english_level:null,learning_style:null,
+    age_group:null,biggest_challenge:null,reading_frequency:null,accountability_style:null,content_depth:null,
+    time:40,life_areas:[]
+  });
   const[animDir,setAnimDir]=useState("in");
 
   const questions=[
-    {id:"goals",label:"What is your dream / goal?",multi:false,opts:["Generate Income","Start A Business","Improving Mindset","Learning","Freedom","To Be Wiser"]},
-    {id:"motivation",label:"Why do you seek knowledge?",multi:false,opts:["Financial Freedom","Self-Improvement","Curiosity","Solve Personal Problems","Self-Discipline And Structure"]},
-    {id:"finance_level",label:"What's your understanding of economics and basic financial literacy?",multi:false,opts:["No understanding (Beginner)","Basic understanding","Intermediate","Advanced","Expert Understanding"]},
-    {id:"english_level",label:"How well do you understand and speak English?",multi:false,opts:["Beginner","Fluent","Shakespeare Level"]},
-    {id:"learning_style",label:"What's your preferred learning style?",multi:false,opts:["Reading","Videos","Interactive/Hands-on","Audio"]},
-    {id:"time",label:"How much time per week do you plan to dedicate to learning?",multi:false,opts:null,slider:true},
-    {id:"life_areas",label:"What parts of your life do you need to improve on?",multi:true,opts:["Finance","Psychology/Mindset","Discipline","Social Skills","Health","Business/Entrepreneurship","Communication","Productivity"]},
+    {id:"goals",label:"What is your biggest dream or goal right now?",multi:false,
+      opts:["Generate Income","Start A Business","Improving Mindset","Learning","Freedom","To Be Wiser"]},
+    {id:"motivation",label:"What drives you to seek knowledge?",multi:false,
+      opts:["Financial Freedom","Self-Improvement","Curiosity","Solve Personal Problems","Self-Discipline And Structure"]},
+    {id:"age_group",label:"Which age group best describes you?",multi:false,
+      opts:["13-17","18-24","25-34","35-44","45+"]},
+    {id:"biggest_challenge",label:"What is the biggest challenge holding you back?",multi:false,
+      opts:["Lack of motivation","Not enough money","No clear direction","Bad habits / discipline","Social anxiety / confidence","Time management"]},
+    {id:"finance_level",label:"How would you rate your financial literacy?",multi:false,
+      opts:["No understanding (Beginner)","Basic understanding","Intermediate","Advanced","Expert Understanding"]},
+    {id:"english_level",label:"How comfortable are you reading English?",multi:false,
+      opts:["Beginner","Fluent","Shakespeare Level"]},
+    {id:"reading_frequency",label:"How often do you read or study on your own?",multi:false,
+      opts:["Never / rarely","A few times a month","Weekly","Daily reader"]},
+    {id:"learning_style",label:"How do you learn best?",multi:false,
+      opts:["Reading","Videos","Interactive/Hands-on","Audio"]},
+    {id:"accountability_style",label:"What keeps you accountable?",multi:false,
+      opts:["I prefer solo learning","I like tracking my progress","I need a community","I work best with a mentor"]},
+    {id:"content_depth",label:"How deep do you want the content to go?",multi:false,
+      opts:["Quick tips & summaries","Balanced — some detail","Deep dives & full breakdowns","I want everything available"]},
+    {id:"time",label:"How much time per week will you dedicate to learning?",multi:false,opts:null,slider:true},
+    {id:"life_areas",label:"Which areas of your life need the most work?",multi:true,
+      opts:["Finance","Psychology/Mindset","Discipline","Social Skills","Health","Business/Entrepreneurship","Communication","Productivity"]},
   ];
 
   const q=questions[step];
@@ -71,7 +91,7 @@ export function TailorQuestions({onComplete,onBack,t:theme}){
   ];
   const getNearestLabel=(val)=>{
     let closest=timeLabels[0];
-    timeLabels.forEach(t=>{if(Math.abs(t.v-val)<Math.abs(closest.v-val))closest=t;});
+    timeLabels.forEach(tl=>{if(Math.abs(tl.v-val)<Math.abs(closest.v-val))closest=tl;});
     return closest.label;
   };
 
@@ -102,60 +122,95 @@ export function TailorQuestions({onComplete,onBack,t:theme}){
   const pct=Math.round(((step+1)/total)*100);
 
   return(
-    <div style={{minHeight:"100svh",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:t.skin,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif"}}>
-      <div style={{background:t.white,borderBottom:`1px solid ${t.border}`,padding:"18px 24px"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-          <button onClick={goPrev} style={{background:"none",border:"none",cursor:"pointer",color:t.muted,fontSize:13,padding:0,fontFamily:"Georgia,serif"}}>← Back</button>
-          <span style={{fontSize:12,color:t.muted,fontWeight:600}}>{step+1} / {total}</span>
+    <div data-page-tag="#tailor_questions" style={{minHeight:"100svh",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:t.skin,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif"}}>
+      {/* Header bar */}
+      <div style={{background:t.white,borderBottom:`1px solid ${t.border}`,padding:"16px 20px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+          <button onClick={goPrev} style={{background:"none",border:"none",cursor:"pointer",color:t.muted,fontSize:13,padding:0,fontFamily:"Georgia,serif",display:"flex",alignItems:"center",gap:4}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+          <span style={{fontSize:11,color:t.muted,fontWeight:600,letterSpacing:1}}>{step+1} of {total}</span>
           <div style={{width:40}}/>
         </div>
-        <div style={{height:4,background:t.light,borderRadius:4}}>
-          <div style={{height:"100%",width:`${pct}%`,background:"#6FBE77",borderRadius:4,transition:"width 0.35s ease"}}/>
+        <div style={{height:4,background:t.light,borderRadius:4,overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${pct}%`,background:t.green,borderRadius:4,transition:"width 0.35s ease"}}/>
         </div>
       </div>
-      <div style={{flex:1,padding:"36px 24px 24px",maxWidth:520,margin:"0 auto",width:"100%",boxSizing:"border-box",
-        opacity:animDir==="out"?0:1,transform:animDir==="out"?"translateX(18px)":"translateX(0)",transition:"opacity 0.18s,transform 0.18s"}}>
-        <p style={{margin:"0 0 6px",fontSize:10,fontWeight:700,letterSpacing:2.5,textTransform:"uppercase",color:t.muted}}>Question {step+1}</p>
-        <h2 style={{margin:"0 0 28px",fontSize:21,fontWeight:800,color:t.ink,lineHeight:1.3,letterSpacing:-0.3}}>{q.label}</h2>
+
+      {/* Question body */}
+      <div style={{flex:1,padding:"28px 22px 20px",maxWidth:520,margin:"0 auto",width:"100%",boxSizing:"border-box",
+        opacity:animDir==="out"?0:1,transform:animDir==="out"?"translateX(16px)":"translateX(0)",transition:"opacity 0.18s,transform 0.18s"}}>
+        <p style={{margin:"0 0 4px",fontSize:10,fontWeight:700,letterSpacing:2.5,textTransform:"uppercase",color:t.green}}>Question {step+1}</p>
+        <h2 style={{margin:"0 0 24px",fontSize:20,fontWeight:800,color:t.ink,lineHeight:1.35,letterSpacing:-0.3}}>{q.label}</h2>
+
+        {/* Slider question */}
         {q.slider&&(
-          <div style={{padding:"8px 0 24px"}}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:8}}>
-              {timeLabels.map(t=>(
-                <span key={t.v} style={{fontSize:10,color:Math.abs(t.v-answers.time)<14?t.green:t.muted,fontWeight:Math.abs(t.v-answers.time)<14?700:400,fontFamily:"Georgia,serif",textAlign:"center",maxWidth:70,lineHeight:1.3}}>{t.label}</span>
+          <div style={{padding:"4px 0 20px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:6}}>
+              {timeLabels.map(tl=>(
+                <span key={tl.v} style={{fontSize:10,color:Math.abs(tl.v-answers.time)<14?t.green:t.muted,fontWeight:Math.abs(tl.v-answers.time)<14?700:400,fontFamily:"Georgia,serif",textAlign:"center",maxWidth:70,lineHeight:1.3}}>{tl.label}</span>
               ))}
             </div>
             <div style={{position:"relative",height:44,display:"flex",alignItems:"center"}}>
               <div style={{position:"absolute",left:0,right:0,height:5,background:t.border,borderRadius:4}}>
-                <div style={{height:"100%",width:`${answers.time}%`,background:"#6FBE77",borderRadius:4}}/>
+                <div style={{height:"100%",width:`${answers.time}%`,background:t.green,borderRadius:4}}/>
               </div>
               <input type="range" min="0" max="100" value={answers.time}
                 onChange={e=>setAnswers(a=>({...a,time:Number(e.target.value)}))}
                 style={{position:"absolute",left:0,right:0,width:"100%",opacity:0,height:44,cursor:"pointer",zIndex:2}}/>
-              <div style={{position:"absolute",left:`calc(${answers.time}% - 14px)`,width:28,height:28,borderRadius:"50%",background:"#6FBE77",boxShadow:"0 2px 10px rgba(111,190,119,0.45)",border:`3px solid ${t.white}`,pointerEvents:"none",transition:"left 0.05s"}}/>
+              <div style={{position:"absolute",left:`calc(${answers.time}% - 14px)`,width:28,height:28,borderRadius:"50%",background:t.green,boxShadow:`0 2px 10px rgba(74,140,92,0.45)`,border:`3px solid ${t.white}`,pointerEvents:"none",transition:"left 0.05s"}}/>
             </div>
-            <p style={{marginTop:20,textAlign:"center",fontSize:14,fontWeight:700,color:t.green,fontFamily:"Georgia,serif"}}>{getNearestLabel(answers.time)}</p>
+            <p style={{marginTop:16,textAlign:"center",fontSize:14,fontWeight:700,color:t.green,fontFamily:"Georgia,serif"}}>{getNearestLabel(answers.time)}</p>
           </div>
         )}
+
+        {/* Options grid */}
         {!q.slider&&q.opts&&(
-          <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {q.opts.map(opt=>{
               const sel=q.multi?answers[q.id].includes(opt):answers[q.id]===opt;
               return(
                 <button key={opt} onClick={()=>toggleOpt(q.id,opt,q.multi)}
-                  style={{background:sel?"#6FBE77":t.white,border:`1.5px solid ${sel?"#6FBE77":t.border}`,borderRadius:24,padding:"11px 20px",fontSize:14,fontWeight:sel?700:400,color:sel?t.white:t.mid,cursor:"pointer",fontFamily:"Georgia,serif",transition:"all 0.15s",display:"flex",alignItems:"center",gap:8}}>
-                  {sel&&<svg width="13" height="13" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                  style={{
+                    background:sel?t.green:t.white,
+                    border:`1.5px solid ${sel?t.green:t.border}`,
+                    borderRadius:14,
+                    padding:"14px 18px",
+                    fontSize:14,
+                    fontWeight:sel?700:500,
+                    color:sel?"#fff":t.mid,
+                    cursor:"pointer",
+                    fontFamily:"Georgia,serif",
+                    textAlign:"left",
+                    display:"flex",
+                    alignItems:"center",
+                    gap:10,
+                    transition:"background 0.15s, border-color 0.15s",
+                  }}>
+                  {/* Check / radio indicator */}
+                  <span style={{
+                    width:20,height:20,borderRadius:q.multi?4:"50%",flexShrink:0,
+                    border:sel?`2px solid #fff`:`2px solid ${t.border}`,
+                    background:sel?t.green:t.white,
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                  }}>
+                    {sel&&<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                  </span>
                   {opt}
                 </button>
               );
             })}
           </div>
         )}
-        {q.multi&&<p style={{margin:"16px 0 0",fontSize:11,color:t.muted,fontStyle:"italic"}}>Select all that apply.</p>}
+        {q.multi&&<p style={{margin:"12px 0 0",fontSize:11,color:t.muted,fontStyle:"italic"}}>Select all that apply.</p>}
       </div>
-      <div style={{padding:"16px 24px 36px",maxWidth:520,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
+
+      {/* Footer */}
+      <div style={{padding:"14px 22px 32px",maxWidth:520,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
         <button onClick={goNext} disabled={!isAnswered()}
-          style={{width:"100%",background:isAnswered()?"#6FBE77":t.light,border:"none",borderRadius:14,padding:"17px",color:isAnswered()?t.white:t.muted,fontSize:16,fontWeight:700,cursor:isAnswered()?"pointer":"default",fontFamily:"Georgia,serif",transition:"all 0.2s"}}>
-          {step<total-1?"Next →":"Build My Plan ✦"}
+          style={{width:"100%",background:isAnswered()?t.green:t.light,border:"none",borderRadius:14,padding:"17px",color:isAnswered()?"#fff":t.muted,fontSize:16,fontWeight:700,cursor:isAnswered()?"pointer":"default",fontFamily:"Georgia,serif",transition:"background 0.2s, color 0.2s"}}>
+          {step<total-1?"Continue →":"Build My Plan ✦"}
         </button>
       </div>
     </div>
