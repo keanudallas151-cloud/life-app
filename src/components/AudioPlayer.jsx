@@ -15,15 +15,15 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
   const t = theme || C;
 
   // ── refs ──
-  const audioRef   = useRef(null);
+  const audioRef = useRef(null);
   const intervalRef = useRef(null);
 
   // ── state ──
-  const [playing,  setPlaying]  = useState(false);
-  const [elapsed,  setElapsed]  = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(fallbackDuration);
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const hasAudio = !!mp3Url;
 
@@ -95,7 +95,9 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
         setPlaying(false);
       } else {
         setLoading(true);
-        a.play().then(() => { setLoading(false); setPlaying(true); }).catch(() => { setLoading(false); setError("Playback failed"); });
+        a.play()
+          .then(() => { setLoading(false); setPlaying(true); })
+          .catch(() => { setLoading(false); setError("Playback failed"); });
       }
     } else {
       setPlaying(p => !p);
@@ -227,11 +229,11 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
           }}
         >
           {loading ? (
-            <span style={{ fontSize: 18, color: "#fff" }}>⏳</span>
+            <span style={{ fontSize: 18, color: t.white }}>⏳</span>
           ) : playing ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill={t.white}><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
           ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21" /></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill={t.white}><polygon points="6,3 20,12 6,21" /></svg>
           )}
         </button>
 

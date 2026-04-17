@@ -179,7 +179,7 @@ export function TailorQuestions({onComplete,onBack,t:theme}){
                     padding:"14px 18px",
                     fontSize:14,
                     fontWeight:sel?700:500,
-                    color:sel?"#fff":t.mid,
+                    color:sel?t.white:t.mid,
                     cursor:"pointer",
                     fontFamily:"Georgia,serif",
                     textAlign:"left",
@@ -209,7 +209,7 @@ export function TailorQuestions({onComplete,onBack,t:theme}){
       {/* Footer */}
       <div style={{padding:"14px 22px 32px",maxWidth:520,margin:"0 auto",width:"100%",boxSizing:"border-box"}}>
         <button onClick={goNext} disabled={!isAnswered()}
-          style={{width:"100%",background:isAnswered()?t.green:t.light,border:"none",borderRadius:14,padding:"17px",color:isAnswered()?"#fff":t.muted,fontSize:16,fontWeight:700,cursor:isAnswered()?"pointer":"default",fontFamily:"Georgia,serif",transition:"background 0.2s, color 0.2s"}}>
+          style={{width:"100%",background:isAnswered()?t.green:t.light,border:"none",borderRadius:14,padding:"17px",color:isAnswered()?t.white:t.muted,fontSize:16,fontWeight:700,cursor:isAnswered()?"pointer":"default",fontFamily:"Georgia,serif",transition:"background 0.2s, color 0.2s"}}>
           {step<total-1?"Continue →":"Build My Plan ✦"}
         </button>
       </div>
