@@ -1,7 +1,7 @@
 import { C } from "../systems/theme";
 
 export function Bar({label,value,max,color,prefix="",suffix="",t=C}){
-  const pct=Math.round((value/max)*100);
+  const pct=max>0?Math.round((value/max)*100):0;
   return(
     <div style={{marginBottom:14}}>
       <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
@@ -16,9 +16,12 @@ export function Bar({label,value,max,color,prefix="",suffix="",t=C}){
 }
 
 export function LineChart({data,color,xLabel,t=C}){
-  const mx=Math.max(...data.map(d=>d.v));const mn=Math.min(...data.map(d=>d.v));const rng=mx-mn||1;
+  if(!data||data.length===0)return null;
+  const vals=data.map(d=>d.v);
+  const mx=Math.max(...vals);const mn=Math.min(...vals);const rng=mx-mn||1;
   const W=280,H=120,P=8;
-  const pts=data.map((d,i)=>({x:P+(i/(data.length-1))*(W-P*2),y:H-P-((d.v-mn)/rng)*(H-P*2)}));
+  const divisor=data.length>1?data.length-1:1;
+  const pts=data.map((d,i)=>({x:P+(i/divisor)*(W-P*2),y:H-P-((d.v-mn)/rng)*(H-P*2)}));
   const path=pts.map((p,i)=>`${i===0?"M":"L"}${p.x},${p.y}`).join(" ");
   const fill=path+` L${pts[pts.length-1].x},${H} L${pts[0].x},${H} Z`;
   return(

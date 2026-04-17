@@ -87,18 +87,21 @@ export function usePostIt(user) {
     // Build maps
     const commentsMap = {};
     (commentRows || []).forEach(c => {
+      if (!c.post_id) return; // guard: skip rows with missing post_id
       if (!commentsMap[c.post_id]) commentsMap[c.post_id] = [];
       commentsMap[c.post_id].push(c);
     });
 
-    // Prefer sum of post_votes only. Adding posts.votes on top double-counts once
-    // someone has voted (row still holds the seed value, e.g. 1).
+    // Use summed post_votes when any votes exist for a post.
+    // Only fall back to the seed (posts.votes) when zero rows were found in post_votes.
     const votesMap = {};
+    const postsWithVoteRows = new Set();
     (voteRows || []).forEach(v => {
+      postsWithVoteRows.add(v.post_id);
       votesMap[v.post_id] = (votesMap[v.post_id] || 0) + v.dir;
     });
     postRows.forEach(p => {
-      if ((votesMap[p.id] ?? 0) === 0 && (p.votes || 0) !== 0) {
+      if (!postsWithVoteRows.has(p.id) && (p.votes || 0) !== 0) {
         votesMap[p.id] = p.votes;
       }
     });
@@ -150,8 +153,8 @@ export function usePostIt(user) {
         payload => {
           const { post_id, dir } = payload.new;
           // Skip if already applied by our own optimistic update
-          if (pendingVoteIds.current[post_id] > 0) {
-            pendingVoteIds.current[post_id]--;
+          if ((pendingVoteIds.current[post_id] ?? 0) > 0) {
+            pendingVoteIds.current[post_id] = Math.max(0, pendingVoteIds.current[post_id] - 1);
             return;
           }
           setPosts(prev => prev.map(p =>
@@ -163,8 +166,8 @@ export function usePostIt(user) {
           // User changed their vote (e.g. ▲ then ▼): diff = new - old
           const diff = payload.new.dir - payload.old.dir;
           // Skip if already applied by our own optimistic update
-          if (pendingVoteIds.current[payload.new.post_id] > 0) {
-            pendingVoteIds.current[payload.new.post_id]--;
+          if ((pendingVoteIds.current[payload.new.post_id] ?? 0) > 0) {
+            pendingVoteIds.current[payload.new.post_id] = Math.max(0, pendingVoteIds.current[payload.new.post_id] - 1);
             return;
           }
           setPosts(prev => prev.map(p =>

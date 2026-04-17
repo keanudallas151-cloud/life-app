@@ -166,7 +166,7 @@ export default function SettingsPage({
               label: "Reset Tailoring",
               onClick: () => {
                 setProfile(null);
-                LS.del(`tsd_${uid}`);
+                if (uid) LS.del(`tsd_${uid}`);
                 trackMomentumEvent("profile", {
                   source: "settings",
                   points: 2,

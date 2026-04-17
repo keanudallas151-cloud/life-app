@@ -65,7 +65,11 @@ export function WhereToStartPage({ t, play, setPage, onSelect, onOpenQuiz }) {
       {STEPS.map((item) => (
         <button
           key={item.step}
-          onClick={() => onSelect(item.key, CONTENT[item.key])}
+          onClick={() => {
+            const node = CONTENT[item.key];
+            if (!node) return;
+            onSelect(item.key, node);
+          }}
           style={{
             display: "flex",
             alignItems: "flex-start",

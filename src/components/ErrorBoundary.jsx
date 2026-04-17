@@ -17,17 +17,17 @@ class ErrorBoundary extends React.Component {
 
   handleRetry = () => {
     this.setState({ hasError: false, error: null, errorInfo: null })
-    window.location.reload()
+    if (typeof window !== 'undefined') window.location.reload()
   }
 
   handleHome = () => {
-    window.location.href = '/'
+    if (typeof window !== 'undefined') window.location.href = '/'
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-950">
+        <div role="alert" className="min-h-screen flex items-center justify-center p-6 bg-slate-950">
           <div className="bg-slate-900/90 backdrop-blur border border-slate-800 rounded-3xl p-8 max-w-lg text-center">
             <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6">
               <span className="text-red-500 text-4xl font-bold">!</span>

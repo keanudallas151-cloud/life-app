@@ -238,6 +238,11 @@ export function useSound(settings = {}) {
       window.removeEventListener("pointerdown", kick);
       window.removeEventListener("touchstart", kick);
       window.removeEventListener("keydown", kick);
+      // Close AudioContext to prevent memory leak
+      if (ctx.current) {
+        ctx.current.close().catch(() => {});
+        ctx.current = null;
+      }
     };
   }, [preloadAll]);
 

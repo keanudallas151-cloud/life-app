@@ -44,6 +44,8 @@ export function RegisterPage({
     "Strong",
   ];
   const passwordStrengthColors = [C.red, C.red, "#e6a23c", C.gold, C.green];
+  // Clamp to valid array index (0..4) since strength counts 5 booleans (0..5)
+  const clampedStrength = Math.min(passwordStrength, passwordStrengthLabels.length - 1);
   const confirmMismatch = rPass2.length > 0 && rPass !== rPass2;
 
   // Live age check: user must be 13+ (born 2013 or earlier)

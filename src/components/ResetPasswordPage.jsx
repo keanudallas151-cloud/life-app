@@ -26,6 +26,8 @@ export function ResetPasswordPage({
     "Very strong",
   ];
   const passwordStrengthColors = [C.red, C.red, "#e6a23c", C.gold, C.green];
+  // Clamp to valid array index (0..4) since strength counts 5 booleans (0..5)
+  const clampedStrength = Math.min(resetPasswordStrength, passwordStrengthLabels.length - 1);
 
   const resetPasswordHasMinLength = rpPass.length >= 8;
   const resetPasswordHasUpper = /[A-Z]/.test(rpPass);
@@ -202,8 +204,8 @@ export function ResetPasswordPage({
                       height: 3,
                       borderRadius: 2,
                       background:
-                        i < resetPasswordStrength
-                          ? passwordStrengthColors[resetPasswordStrength]
+                        i < clampedStrength
+                          ? passwordStrengthColors[clampedStrength]
                           : C.light,
                       transition: "background 0.2s",
                     }}
@@ -214,11 +216,11 @@ export function ResetPasswordPage({
                 style={{
                   margin: 0,
                   fontSize: 11,
-                  color: passwordStrengthColors[resetPasswordStrength],
+                  color: passwordStrengthColors[clampedStrength],
                   fontStyle: "italic",
                 }}
               >
-                {passwordStrengthLabels[resetPasswordStrength]}
+                {passwordStrengthLabels[clampedStrength]}
               </p>
               {resetPasswordHint && (
                 <p

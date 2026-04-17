@@ -12,12 +12,14 @@ export const metadata = {
   openGraph: {
     title: 'Life. — Build Wealth. Learn Everything. Connect.',
     description: 'Make money, learn anything, and connect with investors and creators. The first million is the hardest — the second is imminent.',
-    type: 'website'
+    type: 'website',
+    images: [{ url: '/favicon.svg', width: 512, height: 512, alt: 'Life. logo' }],
   },
   twitter: {
     card: 'summary',
     title: 'Life. — Build Wealth. Learn Everything. Connect.',
-    description: 'Make money, learn anything, and connect with investors and creators.'
+    description: 'Make money, learn anything, and connect with investors and creators.',
+    images: ['/favicon.svg'],
   }
 }
 

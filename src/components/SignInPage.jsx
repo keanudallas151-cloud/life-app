@@ -143,7 +143,7 @@ export function SignInPage({
               autoComplete="email"
               style={{
                 background: C.skin,
-                border: `1.5px solid ${siErr && !siPass ? C.red : C.border}`,
+                border: `1.5px solid ${siErr ? C.red : C.border}`,
                 borderRadius: 12,
                 padding: "14px 16px",
                 fontSize: 15,
@@ -158,7 +158,7 @@ export function SignInPage({
                 if (!siErr) e.currentTarget.style.borderColor = C.green;
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = C.border;
+                e.currentTarget.style.borderColor = siErr ? C.red : C.border;
               }}
             />
           </div>

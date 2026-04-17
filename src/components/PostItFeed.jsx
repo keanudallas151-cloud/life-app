@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { C, S } from "../systems/theme";
 import { Ic } from "../icons/Ic";
 import { usePostIt } from "../systems/usePostIt";
@@ -32,11 +32,11 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
     }
   }, []);
 
-  const sorted = [...posts].sort((a,b) =>
+  const sorted = useMemo(() => [...posts].sort((a,b) =>
     sort==="votes"    ? b.votes - a.votes
     : sort==="trending" ? (b.votes + b.comments.length*3) - (a.votes + a.comments.length*3)
     : new Date(b.created_at || 0) - new Date(a.created_at || 0)
-  );
+  ), [posts, sort]);
 
   const handleVote = (id, dir) => {
     if (!user?.id) {

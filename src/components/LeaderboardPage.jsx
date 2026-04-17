@@ -38,9 +38,9 @@ export function LeaderboardPage({ t, readKeys, bookmarks }) {
       >
         See how you stack up against other Life. members.
       </p>
-      {entries.map((entry) => (
+      {entries.map((entry, index) => (
         <div
-          key={entry.name}
+          key={`${entry.name}-${index}`}
           style={{
             display: "flex",
             alignItems: "center",

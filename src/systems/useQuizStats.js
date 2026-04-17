@@ -50,6 +50,7 @@ export function useQuizStats(userId) {
 
   useEffect(() => {
     if (isGuest) { setStatsState({ ...DEFAULT_STATS }); return; }
+    let cancelled = false;
     setLoading(true);
     supabase
       .from("quiz_stats")
@@ -57,10 +58,12 @@ export function useQuizStats(userId) {
       .eq("user_id", userId)
       .maybeSingle()
       .then(({ data, error }) => {
+        if (cancelled) return;
         if (error) console.error("useQuizStats fetch:", error.message);
         setStatsState(fromDB(data));
         setLoading(false);
       });
+    return () => { cancelled = true; };
   }, [userId, isGuest]);
 
   const saveStats = useCallback(async (next) => {

@@ -14,9 +14,5 @@ export function setResumeTopic(contentKey) {
 }
 
 export function clearResumeTopic() {
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* ignore */
-  }
+  LS.del(KEY);
 }
