@@ -1383,7 +1383,7 @@ export default function LifeApp() {
     }
   };
 
-  const saveHighlight = useCallback(
+  const _saveHighlight = useCallback(
     ({ text, topicTitle, page }) => {
       if (!selKey) return { status: "error", message: "No topic selected." };
       const normalizedText = String(text || "")
@@ -1422,7 +1422,7 @@ export default function LifeApp() {
     [highlights, selContent?.title, selKey, setHighlights, trackMomentumEvent],
   );
 
-  const removeHighlight = useCallback(
+  const _removeHighlight = useCallback(
     (highlightId) => {
       if (!highlightId) return;
       setHighlights((prev) => prev.filter((item) => item?.id !== highlightId));
