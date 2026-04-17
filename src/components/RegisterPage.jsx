@@ -464,7 +464,7 @@ export function RegisterPage({
                       borderRadius: 2,
                       background:
                         i < passwordStrength
-                          ? passwordStrengthColors[passwordStrength]
+                          ? passwordStrengthColors[clampedStrength]
                           : C.light,
                       transition: "background 0.2s",
                     }}
@@ -475,11 +475,11 @@ export function RegisterPage({
                 style={{
                   margin: 0,
                   fontSize: 11,
-                  color: passwordStrengthColors[passwordStrength],
+                  color: passwordStrengthColors[clampedStrength],
                   fontStyle: "italic",
                 }}
               >
-                {passwordStrengthLabels[passwordStrength]}
+                {passwordStrengthLabels[clampedStrength]}
               </p>
               {/* Requirement checklist — shows the user EXACTLY what's
                   needed. Green tick for met, gray for missing. */}
