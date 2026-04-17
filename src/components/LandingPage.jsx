@@ -234,11 +234,11 @@ export function LandingPage({ C, S, Ic, play, setScreen, AUTH_PROVIDERS, doProvi
             setScreen("signin");
           }}
           style={{
-            background: C.white,
-            border: `1.5px solid ${C.border}`,
+            background: C.ink,
+            border: "none",
             borderRadius: 14,
             padding: "18px 20px",
-            color: C.ink,
+            color: "#fff",
             fontSize: 17,
             fontWeight: 600,
             cursor: "pointer",
@@ -255,7 +255,7 @@ export function LandingPage({ C, S, Ic, play, setScreen, AUTH_PROVIDERS, doProvi
             height="18"
             viewBox="0 0 24 24"
             fill="none"
-            stroke={C.ink}
+            stroke="#fff"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"

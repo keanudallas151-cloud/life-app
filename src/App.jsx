@@ -3440,6 +3440,10 @@ export default function LifeApp() {
                   setPage("daily_growth");
                 }}
                 onOpenMomentumHub={openMomentumHub}
+                onGetStarted={() => {
+                  play("tap");
+                  setPage("where_to_start");
+                }}
               />
             )}
 
