@@ -239,7 +239,7 @@ export function LandingPage({ C, S, Ic, play, setScreen, AUTH_PROVIDERS, doProvi
             border: `1.5px solid ${C.border}`,
             borderRadius: 14,
             padding: "18px 20px",
-            color: "#fff",
+            color: C.ink,
             fontSize: 17,
             fontWeight: 600,
             cursor: "pointer",

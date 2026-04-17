@@ -262,8 +262,13 @@ p {
 
 /* Desktop sidebar sits below topbar */
 .life-sidebar {
-  width: min(86vw, 340px);
+  width: 288px;
+  max-width: min(288px, 100vw);
   top: calc(62px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
 }
 .life-sidebar-backdrop {
   top: calc(62px + env(safe-area-inset-top, 0px));

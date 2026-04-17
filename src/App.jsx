@@ -96,22 +96,36 @@ function SwipeableNotification({ n, theme, onTap, onDelete }) {
   const [offset, setOffset] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startX = useRef(0);
+  const startY = useRef(0);
   const currentX = useRef(0);
   const didDrag = useRef(false);
+  const directionLocked = useRef(null); // "horizontal" | "vertical" | null
 
-  const onStart = (clientX) => {
+  const onStart = (clientX, clientY) => {
     startX.current = clientX;
+    startY.current = clientY;
     currentX.current = clientX;
     didDrag.current = false;
+    directionLocked.current = null;
     setDragging(true);
   };
-  const onMove = (clientX) => {
+  const onMove = (clientX, clientY) => {
     if (!dragging) return;
+    const dx = clientX - startX.current;
+    const dy = clientY - startY.current;
+
+    // Lock direction on first significant movement
+    if (directionLocked.current === null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+      directionLocked.current = Math.abs(dx) > Math.abs(dy) * 1.5 ? "horizontal" : "vertical";
+    }
+
+    // If vertical scroll wins, ignore horizontal swipe
+    if (directionLocked.current === "vertical") return;
+
     currentX.current = clientX;
-    const delta = clientX - startX.current;
-    if (Math.abs(delta) > 6) didDrag.current = true;
+    if (Math.abs(dx) > 6) didDrag.current = true;
     // Only allow swipe LEFT
-    setOffset(Math.min(0, delta));
+    setOffset(Math.min(0, dx));
   };
   const onEnd = () => {
     if (!dragging) return;
@@ -157,11 +171,11 @@ function SwipeableNotification({ n, theme, onTap, onDelete }) {
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") onTap?.();
         }}
-        onTouchStart={(e) => onStart(e.touches[0].clientX)}
-        onTouchMove={(e) => onMove(e.touches[0].clientX)}
+        onTouchStart={(e) => onStart(e.touches[0].clientX, e.touches[0].clientY)}
+        onTouchMove={(e) => onMove(e.touches[0].clientX, e.touches[0].clientY)}
         onTouchEnd={onEnd}
-        onMouseDown={(e) => onStart(e.clientX)}
-        onMouseMove={(e) => dragging && onMove(e.clientX)}
+        onMouseDown={(e) => onStart(e.clientX, e.clientY)}
+        onMouseMove={(e) => dragging && onMove(e.clientX, e.clientY)}
         onMouseUp={onEnd}
         onMouseLeave={onEnd}
         style={{
@@ -2099,7 +2113,7 @@ export default function LifeApp() {
             left: "50%",
             transform: "translateX(-50%)",
             background: t.ink,
-            color: dark ? "#222" : "#fff",
+            color: t.skin,
             padding: "10px 22px",
             borderRadius: 20,
             fontSize: 13,
@@ -2481,17 +2495,13 @@ export default function LifeApp() {
                 color: "#fff",
                 fontSize: 9,
                 fontWeight: 700,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                lineHeight: 1,
+                display: "grid",
+                placeItems: "center",
+                lineHeight: "16px",
                 padding: 0,
                 fontFamily: "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
-                /* Tight font stack + line-height:1 + padding:0 centers perfectly */
                 textAlign: "center",
                 boxSizing: "border-box",
-                /* Nudge up by 0.5px to optically center inside the circle */
-                paddingBottom: 1,
               }}
             >
               {unreadCount > 99 ? "99+" : unreadCount}
@@ -2651,8 +2661,6 @@ export default function LifeApp() {
             top: 0,
             left: 0,
             bottom: 0,
-            width: 288,          /* desktop width; CSS overrides on mobile */
-            maxWidth: "min(288px, 100vw)",
             background: t.white,
             borderRight: `1px solid ${t.border}`,
             overflowY: "auto",
@@ -2660,8 +2668,6 @@ export default function LifeApp() {
             zIndex: 40,
             transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
             transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
-            paddingTop: "env(safe-area-inset-top, 0px)",
-            paddingBottom: "calc(60px + env(safe-area-inset-bottom, 0px))",
           }}
         >
           {/* User card */}
@@ -2847,6 +2853,17 @@ export default function LifeApp() {
                 setSidebarOpen(false);
               }}
               active={page === "quiz"}
+            />
+            <SL
+              theme={t}
+              label="Goals"
+              icon="target"
+              onClick={() => {
+                play("tap");
+                setPage("goal_setting");
+                setSidebarOpen(false);
+              }}
+              active={page === "goal_setting"}
             />
             <SL
               theme={t}
