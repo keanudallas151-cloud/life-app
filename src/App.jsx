@@ -92,6 +92,10 @@ const PREF_DEFAULTS = {
    Tap (no drag) triggers the onTap callback → navigates.
    Works with both touch and mouse events.
    ──────────────────────────────────────────────────────────── */
+// Horizontal movement must exceed vertical by this factor to trigger swipe-to-delete
+// (prevents accidental swipes while scrolling the notification list)
+const SWIPE_HORIZONTAL_BIAS = 1.5;
+
 function SwipeableNotification({ n, theme, onTap, onDelete }) {
   const [offset, setOffset] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -116,7 +120,7 @@ function SwipeableNotification({ n, theme, onTap, onDelete }) {
 
     // Lock direction on first significant movement
     if (directionLocked.current === null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
-      directionLocked.current = Math.abs(dx) > Math.abs(dy) * 1.5 ? "horizontal" : "vertical";
+      directionLocked.current = Math.abs(dx) > Math.abs(dy) * SWIPE_HORIZONTAL_BIAS ? "horizontal" : "vertical";
     }
 
     // If vertical scroll wins, ignore horizontal swipe

@@ -267,10 +267,14 @@ function DailyGrowthModal({ item, t, play, onClose, onComplete }) {
   // Android back button: push a history entry when modal opens,
   // listen for popstate to close instead of navigating away.
   const closedByUI = React.useRef(false);
+  const historyPushed = React.useRef(false);
 
   useEffect(() => {
     window.history.pushState({ dailyGrowthModal: true }, "");
+    historyPushed.current = true;
     const handlePop = () => {
+      // Back button was pressed — the history entry is already consumed
+      historyPushed.current = false;
       if (!closedByUI.current) {
         onClose();
       }
@@ -278,8 +282,8 @@ function DailyGrowthModal({ item, t, play, onClose, onComplete }) {
     window.addEventListener("popstate", handlePop);
     return () => {
       window.removeEventListener("popstate", handlePop);
-      // If modal unmounts from UI close (not back button), pop the history entry
-      if (closedByUI.current) {
+      // Only pop the history entry we pushed if it hasn't been consumed already
+      if (closedByUI.current && historyPushed.current) {
         window.history.back();
       }
     };
