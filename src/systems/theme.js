@@ -24,7 +24,7 @@ export const C = {
   skin:    "#0a0a0a",  // page bg: true Vercel obsidian
   white:   "#111111",  // card / button surface: subtle lift
   green:   "#50c878",  // vibrant accent green — high contrast vs black
-  greenAlt: "#2f9e63",  // compatibility accent for gradients and charts
+  greenAlt: "#2f9e63",  // secondary green for existing gradients in Home, Reader, Tailor, and dashboard cards
   greenLt: "#0f2818",  // green tint bg
   ink:     "#ededed",  // primary text: soft white
   mid:     "#c9c9c9",  // body text: readable light gray
@@ -33,7 +33,7 @@ export const C = {
   light:   "#1a1a1a",  // elevated tint (progress tracks, input bg)
   gold:    "#f5a623",  // warning accent
   red:     "#e5484d",  // error — Vercel's red
-  orange:   "#e58b2a",  // chart accent retained across existing surfaces
+  orange:   "#e58b2a",  // chart accent used by Charts.jsx and other warning-strength UI states
 };
 
 // Deeper variant for users who pick "dark" explicitly in theme picker.
