@@ -2049,7 +2049,7 @@ export default function LifeApp() {
   if (screen === "reset_password")
     return (
       <ResetPasswordPage
-        C={C}
+        C={t}
         S={S}
         play={play}
         setScreen={setScreen}

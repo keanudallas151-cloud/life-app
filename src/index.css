@@ -120,6 +120,17 @@ button,
   }
 }
 
+@keyframes life-logo-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 :focus-visible {
   outline: 2px solid var(--life-green);
   outline-offset: 3px;
