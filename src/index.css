@@ -740,11 +740,6 @@ button[data-password-toggle="true"]:active:not(:disabled),
 }
 
 /* Visual bug-fix + polish pass (batch)  */
-body,
-#root,
-#__next {
-  overflow: hidden;
-}
 
 img,
 svg,
