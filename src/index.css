@@ -44,6 +44,7 @@ html {
   overscroll-behavior-y: none;
   /* Prevent elastic over-scroll bounce on the html element on iOS */
   height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -61,8 +62,9 @@ body {
   touch-action: manipulation;
   overscroll-behavior-y: none;
   overscroll-behavior: none;
-  min-height: 100svh;
-  min-height: -webkit-fill-available;
+  height: 100%;
+  /* Prevent document-level scroll — only .life-main-scroll should scroll */
+  overflow: hidden;
   /* Prevent gap at bottom on iOS when address bar hides */
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-sizing: border-box;
@@ -108,8 +110,10 @@ button,
   touch-action: manipulation;
 }
 
-#root {
-  min-height: 100svh;
+#root,
+#__next {
+  height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -454,6 +458,16 @@ html {
   width: 100%;
 }
 
+/* Auth & landing shells must scroll internally now that body is overflow:hidden */
+.life-landing-shell,
+.life-auth-shell {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
 .life-auth-card {
   width: min(100%, 420px);
   box-shadow: 0 16px 36px rgba(20, 20, 20, 0.08);
@@ -726,10 +740,6 @@ button[data-password-toggle="true"]:active:not(:disabled),
 }
 
 /* Visual bug-fix + polish pass (batch)  */
-body,
-#root {
-  overflow-x: clip;
-}
 
 img,
 svg,

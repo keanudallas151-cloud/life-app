@@ -136,7 +136,6 @@ export function ThemePickerPage({
       data-page-tag="#theme_picker_page"
       className="life-grain life-auth-shell"
       style={{
-        minHeight: "100svh",
         background: `linear-gradient(165deg, ${_C.skin} 0%, ${dark ? "#1e1e1e" : "#111111"} 50%, ${_C.skin} 100%)`,
         display: "flex",
         flexDirection: "column",
@@ -145,7 +144,6 @@ export function ThemePickerPage({
         fontFamily: "Georgia,serif",
         padding: "40px 24px calc(40px + env(safe-area-inset-bottom))",
         position: "relative",
-        overflowX: "hidden",
         transition: "background 0.4s ease",
       }}
     >

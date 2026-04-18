@@ -6,7 +6,7 @@ import { CONTENT } from "../data/content";
 export function TailorIntro({userName,onExplore,onTailor,t:theme}){
   const t = theme || C;
   return(
-    <div style={{minHeight:"100svh",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:t.skin,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif"}}>
+    <div style={{height:"100%",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:t.skin,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{padding:"52px 32px 0",textAlign:"center"}}>
         <p style={{margin:"0 0 8px",fontSize:10,fontWeight:700,letterSpacing:3.5,textTransform:"uppercase",color:t.muted}}>Welcome{userName?`, ${userName.split(" ")[0]}`:""}</p>
         <h1 style={{margin:"0 0 0",fontSize:26,fontWeight:800,color:t.ink,lineHeight:1.2,letterSpacing:-0.5}}>Tailored Self-Development</h1>
@@ -122,7 +122,7 @@ export function TailorQuestions({onComplete,onBack,t:theme}){
   const pct=Math.round(((step+1)/total)*100);
 
   return(
-    <div data-page-tag="#tailor_questions" style={{minHeight:"100svh",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:t.skin,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif"}}>
+    <div data-page-tag="#tailor_questions" style={{height:"100%",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:t.skin,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       {/* Header bar */}
       <div style={{background:t.white,borderBottom:`1px solid ${t.border}`,padding:"16px 20px"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
@@ -245,7 +245,7 @@ export function TailorResult({profile,userName,onContinue,t:theme}){
     .map(x=>x.key);
 
   return(
-    <div style={{minHeight:"100svh",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:t.skin,fontFamily:"Georgia,serif",overflowY:"auto"}}>
+    <div style={{height:"100%",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:t.skin,fontFamily:"Georgia,serif",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       <div style={{background:`linear-gradient(160deg,${t.greenAlt} 0%,${t.green} 100%)`,padding:"max(40px, env(safe-area-inset-top, 0px)) 28px 36px",textAlign:"center",position:"relative"}}>
         <div style={{width:56,height:56,borderRadius:"18px",background:"rgba(255,255,255,0.18)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>

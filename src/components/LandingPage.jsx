@@ -7,7 +7,6 @@ export function LandingPage({ Ic, play, setScreen, AUTH_PROVIDERS, doProviderSig
       data-page-tag="#landing_page"
       className="life-grain life-landing-shell"
       style={{
-        minHeight: "100svh",
         background: "linear-gradient(165deg, #000000 0%, #0a0a0a 45%, #000000 100%)",
         display: "flex",
         flexDirection: "column",
@@ -16,7 +15,6 @@ export function LandingPage({ Ic, play, setScreen, AUTH_PROVIDERS, doProviderSig
         fontFamily: "Georgia,serif",
         padding: "40px 24px calc(44px + env(safe-area-inset-bottom))",
         position: "relative",
-        overflowX: "hidden",
       }}
     >
       <style>{`
