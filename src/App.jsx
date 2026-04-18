@@ -135,14 +135,15 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
 
   const onEnd = () => {
     if (!dragging.current) return;
-    dragging.current = false;
+    dragging.current = false; // release drag lock FIRST so transition is active
     const delta = currentX.current - startX.current;
     if (delta < -72) {
-      // Fly out, collapse height, then call delete
+      // Transition is now active (dragging.current = false) — fly card out smoothly
       setExiting(true);
-      setOffset(-420);
-      setTimeout(() => onDelete?.(), 280);
+      setOffset(-440);
+      setTimeout(() => onDelete?.(), 320);
     } else {
+      // Spring snap back
       setOffset(0);
     }
   };
@@ -203,7 +204,11 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
             : (dark ? "rgba(61,90,76,0.10)" : "rgba(61,90,76,0.06)"),
           cursor: "pointer",
           transform: `translateX(${offset}px)`,
-          transition: dragging.current ? "none" : "transform 0.3s cubic-bezier(0.22,1,0.36,1)",
+          transition: dragging.current
+            ? "transform 0.05s linear"
+            : exiting
+              ? "transform 0.32s cubic-bezier(0.4,0,0.8,0.4)"
+              : "transform 0.38s cubic-bezier(0.22,1,0.36,1)",
           userSelect: "none",
           touchAction: "pan-y",
           WebkitTapHighlightColor: "transparent",
@@ -2346,7 +2351,8 @@ export default function LifeApp() {
                 flexShrink: 0,
                 textAlign: "center",
               }}>
-                <span style={{ fontSize: 10.5, color: dark ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.3)", fontFamily: "-apple-system,BlinkMacSystemFont,system-ui,sans-serif" }}>
+                <span style={{ fontSize: 10.5, color: dark ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.3)", fontFamily: "-apple-system,BlinkMacSystemFont,system-ui,sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                  <span style={{ display: "inline-block", animation: "life-swipe-hint 1.6s ease-in-out infinite" }}>←</span>
                   Swipe left to dismiss
                 </span>
               </div>
@@ -3793,9 +3799,13 @@ export default function LifeApp() {
           <button
             className="life-a2hs-dismiss"
             onClick={dismissA2hs}
-            aria-label="Dismiss"
+            aria-label="Dismiss install prompt"
+            type="button"
           >
-            ×
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
       )}

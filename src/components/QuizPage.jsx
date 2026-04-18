@@ -123,146 +123,539 @@ function TimerRing({ pct, value, color, t }) {
   );
 }
 
+// ─── ALL LIFE BADGES — Prestige + Real-life milestones ─────────────────────
+// These power the Tinder-style swipe UI in the Badges tab.
+// `check` receives { stats, readKeys, totalTopics, goals, communicationLog }
+// ─────────────────────────────────────────────────────────────────────────────
+const ALL_BADGES = [
+  // ── Real-life wealth milestones ──
+  {
+    id: "first-thousand",
+    icon: "💵",
+    label: "First $1,000",
+    category: "WEALTH",
+    color: "#50c878",
+    desc: "You made your first thousand dollars. The journey of a million miles starts with the first step — and yours just printed.",
+    how: "Earn your first $1,000 outside of a traditional paycheck — freelance, a side hustle, or your first business sale. Then log it as a milestone goal.",
+    check: ({ goals }) => goals.hasThousandGoal,
+  },
+  {
+    id: "first-million",
+    icon: "👑",
+    label: "First Million",
+    category: "WEALTH",
+    color: "#f5a623",
+    desc: "Seven figures. Most people only dream it — you made it real. The second million is faster than the first.",
+    how: "Set a $1,000,000 milestone goal in the Goals section and mark it complete. This one's a long game — start now.",
+    check: ({ goals }) => goals.hasMillionGoal,
+  },
+  {
+    id: "first-investment",
+    icon: "📈",
+    label: "First Investment",
+    category: "WEALTH",
+    color: "#4a9eff",
+    desc: "You stopped letting money sit idle and put it to work. The stock market, crypto, real estate — you chose to own a piece of something.",
+    how: "Log a financial goal that includes the word 'invest', 'stock', 'ETF', 'crypto', or 'property'.",
+    check: ({ goals }) => goals.hasInvestmentGoal,
+  },
+  {
+    id: "debt-free",
+    icon: "⛓️",
+    label: "Debt Free",
+    category: "WEALTH",
+    color: "#50c878",
+    desc: "You broke the chains. No more interest payments eating your future. This is what financial freedom actually feels like.",
+    how: "Complete a goal with 'debt free', 'paid off', or 'no debt' in the title.",
+    check: ({ goals }) => goals.hasDebtFreeGoal,
+  },
+  // ── Business & Entrepreneurship ──
+  {
+    id: "first-business",
+    icon: "🏢",
+    label: "First Business",
+    category: "ENTREPRENEUR",
+    color: "#e5484d",
+    desc: "You stopped trading time for money and started building something that can outlive a single shift. Welcome to the builder's club.",
+    how: "Complete a goal with 'business', 'started', 'launched', or 'founded' in the title.",
+    check: ({ goals }) => goals.hasBusinessGoal,
+  },
+  {
+    id: "first-client",
+    icon: "🤝",
+    label: "First Client",
+    category: "ENTREPRENEUR",
+    color: "#a855f7",
+    desc: "Someone paid you for your skills, your time, your vision. That's not a transaction — that's proof of value.",
+    how: "Complete a goal with 'client', 'customer', 'first sale', or 'sold' in the title.",
+    check: ({ goals }) => goals.hasClientGoal,
+  },
+  {
+    id: "first-hire",
+    icon: "👥",
+    label: "First Hire",
+    category: "ENTREPRENEUR",
+    color: "#f5a623",
+    desc: "You levelled up from solopreneur to leader. Your first hire is the moment your business becomes bigger than you.",
+    how: "Complete a goal with 'hire', 'hired', 'team', or 'employee' in the title.",
+    check: ({ goals }) => goals.hasHireGoal,
+  },
+  // ── Life milestones ──
+  {
+    id: "first-car",
+    icon: "🚗",
+    label: "First Car",
+    category: "LIFE",
+    color: "#4a9eff",
+    desc: "Independence on four wheels. Whether it was a banger or a beauty, your first car changed how you move through the world.",
+    how: "Complete a goal with 'car', 'vehicle', 'wheels', or 'drove' in the title.",
+    check: ({ goals }) => goals.hasCarGoal,
+  },
+  {
+    id: "first-home",
+    icon: "🏠",
+    label: "First Property",
+    category: "LIFE",
+    color: "#50c878",
+    desc: "You own land. In a world of renters, you chose to build equity. This is how generational wealth begins.",
+    how: "Complete a goal with 'house', 'home', 'property', 'mortgage', or 'apartment' in the title.",
+    check: ({ goals }) => goals.hasHomeGoal,
+  },
+  {
+    id: "passport-stamp",
+    icon: "✈️",
+    label: "World Traveller",
+    category: "LIFE",
+    color: "#06b6d4",
+    desc: "You stepped outside your postcode and let the world expand your mind. Travel isn't a luxury — it's an education.",
+    how: "Complete a goal with 'travel', 'trip', 'visit', 'flew', or 'holiday' in the title.",
+    check: ({ goals }) => goals.hasTravelGoal,
+  },
+  // ── Learning & Knowledge ──
+  {
+    id: "first-book",
+    icon: "📚",
+    label: "First Book",
+    category: "KNOWLEDGE",
+    color: "#50c878",
+    desc: "You read your first book in the app. That's one hour of insight that will compound over a lifetime.",
+    how: "Open any subject in the library and read through to the end. One chapter is all it takes to start.",
+    check: ({ readKeys }) => readKeys >= 1,
+  },
+  {
+    id: "five-books",
+    icon: "📖",
+    label: "Voracious Reader",
+    category: "KNOWLEDGE",
+    color: "#a855f7",
+    desc: "Five topics deep. You're not just learning — you're building a framework for how the world actually works.",
+    how: "Complete reading 5 different subjects in the app library.",
+    check: ({ readKeys }) => readKeys >= 5,
+  },
+  {
+    id: "subject-mastery",
+    icon: "🏆",
+    label: "Complete Mastery",
+    category: "KNOWLEDGE",
+    color: "#f5a623",
+    desc: "Every subject. Every lesson. You left nothing unread. This is what a complete education looks like.",
+    how: "Read every subject available across the entire app library.",
+    check: ({ readKeys, totalTopics }) => totalTopics > 0 && readKeys >= totalTopics,
+  },
+  {
+    id: "well-rounded",
+    icon: "🌍",
+    label: "Well Rounded",
+    category: "KNOWLEDGE",
+    color: "#4a9eff",
+    desc: "Finance, psychology, philosophy — you don't specialise in one thing, you understand everything. That's a superpower.",
+    how: "Play quizzes across at least 3 different subject categories.",
+    check: ({ stats }) => Object.keys(stats.topicsPlayed || {}).length >= 3,
+  },
+  // ── Quiz & Skills ──
+  {
+    id: "quiz-first-step",
+    icon: "🎯",
+    label: "First Step",
+    category: "QUIZ",
+    color: "#50c878",
+    desc: "You showed up. That's more than most people will ever do. The first quiz is the hardest — you've already won.",
+    how: "Complete your first quiz in any subject or difficulty.",
+    check: ({ stats }) => (stats.totalPlayed || 0) >= 1,
+  },
+  {
+    id: "quiz-10",
+    icon: "🔥",
+    label: "On A Roll",
+    category: "QUIZ",
+    color: "#e5484d",
+    desc: "Ten quizzes in. You're not dabbling — you're drilling. The compound effect of daily practice is kicking in.",
+    how: "Complete 10 quizzes in total across any topics.",
+    check: ({ stats }) => (stats.totalPlayed || 0) >= 10,
+  },
+  {
+    id: "legend-run",
+    icon: "💎",
+    label: "Prestige Run",
+    category: "QUIZ",
+    color: "#a855f7",
+    desc: "25 quizzes. Consistency over intensity. You've proved this isn't a phase — it's a practice.",
+    how: "Complete 25 quizzes total. Keep showing up.",
+    check: ({ stats }) => (stats.totalPlayed || 0) >= 25,
+  },
+  {
+    id: "perfect-score",
+    icon: "⭐",
+    label: "Perfect Score",
+    category: "QUIZ",
+    color: "#f5a623",
+    desc: "100%. Not a single question wrong. You didn't just know the material — you owned it.",
+    how: "Finish any quiz with a perfect score (all questions correct).",
+    check: ({ stats }) => (stats.history || []).some(h => h.score === h.total && h.total >= 5),
+  },
+  {
+    id: "communication-builder",
+    icon: "🎙️",
+    label: "Voice Builder",
+    category: "SKILLS",
+    color: "#4a9eff",
+    desc: "Communication is the skill that multiplies all others. You started training the one thing everyone undervalues.",
+    how: "Complete a Communication quiz or any practice session in the Communication section.",
+    check: ({ stats, communicationLog }) =>
+      Number(stats.topicsPlayed?.communication || 0) >= 1 || communicationLog.length >= 1,
+  },
+  // ── Goals & Discipline ──
+  {
+    id: "goal-architect",
+    icon: "🏁",
+    label: "Goal Architect",
+    category: "GOALS",
+    color: "#50c878",
+    desc: "You wrote down your first goal. Studies show you're 42% more likely to achieve it now. The map is drawn — start walking.",
+    how: "Create your first personal goal in the Goals section.",
+    check: ({ goals }) => goals.count >= 1,
+  },
+  {
+    id: "goal-finished",
+    icon: "✅",
+    label: "Promise Kept",
+    category: "GOALS",
+    color: "#f5a623",
+    desc: "You said you'd do it, and you did it. In a world of broken commitments, you're building a reputation — with yourself.",
+    how: "Complete any personal goal you set in the Goals section.",
+    check: ({ goals }) => goals.hasCompletedGoal,
+  },
+  {
+    id: "five-goals",
+    icon: "🎖️",
+    label: "Relentless",
+    category: "GOALS",
+    color: "#a855f7",
+    desc: "Five goals set. You don't just dream — you plan. Most people have wishes; you have targets.",
+    how: "Create 5 or more goals in the Goals section.",
+    check: ({ goals }) => goals.count >= 5,
+  },
+];
+
+// ─── Enhanced goal signals ────────────────────────────────────────────────
 function getGoalSignals() {
   const goals = LS.get(GOAL_KEY, []);
-  const joined = goals
-    .map((goal) => `${goal?.title || ""} ${goal?.target || ""}`)
-    .join(" ");
+  const joined = goals.map((g) => `${g?.title || ""} ${g?.target || ""}`).join(" ").toLowerCase();
   return {
     count: goals.length,
-    hasThousandGoal: /\b1,?000\b|\$1,?000\b/.test(joined),
-    hasMillionGoal: /\b1,?000,?000\b|\$1,?000,?000\b/.test(joined),
-    hasCompletedGoal: goals.some((goal) => goal?.done),
+    hasThousandGoal:    /\b1[,.]?000\b|\$1[,.]?000\b/.test(joined),
+    hasMillionGoal:     /\b1[,.]?000[,.]?000\b|\$1[,.]?000[,.]?000\b/.test(joined),
+    hasInvestmentGoal:  /invest|stock|etf|crypto|property|shares/.test(joined),
+    hasDebtFreeGoal:    /debt.?free|paid.?off|no.?debt|cleared/.test(joined),
+    hasBusinessGoal:    /business|started|launched|founded|company|startup/.test(joined),
+    hasClientGoal:      /client|customer|first.?sale|sold/.test(joined),
+    hasHireGoal:        /hire|hired|team|employee|staff/.test(joined),
+    hasCarGoal:         /\bcar\b|vehicle|wheels|drove|driving/.test(joined),
+    hasHomeGoal:        /\bhouse\b|\bhome\b|property|mortgage|apartment|flat/.test(joined),
+    hasTravelGoal:      /travel|trip|visit|flew|flight|holiday|abroad/.test(joined),
+    hasCompletedGoal:   goals.some((g) => g?.done),
   };
 }
 
-function buildPrestigeBadges({ stats, readKeys, totalTopics }) {
+// ─── Tinder-style swipe badge card ───────────────────────────────────────
+function SwipeBadgeDeck({ badges, stats, readKeys, totalTopics, t }) {
   const goals = getGoalSignals();
   const communicationLog = LS.get(COMMUNICATION_ACTIVITY_KEY, []);
-  const topicsPlayed = Object.keys(stats.topicsPlayed || {}).length;
-  return [
-    {
-      id: "quiz-first-step",
-      label: "First Step",
-      icon: "🎯",
-      desc: "Complete your first quiz.",
-      unlocked: (stats.totalPlayed || 0) >= 1,
-    },
-    {
-      id: "communication-builder",
-      label: "Voice Builder",
-      icon: "🎙️",
-      desc: "Complete a Communication quiz or practice session.",
-      unlocked:
-        Number(stats.topicsPlayed?.communication || 0) >= 1 ||
-        communicationLog.length >= 1,
-    },
-    {
-      id: "well-rounded",
-      label: "Well Rounded",
-      icon: "🌍",
-      desc: "Play across at least 3 different quiz subjects.",
-      unlocked: topicsPlayed >= 3,
-    },
-    {
-      id: "goal-architect",
-      label: "Goal Architect",
-      icon: "🏁",
-      desc: "Create your first personal goal.",
-      unlocked: goals.count >= 1,
-    },
-    {
-      id: "four-figures",
-      label: "First $1,000 Vision",
-      icon: "💸",
-      desc: "Set a concrete four-figure milestone in your goals.",
-      unlocked: goals.hasThousandGoal,
-    },
-    {
-      id: "seven-figures",
-      label: "First $1,000,000 Vision",
-      icon: "👑",
-      desc: "Think bigger with a seven-figure milestone goal.",
-      unlocked: goals.hasMillionGoal,
-    },
-    {
-      id: "goal-finished",
-      label: "Promise Kept",
-      icon: "✅",
-      desc: "Complete a personal goal you committed to.",
-      unlocked: goals.hasCompletedGoal,
-    },
-    {
-      id: "subject-mastery",
-      label: "Complete Every Subject",
-      icon: "🏆",
-      desc: "Read every subject across the app library.",
-      unlocked: totalTopics > 0 && readKeys >= totalTopics,
-    },
-    {
-      id: "legend-run",
-      label: "Prestige Run",
-      icon: "💎",
-      desc: "Finish 25 quizzes with consistent effort.",
-      unlocked: (stats.totalPlayed || 0) >= 25,
-    },
-  ];
-}
+  const checkCtx = { stats, readKeys, totalTopics, goals, communicationLog };
 
-function PrestigeBadgeCard({ badge, t }) {
+  const resolvedBadges = badges.map(b => ({ ...b, unlocked: b.check(checkCtx) }));
+  const [idx, setIdx] = useState(0);
+  const [animDir, setAnimDir] = useState(null); // "left" | "right"
+  const [dragging, setDragging] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const dragStart = useRef(null);
+  const cardRef = useRef(null);
+
+  const total = resolvedBadges.length;
+  const unlockedCount = resolvedBadges.filter(b => b.unlocked).length;
+  const badge = resolvedBadges[idx];
+
+  const go = useCallback((dir) => {
+    setAnimDir(dir);
+    setTimeout(() => {
+      setIdx(i => dir === "right" ? Math.min(i + 1, total - 1) : Math.max(i - 1, 0));
+      setAnimDir(null);
+      setDragX(0);
+    }, 260);
+  }, [total]);
+
+  // Touch drag
+  const onTouchStart = (e) => {
+    dragStart.current = e.touches[0].clientX;
+    setDragging(true);
+  };
+  const onTouchMove = (e) => {
+    if (dragStart.current === null) return;
+    setDragX(e.touches[0].clientX - dragStart.current);
+  };
+  const onTouchEnd = () => {
+    setDragging(false);
+    if (Math.abs(dragX) > 60) go(dragX < 0 ? "right" : "left");
+    else setDragX(0);
+    dragStart.current = null;
+  };
+
+  // Mouse drag (desktop)
+  const onMouseDown = (e) => {
+    dragStart.current = e.clientX;
+    setDragging(true);
+  };
+  const onMouseMove = (e) => {
+    if (!dragging || dragStart.current === null) return;
+    setDragX(e.clientX - dragStart.current);
+  };
+  const onMouseUp = () => {
+    setDragging(false);
+    if (Math.abs(dragX) > 60) go(dragX < 0 ? "right" : "left");
+    else setDragX(0);
+    dragStart.current = null;
+  };
+
+  const rotate = animDir === "left" ? -18 : animDir === "right" ? 18 : dragX * 0.08;
+  const tx = animDir === "left" ? -380 : animDir === "right" ? 380 : dragX;
+  const opacity = animDir ? 0 : 1;
+
+  const categoryColors = {
+    WEALTH: "#50c878", ENTREPRENEUR: "#e5484d", LIFE: "#4a9eff",
+    KNOWLEDGE: "#a855f7", QUIZ: "#f5a623", SKILLS: "#06b6d4", GOALS: "#50c878",
+  };
+  const catColor = categoryColors[badge.category] || t.green;
+
   return (
-    <div
-      style={{
-        background: badge.unlocked ? t.white : t.light,
-        border: `1px solid ${badge.unlocked ? `${t.green}55` : t.border}`,
-        borderRadius: 18,
-        padding: "18px 16px",
-        minHeight: 150,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        boxShadow: badge.unlocked ? "0 12px 26px rgba(61,90,76,0.12)" : "none",
-        opacity: badge.unlocked ? 1 : 0.74,
-      }}
-    >
-      <div>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "0 0 32px" }}>
+
+      {/* Header */}
+      <div style={{ width: "100%", maxWidth: 420, padding: "24px 16px 16px", textAlign: "center" }}>
+        <p style={{ margin: "0 0 4px", fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: t.muted }}>
+          Life Badges
+        </p>
+        <h2 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 800, color: t.ink, fontFamily: "Georgia,serif" }}>
+          Earned, not given.
+        </h2>
+        {/* Progress pills */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
+          <span style={{ background: `${t.green}22`, color: t.green, fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, border: `1px solid ${t.green}44` }}>
+            {unlockedCount} / {total} unlocked
+          </span>
+          <span style={{ background: `${catColor}22`, color: catColor, fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, border: `1px solid ${catColor}44` }}>
+            {badge.category}
+          </span>
+        </div>
+      </div>
+
+      {/* Card stack */}
+      <div style={{ position: "relative", width: "100%", maxWidth: 380, height: 460, userSelect: "none" }}>
+
+        {/* Ghost cards behind for depth */}
+        {[2, 1].map(offset => {
+          const ghostIdx = Math.min(idx + offset, total - 1);
+          if (ghostIdx === idx) return null;
+          const ghost = resolvedBadges[ghostIdx];
+          return (
+            <div key={offset} style={{
+              position: "absolute", inset: 0,
+              background: t.white,
+              border: `1px solid ${t.border}`,
+              borderRadius: 28,
+              transform: `scale(${1 - offset * 0.04}) translateY(${offset * 14}px)`,
+              opacity: 0.5 - offset * 0.1,
+              zIndex: 10 - offset,
+              pointerEvents: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <span style={{ fontSize: 48, opacity: 0.3 }}>{ghost?.icon}</span>
+            </div>
+          );
+        })}
+
+        {/* Main card */}
         <div
+          ref={cardRef}
+          onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+          onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
-            background: badge.unlocked ? t.greenLt : t.white,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 24,
-            marginBottom: 14,
+            position: "absolute", inset: 0, zIndex: 20,
+            background: badge.unlocked
+              ? `linear-gradient(145deg, ${t.white} 0%, ${badge.color}18 100%)`
+              : t.white,
+            border: `1.5px solid ${badge.unlocked ? badge.color + "55" : t.border}`,
+            borderRadius: 28,
+            padding: "36px 28px 28px",
+            display: "flex", flexDirection: "column",
+            cursor: dragging ? "grabbing" : "grab",
+            transform: `translateX(${tx}px) rotate(${rotate}deg)`,
+            opacity,
+            transition: dragging ? "none" : "transform 0.26s cubic-bezier(0.22,1,0.36,1), opacity 0.26s ease",
+            boxShadow: badge.unlocked
+              ? `0 20px 60px ${badge.color}30, 0 8px 24px rgba(0,0,0,0.4)`
+              : "0 8px 32px rgba(0,0,0,0.35)",
+            WebkitUserSelect: "none",
           }}
         >
-          {badge.icon}
-        </div>
-        <div style={{ fontSize: 15, fontWeight: 700, color: t.ink, marginBottom: 6 }}>
-          {badge.label}
-        </div>
-        <div style={{ fontSize: 12, color: t.muted, lineHeight: 1.65 }}>
-          {badge.desc}
+          {/* Unlock status ribbon */}
+          <div style={{
+            position: "absolute", top: 20, right: 20,
+            background: badge.unlocked ? badge.color : t.light,
+            color: badge.unlocked ? "#fff" : t.muted,
+            fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
+            padding: "4px 10px", borderRadius: 20,
+            border: `1px solid ${badge.unlocked ? badge.color : t.border}`,
+            boxShadow: badge.unlocked ? `0 2px 8px ${badge.color}55` : "none",
+          }}>
+            {badge.unlocked ? "✓ UNLOCKED" : "LOCKED"}
+          </div>
+
+          {/* Icon */}
+          <div style={{
+            width: 88, height: 88, borderRadius: 24,
+            background: badge.unlocked ? `${badge.color}25` : t.light,
+            border: `2px solid ${badge.unlocked ? badge.color + "55" : t.border}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 44, marginBottom: 24,
+            boxShadow: badge.unlocked ? `0 0 24px ${badge.color}40` : "none",
+            animation: badge.unlocked ? "life-badge-pulse 2.5s ease-in-out infinite" : "none",
+          }}>
+            {badge.icon}
+          </div>
+
+          {/* Category */}
+          <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: catColor }}>
+            {badge.category}
+          </p>
+
+          {/* Title */}
+          <h3 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 800, color: t.ink, fontFamily: "Georgia,serif", lineHeight: 1.1 }}>
+            {badge.label}
+          </h3>
+
+          {/* Description */}
+          <p style={{ margin: "0 0 20px", fontSize: 14, color: t.mid, lineHeight: 1.75, flex: 1 }}>
+            {badge.desc}
+          </p>
+
+          {/* How to unlock */}
+          <div style={{
+            background: badge.unlocked ? `${badge.color}15` : t.light,
+            border: `1px solid ${badge.unlocked ? badge.color + "33" : t.border}`,
+            borderRadius: 14, padding: "12px 14px",
+          }}>
+            <p style={{ margin: "0 0 4px", fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase", color: badge.unlocked ? badge.color : t.muted }}>
+              {badge.unlocked ? "How you unlocked this" : "How to unlock"}
+            </p>
+            <p style={{ margin: 0, fontSize: 12, color: badge.unlocked ? t.mid : t.muted, lineHeight: 1.6 }}>
+              {badge.how}
+            </p>
+          </div>
+
+          {/* Drag hint overlay */}
+          {Math.abs(dragX) > 20 && (
+            <div style={{
+              position: "absolute", inset: 0, borderRadius: 28, pointerEvents: "none",
+              background: dragX > 0
+                ? "linear-gradient(to right, rgba(80,200,120,0.12), transparent)"
+                : "linear-gradient(to left, rgba(229,72,77,0.12), transparent)",
+              display: "flex", alignItems: "center",
+              justifyContent: dragX > 0 ? "flex-start" : "flex-end",
+              padding: "0 24px",
+            }}>
+              <span style={{ fontSize: 36, opacity: Math.min(Math.abs(dragX) / 80, 1) }}>
+                {dragX > 0 ? "👈" : "👉"}
+              </span>
+            </div>
+          )}
         </div>
       </div>
-      <div
-        style={{
-          marginTop: 14,
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: 2,
-          textTransform: "uppercase",
-          color: badge.unlocked ? t.green : t.muted,
-        }}
-      >
-        {badge.unlocked ? "Unlocked" : "Locked"}
+
+      {/* Navigation */}
+      <div style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 28 }}>
+        <button
+          type="button"
+          onClick={() => go("left")}
+          disabled={idx === 0}
+          style={{
+            width: 52, height: 52, borderRadius: "50%",
+            background: idx === 0 ? t.light : t.white,
+            border: `1.5px solid ${idx === 0 ? t.border : t.green + "55"}`,
+            color: idx === 0 ? t.muted : t.ink,
+            fontSize: 20, cursor: idx === 0 ? "default" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.2s ease",
+            boxShadow: idx === 0 ? "none" : `0 4px 12px rgba(0,0,0,0.3)`,
+          }}
+        >
+          ←
+        </button>
+
+        {/* Dot indicators */}
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          {resolvedBadges.map((b, i) => (
+            <button
+              key={b.id}
+              type="button"
+              onClick={() => { setAnimDir(i > idx ? "right" : "left"); setTimeout(() => { setIdx(i); setAnimDir(null); }, 260); }}
+              style={{
+                width: i === idx ? 20 : 6,
+                height: 6, borderRadius: 3,
+                background: i === idx ? (b.unlocked ? b.color : t.ink) : (b.unlocked ? t.green + "66" : t.border),
+                border: "none", cursor: "pointer", padding: 0,
+                transition: "all 0.25s cubic-bezier(0.22,1,0.36,1)",
+              }}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => go("right")}
+          disabled={idx === total - 1}
+          style={{
+            width: 52, height: 52, borderRadius: "50%",
+            background: idx === total - 1 ? t.light : t.white,
+            border: `1.5px solid ${idx === total - 1 ? t.border : t.green + "55"}`,
+            color: idx === total - 1 ? t.muted : t.ink,
+            fontSize: 20, cursor: idx === total - 1 ? "default" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.2s ease",
+            boxShadow: idx === total - 1 ? "none" : `0 4px 12px rgba(0,0,0,0.3)`,
+          }}
+        >
+          →
+        </button>
       </div>
+
+      {/* Swipe hint */}
+      <p style={{ margin: "14px 0 0", fontSize: 11, color: t.muted, textAlign: "center", letterSpacing: 0.3 }}>
+        Swipe or tap arrows to explore • {idx + 1} of {total}
+      </p>
     </div>
   );
 }
+
 
 function CommunicationPracticePage({ activity, t, play, onBack }) {
   const sentencePrompts = [
@@ -510,11 +903,6 @@ export function QuizPage({
   const maxTime  = fmt==="blitz" ? 8 : QUIZ_SECS[diff];
   const timerPct   = maxTime > 0 ? timeLeft / maxTime : 0;
   const timerColor = timerPct>0.5 ? t.green : timerPct>0.25 ? t.gold : t.red;
-  const prestigeBadges = buildPrestigeBadges({
-    stats,
-    readKeys: readKeys.length,
-    totalTopics,
-  });
 
   useEffect(() => {
     if (!initialTopic || !TOPIC_META[initialTopic]) return;
@@ -658,32 +1046,13 @@ export function QuizPage({
         </div>
 
         {activeTab === "achievements" && (
-          <div className="life-quiz-panel" style={{ padding:"28px max(16px, env(safe-area-inset-left, 0px)) 28px max(16px, env(safe-area-inset-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
-            <div style={{ background:`linear-gradient(135deg, ${t.white}, ${t.greenLt})`, border:`1px solid ${t.border}`, borderRadius:20, padding:"22px 22px 18px", marginBottom:18 }}>
-              <p style={{ margin:"0 0 6px", fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted }}>
-                Prestige badges
-              </p>
-              <h2 style={{ margin:"0 0 6px", fontSize:24, fontWeight:800, color:t.ink, fontFamily:"Georgia,serif" }}>
-                Earned, not handed out
-              </h2>
-              <p style={{ margin:0, color:t.mid, fontSize:14, lineHeight:1.7 }}>
-                A cleaner badge wall with longer-range milestones across learning, goals, and communication.
-              </p>
-            </div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(180px, 1fr))", gap:12, marginBottom:20 }}>
-              {prestigeBadges.map((badge) => (
-                <PrestigeBadgeCard key={badge.id} badge={badge} t={t} />
-              ))}
-            </div>
-            <p style={{ margin:"0 0 12px", fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted }}>
-              Quiz streak badges
-            </p>
-            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-              {ACHIEVEMENTS.map((a) => (
-                <AchievementBadge t={t} key={a.id} ach={a} unlocked={stats.achievements?.includes(a.id)} />
-              ))}
-            </div>
-          </div>
+          <SwipeBadgeDeck
+            badges={ALL_BADGES}
+            stats={stats}
+            readKeys={readKeys}
+            totalTopics={totalTopics}
+            t={t}
+          />
         )}
 
         {activeTab === "stats" && (
