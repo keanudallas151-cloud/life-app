@@ -1,135 +1,177 @@
-# Implementation Ideas — Gitco
+# Life. — Actionable Todo List
 
-Life. is evolving into an app-first learning product centered on wealth, self-development, and high-retention daily use. It should feel polished, fast, mobile-native, and emotionally engaging across reading, practice, progress, and community. The next planning pass should prioritize how the product looks, moves, responds, and rewards interaction.
+**Current baseline:** `v0.6.2`  
+**Purpose:** Replace old idea dumping with one clear, prioritized working backlog.
 
-## Product direction
+---
 
-- Build toward a true app-like experience on mobile first, then desktop.
-- Make the core loop feel obvious: discover -> read -> reflect -> practice -> return.
-- Keep wealth-building and action-taking central, not hidden behind passive reading.
-- Make momentum, personalization, and community feel alive in every session.
+## How to use this file
 
-## Handoff context for the next AI
+- Work **top to bottom**.
+- Treat **Now** as the real active backlog.
+- Treat **Next** as the follow-up queue once the current sweep is stable.
+- Treat **Later** as worthwhile, but not urgent.
+- Do **not** use this file for vague product dreaming; only add tasks that are concrete and traceable to a screen, file, or product goal.
 
-### Current project snapshot
+---
 
-- Current release version is `0.5.0`.
-- Framework stack: Next.js 16 + React 19 + Supabase.
-- Main validation commands are `npm run lint` and `npm run build`.
-- `app/page.jsx` is a thin client wrapper that dynamically loads `src/App.jsx` with SSR disabled.
-- `src/App.jsx` is still the main orchestrator and routes most app state, navigation, and prop wiring.
+## 1. NOW — High-value tasks
 
-### Important current architecture
+### 1. Release hygiene and repo truth
+- [ ] Keep `package.json`, `package-lock.json`, `CHANGELOG.md`, and `VERSIONING.md` aligned every time the app version changes.
+- [ ] Decide whether `main_backup` should be brought up to date with `main` after each release batch.
+- [ ] Remove or refresh stale handoff/planning docs that still describe old versions or already-finished work.
 
-- `src/App.jsx` coordinates auth, page routing, notifications, quiz routing, reader state, and shared app state.
-- `src/components/AppShell.jsx` lazy-loads heavier feature surfaces like Reader, Quiz, Post-It, and Momentum Hub.
-- `src/components/Reader.jsx` is the main reading experience and already includes notes, share, visuals, and theme-aware rendering.
-- `src/components/QuizPage.jsx` contains quiz logic plus communication practice flows.
-- `src/components/DailyGrowthPage.jsx`, `ProgressDashboardPage.jsx`, `HomePage.jsx`, and `ProfilePage.jsx` were recently upgraded and are good starting points for the next polish pass.
-- `src/systems/useMomentum.js` and `src/systems/momentumEngine.js` drive momentum, missions, streaks, and event-based progress.
+**Why this matters:** The repo has had multiple version/history mismatches already, and stale docs make future sweeps noisy.  
+**Files:** `package.json`, `package-lock.json`, `CHANGELOG.md`, `VERSIONING.md`, `HANDOFF.md`, `REMAINING_TASKS.md`
 
-### What was just completed in v0.5.0
+### 2. Full mobile QA pass on the shipped app
+- [ ] Manually test the main shell on narrow mobile widths: `320px`, `360px`, `393px`, `430px`.
+- [ ] Verify top bar, sidebar, search, notification panel, reader, bottom nav, and auth screens all respect safe areas.
+- [ ] Verify no double scrolling, clipped overlays, or unreachable controls.
+- [ ] Verify minimum 44px tap targets on key controls.
 
-- AI-style decorative section comments were removed from `src/`.
-- Home gained quick action cards.
-- Progress Dashboard gained a dynamic "Next Best Step" section.
-- Daily Growth gained streak/weekly rhythm/next-up guidance and momentum event syncing.
-- Profile gained quick action shortcuts.
-- Notification dropdown sizing was improved for narrow mobile screens.
-- Accessibility was improved in the audio player and reader share handling.
+**Why this matters:** This app is mobile-first, and most real regressions show up at narrow widths or on iOS-like safe-area layouts.  
+**Core files:** `src/App.jsx`, `src/index.css`, `src/components/BottomNav.jsx`, auth page components
 
-### What the next AI should assume
+### 3. Dark mode consistency sweep
+- [ ] Replace remaining harsh hardcoded text/background colors in JSX where theme tokens should be used.
+- [ ] Verify all major pages still look intentional in dark mode, not merely readable.
+- [ ] Audit overlays, cards, badges, notification UI, and special pages for contrast consistency.
 
-- The repo is already in a stable post-polish state, so the next pass should focus on refinement rather than restructuring everything.
-- The highest-value work now is visual consistency, motion quality, interaction feedback, mobile-native feel, and reducing rough edges between screens.
-- Avoid re-adding completed historical tasks into this file; keep it future-facing.
-- Prefer surgical improvements over large rewrites unless a surface is clearly blocking polish.
+**Why this matters:** Theme drift is one of the easiest ways for the app to feel unfinished.  
+**Core files:** `src/App.jsx`, `src/components/*.jsx`, `src/systems/theme.js`
 
-### Best next starting points
+### 4. Reader quality pass
+- [ ] Verify the current reading mode behavior end-to-end: toolbar hiding, bottom-nav hiding, progress visibility, page turns, and scroll reset.
+- [ ] Improve the reading surface so long-form content feels calm and book-like.
+- [ ] Check that supporting visuals, charts, and audio blocks appear where they help, not only as afterthoughts.
 
-1. Audit Home, Progress Dashboard, Daily Growth, Reader, Quiz, Post-It, and notifications on narrow mobile widths first.
-2. Create a consistent motion language for taps, overlays, page transitions, cards, and success states.
-3. Standardize spacing, card treatments, shadows, border opacity, and hierarchy across all major surfaces.
-4. Check reduced-motion behavior and keep animation supportive, not distracting.
+**Why this matters:** Reader quality is central to the product, and it is one of the most high-impact surfaces in the app.  
+**Core files:** `src/components/Reader.jsx`, `src/data/content.js`, `src/index.css`
 
-## Current planning focus
+### 5. App shell cleanup without rewriting the app
+- [ ] Continue extracting self-contained page blocks from `src/App.jsx` into dedicated components.
+- [ ] Centralize page metadata like titles and route-like page labels so they do not drift.
+- [ ] Remove dead page states, one-off wiring, or stale state that no longer drives visible UI.
 
-1. Perfect visual clarity across all major screens.
-2. Add meaningful motion and interaction feedback across the full app.
-3. Tighten mobile feel so the product behaves more like an iOS app than a website.
-4. Raise consistency across navigation, cards, overlays, reader tools, quizzes, and community surfaces.
+**Why this matters:** `src/App.jsx` is still the highest-risk integration file. Small extractions now reduce breakage later.  
+**Core files:** `src/App.jsx`, `src/components/AppShell.jsx`
 
-## Forward plan
+---
 
-### 1. Visual system refinement
+## 2. NEXT — Product improvements that now make sense
 
-- [ ] Audit every page for visual consistency: spacing, typography hierarchy, card radius, shadows, borders, icon size, and empty-state quality.
-- [ ] Replace any remaining harsh or inconsistent gradients, fills, and surface treatments with a cleaner visual system tied to theme tokens.
-- [ ] Improve page-level visual identity so Home, Reader, Quiz, Daily Growth, Momentum, Post-It, and Profile each feel distinct but still part of one product.
-- [ ] Add better section framing and visual rhythm so long pages feel easier to scan.
-- [ ] Improve charts, progress bars, rings, and stat cards so progress feels premium rather than purely functional.
+### 6. Content structure upgrade
+- [ ] Rewrite weak or list-like topics into smoother, more book-style prose.
+- [ ] Add clear title-page behavior for topics that need a stronger chapter opening.
+- [ ] Support inline content markers for charts, callouts, and diagrams inside reading flow.
 
-### 2. Animation and interaction polish
+**Why this matters:** The content experience still matters more than adding more features.  
+**Core files:** `src/data/content.js`, `src/components/Reader.jsx`
 
-- [ ] Add consistent tap, press, hover, focus, and release feedback for every primary interactive element.
-- [ ] Standardize page transitions, modal entrances, toast motion, dropdown motion, and bottom-sheet behavior.
-- [ ] Add micro-animations to success states: completing a quiz, saving a note, finishing a Daily Growth task, earning progress, and opening rewards.
-- [ ] Improve navigation feel with smoother state transitions when switching pages, opening the sidebar, or entering Reader and Quiz flows.
-- [ ] Reduce any abrupt UI changes by adding subtle motion that supports clarity instead of distracting from content.
-- [ ] Create a consistent motion language for the app: calm, premium, responsive, and lightweight.
+### 7. Home and dashboard become stronger command centers
+- [ ] Improve the “what should I do next?” guidance on Home and Progress Dashboard.
+- [ ] Make recent activity, momentum, and unfinished actions easier to resume.
+- [ ] Tighten card hierarchy so the most valuable next action is visually obvious.
 
-### 3. Mobile-first interaction quality
+**Why this matters:** The app should pull users back into action, not just show static information.  
+**Core files:** `src/components/HomePage.jsx`, `src/components/ProgressDashboardPage.jsx`, momentum-related hooks
 
-- [ ] Review every major screen on narrow mobile widths and fix edge bleed, cramped layouts, clipped overlays, and awkward vertical spacing.
-- [ ] Improve thumb reach and touch comfort for bottom navigation, floating actions, close buttons, and reader controls.
-- [ ] Add more native-feeling sheet, drawer, and overlay behavior for mobile interactions.
-- [ ] Improve gesture behavior where it adds real value, especially for notifications, cards, reader navigation, and modal dismissal.
-- [ ] Tighten safe-area handling across auth, home, overlays, bottom nav, and install prompts.
+### 8. Communication practice surface
+- [ ] Decide whether communication practice should remain inside Quiz or become its own dedicated page.
+- [ ] If audio assets exist, wire them into a cleaner guided practice UI.
+- [ ] Add a real warmup / speaking / reflection flow if this area is meant to be a real feature.
 
-### 4. Home and dashboard surfaces
+**Why this matters:** The data structure exists, but the experience still feels partial.  
+**Core files:** `src/data/quiz.js`, `src/components/QuizPage.jsx`
 
-- [ ] Turn Home into a stronger command center with clearer next actions, progress context, and personalized recommendations.
-- [ ] Add richer visual feedback for streaks, reading return points, and weekly momentum.
-- [ ] Make Progress Dashboard feel more premium with better visual storytelling around goals, consistency, and next steps.
-- [ ] Add stronger visual hierarchy for actionable cards so the best next move is always obvious.
+### 9. Badges and reward system
+- [ ] Redesign milestone and badge presentation so it feels earned, organized, and motivating.
+- [ ] Add meaningful progression tiers instead of flat achievement lists.
+- [ ] Tie rewards more clearly to reading, quiz completion, streaks, and personal goals.
 
-### 5. Reader and learning flow
+**Why this matters:** Motivation systems only help if they feel structured and premium.  
+**Likely files:** `src/components/ProgressDashboardPage.jsx` and related reward UI
 
-- [ ] Refine Reader page transitions, toolbar behavior, note interactions, and content pacing so reading feels more immersive.
-- [ ] Add more visual depth to topic intros, content breakpoints, diagrams, and educational callouts.
-- [ ] Improve quiz feedback screens so results, weak spots, and follow-up actions feel clearer and more rewarding.
-- [ ] Add stronger motion and response cues around practice flows, especially communication drills and quiz completion.
+### 10. Profile and community polish
+- [ ] Make Profile feel more intentional as a personal hub, not just a stats dump.
+- [ ] Improve Post-It interaction quality and content hierarchy.
+- [ ] Keep notifications useful, readable, and tied to real actions.
 
-### 6. Community and social feel
+**Why this matters:** Social and identity surfaces should feel alive, not secondary.  
+**Core files:** `src/components/ProfilePage.jsx`, `src/components/PostItFeed.jsx`, `src/App.jsx`
 
-- [ ] Make Post-It feel more alive with better interaction states, composer polish, stronger hierarchy, and more satisfying engagement feedback.
-- [ ] Improve profile identity and lightweight social presence so users feel more visible inside the app.
-- [ ] Refine notifications so alerts feel timely, readable, and visually integrated with the rest of the product.
+---
 
-### 7. Premium product feel
+## 3. LATER — Worth doing, not urgent
 
-- [ ] Replace any remaining placeholder-feeling UI with more intentional surfaces, stronger copy hierarchy, and cleaner interaction feedback.
-- [ ] Add loading skeletons, optimistic transitions, and less jarring waiting states across slower flows.
-- [ ] Continue eliminating rough edges that break immersion: abrupt jumps, inconsistent spacing, flat empty states, and weak confirmation states.
+### 11. Focused test coverage
+- [ ] Add tests only after more logic is extracted out of `src/App.jsx`.
+- [ ] Start with small, stable targets: pure helpers, hooks, or isolated page logic.
+- [ ] Avoid adding a large test surface before the current app structure is easier to maintain.
 
-### 8. Accessibility and control
+**Decision:** Worth doing later, **not** worth forcing right now.
 
-- [ ] Audit motion for accessibility so enhanced animation still works well with reduced-motion preferences.
-- [ ] Improve focus visibility, control clarity, and readable contrast across auth, settings, quiz, reader, and feed flows.
-- [ ] Ensure animation never blocks comprehension or makes touch interactions feel slower.
+### 12. Better runtime monitoring
+- [ ] Add client-side error monitoring if production debugging becomes painful.
+- [ ] Only do this once the product surface is stable enough that alert noise will be useful.
 
-### 9. Product expansion after polish pass
+**Decision:** Worth doing later, **not** a current blocker.
 
-- [ ] Deepen personalization so recommendations, home prompts, and practice suggestions respond more clearly to user behavior and tailoring data.
-- [ ] Build the investor/inventor matching MVP into a real in-app experience with profiles, pitch cards, and structured discovery.
-- [ ] Define and implement real premium/subscription flows.
-- [ ] Keep moving the product toward installable-app quality with stronger offline and degraded-network behavior.
+### 13. Performance pass
+- [ ] Audit the heaviest surfaces on lower-end mobile devices.
+- [ ] Check long pages, overlays, gradients, and transitions for jank.
+- [ ] Optimize only where real slowdown is observed.
 
-## Execution order recommendation
+**Decision:** Worth doing after the main UI/content backlog is calmer.
 
-1. Visual audit and consistency cleanup across all key pages.
-2. Motion system pass for buttons, cards, overlays, and transitions.
-3. Mobile interaction pass for spacing, reach, safe areas, and gestures.
-4. Reader, Quiz, and Daily Growth premium-feel pass.
-5. Community, notifications, and profile polish pass.
-6. Final accessibility and reduced-motion audit.
+### 14. TypeScript migration
+- [ ] Keep this incremental if it ever starts.
+- [ ] Migrate leaf components and utilities first.
+- [ ] Do not turn this into a repo-wide rewrite project.
+
+**Decision:** Useful eventually, but not a smart priority right now.
+
+---
+
+## 4. NOT A PRIORITY RIGHT NOW
+
+- [ ] Do **not** add tooling just because a checklist suggests it.
+- [ ] Do **not** rewrite `src/App.jsx` from scratch.
+- [ ] Do **not** add React Router.
+- [ ] Do **not** treat “more features” as automatically better than fixing flow, consistency, and content quality.
+
+**Examples of things to avoid rushing:**
+- Adding Vitest before the code is easier to test
+- Adding Sentry before real production monitoring pain exists
+- Large architectural rewrites with no immediate product payoff
+
+---
+
+## 5. Suggested execution order
+
+1. Release hygiene and stale-doc cleanup  
+2. Full mobile QA pass  
+3. Dark mode consistency sweep  
+4. Reader quality pass  
+5. Incremental `App.jsx` extraction  
+6. Content structure upgrade  
+7. Home / dashboard improvement  
+8. Communication practice decision  
+9. Badges redesign  
+10. Tests / monitoring / performance only after the above
+
+---
+
+## 6. Definition of done for future sessions
+
+A task should usually be considered done only when:
+
+- The code path is actually wired into the app
+- The relevant page works on mobile widths
+- Dark mode still looks right
+- `npm run lint` passes
+- `npm run build` passes
+- Version/docs are updated if the release changed
+

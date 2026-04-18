@@ -5,6 +5,9 @@ import { FinanceChart } from "./Charts";
 import { AudioPlayer } from "./AudioPlayer";
 import { FINANCE_KEYS, MAP } from "../data/content";
 import { computeEssentialScore } from "../data/tailoring";
+import { LS } from "../systems/storage";
+
+const FOCUS_MODE_HINT_KEY = "reader_focus_mode_hint_dismissed";
 
 export function FinanceDisclaimer({ t: theme } = {}) {
   const t = theme || C;
@@ -715,6 +718,9 @@ export function EbookReader({
   const totalPages = contentPages + (showTitlePage ? 1 : 0);
   const [pageNum, setPageNum] = useState(0);
   const [readingMode, setReadingMode] = useState(false);
+  const [showFocusHint, setShowFocusHint] = useState(() =>
+    !LS.get(FOCUS_MODE_HINT_KEY, false),
+  );
   const [anim, setAnim] = useState(null);
   const pageRef = useRef(null);
   const sx = useRef(null);
@@ -777,6 +783,11 @@ export function EbookReader({
     const dx = e.changedTouches[0].clientX - sx.current;
     if (Math.abs(dx) > 50) turn(dx < 0 ? 1 : -1);
     sx.current = null;
+  };
+
+  const dismissFocusHint = () => {
+    setShowFocusHint(false);
+    LS.set(FOCUS_MODE_HINT_KEY, true);
   };
 
   const contentPageNum = showTitlePage ? Math.max(0, pageNum - 1) : pageNum;
@@ -857,11 +868,83 @@ export function EbookReader({
             gap: 6,
             marginLeft: "auto",
             flexShrink: 0,
+            position: "relative",
           }}
         >
+          {showFocusHint && !readingMode && (
+            <div
+              role="note"
+              style={{
+                position: "absolute",
+                right: -2,
+                top: -62,
+                maxWidth: 220,
+                padding: "10px 12px",
+                borderRadius: 12,
+                background: t.ink,
+                color: t.skin,
+                boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+                zIndex: 3,
+              }}
+            >
+              <button
+                type="button"
+                aria-label="Dismiss focus mode tip"
+                onClick={dismissFocusHint}
+                style={{
+                  position: "absolute",
+                  top: 6,
+                  right: 6,
+                  width: 20,
+                  height: 20,
+                  borderRadius: "50%",
+                  border: "none",
+                  background: "transparent",
+                  color: t.skin,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0,
+                  lineHeight: 1,
+                  fontSize: 14,
+                }}
+              >
+                ×
+              </button>
+              <p
+                style={{
+                  margin: 0,
+                  paddingRight: 18,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  lineHeight: 1.45,
+                  fontFamily: "Georgia,serif",
+                }}
+              >
+                Toggle Focus Mode
+              </p>
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  right: 16,
+                  bottom: -8,
+                  width: 14,
+                  height: 14,
+                  background: t.ink,
+                  transform: "rotate(45deg)",
+                  borderRadius: 2,
+                }}
+              />
+            </div>
+          )}
           <button
             type="button"
-            onClick={() => setReadingMode(r => !r)}
+            onClick={() => {
+              setReadingMode((r) => !r);
+              if (showFocusHint) dismissFocusHint();
+            }}
             aria-label={readingMode ? "Exit reading mode" : "Enter reading mode"}
             title={readingMode ? "Exit reading mode" : "Enter reading mode"}
             style={{

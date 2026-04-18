@@ -2,6 +2,12 @@
 
 All notable prototype milestones for Life are tracked here.
 
+## v0.6.2 — Small update
+
+- hardened the Secret Sienna page so it only opens after the exact hidden search code unlocks it
+- fixed reading mode so it now hides the bottom navigation for a cleaner full-screen reader
+- aligned release metadata and docs with the current `v0.6.2` version
+
 ## v0.6.1 — Bug sweep fixes
 
 - added page titles for `discord_networking` and `account_customize`

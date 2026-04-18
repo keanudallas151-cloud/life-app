@@ -2418,8 +2418,12 @@ export default function LifeApp() {
             }}
             aria-label="Toggle sidebar"
             style={{
-              background: "none",
+              background: "transparent",
               border: "none",
+              outline: "none",
+              boxShadow: "none",
+              appearance: "none",
+              WebkitTapHighlightColor: "transparent",
               cursor: "pointer",
               display: "flex",
               flexDirection: "column",
@@ -2431,6 +2435,7 @@ export default function LifeApp() {
               height: 40,
               padding: "4px 4px 0",
               boxSizing: "border-box",
+              borderRadius: 0,
               transition: "opacity 0.2s ease",
             }}
             onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
@@ -2466,12 +2471,11 @@ export default function LifeApp() {
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                background: "linear-gradient(145deg, #2d2d2d, #404040)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: "transparent",
+                border: "none",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
                 transition: "transform 0.2s ease",
               }}
               onMouseEnter={(e) =>
@@ -3784,12 +3788,6 @@ export default function LifeApp() {
                 user={user}
                 play={play}
                 setPage={setPage}
-                readKeys={readKeys}
-                bookmarks={bookmarks}
-                readingStreak={readingStreak}
-                completedNotes={completedNotes}
-                momentumSnapshot={momentumSnapshot}
-                openMomentumHub={openMomentumHub}
                 initials={initials}
                 doSignOut={doSignOut}
               />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Ic } from "../icons/Ic";
 import { THEME_MODES } from "../systems/theme";
 
 const PREF_DEFAULTS = {
@@ -35,16 +36,20 @@ export default function SettingsPage({
   onDeleteAccount,
 }) {
   const [openSections, setOpenSections] = useState({});
-  const toggleSection = (title) => setOpenSections(s => ({ ...s, [title]: !s[title] }));
+  const toggleSection = (title) =>
+    setOpenSections((s) => ({ ...s, [title]: !s[title] }));
 
   return (
     <div
       className="life-settings-page"
       data-page-tag="#setting_preferences"
       style={{
-        padding: "32px 20px",
+        padding: "28px 16px 36px",
         maxWidth: 520,
         margin: "0 auto",
+        boxSizing: "border-box",
+        width: "100%",
+        overflowX: "hidden",
       }}
     >
       <button
@@ -94,6 +99,7 @@ export default function SettingsPage({
         {
           tag: "#setting_appearance",
           title: "Appearance",
+          icon: "moon",
           items: [
             {
               type: "choice",
@@ -120,6 +126,7 @@ export default function SettingsPage({
         {
           tag: "#setting_motion",
           title: "Motion & Performance",
+          icon: "bolt",
           items: [
             {
               label: "Reduce Motion",
@@ -144,6 +151,7 @@ export default function SettingsPage({
         {
           tag: "#setting_sound",
           title: "Sound",
+          icon: "chat",
           items: [
             {
               label: "Sound Effects",
@@ -156,6 +164,7 @@ export default function SettingsPage({
         {
           tag: "#setting_account",
           title: "Account & Data",
+          icon: "shield",
           items: [],
           actions: [
             {
@@ -186,8 +195,15 @@ export default function SettingsPage({
             },
           ],
         },
-      ].map((section) => (
-        <div
+      ].map((section) => {
+        const isOpen = !!openSections[section.title];
+        const SectionIcon =
+          section.icon && typeof Ic[section.icon] === "function"
+            ? Ic[section.icon]
+            : null;
+
+        return (
+          <div
           className="life-settings-card"
           key={section.title}
           data-page-tag={section.tag}
@@ -207,44 +223,83 @@ export default function SettingsPage({
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
+              gap: 12,
               width: "100%",
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: "0 0 10px",
+              padding: 0,
               margin: 0,
             }}
           >
             <span
               style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: 2.5,
-                textTransform: "uppercase",
-                color: t.muted,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 12,
+                minWidth: 0,
               }}
             >
-              {section.title}
+              <span
+                aria-hidden
+                style={{
+                  width: 32,
+                  height: 32,
+                  minWidth: 32,
+                  minHeight: 32,
+                  borderRadius: "50%",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: t.light,
+                  border: `1px solid ${t.border}`,
+                  flexShrink: 0,
+                }}
+              >
+                {SectionIcon ? SectionIcon("none", t.mid, 16) : null}
+              </span>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 2.5,
+                  textTransform: "uppercase",
+                  color: t.muted,
+                  textAlign: "left",
+                }}
+              >
+                {section.title}
+              </span>
             </span>
             <svg
               width="12"
               height="12"
               viewBox="0 0 12 12"
               style={{
-                transform: openSections[section.title] ? "rotate(180deg)" : "rotate(0deg)",
+                transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
                 transition: "transform 0.2s ease",
                 flexShrink: 0,
               }}
             >
-              <polyline points="2,4 6,8 10,4" fill="none" stroke={t.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline
+                points="4,2 8,6 4,10"
+                fill="none"
+                stroke={t.muted}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
-          <div style={{
-            maxHeight: openSections[section.title] ? 0 : 1000,
-            opacity: openSections[section.title] ? 0 : 1,
-            overflow: "hidden",
-            transition: "max-height 0.3s ease, opacity 0.2s ease",
-          }}>
+          <div
+            style={{
+              maxHeight: isOpen ? 1000 : 0,
+              opacity: isOpen ? 1 : 0,
+              overflow: "hidden",
+              transition: "max-height 0.3s ease, opacity 0.2s ease",
+              paddingTop: isOpen ? 12 : 0,
+            }}
+          >
           {section.items.filter(Boolean).map((item) => (
             <div
               className="life-settings-row"
@@ -339,7 +394,15 @@ export default function SettingsPage({
             </div>
           ))}
           {section.actions && (
-            <div className="life-settings-action-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
+            <div
+              className="life-settings-action-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr",
+                gap: 8,
+                marginTop: 10,
+              }}
+            >
               {section.actions.filter(Boolean).map((action) => (
                 <button
                   key={action.label}
@@ -367,9 +430,10 @@ export default function SettingsPage({
               ))}
             </div>
           )}
-          </div>{/* /collapsible */}
+          </div>
         </div>
-      ))}
+      );
+      })}
     </div>
   );
 }
