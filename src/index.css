@@ -3707,3 +3707,8 @@ button:active .life-card-inner,
 .life-text-btn:focus-visible {
   outline: none !important;
 }
+
+/* ─── Hide scrollbar for page indicators ───────────────────────────── */
+.life-page-dots::-webkit-scrollbar {
+  display: none;
+}

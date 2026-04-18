@@ -1281,7 +1281,7 @@ export function EbookReader({
                 <div style={{ position: "relative", maxWidth: 180, overflow: "hidden" }}>
                   {totalPages > 12 && <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 20, background: "linear-gradient(90deg, rgba(255,255,255,0.95), transparent)", zIndex: 1, pointerEvents: "none" }} />}
                   {totalPages > 12 && <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 20, background: "linear-gradient(270deg, rgba(255,255,255,0.95), transparent)", zIndex: 1, pointerEvents: "none" }} />}
-                  <div style={{ display: "flex", gap: 5, alignItems: "center", overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", padding: "4px 2px", msOverflowStyle: "none" }}>
+                  <div className="life-page-dots" style={{ display: "flex", gap: 5, alignItems: "center", overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch", padding: "4px 2px", msOverflowStyle: "none" }}>
                   {Array.from({ length: totalPages }).map((_, i) => (
                     <button
                       key={i}

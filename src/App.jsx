@@ -736,7 +736,7 @@ export default function LifeApp() {
       profile: "Profile — Life.",
       help: "Help — Life.",
       where_to_start: "Where To Start — Life.",
-      networking: "Networking Group — Life.",
+      networking: "Investors & Inventors — Life.",
       categories: "Categories — Life.",
       progress_dashboard: "Progress — Life.",
       leaderboard: "Leaderboard — Life.",
@@ -752,6 +752,8 @@ export default function LifeApp() {
       sidebar_saved: "Saved — Life.",
       sidebar_experience: "Experience — Life.",
       premium: "Premium — Life.",
+      discord_networking: "Networking Group — Life.",
+      account_customize: "Account — Life.",
     };
     document.title = titles[page] || "Life. — Knowledge, Growth, Community";
   }, [page]);
