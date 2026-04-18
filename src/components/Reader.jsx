@@ -695,7 +695,7 @@ export function EbookReader({
   bookmarks,
   allContent,
   profile,
-  savedReaderPage = 0,
+  /* savedReaderPage – unused; always start on title page */
   onReaderPageSave,
   t: theme,
 }) {
@@ -714,10 +714,10 @@ export function EbookReader({
   const sx = useRef(null);
 
   useEffect(() => {
-    const contentPage = Math.max(0, Math.min(savedReaderPage ?? 0, contentPages - 1));
-    setPageNum(showTitlePage ? contentPage + 1 : contentPage);
+    // Always open on the title page (page 0) when a topic is selected
+    setPageNum(0);
     setAnim(null);
-  }, [contentPages, savedReaderPage, selKey, showTitlePage]);
+  }, [selKey]);
 
   const commitPage = (n) => {
     const clamped = Math.max(0, Math.min(n, totalPages - 1));
