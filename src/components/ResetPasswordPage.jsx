@@ -26,8 +26,6 @@ export function ResetPasswordPage({
     "Very strong",
   ];
   const passwordStrengthColors = [C.red, C.red, "#e6a23c", C.gold, C.green];
-  // Clamp to valid array index (0..4) since strength counts 5 booleans (0..5)
-  const clampedStrength = Math.min(resetPasswordStrength, passwordStrengthLabels.length - 1);
 
   const resetPasswordHasMinLength = rpPass.length >= 8;
   const resetPasswordHasUpper = /[A-Z]/.test(rpPass);
@@ -47,6 +45,8 @@ export function ResetPasswordPage({
       : rpPass.length > 0 && !resetPasswordHasSpecial
         ? "Add a symbol like !@#$ for extra security"
       : "";
+  // Clamp to valid array index (0..4) since strength counts 5 booleans (0..5)
+  const clampedStrength = Math.min(resetPasswordStrength, passwordStrengthLabels.length - 1);
   const resetConfirmMismatch = rpPass2.length > 0 && rpPass !== rpPass2;
 
   return (
