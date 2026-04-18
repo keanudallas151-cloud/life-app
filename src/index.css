@@ -1,12 +1,12 @@
 :root {
-  --life-skin: #f7f8fa;
-  --life-ink: #1c1f23;
-  --life-green: #3d5a4c;
-  --life-green-soft: #edf1ef;
-  --life-muted: #888e96;
-  --life-border: #e2e4e8;
-  --life-white: #ffffff;
-  --life-gold: #b8975a;
+  /* ─── Vercel/Geist-inspired palette. Mirrors src/systems/theme.js `C`. ── */
+  --life-skin: #0a0a0a;
+  --life-ink: #ededed;
+  --life-green: #50c878;
+  --life-green-soft: #0f2818;
+  --life-muted: #a1a1a1;
+  --life-border: #2e2e2e;
+  --life-white: #111111;
   --life-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --life-ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
   --life-font: Georgia, "Times New Roman", "Iowan Old Style", serif;
@@ -27,8 +27,8 @@
 }
 
 body.life-dark {
-  background: #131517;
-  color: #e8eaed;
+  background: #000000;
+  color: #fafafa;
   color-scheme: dark;
 }
 
@@ -76,31 +76,31 @@ body::before {
   pointer-events: none;
   background:
     radial-gradient(
-      1200px 460px at 8% -10%,
-      rgba(61, 90, 76, 0.09),
+      1400px 540px at 8% -10%,
+      rgba(80, 200, 120, 0.06),
       transparent 62%
     ),
     radial-gradient(
-      900px 420px at 92% 0%,
-      rgba(180, 151, 90, 0.08),
+      1000px 480px at 92% 0%,
+      rgba(245, 166, 35, 0.03),
       transparent 58%
     ),
-    linear-gradient(180deg, #f7f8fa 0%, #f0f1f3 52%, #e8eaed 100%);
+    linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 52%, #080808 100%);
 }
 
 body.life-dark::before {
   background:
     radial-gradient(
-      1200px 460px at 8% -10%,
-      rgba(90, 138, 106, 0.07),
+      1400px 540px at 8% -10%,
+      rgba(80, 200, 120, 0.07),
       transparent 62%
     ),
     radial-gradient(
-      900px 420px at 92% 0%,
-      rgba(184, 151, 90, 0.06),
+      1000px 480px at 92% 0%,
+      rgba(245, 166, 35, 0.04),
       transparent 58%
     ),
-    linear-gradient(180deg, #161719 0%, #131517 52%, #101113 100%);
+    linear-gradient(180deg, #050505 0%, #000000 52%, #000000 100%);
 }
 
 button,
@@ -126,7 +126,7 @@ button,
 }
 
 ::selection {
-  background: rgba(61, 90, 76, 0.22);
+  background: rgba(74, 140, 92, 0.22);
   color: var(--life-ink);
 }
 
@@ -140,7 +140,7 @@ p {
 /* Scrollbars — subtle, desktop */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(61, 90, 76, 0.35) transparent;
+  scrollbar-color: rgba(74, 140, 92, 0.35) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -149,12 +149,12 @@ p {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(61, 90, 76, 0.28);
+  background: rgba(74, 140, 92, 0.28);
   border-radius: 99px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(61, 90, 76, 0.45);
+  background: rgba(74, 140, 92, 0.45);
 }
 
 /* Main content: soft entrance when switching primary pages */
@@ -175,63 +175,6 @@ p {
 
 @media (prefers-reduced-motion: reduce) {
   .life-surface-enter {
-    animation: none;
-  }
-}
-
-/* ─── Professional card stagger entrance ─── */
-.life-card-stagger > * {
-  animation: life-card-rise 0.5s var(--life-ease-out) both;
-}
-.life-card-stagger > *:nth-child(1) { animation-delay: 0.04s; }
-.life-card-stagger > *:nth-child(2) { animation-delay: 0.08s; }
-.life-card-stagger > *:nth-child(3) { animation-delay: 0.12s; }
-.life-card-stagger > *:nth-child(4) { animation-delay: 0.16s; }
-.life-card-stagger > *:nth-child(5) { animation-delay: 0.20s; }
-.life-card-stagger > *:nth-child(6) { animation-delay: 0.24s; }
-.life-card-stagger > *:nth-child(n+7) { animation-delay: 0.28s; }
-
-@keyframes life-card-rise {
-  from { opacity: 0; transform: translateY(16px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* ─── Subtle section fade-in on scroll (utility class) ─── */
-.life-fade-in {
-  animation: life-fade-up 0.55s var(--life-ease-out) both;
-}
-
-@keyframes life-fade-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ─── Gold accent pulse for premium elements ─── */
-.life-gold-pulse {
-  animation: life-gold-glow 2.5s ease-in-out infinite alternate;
-}
-
-@keyframes life-gold-glow {
-  from { box-shadow: 0 0 8px rgba(184, 151, 90, 0.15); }
-  to   { box-shadow: 0 0 20px rgba(184, 151, 90, 0.3); }
-}
-
-/* ─── Smooth number count-up feel ─── */
-.life-stat-pop {
-  animation: life-stat-enter 0.4s var(--life-ease-out) both;
-}
-
-@keyframes life-stat-enter {
-  from { opacity: 0; transform: scale(0.8); }
-  60%  { transform: scale(1.05); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .life-card-stagger > *,
-  .life-fade-in,
-  .life-gold-pulse,
-  .life-stat-pop {
     animation: none;
   }
 }
@@ -272,7 +215,7 @@ p {
   opacity: 0;
   background: linear-gradient(
     130deg,
-    rgba(255, 255, 255, 0.36),
+    rgba(255, 255, 255, 0.06),
     transparent 44%
   );
   transition: opacity 0.24s ease;
@@ -281,9 +224,10 @@ p {
 @media (prefers-reduced-motion: no-preference) {
   .life-card-hover:hover {
     transform: translateY(-2px);
+    border-color: rgba(80, 200, 120, 0.28);
     box-shadow:
-      0 4px 6px rgba(20, 20, 20, 0.06),
-      0 14px 32px rgba(61, 90, 76, 0.12);
+      0 4px 10px rgba(0, 0, 0, 0.4),
+      0 14px 32px rgba(80, 200, 120, 0.12);
   }
 
   .life-card-hover:hover::after {
@@ -293,6 +237,27 @@ p {
 
 .life-card-hover:active {
   transform: translateY(0) scale(0.985);
+}
+
+/* ─── Button glow outline: makes buttons pop against black bg ──────────
+   Adds a subtle green rim-light + stronger border so buttons never blend
+   into the page. Automatically applies to every <button> except the
+   explicitly-ghost styles (sidebar links, header icons). */
+button:not(.life-sidebar-link):not(.life-bottom-nav-item):not([data-ghost]):not(.life-password-toggle) {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button:not(.life-sidebar-link):not(.life-bottom-nav-item):not([data-ghost]):not(.life-password-toggle):hover {
+    box-shadow:
+      0 0 0 1px rgba(80, 200, 120, 0.3),
+      0 2px 6px rgba(0, 0, 0, 0.4),
+      0 0 16px rgba(80, 200, 120, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -339,7 +304,7 @@ p {
   .life-sidebar-body,
   .life-notif-dropdown > div {
     scrollbar-width: thin;
-    scrollbar-color: rgba(61, 90, 76, 0.28) transparent;
+    scrollbar-color: rgba(74, 140, 92, 0.28) transparent;
   }
   .life-main-scroll::-webkit-scrollbar,
   .life-sidebar-body::-webkit-scrollbar,
@@ -349,14 +314,14 @@ p {
   .life-main-scroll::-webkit-scrollbar-thumb,
   .life-sidebar-body::-webkit-scrollbar-thumb,
   .life-notif-dropdown > div::-webkit-scrollbar-thumb {
-    background: rgba(61, 90, 76, 0.28);
+    background: rgba(74, 140, 92, 0.28);
     border-radius: 4px;
     border: 2px solid transparent;
     background-clip: padding-box;
     transition: background 0.2s ease;
   }
   .life-main-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(61, 90, 76, 0.45);
+    background: rgba(74, 140, 92, 0.45);
     background-clip: padding-box;
   }
 }
@@ -373,7 +338,7 @@ p {
 /* ─── Smoother input focus: green ring grows from border ───────────────── */
 input:focus,
 textarea:focus {
-  box-shadow: 0 0 0 3px rgba(61, 90, 76, 0.15);
+  box-shadow: 0 0 0 3px rgba(74, 140, 92, 0.15);
 }
 
 /* ─── Page transition: a touch more refined ────────────────────────────── */
@@ -390,11 +355,11 @@ textarea:focus {
 
 /* ─── Selection color: use brand green instead of browser blue ─────────── */
 ::selection {
-  background: rgba(61, 90, 76, 0.28);
+  background: rgba(74, 140, 92, 0.28);
   color: inherit;
 }
 ::-moz-selection {
-  background: rgba(61, 90, 76, 0.28);
+  background: rgba(74, 140, 92, 0.28);
   color: inherit;
 }
 
@@ -404,45 +369,6 @@ a,
 [role="button"] {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
-}
-
-/* ─── Button press feedback: subtle scale on active ──────────────────────── */
-@media (prefers-reduced-motion: no-preference) {
-  button:not(:disabled):active,
-  [role="button"]:not(:disabled):active {
-    transform: scale(0.97);
-    transition: transform 0.1s ease;
-  }
-}
-
-/* ─── Smooth list item stagger for content lists ─────────────────────────── */
-@keyframes life-list-item-in {
-  from { opacity: 0; transform: translateX(-8px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .life-list-stagger > * {
-    animation: life-list-item-in 0.3s cubic-bezier(0.4,0,0.2,1) both;
-  }
-  .life-list-stagger > *:nth-child(1)  { animation-delay: 0.02s; }
-  .life-list-stagger > *:nth-child(2)  { animation-delay: 0.05s; }
-  .life-list-stagger > *:nth-child(3)  { animation-delay: 0.08s; }
-  .life-list-stagger > *:nth-child(4)  { animation-delay: 0.11s; }
-  .life-list-stagger > *:nth-child(5)  { animation-delay: 0.14s; }
-  .life-list-stagger > *:nth-child(6)  { animation-delay: 0.17s; }
-  .life-list-stagger > *:nth-child(7)  { animation-delay: 0.20s; }
-  .life-list-stagger > *:nth-child(8)  { animation-delay: 0.23s; }
-  .life-list-stagger > *:nth-child(n+9){ animation-delay: 0.26s; }
-}
-
-/* ─── Progress bar fill animation ────────────────────────────────────────── */
-@keyframes life-progress-fill {
-  from { width: 0; }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .life-progress-bar-fill {
-    animation: life-progress-fill 0.8s cubic-bezier(0.4,0,0.2,1) both;
-  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -456,7 +382,7 @@ a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--life-green, #3d5a4c);
+  outline: 2px solid var(--life-green, #4a8c5c);
   outline-offset: 2px;
   border-radius: inherit;
 }
@@ -542,7 +468,7 @@ html {
   .life-content-card:hover,
   .life-topic-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(61,90,76,0.12);
+    box-shadow: 0 8px 24px rgba(74,140,92,0.12);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 }
@@ -601,7 +527,7 @@ html {
 
 .scroll-to-top:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(61, 90, 76, 0.25);
+  box-shadow: 0 8px 24px rgba(74, 140, 92, 0.25);
   border-color: var(--life-green);
 }
 
@@ -733,8 +659,8 @@ html {
 .life-password-field > button[data-password-toggle="true"]:hover,
 .life-auth-card div[style*="position:relative"] > input + button:hover,
 .life-auth-card div[style*="position: relative"] > input + button:hover {
-  background: rgba(61, 90, 76, 0.08) !important;
-  border-color: rgba(61, 90, 76, 0.22) !important;
+  background: rgba(74, 140, 92, 0.08) !important;
+  border-color: rgba(74, 140, 92, 0.22) !important;
   color: var(--life-green) !important;
   /* CRITICAL: keep same transform — no translateY(-50%) scale drift */
   transform: translate3d(0, -50%, 0) !important;
@@ -746,7 +672,7 @@ html {
 .life-auth-card div[style*="position:relative"] > input + button:active,
 .life-auth-card div[style*="position: relative"] > input + button:active {
   transform: translate3d(0, -50%, 0) !important;
-  background: rgba(61, 90, 76, 0.14) !important;
+  background: rgba(74, 140, 92, 0.14) !important;
 }
 
 .life-password-field > .life-password-toggle:focus-visible,
@@ -905,18 +831,18 @@ body.life-dark .life-sidebar,
 body.life-dark .life-profile-card,
 body.life-dark .life-settings-card,
 body.life-dark .life-auth-card {
-  background: #1e1e1e !important;
-  border-color: #333 !important;
-  color: #e8e8e8 !important;
+  background: #0a0a0a !important;
+  border-color: #262626 !important;
+  color: #fafafa !important;
 }
 
 body.life-dark .life-auth-shell,
 body.life-dark .life-landing-shell {
-  background: linear-gradient(165deg, #131517 0%, #181a1e 45%, #131517 100%) !important;
+  background: linear-gradient(165deg, #000000 0%, #0a0a0a 45%, #000000 100%) !important;
 }
 
 body.life-dark .life-home-hero {
-  background: linear-gradient(180deg, #141618 0%, #181a1e 100%) !important;
+  background: linear-gradient(180deg, #0a0a0a 0%, #0f0f0f 100%) !important;
 }
 
 body.life-dark .life-auth-card,
@@ -927,37 +853,37 @@ body.life-dark .life-search-dropdown button,
 body.life-dark .life-notif-dropdown,
 body.life-dark .scroll-to-top,
 body.life-dark .life-glass-card {
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6) !important;
 }
 
 body.life-dark .life-topbar input[type="text"] {
-  background: #1c1e22 !important;
-  border-color: #2e3138 !important;
-  color: #e8eaed !important;
+  background: #141414 !important;
+  border-color: #262626 !important;
+  color: #fafafa !important;
 }
 
 body.life-dark .life-topbar input[type="text"]::placeholder {
-  color: #8c929a !important;
+  color: #a1a1a1 !important;
 }
 
 body.life-dark .life-topbar input[type="text"]:focus {
-  background: #222528 !important;
-  border-color: #5a8a6a !important;
-  box-shadow: 0 0 0 3px rgba(90, 138, 106, 0.14) !important;
+  background: #1a1a1a !important;
+  border-color: #50c878 !important;
+  box-shadow: 0 0 0 3px rgba(80, 200, 120, 0.18) !important;
 }
 
 body.life-dark select {
   background-image:
-    linear-gradient(45deg, transparent 50%, #8c929a 50%),
-    linear-gradient(135deg, #8c929a 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, #a29d96 50%),
+    linear-gradient(135deg, #a29d96 50%, transparent 50%);
 }
 
 body.life-dark .life-auth-card input,
 body.life-dark .life-auth-card textarea,
 body.life-dark .life-auth-card select {
-  background: #1c1e22 !important;
-  color: #e8eaed !important;
-  border-color: #2e3138 !important;
+  background: #202020 !important;
+  color: #f2f2f2 !important;
+  border-color: #3b3b3b !important;
 }
 
 body.life-dark .life-auth-card p,
@@ -975,22 +901,22 @@ body.life-dark .life-settings-action-grid > button,
 body.life-dark .life-card-hover,
 body.life-dark .life-resume-card,
 body.life-dark .life-sidebar button[style*="background: C.white"] {
-  background: #1c1e22 !important;
-  border-color: #2e3138 !important;
+  background: #1f1f1f !important;
+  border-color: #3b3b3b !important;
 }
 
 body.life-dark .life-footer {
-  color: #8c929a !important;
+  color: #a29d96 !important;
 }
 
 body.life-dark .life-settings-subtitle,
 body.life-dark .life-profile-page p,
 body.life-dark .life-settings-page p {
-  color: #bfc3c9;
+  color: #b8b8b8;
 }
 
 body.life-dark .life-main-scroll {
-  background: #131517;
+  background: #121212;
 }
 
 @media (max-width: 640px) {
@@ -1535,7 +1461,7 @@ select:focus-visible {
 .life-topbar input[type="text"]:focus {
   background: var(--life-white) !important;
   border-color: var(--life-green) !important;
-  box-shadow: 0 0 0 3px rgba(61, 90, 76, 0.12);
+  box-shadow: 0 0 0 3px rgba(74, 140, 92, 0.12);
 }
 
 /* Search icon animation */
@@ -1553,7 +1479,7 @@ select:focus-visible {
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus {
-  box-shadow: 0 0 0 3px rgba(61, 90, 76, 0.1);
+  box-shadow: 0 0 0 3px rgba(74, 140, 92, 0.1);
 }
 
 input,
@@ -1568,8 +1494,8 @@ select {
   -webkit-appearance: none;
   appearance: none;
   background-image:
-    linear-gradient(45deg, transparent 50%, #888e96 50%),
-    linear-gradient(135deg, #888e96 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, #8a8070 50%),
+    linear-gradient(135deg, #8a8070 50%, transparent 50%);
   background-position:
     calc(100% - 16px) calc(50% - 2px),
     calc(100% - 11px) calc(50% - 2px);
@@ -1769,12 +1695,12 @@ button:active:not(:disabled) {
     rgba(255, 252, 247, 0.97) 0%,
     rgba(245, 240, 232, 0.98) 100%
   );
-  border: 1px solid rgba(61, 90, 76, 0.35);
+  border: 1px solid rgba(74, 140, 92, 0.35);
   border-radius: 20px;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.5) inset,
     0 24px 80px rgba(20, 20, 20, 0.35),
-    0 0 120px rgba(61, 90, 76, 0.12);
+    0 0 120px rgba(74, 140, 92, 0.12);
   overflow: hidden;
 }
 
@@ -1827,7 +1753,7 @@ button:active:not(:disabled) {
   text-transform: uppercase;
   color: var(--life-green);
   background: var(--life-green-soft);
-  border: 1px solid rgba(61, 90, 76, 0.35);
+  border: 1px solid rgba(74, 140, 92, 0.35);
   padding: 8px 14px;
   border-radius: 999px;
   font-family: var(--life-font);
@@ -1849,7 +1775,7 @@ button:active:not(:disabled) {
 }
 
 .life-constellation-close:hover {
-  box-shadow: 0 6px 20px rgba(61, 90, 76, 0.35);
+  box-shadow: 0 6px 20px rgba(74, 140, 92, 0.35);
 }
 
 .life-constellation-close:active {
@@ -1873,12 +1799,12 @@ button:active:not(:disabled) {
   background-image:
     radial-gradient(
       1.5px 1.5px at 20% 30%,
-      rgba(61, 90, 76, 0.35),
+      rgba(74, 140, 92, 0.35),
       transparent
     ),
-    radial-gradient(1px 1px at 70% 60%, rgba(61, 90, 76, 0.25), transparent),
+    radial-gradient(1px 1px at 70% 60%, rgba(74, 140, 92, 0.25), transparent),
     radial-gradient(1px 1px at 40% 80%, rgba(180, 160, 120, 0.2), transparent),
-    radial-gradient(1.5px 1.5px at 85% 20%, rgba(61, 90, 76, 0.3), transparent);
+    radial-gradient(1.5px 1.5px at 85% 20%, rgba(74, 140, 92, 0.3), transparent);
   background-size:
     280px 280px,
     320px 320px,
@@ -2252,15 +2178,22 @@ button:active:not(:disabled),
     margin-right: auto !important;
     border-radius: 20px !important;
     padding: 24px 16px 24px !important;
-    text-align: center;
+    text-align: center !important;
   }
 
   .life-home-hero h1 {
     max-width: 10.5ch;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+    display: block !important;
   }
 
   .life-home-hero p {
     max-width: 32ch;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
   }
 }
 
@@ -2667,8 +2600,8 @@ button:active:not(:disabled),
     width: 20px;
     height: 3px;
     border-radius: 999px;
-    background: linear-gradient(90deg, #3d5a4c, #5a7d6a);
-    box-shadow: 0 1px 3px rgba(61, 90, 76, 0.4);
+    background: linear-gradient(90deg, #4a8c5c, #6FBE77);
+    box-shadow: 0 1px 3px rgba(74, 140, 92, 0.4);
     animation: life-nav-pill 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
@@ -2793,7 +2726,7 @@ button:active:not(:disabled),
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: linear-gradient(145deg, var(--life-green), #2e4a3a);
+  background: linear-gradient(145deg, var(--life-green), #2d6e42);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3053,11 +2986,11 @@ button:active:not(:disabled),
   margin-top: 18px;
   padding: 18px;
   border-radius: 18px;
-  border: 1px solid rgba(61, 90, 76, 0.28);
+  border: 1px solid rgba(74, 140, 92, 0.28);
   background:
     radial-gradient(
       120% 120% at 100% -5%,
-      rgba(61, 90, 76, 0.11),
+      rgba(74, 140, 92, 0.11),
       transparent 48%
     ),
     linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(245, 240, 232, 0.92));
@@ -3097,7 +3030,7 @@ button:active:not(:disabled),
 .life-momentum-link-btn,
 .life-momentum-go-btn {
   min-height: 44px;
-  border: 1px solid rgba(61, 90, 76, 0.32);
+  border: 1px solid rgba(74, 140, 92, 0.32);
   background: rgba(255, 255, 255, 0.88);
   color: var(--life-green);
   border-radius: 12px;
@@ -3121,18 +3054,18 @@ button:active:not(:disabled),
   transform: none !important;
 }
 .life-momentum-link-btn:hover {
-  background: rgba(61, 90, 76, 0.08);
-  border-color: rgba(61, 90, 76, 0.5);
+  background: rgba(74, 140, 92, 0.08);
+  border-color: rgba(74, 140, 92, 0.5);
 }
 .life-momentum-link-btn:active {
-  background: rgba(61, 90, 76, 0.14);
+  background: rgba(74, 140, 92, 0.14);
 }
 
 .life-momentum-go-btn {
   width: 100%;
   margin-top: 10px;
-  border-color: rgba(61, 90, 76, 0.45);
-  background: rgba(61, 90, 76, 0.12);
+  border-color: rgba(74, 140, 92, 0.45);
+  background: rgba(74, 140, 92, 0.12);
 }
 
 .life-momentum-stat-row {
@@ -3145,7 +3078,7 @@ button:active:not(:disabled),
 .life-momentum-stat-row > div {
   min-height: 72px;
   border-radius: 12px;
-  border: 1px solid rgba(61, 90, 76, 0.2);
+  border: 1px solid rgba(74, 140, 92, 0.2);
   background: rgba(255, 255, 255, 0.82);
   padding: 10px 6px;
   display: flex;
@@ -3199,7 +3132,7 @@ button:active:not(:disabled),
 
 .life-momentum-next {
   margin-top: 12px;
-  border: 1px solid rgba(61, 90, 76, 0.25);
+  border: 1px solid rgba(74, 140, 92, 0.25);
   border-radius: 14px;
   background: rgba(234, 243, 236, 0.75);
   padding: 12px;
@@ -3252,7 +3185,7 @@ button:active:not(:disabled),
 
 .life-momentum-quote-item {
   border-radius: 14px;
-  border: 1px solid rgba(61, 90, 76, 0.24);
+  border: 1px solid rgba(74, 140, 92, 0.24);
   background: rgba(255, 255, 255, 0.78);
   padding: 12px;
 }
@@ -3292,7 +3225,7 @@ button:active:not(:disabled),
   margin-top: 6px;
   height: 9px;
   border-radius: 999px;
-  background: rgba(61, 90, 76, 0.14);
+  background: rgba(74, 140, 92, 0.14);
   overflow: hidden;
 }
 
@@ -3301,7 +3234,7 @@ button:active:not(:disabled),
   height: 100%;
   width: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, #3d5a4c, #5a7d6a);
+  background: linear-gradient(90deg, #4a8c5c, #77b485);
   transition: width 220ms var(--life-ease-soft);
 }
 
@@ -3314,7 +3247,7 @@ button:active:not(:disabled),
 
 .life-momentum-highlights > div {
   border-radius: 12px;
-  border: 1px dashed rgba(61, 90, 76, 0.35);
+  border: 1px dashed rgba(74, 140, 92, 0.35);
   background: rgba(255, 255, 255, 0.7);
   padding: 9px;
   min-height: 64px;
@@ -3360,12 +3293,12 @@ button:active:not(:disabled),
 }
 
 .life-momentum-hub-header {
-  border: 1px solid rgba(61, 90, 76, 0.25);
+  border: 1px solid rgba(74, 140, 92, 0.25);
   border-radius: 18px;
   background:
     radial-gradient(
       130% 130% at 100% 0%,
-      rgba(61, 90, 76, 0.16),
+      rgba(74, 140, 92, 0.16),
       transparent 56%
     ),
     rgba(255, 255, 255, 0.88);
@@ -3396,7 +3329,7 @@ button:active:not(:disabled),
 
 .life-momentum-hub-section {
   margin-top: 14px;
-  border: 1px solid rgba(61, 90, 76, 0.2);
+  border: 1px solid rgba(74, 140, 92, 0.2);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.86);
   padding: 14px;
@@ -3425,7 +3358,7 @@ button:active:not(:disabled),
 .life-momentum-suggestion {
   margin-top: 10px;
   border-radius: 12px;
-  border: 1px solid rgba(61, 90, 76, 0.22);
+  border: 1px solid rgba(74, 140, 92, 0.22);
   background: rgba(234, 243, 236, 0.72);
   padding: 12px;
 }
@@ -3451,15 +3384,15 @@ button:active:not(:disabled),
 }
 
 .life-momentum-mission-item {
-  border: 1px solid rgba(61, 90, 76, 0.2);
+  border: 1px solid rgba(74, 140, 92, 0.2);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.94);
   padding: 12px;
 }
 
 .life-momentum-mission-item.done {
-  border-color: rgba(61, 90, 76, 0.45);
-  box-shadow: 0 0 0 1px rgba(61, 90, 76, 0.2) inset;
+  border-color: rgba(74, 140, 92, 0.45);
+  box-shadow: 0 0 0 1px rgba(74, 140, 92, 0.2) inset;
 }
 
 .life-momentum-mission-top {
@@ -3498,7 +3431,7 @@ button:active:not(:disabled),
 .life-momentum-quick-actions > button {
   min-height: 44px;
   border-radius: 12px;
-  border: 1px solid rgba(61, 90, 76, 0.3);
+  border: 1px solid rgba(74, 140, 92, 0.3);
   background: rgba(255, 255, 255, 0.9);
   color: var(--life-ink);
   font-size: 12px;
@@ -3522,8 +3455,8 @@ body.life-dark .life-momentum-next,
 body.life-dark .life-momentum-suggestion,
 body.life-dark .life-momentum-highlights > div,
 body.life-dark .life-momentum-quote-item {
-  background: #131517;
-  border-color: #2e3138;
+  background: #181818;
+  border-color: #3a3a3a;
 }
 
 body.life-dark .life-momentum-card-head h3,
@@ -3548,7 +3481,7 @@ body.life-dark .life-momentum-hub-header > span,
 body.life-dark .life-momentum-hub-section-head > span,
 body.life-dark .life-momentum-highlights > div > span,
 body.life-dark .life-momentum-quote-item span {
-  color: #bfc3c9;
+  color: #b8b8b8;
 }
 
 body.life-dark .life-momentum-link-btn,
@@ -3613,7 +3546,7 @@ body.life-dark .life-momentum-progress-track {
 /* Enhanced focus/interaction states  */
 input:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--life-green, #3d5a4c);
+  outline: 2px solid var(--life-green, #4a8c5c);
   outline-offset: 0px;
 }
 

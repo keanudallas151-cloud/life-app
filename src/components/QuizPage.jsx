@@ -923,7 +923,7 @@ export function QuizPage({
           <div style={{ marginBottom:20 }}>
             <p style={{ fontSize:10, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:t.red, margin:"0 0 10px" }}>Review missed questions</p>
             {answers.filter(a=>!a.correct).map((a,i) => (
-              <div key={i} style={{ background:t.ink === C.ink ? "#fff8f8" : t.light, border:`1px solid ${t.red}22`, borderRadius:12, padding:"14px 16px", marginBottom:8 }}>
+              <div key={i} style={{ background:t.light, border:`1px solid ${t.red}44`, borderRadius:12, padding:"14px 16px", marginBottom:8 }}>
                 <p style={{ margin:"0 0 6px", fontSize:13, fontWeight:700, color:t.ink, fontFamily:"Georgia,serif" }}>{a.q?.q}</p>
                 <p style={{ margin:"0 0 4px", fontSize:12, color:t.green }}>✓ {a.q?.opts?.[a.q?.a]}</p>
                 {a.q?.explain && <p style={{ margin:0, fontSize:11, color:t.muted, fontStyle:"italic", lineHeight:1.6 }}>{a.q.explain}</p>}
@@ -963,7 +963,7 @@ export function QuizPage({
         </div>
         <div style={{ display:"flex", gap:8, alignItems:"center" }}>
           {streak >= 2 && (
-              <span style={{ display:"inline-flex", alignItems:"center", gap:4, fontSize:12, color:t.gold, fontWeight:700, background:t.ink === C.ink ? "#fdf6e8" : t.light, padding:"3px 8px", borderRadius:20 }}>
+              <span style={{ display:"inline-flex", alignItems:"center", gap:4, fontSize:12, color:t.gold, fontWeight:700, background:`${t.gold}1f`, padding:"3px 8px", borderRadius:20 }}>
               🔥 {streak}
             </span>
           )}
@@ -1026,7 +1026,7 @@ export function QuizPage({
 
       {showFact && chosen !== null && q.explain && (
         <div style={{ marginTop:14, padding:"14px 16px",
-          background:chosen===correctIdx?t.greenLt:"#fff8f8",
+          background:chosen===correctIdx?t.greenLt:`${t.red}1f`,
           border:`1px solid ${chosen===correctIdx?t.green+"44":t.red+"44"}`, borderRadius:12 }}>
           <p style={{ margin:0, fontSize:13, color:chosen===correctIdx?t.green:t.red, fontFamily:"Georgia,serif", lineHeight:1.7 }}>
             <span style={{ fontWeight:700 }}>{chosen===correctIdx?"✓ Correct — ":"✗ Incorrect — "}</span>

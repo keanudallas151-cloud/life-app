@@ -8,7 +8,7 @@ export function LandingPage({ Ic, play, setScreen, AUTH_PROVIDERS, doProviderSig
       className="life-grain life-landing-shell"
       style={{
         minHeight: "100svh",
-        background: "linear-gradient(165deg, #1a1a1a 0%, #2a2a2a 45%, #1a1a1a 100%)",
+        background: "linear-gradient(165deg, #000000 0%, #0a0a0a 45%, #000000 100%)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

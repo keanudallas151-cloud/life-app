@@ -75,27 +75,33 @@ export function HomePage({
           borderRadius: "50%", border: `1.5px solid ${t.green}14`, pointerEvents: "none",
         }} />
 
-        <div style={{ maxWidth: 580, width: "100%", position: "relative", margin: "0 auto" }}>
+        <div style={{ maxWidth: 580, width: "100%", position: "relative", margin: "0 auto", textAlign: "center" }}>
           <p style={{
-            margin: "0 0 12px",
-            fontSize: "clamp(0.72rem, 2.8vw, 0.9rem)",
+            margin: "0 auto 14px",
+            fontSize: "clamp(0.74rem, 2.8vw, 0.92rem)",
             fontWeight: 700,
             letterSpacing: "0.32em",
             textTransform: "uppercase",
             color: t.green,
             lineHeight: 1.2,
+            textAlign: "center",
+            display: "block",
+            width: "100%",
           }}>
             {greeting}{firstName ? `, ${firstName}` : ""}
           </p>
           <h1 style={{
-            margin: "0 0 22px",
-            fontSize: "clamp(3.6rem, 16vw, 6.4rem)",
+            margin: "0 auto 24px",
+            fontSize: "clamp(4.2rem, 18vw, 7.2rem)",
             fontWeight: 800,
             color: t.ink,
             fontFamily: "Nunito, sans-serif",
-            letterSpacing: "-0.04em",
+            letterSpacing: "-0.045em",
             lineHeight: 0.92,
             WebkitTextSizeAdjust: "100%",
+            textAlign: "center",
+            display: "block",
+            width: "100%",
           }}>
             Life.
           </h1>

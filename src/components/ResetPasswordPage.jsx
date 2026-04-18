@@ -55,7 +55,7 @@ export function ResetPasswordPage({
       className="life-grain life-auth-shell"
       style={{
         minHeight: "100svh",
-        background: `linear-gradient(165deg, ${C.skin} 0%, ${C.border} 50%, ${C.skin} 100%)`,
+        background: `linear-gradient(165deg, ${C.skin} 0%, #111111 50%, ${C.skin} 100%)`,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -74,7 +74,7 @@ export function ResetPasswordPage({
           width: 170,
           height: 170,
           borderRadius: "50%",
-          border: "1.5px solid rgba(61,90,76,0.09)",
+          border: "1.5px solid rgba(74,140,92,0.09)",
           pointerEvents: "none",
         }}
       />
@@ -83,7 +83,7 @@ export function ResetPasswordPage({
           width: 70,
           height: 70,
           borderRadius: "20%",
-          background: `linear-gradient(145deg,${C.green},${C.greenAlt})`,
+          background: `linear-gradient(145deg,${C.green},#2d6e42)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -327,7 +327,7 @@ export function ResetPasswordPage({
           onClick={doResetPassword}
           disabled={authLoading}
           style={{
-            background: `linear-gradient(135deg, ${C.green}, ${C.greenAlt})`,
+            background: `linear-gradient(135deg, ${C.green}, #3a7d4a)`,
             border: "none",
             borderRadius: 12,
             padding: "16px",
@@ -338,7 +338,7 @@ export function ResetPasswordPage({
             fontFamily: "Georgia,serif",
             opacity: authLoading ? 0.7 : 1,
             marginTop: 2,
-            boxShadow: "0 4px 16px rgba(61,90,76,0.35)",
+            boxShadow: "0 4px 16px rgba(74,140,92,0.35)",
             transition: "all 0.2s ease",
           }}
         >
