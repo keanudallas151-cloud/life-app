@@ -69,7 +69,6 @@ export function RegisterPage({
       data-page-tag="#register_page"
       className="life-grain life-auth-shell"
       style={{
-        minHeight: "100svh",
         background: `linear-gradient(165deg, ${C.skin} 0%, #111111 50%, ${C.skin} 100%)`,
         display: "flex",
         flexDirection: "column",
@@ -78,7 +77,6 @@ export function RegisterPage({
         fontFamily: "Georgia,serif",
         padding: "48px 24px calc(40px + env(safe-area-inset-bottom))",
         position: "relative",
-        overflowX: "hidden",
       }}
     >
       <div

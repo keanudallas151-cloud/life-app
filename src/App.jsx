@@ -1650,7 +1650,7 @@ export default function LifeApp() {
     return (
       <div
         style={{
-          minHeight: "100vh",
+          height: "100%",
           background: `linear-gradient(135deg, ${C.skin} 0%, ${C.border} 50%, ${C.skin} 100%)`,
           display: "flex",
           alignItems: "center",
@@ -1781,10 +1781,12 @@ export default function LifeApp() {
       <div
         data-page-tag="#privacy_policy_page"
         style={{
-          minHeight: "100svh",
+          height: "100%",
           background: C.skin,
           fontFamily: "Georgia,serif",
           padding: "48px 24px",
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
         }}
       >
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
@@ -1909,10 +1911,12 @@ export default function LifeApp() {
       <div
         data-page-tag="#terms_condition_page"
         style={{
-          minHeight: "100svh",
+          height: "100%",
           background: C.skin,
           fontFamily: "Georgia,serif",
           padding: "48px 24px",
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
         }}
       >
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
@@ -2189,8 +2193,7 @@ export default function LifeApp() {
     <div
       data-page-tag="#dashboard_home"
       style={{
-        height: "100svh",
-        minHeight: "100svh",
+        height: "100%",
         background: t.skin,
         display: "flex",
         flexDirection: "column",
