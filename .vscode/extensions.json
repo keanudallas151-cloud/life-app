@@ -11,6 +11,8 @@
     "ms-ossdata.vscode-pgsql",
     "phu1237.vs-browser",
     "supabase.vscode-supabase-extension",
-    "usernamehw.errorlens"
+    "usernamehw.errorlens",
+    "google.gemini-cli-vscode-ide-companion",
+    "google.geminicodeassist"
   ]
 }

@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.6.7 — Profile avatar upload, PostIt avatars, paper texture, code cleanup
+## v0.6.7 — Navigation, avatars, settings, and Gemini guide
 - Added profile picture upload to the account profile page — tap the avatar circle to choose a photo.
 - Profile photo uploads to a dedicated Supabase storage bucket (profile-avatars), separate from Inventors & Investors media.
 - Photo is persisted to Supabase auth user_metadata and updates live in app state without a page reload.
@@ -8,7 +8,10 @@
 - Added author_avatar_url column to posts and comments tables via migration.
 - Reader parchment page now has genuine SVG feTurbulence paper grain texture layered over the existing gradients. Works in both light and dark reading mode. No external image request — baked as a data URI.
 - Removed duplicate font-size 16px media query block from index.css (was covered by comprehensive block added in v0.6.6).
-- Bumped version from 0.6.6 to 0.6.7.
+- Replaced the old direct Life shortcuts with a `Browse Life` hub that opens grouped navigation cards for onboarding, momentum, goals, and quiz flows.
+- Reorganized `Settings` account actions into clearer Profile & Access, Privacy & Legal, and Progress & Reset groups, including surfaced account details and a direct account page jump.
+- Added a practical `GEMINI.md` with architecture rules, safe-edit guidance, release context, ready-to-use prompts, and a bug-hunt map for the app.
+- Aligned release metadata and planning docs with the current `v0.6.7` version.
 
 ## v0.6.6 — Lint fixes, iOS & mobile polish
 - Fixed useEffect missing dependency in InventorsInvestors (roleChoice stale closure).

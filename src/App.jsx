@@ -3144,59 +3144,12 @@ export default function LifeApp() {
           >
             <SL
               theme={t}
-              label="Where To Start?"
+              label="Browse Life"
               icon="compass"
               onClick={() => {
-                play("tap");
-                setPage("where_to_start");
+                openSidebarSectionPage("sidebar_life", setLifeOpen);
               }}
-              active={page === "where_to_start"}
-            />
-            <SL
-              theme={t}
-              label="Momentum Hub"
-              icon="trending"
-              onClick={openMomentumHub}
-              active={page === "momentum_hub"}
-            />
-            <SL
-              theme={t}
-              label="Daily Growth"
-              icon="star"
-              onClick={() => {
-                play("tap");
-                setPage("daily_growth");
-              }}
-              active={page === "daily_growth"}
-            />
-            <SL
-              theme={t}
-              label="Quiz"
-              icon="brain"
-              onClick={() => {
-                play("tap");
-                openQuizHome();
-              }}
-              active={page === "quiz"}
-            />
-            <SL
-              theme={t}
-              label="Goals"
-              onClick={() => {
-                play("tap");
-                setPage("goal_setting");
-              }}
-              active={page === "goal_setting"}
-            />
-            <SL
-              theme={t}
-              label="Help"
-              icon="question"
-              onClick={() => {
-                play("tap");
-                setPage("help");
-              }}
-              active={page === "help"}
+              active={page === "sidebar_life"}
             />
           </SS>
           <SS
@@ -3574,7 +3527,24 @@ export default function LifeApp() {
               />
             )}
 
-            {page === "sidebar_life" && <SidebarSectionPage sectionKey="sidebar_life" t={t} />}
+            {page === "sidebar_life" && (
+              <SidebarSectionPage
+                sectionKey="sidebar_life"
+                t={t}
+                onLifeNavigate={(target) => {
+                  if (target === "momentum_hub") {
+                    openMomentumHub();
+                    return;
+                  }
+                  if (target === "quiz") {
+                    openQuizHome();
+                    return;
+                  }
+                  play("tap");
+                  setPage(target);
+                }}
+              />
+            )}
             {page === "sidebar_library" && <SidebarSectionPage sectionKey="sidebar_library" t={t} />}
             {page === "sidebar_socials" && <SidebarSectionPage sectionKey="sidebar_socials" t={t} />}
             {page === "sidebar_guided" && <SidebarSectionPage sectionKey="sidebar_guided" t={t} />}
@@ -3779,6 +3749,7 @@ export default function LifeApp() {
                 t={t}
                 play={play}
                 setPage={setPage}
+                user={user}
                 uiPrefs={uiPrefs}
                 updateUiPrefs={updateUiPrefs}
                 themeMode={themeMode}

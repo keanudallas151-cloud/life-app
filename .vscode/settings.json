@@ -33,5 +33,9 @@
   "mediaPreview.video.loop": true,
   "workbench.externalBrowser": "chrome",
   "github.copilot.chat.claudeAgent.allowDangerouslySkipPermissions": true,
-  "cSpell.words": ["Supabase"]
+  "cSpell.words": ["Supabase"],
+  "editor.tokenColorCustomizations": {
+    "comments": "",
+    "textMateRules": []
+  }
 }

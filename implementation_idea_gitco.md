@@ -1,6 +1,6 @@
 # Life. — Actionable Todo List
 
-**Current baseline:** `v0.6.2`  
+**Current baseline:** `v0.6.7`  
 **Purpose:** Replace old idea dumping with one clear, prioritized working backlog.
 
 ---
@@ -174,4 +174,3 @@ A task should usually be considered done only when:
 - `npm run lint` passes
 - `npm run build` passes
 - Version/docs are updated if the release changed
-

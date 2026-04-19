@@ -23,6 +23,7 @@ export default function SettingsPage({
   t,
   play,
   setPage,
+  user,
   uiPrefs,
   updateUiPrefs,
   themeMode,
@@ -36,8 +37,13 @@ export default function SettingsPage({
   onDeleteAccount,
 }) {
   const [openSections, setOpenSections] = useState({});
+  const [openAccountGroups, setOpenAccountGroups] = useState({
+    "Profile & Access": true,
+  });
   const toggleSection = (title) =>
     setOpenSections((s) => ({ ...s, [title]: !s[title] }));
+  const toggleAccountGroup = (title) =>
+    setOpenAccountGroups((s) => ({ ...s, [title]: !s[title] }));
 
   return (
     <div
@@ -166,32 +172,91 @@ export default function SettingsPage({
           title: "Account & Data",
           icon: "shield",
           items: [],
-          actions: [
+          accountGroups: [
             {
-              label: "Restore Defaults",
-              onClick: () => { updateUiPrefs(PREF_DEFAULTS); play("ok"); },
+              title: "Profile & Access",
+              actions: [
+                {
+                  label: user?.name || "Display name not set",
+                  desc: "Current display name",
+                  disabled: true,
+                },
+                {
+                  label: user?.email || "Email not set",
+                  desc: "Current account email",
+                  disabled: true,
+                },
+                {
+                  label: "Open Account Page",
+                  desc: "Review your profile details and account surface",
+                  onClick: () => {
+                    play("tap");
+                    setPage("account_customize");
+                  },
+                },
+              ],
             },
             {
-              label: "Reset Progress",
-              onClick: () => { setReadKeys([]); play("ok"); },
+              title: "Privacy & Legal",
+              actions: [
+                {
+                  label: "Privacy Policy",
+                  desc: "Read how your data and app usage are handled",
+                  onClick: () => {
+                    play("tap");
+                    setPage("privacy_policy");
+                  },
+                },
+                {
+                  label: "Terms & Conditions",
+                  desc: "Review the current platform terms",
+                  onClick: () => {
+                    play("tap");
+                    setPage("terms_conditions");
+                  },
+                },
+              ],
             },
             {
-              label: "Reset Tailoring",
-              onClick: () => {
-                setProfile(null);
-                if (uid) LS.del(`tsd_${uid}`);
-                trackMomentumEvent("profile", {
-                  source: "settings",
-                  points: 2,
-                  meta: { action: "tailor_reset" },
-                });
-                play("ok");
-              },
-            },
-            onDeleteAccount && {
-              label: "Delete Account",
-              danger: true,
-              onClick: () => onDeleteAccount(),
+              title: "Progress & Reset",
+              actions: [
+                {
+                  label: "Restore Defaults",
+                  desc: "Reset app preferences back to the default settings",
+                  onClick: () => {
+                    updateUiPrefs(PREF_DEFAULTS);
+                    play("ok");
+                  },
+                },
+                {
+                  label: "Reset Progress",
+                  desc: "Clear reading progress and start your tracking from zero",
+                  onClick: () => {
+                    setReadKeys([]);
+                    play("ok");
+                  },
+                },
+                {
+                  label: "Reset Tailoring",
+                  desc: "Clear your tailoring profile and rebuild your recommendations",
+                  onClick: () => {
+                    setProfile(null);
+                    if (uid) LS.del(`tsd_${uid}`);
+                    trackMomentumEvent("profile", {
+                      source: "settings",
+                      points: 2,
+                      meta: { action: "tailor_reset" },
+                    });
+                    play("ok");
+                  },
+                },
+                onDeleteAccount && {
+                  label: "Delete Account",
+                  desc: "Remove your account and associated data",
+                  danger: true,
+                  onClick: () => onDeleteAccount(),
+                },
+              ],
             },
           ],
         },
@@ -393,41 +458,129 @@ export default function SettingsPage({
               )}
             </div>
           ))}
-          {section.actions && (
-            <div
-              className="life-settings-action-grid"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr",
-                gap: 8,
-                marginTop: 10,
-              }}
-            >
-              {section.actions.filter(Boolean).map((action) => (
-                <button
-                  key={action.label}
-                  onClick={action.onClick}
-                  style={{
-                    background: action.danger ? "rgba(192,57,43,0.08)" : t.light,
-                    border: `1px solid ${action.danger ? "rgba(192,57,43,0.25)" : t.border}`,
-                    borderRadius: 10,
-                    padding: "12px 14px",
-                    color: action.danger ? t.red : t.mid,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    fontFamily: "Georgia,serif",
-                    minHeight: 48,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    textAlign: "center",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  {action.label}
-                </button>
-              ))}
+          {section.accountGroups && (
+            <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+              {section.accountGroups.filter(Boolean).map((group) => {
+                const isGroupOpen = !!openAccountGroups[group.title];
+                return (
+                  <div
+                    key={group.title}
+                    style={{
+                      background: t.light,
+                      border: `1px solid ${t.border}`,
+                      borderRadius: 12,
+                      padding: "12px 12px",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleAccountGroup(group.title)}
+                      style={{
+                        width: "100%",
+                        background: "none",
+                        border: "none",
+                        padding: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 10,
+                        cursor: "pointer",
+                        textAlign: "left",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 700,
+                          color: t.ink,
+                          fontFamily: "Georgia,serif",
+                        }}
+                      >
+                        {group.title}
+                      </span>
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 12 12"
+                        style={{
+                          transform: isGroupOpen ? "rotate(90deg)" : "rotate(0deg)",
+                          transition: "transform 0.2s ease",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <polyline
+                          points="4,2 8,6 4,10"
+                          fill="none"
+                          stroke={t.muted}
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                    <div
+                      style={{
+                        maxHeight: isGroupOpen ? 1000 : 0,
+                        opacity: isGroupOpen ? 1 : 0,
+                        overflow: "hidden",
+                        transition: "max-height 0.28s ease, opacity 0.2s ease",
+                        paddingTop: isGroupOpen ? 10 : 0,
+                      }}
+                    >
+                      <div style={{ display: "grid", gap: 8 }}>
+                        {group.actions.filter(Boolean).map((action) => {
+                          const isDisabled = !!action.disabled;
+                          return (
+                            <button
+                              key={action.label}
+                              type="button"
+                              onClick={action.onClick}
+                              disabled={isDisabled}
+                              style={{
+                                width: "100%",
+                                background: action.danger
+                                  ? "rgba(192,57,43,0.08)"
+                                  : t.white,
+                                border: `1px solid ${
+                                  action.danger
+                                    ? "rgba(192,57,43,0.25)"
+                                    : t.border
+                                }`,
+                                borderRadius: 10,
+                                padding: "12px 12px",
+                                color: action.danger ? t.red : t.ink,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: isDisabled ? "default" : "pointer",
+                                fontFamily: "Georgia,serif",
+                                textAlign: "left",
+                                opacity: isDisabled ? 0.82 : 1,
+                              }}
+                            >
+                              <span style={{ display: "block", marginBottom: action.desc ? 3 : 0 }}>
+                                {action.label}
+                              </span>
+                              {action.desc && (
+                                <span
+                                  style={{
+                                    display: "block",
+                                    fontSize: 11,
+                                    fontWeight: 400,
+                                    lineHeight: 1.6,
+                                    color: action.danger ? t.red : t.muted,
+                                  }}
+                                >
+                                  {action.desc}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
           </div>
