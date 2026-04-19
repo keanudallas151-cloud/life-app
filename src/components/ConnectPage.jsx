@@ -368,7 +368,7 @@ function SwipeDeck({profiles,t,play}){
         {saved.length>0&&<span style={{background:`${t.green}22`,color:t.green,fontSize:11,fontWeight:700,padding:"3px 10px",borderRadius:20,border:`1px solid ${t.green}44`}}>{saved.length} saved ✓</span>}
       </div>
 
-      <div style={{position:"relative",height:500,marginBottom:28}}>
+      <div style={{position:"relative",height:"min(500px, 52svh)",marginBottom:28}}>
         {third&&<div style={{position:"absolute",inset:0,background:t.white,border:`1px solid ${t.border}`,borderRadius:26,transform:"scale(.90) translateY(32px)",opacity:.22,pointerEvents:"none",zIndex:1}}/>}
         {next&&<div style={{position:"absolute",inset:0,background:t.white,border:`1px solid ${t.border}`,borderRadius:26,transform:"scale(.955) translateY(16px)",opacity:.48,pointerEvents:"none",zIndex:2}}/>}
         <SwipeCard key={current.id} profile={current} onSave={handleSave} onPass={handlePass} t={t}/>
@@ -393,7 +393,7 @@ function SwipeDeck({profiles,t,play}){
         <span style={{animation:"sd-arrow-r 1.4s ease-in-out infinite",color:"#50c878",fontWeight:800,fontSize:18}}>→</span>
       </p>
 
-      {toast&&<div style={{position:"fixed",bottom:110,left:"50%",transform:"translateX(-50%)",background:toast==="saved"?"#50c878":"#e5484d",color:"#fff",padding:"12px 28px",borderRadius:14,fontSize:14,fontWeight:800,boxShadow:toast==="saved"?"0 8px 24px rgba(80,200,120,.45)":"0 8px 24px rgba(229,72,77,.35)",zIndex:90,whiteSpace:"nowrap",animation:"sd-toast .3s cubic-bezier(.22,1,.36,1) both"}}>{toast==="saved"?"♥ Saved!":"✕ Passed"}</div>}
+      {toast&&<div style={{position:"fixed",bottom:"calc(96px + env(safe-area-inset-bottom,0px))",left:"50%",transform:"translateX(-50%)",background:toast==="saved"?"#50c878":"#e5484d",color:"#fff",padding:"12px 28px",borderRadius:14,fontSize:14,fontWeight:800,boxShadow:toast==="saved"?"0 8px 24px rgba(80,200,120,.45)":"0 8px 24px rgba(229,72,77,.35)",zIndex:90,whiteSpace:"nowrap",animation:"sd-toast .3s cubic-bezier(.22,1,.36,1) both"}}>{toast==="saved"?"♥ Saved!":"✕ Passed"}</div>}
     </div>
   );
 }
@@ -436,7 +436,7 @@ export function ConnectPage({t,user,play}){
   if(stage==="create_profile")return(<div style={{padding:"32px 20px",maxWidth:480,margin:"0 auto"}}><NetworkingProfileForm t={t} play={play} user={user} role={pickedRole} onSave={handleProfileSave} onBack={()=>setStage("role_pick")}/></div>);
 
   return(
-    <div data-page-tag="#connect" style={{padding:"28px 20px",maxWidth:480,margin:"0 auto"}}>
+    <div data-page-tag="#connect" style={{padding:"28px 20px calc(96px + env(safe-area-inset-bottom,0px)) 20px",maxWidth:480,margin:"0 auto",boxSizing:"border-box"}}>
       <style>{`@keyframes cp-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
       {/* Header */}
@@ -448,9 +448,12 @@ export function ConnectPage({t,user,play}){
             <p style={{margin:0,fontSize:13,color:t.muted,lineHeight:1.6}}>Swipe to find your next deal or co-founder.</p>
           </div>
           {myProfile&&(
-            <button type="button" onClick={()=>{play?.("tap");setShowMyProfile(v=>!v);}} style={{background:"none",border:"none",cursor:"pointer",padding:4,flexShrink:0}} title="Your networking profile">
-              <ProfileAvatar profile={myProfile} size={46} t={t}/>
-            </button>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,flexShrink:0}}>
+              <button type="button" onClick={()=>{play?.("tap");setShowMyProfile(v=>!v);}} style={{background:"none",border:"none",cursor:"pointer",padding:4}} title="Your networking profile">
+                <ProfileAvatar profile={myProfile} size={46} t={t}/>
+              </button>
+              <button type="button" onClick={()=>{if(window.confirm("Reset your networking profile? This cannot be undone.")){setMyProfile(null);setShowMyProfile(false);LS.set(profileKey,null);setStage("role_pick");play?.("back");}}} style={{background:"none",border:`1px solid ${t.border}`,borderRadius:8,cursor:"pointer",padding:"3px 8px",fontSize:9,fontWeight:700,color:t.muted,fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>Reset</button>
+            </div>
           )}
         </div>
       </div>
