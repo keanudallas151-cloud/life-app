@@ -265,7 +265,7 @@ export function useInventorsInvestorsData(user) {
       setSaving(true);
       setUploadProgress(15);
       try {
-        let avatarUrl = values.avatarPreviewUrl || profile?.avatar_url || "";
+        let avatarUrl = !isBlobPreviewUrl(values.avatarPreviewUrl) ? values.avatarPreviewUrl || profile?.avatar_url || "" : profile?.avatar_url || "";
         if (values.avatarFile) {
           avatarUrl = await uploadFile(values.avatarFile, `${user.id}/avatar`);
           setUploadProgress(40);
@@ -336,7 +336,7 @@ export function useInventorsInvestorsData(user) {
       setSaving(true);
       setUploadProgress(10);
       try {
-        let avatarUrl = values.avatarPreviewUrl || profile?.avatar_url || "";
+        let avatarUrl = !isBlobPreviewUrl(values.avatarPreviewUrl) ? values.avatarPreviewUrl || profile?.avatar_url || "" : profile?.avatar_url || "";
         if (values.avatarFile) {
           avatarUrl = await uploadFile(values.avatarFile, `${user.id}/avatar`);
           setUploadProgress(25);
@@ -390,19 +390,15 @@ export function useInventorsInvestorsData(user) {
         if (inventorError) throw inventorError;
         setUploadProgress(60);
 
-        const galleryRows = [];
-        for (let index = 0; index < values.galleryFiles.length; index += 1) {
-          const url = await uploadFile(values.galleryFiles[index], `${user.id}/gallery`);
-          galleryRows.push({
-            inventor_profile_id: inventorRow.id,
-            image_url: url,
-            sort_order: index,
-          });
-          setUploadProgress(60 + Math.round(((index + 1) / values.galleryFiles.length) * 25));
-        }
+        if (values.galleryFiles.length) {
+          const galleryRows = [];
+          for (let index = 0; index < values.galleryFiles.length; index += 1) {
+            const url = await uploadFile(values.galleryFiles[index], `${user.id}/gallery`);
+            galleryRows.push({ inventor_profile_id: inventorRow.id, image_url: url, sort_order: index });
+            setUploadProgress(60 + Math.round(((index + 1) / values.galleryFiles.length) * 25));
+          }
 
-        await supabase.from("inventor_profile_images").delete().eq("inventor_profile_id", inventorRow.id);
-        if (galleryRows.length) {
+          await supabase.from("inventor_profile_images").delete().eq("inventor_profile_id", inventorRow.id);
           const { error: imageError } = await supabase.from("inventor_profile_images").insert(galleryRows);
           if (imageError) throw imageError;
         }
@@ -427,11 +423,7 @@ export function useInventorsInvestorsData(user) {
   const createSwipe = useCallback(
     async (toUserId, action) => {
       if (!user?.id || !toUserId) return;
-      await supabase.from("swipes").insert({
-        from_user_id: user.id,
-        to_user_id: toUserId,
-        action,
-      });
+      await supabase.from("swipes").insert({ from_user_id: user.id, to_user_id: toUserId, action });
       await loadDiscovery();
     },
     [loadDiscovery, user?.id],
@@ -550,4 +542,8 @@ function toNumberOrNull(value) {
   if (value === null || value === undefined || value === "") return null;
   const numeric = Number(String(value).replace(/[^\d.-]/g, ""));
   return Number.isFinite(numeric) ? numeric : null;
+}
+
+function isBlobPreviewUrl(value) {
+  return typeof value === "string" && value.startsWith("blob:");
 }
