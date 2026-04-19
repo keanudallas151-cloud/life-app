@@ -1,6 +1,20 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { LS } from "../systems/storage";
 import { getReadingStreak } from "../systems/readingStreak";
+import { supabase, isSupabaseConfigured } from "../supabaseClient";
+
+const AVATAR_BUCKET = "profile-avatars";
+
+async function uploadAvatar(userId, file) {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `${userId}/avatar.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .upload(path, file, { upsert: true, cacheControl: "3600" });
+  if (upErr) throw upErr;
+  const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
 
 export default function ProfilePage({
   t,
@@ -12,7 +26,43 @@ export default function ProfilePage({
   readKeys = [],
   bookmarks = [],
   totalTopics = 0,
+  onAvatarChange,
 }) {
+  const fileInputRef = useRef(null);
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || "");
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+
+  const handleAvatarClick = () => {
+    play?.("tap");
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id || !isSupabaseConfigured) return;
+    const maxBytes = 5 * 1024 * 1024;
+    if (file.size > maxBytes) { setAvatarError("Image must be under 5 MB."); return; }
+    if (!["image/jpeg","image/png","image/webp"].includes(file.type)) {
+      setAvatarError("JPG, PNG, or WEBP only."); return;
+    }
+    setAvatarError("");
+    setAvatarPreview(URL.createObjectURL(file));
+    setAvatarUploading(true);
+    try {
+      const publicUrl = await uploadAvatar(user.id, file);
+      await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
+      onAvatarChange?.(publicUrl);
+    } catch (err) {
+      console.error("Avatar upload failed", err);
+      setAvatarError("Upload failed. Try again.");
+      setAvatarPreview(user?.avatarUrl || "");
+    } finally {
+      setAvatarUploading(false);
+      e.target.value = "";
+    }
+  };
+
   const goals = useMemo(() => LS.get("life_personal_goals", []), []);
   const completedGoals = goals.filter((g) => g.done).length;
   const streak = getReadingStreak();
@@ -116,23 +166,80 @@ export default function ProfilePage({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-          <div
+          {/* Tappable avatar — shows photo if uploaded, otherwise initials */}
+          <button
+            type="button"
+            onClick={handleAvatarClick}
+            aria-label="Change profile picture"
+            title="Tap to change photo"
             style={{
+              position: "relative",
               width: 72,
               height: 72,
               borderRadius: "50%",
-              background: `linear-gradient(135deg, ${t.green}, ${t.greenAlt})`,
+              background: avatarPreview
+                ? "transparent"
+                : `linear-gradient(135deg, ${t.green}, ${t.greenAlt})`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
               boxShadow: `0 0 0 3px ${t.white}, 0 0 0 5px ${t.green}30`,
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              overflow: "hidden",
+              WebkitTapHighlightColor: "transparent",
+              opacity: avatarUploading ? 0.6 : 1,
+              transition: "opacity 0.2s ease",
             }}
           >
-            <span style={{ fontSize: 26, fontWeight: 800, color: "#fff", letterSpacing: -0.5, lineHeight: 1 }}>
-              {initials}
+            {avatarPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarPreview}
+                alt="Profile"
+                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+              />
+            ) : (
+              <span style={{ fontSize: 26, fontWeight: 800, color: "#fff", letterSpacing: -0.5, lineHeight: 1 }}>
+                {initials}
+              </span>
+            )}
+            {/* Camera overlay hint */}
+            <span
+              aria-hidden
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: "38%",
+                background: "rgba(0,0,0,0.45)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "0 0 36px 36px",
+              }}
+            >
+              {avatarUploading ? (
+                <span style={{ fontSize: 9, color: "#fff", fontWeight: 700 }}>…</span>
+              ) : (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              )}
             </span>
-          </div>
+          </button>
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleAvatarFile}
+            style={{ display: "none" }}
+          />
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 style={{ margin: "0 0 3px", fontSize: 20, fontWeight: 800, color: t.ink, wordBreak: "break-word", lineHeight: 1.2 }}>
               {user?.name || "User"}
@@ -140,9 +247,13 @@ export default function ProfilePage({
             <p style={{ margin: 0, fontSize: 13, color: t.muted, fontStyle: "italic", wordBreak: "break-word" }}>
               {user?.email}
             </p>
+            {avatarError && (
+              <p style={{ margin: "6px 0 0", fontSize: 11, color: t.red, fontWeight: 600 }}>
+                {avatarError}
+              </p>
+            )}
           </div>
         </div>
-
         {/* Stats grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
           {stats.map((s) => (

@@ -3618,13 +3618,6 @@ textarea:focus-visible {
   outline-offset: 0px;
 }
 
-/* Prevent text size adjust on landscape rotate  */
-@media (max-width: 640px) {
-  input, textarea, select {
-    font-size: 16px !important;
-  }
-}
-
 /* Smooth scrollbar hide on mobile  */
 .life-main-scroll::-webkit-scrollbar {
   display: none;

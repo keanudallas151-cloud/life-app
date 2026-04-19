@@ -515,24 +515,29 @@ export function NotesTab({
   );
 }
 
+// SVG feTurbulence noise baked to a data URI — gives genuine paper grain
+// without any network request. The filter is tuned for both light and dark modes.
+const PAPER_TEXTURE_LIGHT =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeBlend in='SourceGraphic' mode='multiply'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E\")";
+const PAPER_TEXTURE_DARK =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeBlend in='SourceGraphic' mode='screen'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E\")";
+
 function getParchmentBackground(t) {
-  const base =
-    t.ink === C.ink
-      ? "linear-gradient(180deg, #fefcf8 0%, #f9f5ee 40%, #f4efe5 100%)"
-      : "linear-gradient(180deg, #3b3128 0%, #2a221c 100%)";
-  const glow =
-    t.ink === C.ink
-      ? "radial-gradient(circle at 18% 14%, rgba(255,255,255,0.5) 0, rgba(255,255,255,0) 50%)"
-      : "radial-gradient(circle at 18% 14%, rgba(255,231,205,0.08) 0, rgba(255,231,205,0) 40%)";
-  const fibers =
-    t.ink === C.ink
-      ? "repeating-linear-gradient(125deg, rgba(120,89,56,0.03) 0 1px, rgba(255,255,255,0) 1px 8px)"
-      : "repeating-linear-gradient(125deg, rgba(246,214,187,0.03) 0 2px, rgba(0,0,0,0) 2px 10px)";
-  const roughGrain =
-    t.ink === C.ink
-      ? "repeating-linear-gradient(45deg, rgba(180,160,130,0.015) 0 1px, transparent 1px 6px)"
-      : "none";
-  return `${glow}, ${roughGrain}, ${fibers}, ${base}`;
+  const isLight = t.ink === C.ink;
+  const texture = isLight ? PAPER_TEXTURE_LIGHT : PAPER_TEXTURE_DARK;
+  const base = isLight
+    ? "linear-gradient(180deg, #fefcf8 0%, #f9f5ee 40%, #f4efe5 100%)"
+    : "linear-gradient(180deg, #3b3128 0%, #2a221c 100%)";
+  const glow = isLight
+    ? "radial-gradient(circle at 18% 14%, rgba(255,255,255,0.5) 0, rgba(255,255,255,0) 50%)"
+    : "radial-gradient(circle at 18% 14%, rgba(255,231,205,0.08) 0, rgba(255,231,205,0) 40%)";
+  const fibers = isLight
+    ? "repeating-linear-gradient(125deg, rgba(120,89,56,0.035) 0 1px, rgba(255,255,255,0) 1px 8px)"
+    : "repeating-linear-gradient(125deg, rgba(246,214,187,0.04) 0 2px, rgba(0,0,0,0) 2px 10px)";
+  const roughGrain = isLight
+    ? "repeating-linear-gradient(45deg, rgba(180,160,130,0.02) 0 1px, transparent 1px 6px)"
+    : "none";
+  return `${texture}, ${glow}, ${roughGrain}, ${fibers}, ${base}`;
 }
 
 const INLINE_VISUAL_PATTERN = /\{\{(?:chart|visual):([^}]+)\}\}/g;

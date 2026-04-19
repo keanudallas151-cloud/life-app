@@ -7,6 +7,7 @@ function shapePosts(rows, commentsMap, votesMap) {
   return rows.map(r => ({
     id:       r.id,
     author:   r.author,
+    authorAvatarUrl: r.author_avatar_url || "",
     title:    r.title,
     body:     r.body || "",
     flair:    r.flair || "General",
@@ -15,6 +16,7 @@ function shapePosts(rows, commentsMap, votesMap) {
     comments: (commentsMap[r.id] || []).map(c => ({
       id:     c.id,
       author: c.author,
+      authorAvatarUrl: c.author_avatar_url || "",
       text:   c.text,
       time:   formatAge(c.created_at),
     })),
@@ -190,6 +192,7 @@ export function usePostIt(user) {
     const { error } = await supabase.from("posts").insert({
       user_id: user.id,
       author,
+      author_avatar_url: user.avatarUrl || "",
       title: title.trim(),
       body:  body.trim(),
       flair,
@@ -209,6 +212,7 @@ export function usePostIt(user) {
       post_id: postId,
       user_id: user.id,
       author,
+      author_avatar_url: user.avatarUrl || "",
       text: text.trim(),
     });
     if (error) console.error("addComment:", error.message);

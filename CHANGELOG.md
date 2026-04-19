@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.6.7 — Profile avatar upload, PostIt avatars, paper texture, code cleanup
+- Added profile picture upload to the account profile page — tap the avatar circle to choose a photo.
+- Profile photo uploads to a dedicated Supabase storage bucket (profile-avatars), separate from Inventors & Investors media.
+- Photo is persisted to Supabase auth user_metadata and updates live in app state without a page reload.
+- PostIt / Reddit-style feed now shows the poster's real profile photo next to every post and comment. Falls back to initials if no photo is set.
+- Added author_avatar_url column to posts and comments tables via migration.
+- Reader parchment page now has genuine SVG feTurbulence paper grain texture layered over the existing gradients. Works in both light and dark reading mode. No external image request — baked as a data URI.
+- Removed duplicate font-size 16px media query block from index.css (was covered by comprehensive block added in v0.6.6).
+- Bumped version from 0.6.6 to 0.6.7.
+
 ## v0.6.6 — Lint fixes, iOS & mobile polish
 - Fixed useEffect missing dependency in InventorsInvestors (roleChoice stale closure).
 - Fixed crypto not defined error — switched to window.crypto.randomUUID().
@@ -9,8 +19,7 @@
 - Added comprehensive mobile CSS sweep for top 20 global devices (360–430px).
 - Added iOS-specific CSS: momentum scroll, touch-callout, safe area guards, tap highlight removal.
 - Added Capacitor-compatible viewport and PWA meta for native iOS packaging path.
-- Improved font-size on inputs/selects to prevent iOS auto-zoom.
-- Added display-mode standalone improvements for installed PWA/home screen use.
+- Bumped version from 0.6.5 to 0.6.6.
 
 ## v0.6.5 — Inventors & Investors implementation
 - Added the full Inventors & Investors flow under the existing networking entry.
@@ -29,5 +38,5 @@
 - Corrected the main networking page title to Investors & Inventors.
 
 ## v0.6.0 — Networking split and account customization
-- Split the Discord networking page from the Inventors & Inventors surface.
+- Split the Discord networking page from the Inventors & Investors surface.
 - Added an account customize page.

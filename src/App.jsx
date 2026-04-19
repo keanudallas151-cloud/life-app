@@ -418,6 +418,7 @@ export default function LifeApp() {
       name: meta.name || meta.full_name || sbUser.email,
       username: meta.username || meta.user_name || "",
       emailConfirmed: Boolean(sbUser.email_confirmed_at),
+      avatarUrl: meta.avatar_url || "",
     };
   }, []);
 
@@ -3805,6 +3806,7 @@ export default function LifeApp() {
                 readKeys={readKeys}
                 bookmarks={bookmarks}
                 totalTopics={allContent.length}
+                onAvatarChange={(url) => setUser((prev) => prev ? { ...prev, avatarUrl: url } : prev)}
               />
             )}
 

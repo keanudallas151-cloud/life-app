@@ -5,6 +5,37 @@ import { usePostIt } from "../systems/usePostIt";
 
 const DRAFT_KEY = "life_postit_draft";
 
+/** Renders a circular avatar — photo if available, initials fallback */
+function PostAvatar({ avatarUrl, initials, size = 28, fontSize = 10 }) {
+  if (avatarUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={avatarUrl}
+        alt={initials}
+        style={{
+          width: size, height: size,
+          borderRadius: "50%",
+          objectFit: "cover",
+          flexShrink: 0,
+          border: `1px solid ${C.border}`,
+        }}
+      />
+    );
+  }
+  return (
+    <div style={{
+      width: size, height: size,
+      borderRadius: "50%",
+      background: C.ink,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      flexShrink: 0,
+    }}>
+      <span style={{ color: C.white, fontSize, fontWeight: 700 }}>{initials}</span>
+    </div>
+  );
+}
+
 export function PostItFeed({ play, user, onMomentumEvent }) {
   const { posts, addPost, addComment, vote, myVotes, loading, error, reload } = usePostIt(user);
 
@@ -105,9 +136,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
       </button>
       <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:20, boxSizing:"border-box" }}>
         <div className="life-postit-detail-meta" style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14, flexWrap:"wrap" }}>
-          <div style={{ width:32, height:32, borderRadius:"50%", background:C.ink, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-            <span style={{ color:C.white, fontSize:11, fontWeight:700 }}>{vp.author?.slice(0,2)}</span>
-          </div>
+          <PostAvatar avatarUrl={vp.authorAvatarUrl} initials={vp.author?.slice(0,2)} size={32} fontSize={11} />
           <span style={{ fontSize:13, fontWeight:600, color:C.ink, minWidth:0, wordBreak:"break-word" }}>{vp.author}</span>
           <span style={{ fontSize:11, color:C.muted }}>{vp.time}</span>
           <span style={{ marginLeft:"auto", background:C.greenLt, color:C.green, fontSize:10, fontWeight:700, padding:"3px 10px", borderRadius:20, flexShrink:0 }}>{vp.flair}</span>
@@ -138,9 +167,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
         </p>
         {vp.comments.map(c => (
           <div key={c.id} style={{ display:"flex", gap:12, marginBottom:14 }}>
-            <div style={{ width:28, height:28, borderRadius:"50%", background:C.light, border:`1px solid ${C.border}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-              <span style={{ fontSize:10, fontWeight:700, color:C.mid }}>{c.author?.slice(0,2)}</span>
-            </div>
+            <PostAvatar avatarUrl={c.authorAvatarUrl} initials={c.author?.slice(0,2)} size={28} fontSize={10} />
             <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:10, padding:"10px 14px", flex:1 }}>
               <span style={{ fontSize:12, fontWeight:600, color:C.ink }}>{c.author}</span>
               <span style={{ fontSize:11, color:C.muted, marginLeft:8 }}>{c.time}</span>
@@ -227,9 +254,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
       {sorted.map(post => (
         <div key={post.id} className="life-card-hover" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"18px 16px", marginBottom:12, boxShadow:S.sm, transition:"box-shadow 0.25s ease, border-color 0.2s ease", boxSizing:"border-box" }}>
           <div className="life-postit-card-meta" style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10, flexWrap:"wrap" }}>
-            <div style={{ width:28, height:28, borderRadius:"50%", background:C.ink, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-              <span style={{ color:C.white, fontSize:10, fontWeight:700 }}>{post.author?.slice(0,2)}</span>
-            </div>
+            <PostAvatar avatarUrl={post.authorAvatarUrl} initials={post.author?.slice(0,2)} size={28} fontSize={10} />
             <span style={{ fontSize:12, color:C.muted, flex:"1 1 auto", minWidth:0 }}>{post.time}</span>
             <span style={{ marginLeft:"auto", background:C.greenLt, color:C.green, fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:20, flexShrink:0 }}>{post.flair}</span>
           </div>
