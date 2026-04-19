@@ -31,3 +31,15 @@ dist
 *.njsproj
 *.sln
 *.sw?
+
+# Additional secrets & local tooling
+.supabase/
+.vercel/
+.netlify/
+.secrets/
+*.key
+*.pem
+*.p12
+.env.production
+.env.test
+
