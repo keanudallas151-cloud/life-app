@@ -2504,7 +2504,7 @@ export default function LifeApp() {
           style={{
             display: "flex",
             alignItems: "center",  /* vertically centers hamburger with logo + search */
-            gap: 14,
+            gap: 10,
             flexShrink: 0,
             height: "100%",
           }}
@@ -2527,11 +2527,11 @@ export default function LifeApp() {
               flexDirection: "column",
               justifyContent: "center",  /* aligns hamburger dashes with siblings */
               alignItems: "flex-start",
-              gap: 5,
+              gap: 6,
               /* Match height of logo/search so it's perfectly centered */
               width: 40,
               height: 40,
-              padding: "4px 4px 0",
+              padding: "4px 4px -0.5",
               boxSizing: "border-box",
               borderRadius: 0,
               transition: "opacity 0.2s ease",
@@ -2561,7 +2561,7 @@ export default function LifeApp() {
               border: "none",
               cursor: "pointer",
               padding: 0,
-              marginLeft: 6,
+              marginLeft: 0,
             }}
           >
             <div
@@ -2645,7 +2645,7 @@ export default function LifeApp() {
               background: t.light,
               border: `1px solid ${t.border}`,
               borderRadius: 20,
-              padding: "9px 32px 9px 34px",
+              padding: "9px 34px 9px 34px",
               color: t.ink,
               fontSize: 13,
               outline: "none",

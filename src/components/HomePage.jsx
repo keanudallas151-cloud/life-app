@@ -132,18 +132,18 @@ export function HomePage({
               fontFamily: "Nunito, sans-serif",
               letterSpacing: "-0.04em",
               lineHeight: 0.92,
-              WebkitTextSizeAdjust: "250%",
+              WebkitTextSizeAdjust: "230%",
             }}
           >
             Life
             <span
               style={{
                 display: "inline-block",
-                width: "0.4em",
-                height: "0.4em",
+                width: "0.3em",
+                height: "0.3em",
                 background: t.ink,
                 borderRadius: "50%",
-                marginLeft: "0.02em",
+                marginLeft: "0.5em",
                 verticalAlign: "0.08em",
               }}
             />
