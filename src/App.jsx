@@ -1800,8 +1800,8 @@ export default function LifeApp() {
             <span
               style={{
                 display: "inline-block",
-                width: "0.4em",
-                height: "0.4em",
+                width: "0.2em",
+                height: "0.2em",
                 background: C.ink,
                 borderRadius: "50%",
                 marginLeft: "0.02em",

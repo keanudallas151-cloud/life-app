@@ -34,17 +34,6 @@ Use `npm run lint` and `npm run build` before considering a change done.
 
 If you only open one file, open **`src/App.jsx`**.
 
-## Nested Gemini files
-
-This repo also uses folder-scoped `GEMINI.md` files for tighter local guidance.
-
-- `app/GEMINI.md` for the thin Next.js entry shell
-- `src/components/GEMINI.md` for UI surface and page-component conventions
-- `src/systems/GEMINI.md` for theme, storage, and cloud/local persistence rules
-- `src/data/GEMINI.md` for static content, quiz, tailoring, and seeded-post data
-
-When working inside one of those folders, prefer the local `GEMINI.md` over generic assumptions.
-
 ## Core architecture
 
 ### Routing model
@@ -121,7 +110,7 @@ Make **targeted edits**, not broad rewrites.
 - Canonical env vars:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-Expected backend tables include:
+    Expected backend tables include:
 
 - `user_data`
 - `quiz_stats`
@@ -208,7 +197,9 @@ Use `Ic.*` from `src/icons/Ic.jsx`.
 Example:
 
 ```jsx
-{Ic.wallet("none", t.green, 20)}
+{
+  Ic.wallet("none", t.green, 20);
+}
 ```
 
 ## Current repo hotspots
@@ -465,23 +456,19 @@ Common bugs:
 
 ## Fast file map
 
-| Purpose | File |
-| --- | --- |
-| Active entry page | `app/page.jsx` |
-| Main app controller | `src/App.jsx` |
-| Global CSS | `src/index.css` |
-| Main app CSS | `src/App.css` |
-| Supabase client | `src/supabaseClient.js` |
-| Theme system | `src/systems/theme.js` |
-| Local storage helper | `src/systems/storage.js` |
-| Main content tree | `src/data/content.js` |
-| Quiz data | `src/data/quiz.js` |
-| Tailoring data | `src/data/tailoring.js` |
+| Purpose              | File                          |
+| -------------------- | ----------------------------- |
+| Active entry page    | `app/page.jsx`                |
+| Main app controller  | `src/App.jsx`                 |
+| Global CSS           | `src/index.css`               |
+| Main app CSS         | `src/App.css`                 |
+| Supabase client      | `src/supabaseClient.js`       |
+| Theme system         | `src/systems/theme.js`        |
+| Local storage helper | `src/systems/storage.js`      |
+| Main content tree    | `src/data/content.js`         |
+| Quiz data            | `src/data/quiz.js`            |
+| Tailoring data       | `src/data/tailoring.js`       |
 | Lazy-loaded surfaces | `src/components/AppShell.jsx` |
-
-## Useful prompts for Gemini
-
-Use prompts like these when you want Gemini to work with the repo instead of giving generic web-dev advice.
 
 ### Understand a surface before editing
 

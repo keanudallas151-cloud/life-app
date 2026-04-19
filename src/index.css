@@ -3037,9 +3037,13 @@ button:active:not(:disabled),
 
 @media (max-width: 640px) {
   .life-landing-shell {
-    padding: max(var(--safe-top), 24px) 16px calc(40px + var(--safe-bottom)) !important;
-    min-height: 100svh;
-    justify-content: center;
+    padding:
+      max(calc(var(--safe-top) + 28px), 56px)
+      16px
+      calc(104px + var(--safe-bottom))
+      !important;
+    min-height: calc(100svh + 120px);
+    justify-content: flex-start;
     align-items: center;
   }
 

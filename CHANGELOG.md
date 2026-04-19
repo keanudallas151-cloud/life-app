@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.6.11 — Security scripts, secret scanning, and untrack guidance
+- Stop-tracked local env files and added ignore rules.
+- Added repository scripts to locate potential secrets and untrack local envs.
+- Added GitHub secret scanning workflow (gitleaks) and a detailed scrub/rotate instructions doc.
+
+
+
 ## v0.6.10 — Mobile geometry and alignment polish
 - Locked key icon controls to square bounds so circular buttons stay circular instead of stretching on mobile.
 - Normalized top-bar logo, profile, and search-clear sizing to keep controls evenly aligned on narrow screens.
