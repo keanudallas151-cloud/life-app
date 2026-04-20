@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "../supabaseClient";
 import {
+  loadLocalNetworkingState,
   loadRoleChoice,
   normalizeListInput,
+  saveLocalNetworkingState,
   saveRoleChoice,
 } from "../utils/inventorsInvestors";
 
@@ -21,6 +23,20 @@ export function useInventorsInvestorsData(user) {
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
+
+  const persistLocalState = useCallback(
+    (nextState) => {
+      if (!user?.id) return;
+      const current = loadLocalNetworkingState(user.id) || {};
+      saveLocalNetworkingState(user.id, {
+        ...current,
+        ...nextState,
+        selectedRole:
+          nextState?.selectedRole || current.selectedRole || selectedRole || "",
+      });
+    },
+    [selectedRole, user?.id],
+  );
 
   const loadDiscovery = useCallback(
     async (roleOverride) => {
@@ -89,6 +105,9 @@ export function useInventorsInvestorsData(user) {
           }));
 
         setDiscoveryProfiles(filtered);
+      } catch (error) {
+        console.error("Failed to load discovery profiles", error);
+        setDiscoveryProfiles([]);
       } finally {
         setDiscoveryLoading(false);
       }
@@ -103,76 +122,82 @@ export function useInventorsInvestorsData(user) {
       return;
     }
 
-    const { data: participantRows } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id, last_read_at")
-      .eq("user_id", user.id);
+    try {
+      const { data: participantRows } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id, last_read_at")
+        .eq("user_id", user.id);
 
-    const conversationIds = (participantRows || []).map((row) => row.conversation_id);
-    if (!conversationIds.length) {
+      const conversationIds = (participantRows || []).map((row) => row.conversation_id);
+      if (!conversationIds.length) {
+        setConversations([]);
+        setActiveConversationId("");
+        return;
+      }
+
+      const [{ data: conversationRows }, { data: peerRows }, { data: messageRows }] = await Promise.all([
+        supabase
+          .from("conversations")
+          .select("id, created_at, updated_at")
+          .in("id", conversationIds)
+          .order("updated_at", { ascending: false }),
+        supabase
+          .from("conversation_participants")
+          .select("conversation_id, user_id")
+          .in("conversation_id", conversationIds)
+          .neq("user_id", user.id),
+        supabase
+          .from("messages")
+          .select("id, conversation_id, sender_user_id, message_text, created_at")
+          .in("conversation_id", conversationIds)
+          .order("created_at", { ascending: true }),
+      ]);
+
+      const peerIds = Array.from(new Set((peerRows || []).map((row) => row.user_id)));
+      const { data: peerProfiles } = peerIds.length
+        ? await supabase
+            .from("inventors_investors_public_profiles")
+            .select("user_id, full_name, avatar_url, role, location")
+            .in("user_id", peerIds)
+        : { data: [] };
+
+      const participantMap = new Map((peerProfiles || []).map((row) => [row.user_id, row]));
+      const peerMap = new Map((peerRows || []).map((row) => [row.conversation_id, row.user_id]));
+      const readMap = new Map((participantRows || []).map((row) => [row.conversation_id, row.last_read_at]));
+
+      const groupedMessages = new Map();
+      (messageRows || []).forEach((row) => {
+        const bucket = groupedMessages.get(row.conversation_id) || [];
+        bucket.push({ ...row, isMine: row.sender_user_id === user.id });
+        groupedMessages.set(row.conversation_id, bucket);
+      });
+
+      const nextConversations = (conversationRows || []).map((row) => {
+        const messages = groupedMessages.get(row.id) || [];
+        const lastMessage = messages[messages.length - 1] || null;
+        const lastReadAt = readMap.get(row.id);
+        const unreadCount = messages.filter((message) => {
+          if (message.sender_user_id === user.id) return false;
+          if (!lastReadAt) return true;
+          return new Date(message.created_at).getTime() > new Date(lastReadAt).getTime();
+        }).length;
+
+        return {
+          ...row,
+          participant: participantMap.get(peerMap.get(row.id)) || null,
+          messages,
+          lastMessage,
+          unreadCount,
+        };
+      });
+
+      setConversations(nextConversations);
+      setActiveConversationId((current) => current || nextConversations[0]?.id || "");
+    } catch (error) {
+      console.error("Failed to load conversations", error);
       setConversations([]);
       setActiveConversationId("");
-      return;
     }
-
-    const [{ data: conversationRows }, { data: peerRows }, { data: messageRows }] = await Promise.all([
-      supabase
-        .from("conversations")
-        .select("id, created_at, updated_at")
-        .in("id", conversationIds)
-        .order("updated_at", { ascending: false }),
-      supabase
-        .from("conversation_participants")
-        .select("conversation_id, user_id")
-        .in("conversation_id", conversationIds)
-        .neq("user_id", user.id),
-      supabase
-        .from("messages")
-        .select("id, conversation_id, sender_user_id, message_text, created_at")
-        .in("conversation_id", conversationIds)
-        .order("created_at", { ascending: true }),
-    ]);
-
-    const peerIds = Array.from(new Set((peerRows || []).map((row) => row.user_id)));
-    const { data: peerProfiles } = peerIds.length
-      ? await supabase
-          .from("inventors_investors_public_profiles")
-          .select("user_id, full_name, avatar_url, role, location")
-          .in("user_id", peerIds)
-      : { data: [] };
-
-    const participantMap = new Map((peerProfiles || []).map((row) => [row.user_id, row]));
-    const peerMap = new Map((peerRows || []).map((row) => [row.conversation_id, row.user_id]));
-    const readMap = new Map((participantRows || []).map((row) => [row.conversation_id, row.last_read_at]));
-
-    const groupedMessages = new Map();
-    (messageRows || []).forEach((row) => {
-      const bucket = groupedMessages.get(row.conversation_id) || [];
-      bucket.push({ ...row, isMine: row.sender_user_id === user.id });
-      groupedMessages.set(row.conversation_id, bucket);
-    });
-
-    const nextConversations = (conversationRows || []).map((row) => {
-      const messages = groupedMessages.get(row.id) || [];
-      const lastMessage = messages[messages.length - 1] || null;
-      const lastReadAt = readMap.get(row.id);
-      const unreadCount = messages.filter((message) => {
-        if (message.sender_user_id === user.id) return false;
-        if (!lastReadAt) return true;
-        return new Date(message.created_at).getTime() > new Date(lastReadAt).getTime();
-      }).length;
-
-      return {
-        ...row,
-        participant: participantMap.get(peerMap.get(row.id)) || null,
-        messages,
-        lastMessage,
-        unreadCount,
-      };
-    });
-
-    setConversations(nextConversations);
-    setActiveConversationId((current) => current || nextConversations[0]?.id || "");
   }, [user?.id]);
 
   const loadInitial = useCallback(async () => {
@@ -182,20 +207,46 @@ export function useInventorsInvestorsData(user) {
     }
 
     setLoading(true);
-    const [{ data: profileRow }, { data: investorRow }, { data: inventorRow }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
-      supabase.from("investor_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-      supabase.from("inventor_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-    ]);
+    const localState = loadLocalNetworkingState(user.id) || null;
 
-    const nextRole = profileRow?.role || loadRoleChoice(user.id);
-    setProfile(profileRow || null);
-    setInvestorProfile(investorRow || null);
-    setInventorProfile(inventorRow || null);
-    setSelectedRole(nextRole);
+    try {
+      const [{ data: profileRow }, { data: investorRow }, { data: inventorRow }] = await Promise.all([
+        supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("investor_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("inventor_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+      ]);
 
-    await Promise.all([loadDiscovery(nextRole), loadConversations()]);
-    setLoading(false);
+      const nextProfile = profileRow || localState?.profile || null;
+      const nextInvestorProfile = investorRow || localState?.investorProfile || null;
+      const nextInventorProfile = inventorRow || localState?.inventorProfile || null;
+      const nextRole =
+        profileRow?.role ||
+        localState?.selectedRole ||
+        loadRoleChoice(user.id);
+
+      setProfile(nextProfile);
+      setInvestorProfile(nextInvestorProfile);
+      setInventorProfile(nextInventorProfile);
+      setSelectedRole(nextRole || "");
+
+      await Promise.all([
+        nextRole ? loadDiscovery(nextRole) : Promise.resolve(setDiscoveryProfiles([])),
+        loadConversations(),
+      ]);
+    } catch (error) {
+      console.error("Failed to load Inventors & Investors state", error);
+      const nextRole = localState?.selectedRole || loadRoleChoice(user.id);
+      setProfile(localState?.profile || null);
+      setInvestorProfile(localState?.investorProfile || null);
+      setInventorProfile(localState?.inventorProfile || null);
+      setSelectedRole(nextRole || "");
+      await Promise.all([
+        nextRole ? loadDiscovery(nextRole) : Promise.resolve(setDiscoveryProfiles([])),
+        loadConversations(),
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }, [loadConversations, loadDiscovery, user?.id]);
 
   useEffect(() => {
@@ -224,27 +275,46 @@ export function useInventorsInvestorsData(user) {
   const chooseRole = useCallback(
     async (role) => {
       if (!user?.id) return;
-      saveRoleChoice(user.id, role);
-      setSelectedRole(role);
 
-      const payload = {
+      const optimisticProfile = {
+        ...(profile || {}),
         user_id: user.id,
-        role,
         full_name: profile?.full_name || user.name || user.email || "",
         email: profile?.email || user.email || "",
-        profile_completed: false,
+        role,
+        profile_completed: profile?.profile_completed || false,
       };
 
-      const { data } = await supabase
-        .from("profiles")
-        .upsert(payload, { onConflict: "user_id" })
-        .select()
-        .single();
+      saveRoleChoice(user.id, role);
+      setSelectedRole(role);
+      setProfile(optimisticProfile);
+      persistLocalState({ profile: optimisticProfile, selectedRole: role });
 
-      setProfile(data);
+      try {
+        const payload = {
+          user_id: user.id,
+          role,
+          full_name: optimisticProfile.full_name,
+          email: optimisticProfile.email,
+          profile_completed: optimisticProfile.profile_completed,
+        };
+
+        const { data } = await supabase
+          .from("profiles")
+          .upsert(payload, { onConflict: "user_id" })
+          .select()
+          .single();
+
+        const nextProfile = data || optimisticProfile;
+        setProfile(nextProfile);
+        persistLocalState({ profile: nextProfile, selectedRole: role });
+      } catch (error) {
+        console.error("Failed to choose role", error);
+      }
+
       await loadDiscovery(role);
     },
-    [loadDiscovery, profile?.email, profile?.full_name, user],
+    [loadDiscovery, persistLocalState, profile, user],
   );
 
   const uploadFile = useCallback(async (file, folder) => {
@@ -264,31 +334,46 @@ export function useInventorsInvestorsData(user) {
       if (!user?.id) return { ok: false };
       setSaving(true);
       setUploadProgress(15);
+
+      let avatarUrl = !isBlobPreviewUrl(values.avatarPreviewUrl)
+        ? values.avatarPreviewUrl || profile?.avatar_url || ""
+        : profile?.avatar_url || values.avatarPreviewUrl || "";
+
       try {
-        let avatarUrl = !isBlobPreviewUrl(values.avatarPreviewUrl) ? values.avatarPreviewUrl || profile?.avatar_url || "" : profile?.avatar_url || "";
         if (values.avatarFile) {
           avatarUrl = await uploadFile(values.avatarFile, `${user.id}/avatar`);
           setUploadProgress(40);
         }
 
+        const optimisticProfile = {
+          ...(profile || {}),
+          user_id: user.id,
+          full_name: values.fullName.trim(),
+          role: "investor",
+          avatar_url: avatarUrl,
+          location: values.location.trim(),
+          bio: values.shortBio.trim(),
+          email: values.contactEmail.trim(),
+          phone: values.phoneNumber.trim(),
+          email_public: values.emailPublic,
+          phone_public: values.phonePublic,
+          profile_completed: true,
+        };
+
+        const optimisticInvestorProfile = {
+          ...(investorProfile || {}),
+          user_id: user.id,
+          investment_budget: toNumberOrNull(values.investmentBudget),
+          investment_range_min: toNumberOrNull(values.investmentRangeMin),
+          investment_range_max: toNumberOrNull(values.investmentRangeMax),
+          looking_to_invest_in: values.lookingToInvestIn.trim(),
+          preferred_industries: normalizeListInput(values.preferredIndustries),
+          stage_preference: values.stagePreference,
+        };
+
         const { data: profileRow, error: profileError } = await supabase
           .from("profiles")
-          .upsert(
-            {
-              user_id: user.id,
-              full_name: values.fullName.trim(),
-              role: "investor",
-              avatar_url: avatarUrl,
-              location: values.location.trim(),
-              bio: values.shortBio.trim(),
-              email: values.contactEmail.trim(),
-              phone: values.phoneNumber.trim(),
-              email_public: values.emailPublic,
-              phone_public: values.phonePublic,
-              profile_completed: true,
-            },
-            { onConflict: "user_id" },
-          )
+          .upsert(optimisticProfile, { onConflict: "user_id" })
           .select()
           .single();
 
@@ -297,37 +382,79 @@ export function useInventorsInvestorsData(user) {
 
         const { data: investorRow, error: investorError } = await supabase
           .from("investor_profiles")
-          .upsert(
-            {
-              user_id: user.id,
-              investment_budget: toNumberOrNull(values.investmentBudget),
-              investment_range_min: toNumberOrNull(values.investmentRangeMin),
-              investment_range_max: toNumberOrNull(values.investmentRangeMax),
-              looking_to_invest_in: values.lookingToInvestIn.trim(),
-              preferred_industries: normalizeListInput(values.preferredIndustries),
-              stage_preference: values.stagePreference,
-            },
-            { onConflict: "user_id" },
-          )
+          .upsert(optimisticInvestorProfile, { onConflict: "user_id" })
           .select()
           .single();
 
         if (investorError) throw investorError;
-        setProfile(profileRow);
-        setInvestorProfile(investorRow);
+
+        setProfile(profileRow || optimisticProfile);
+        setInvestorProfile(investorRow || optimisticInvestorProfile);
         setSelectedRole("investor");
+        persistLocalState({
+          profile: profileRow || optimisticProfile,
+          investorProfile: investorRow || optimisticInvestorProfile,
+          inventorProfile,
+          selectedRole: "investor",
+        });
         await Promise.all([loadDiscovery("investor"), loadConversations()]);
         setUploadProgress(100);
         return { ok: true };
       } catch (error) {
         console.error("Failed to save investor profile", error);
-        return { ok: false, error };
+
+        const fallbackProfile = {
+          ...(profile || {}),
+          user_id: user.id,
+          full_name: values.fullName.trim(),
+          role: "investor",
+          avatar_url: avatarUrl,
+          location: values.location.trim(),
+          bio: values.shortBio.trim(),
+          email: values.contactEmail.trim(),
+          phone: values.phoneNumber.trim(),
+          email_public: values.emailPublic,
+          phone_public: values.phonePublic,
+          profile_completed: true,
+        };
+
+        const fallbackInvestorProfile = {
+          ...(investorProfile || {}),
+          user_id: user.id,
+          investment_budget: toNumberOrNull(values.investmentBudget),
+          investment_range_min: toNumberOrNull(values.investmentRangeMin),
+          investment_range_max: toNumberOrNull(values.investmentRangeMax),
+          looking_to_invest_in: values.lookingToInvestIn.trim(),
+          preferred_industries: normalizeListInput(values.preferredIndustries),
+          stage_preference: values.stagePreference,
+        };
+
+        setProfile(fallbackProfile);
+        setInvestorProfile(fallbackInvestorProfile);
+        setSelectedRole("investor");
+        persistLocalState({
+          profile: fallbackProfile,
+          investorProfile: fallbackInvestorProfile,
+          inventorProfile,
+          selectedRole: "investor",
+        });
+        await loadDiscovery("investor");
+        return { ok: true, degraded: true };
       } finally {
         setSaving(false);
         window.setTimeout(() => setUploadProgress(0), 300);
       }
     },
-    [loadConversations, loadDiscovery, profile?.avatar_url, uploadFile, user?.id],
+    [
+      inventorProfile,
+      investorProfile,
+      loadConversations,
+      loadDiscovery,
+      persistLocalState,
+      profile,
+      uploadFile,
+      user?.id,
+    ],
   );
 
   const saveInventorProfile = useCallback(
@@ -335,31 +462,50 @@ export function useInventorsInvestorsData(user) {
       if (!user?.id) return { ok: false };
       setSaving(true);
       setUploadProgress(10);
+
+      let avatarUrl = !isBlobPreviewUrl(values.avatarPreviewUrl)
+        ? values.avatarPreviewUrl || profile?.avatar_url || ""
+        : profile?.avatar_url || values.avatarPreviewUrl || "";
+
       try {
-        let avatarUrl = !isBlobPreviewUrl(values.avatarPreviewUrl) ? values.avatarPreviewUrl || profile?.avatar_url || "" : profile?.avatar_url || "";
         if (values.avatarFile) {
           avatarUrl = await uploadFile(values.avatarFile, `${user.id}/avatar`);
           setUploadProgress(25);
         }
 
+        const optimisticProfile = {
+          ...(profile || {}),
+          user_id: user.id,
+          full_name: values.fullName.trim(),
+          role: "inventor",
+          avatar_url: avatarUrl,
+          location: values.location.trim(),
+          bio: values.shortPitch.trim(),
+          email: values.contactEmail.trim(),
+          phone: values.phoneNumber.trim(),
+          email_public: values.emailPublic,
+          phone_public: values.phonePublic,
+          profile_completed: true,
+        };
+
+        const optimisticInventorProfile = {
+          ...(inventorProfile || {}),
+          user_id: user.id,
+          invention_name: values.inventionName.trim(),
+          invention_type: values.inventionType.trim(),
+          description: values.description.trim(),
+          revenue: toNumberOrNull(values.revenue),
+          equity_available: toNumberOrNull(values.equityAvailable),
+          funding_sought: toNumberOrNull(values.fundingSought),
+          category: values.category.trim(),
+          website_url: values.websiteUrl.trim() || null,
+          social_links: normalizeListInput(values.socialLinks),
+          short_pitch: values.shortPitch.trim(),
+        };
+
         const { data: profileRow, error: profileError } = await supabase
           .from("profiles")
-          .upsert(
-            {
-              user_id: user.id,
-              full_name: values.fullName.trim(),
-              role: "inventor",
-              avatar_url: avatarUrl,
-              location: values.location.trim(),
-              bio: values.shortPitch.trim(),
-              email: values.contactEmail.trim(),
-              phone: values.phoneNumber.trim(),
-              email_public: values.emailPublic,
-              phone_public: values.phonePublic,
-              profile_completed: true,
-            },
-            { onConflict: "user_id" },
-          )
+          .upsert(optimisticProfile, { onConflict: "user_id" })
           .select()
           .single();
 
@@ -368,22 +514,7 @@ export function useInventorsInvestorsData(user) {
 
         const { data: inventorRow, error: inventorError } = await supabase
           .from("inventor_profiles")
-          .upsert(
-            {
-              user_id: user.id,
-              invention_name: values.inventionName.trim(),
-              invention_type: values.inventionType.trim(),
-              description: values.description.trim(),
-              revenue: toNumberOrNull(values.revenue),
-              equity_available: toNumberOrNull(values.equityAvailable),
-              funding_sought: toNumberOrNull(values.fundingSought),
-              category: values.category.trim(),
-              website_url: values.websiteUrl.trim() || null,
-              social_links: normalizeListInput(values.socialLinks),
-              short_pitch: values.shortPitch.trim(),
-            },
-            { onConflict: "user_id" },
-          )
+          .upsert(optimisticInventorProfile, { onConflict: "user_id" })
           .select()
           .single();
 
@@ -403,21 +534,77 @@ export function useInventorsInvestorsData(user) {
           if (imageError) throw imageError;
         }
 
-        setProfile(profileRow);
-        setInventorProfile(inventorRow);
+        setProfile(profileRow || optimisticProfile);
+        setInventorProfile(inventorRow || optimisticInventorProfile);
         setSelectedRole("inventor");
+        persistLocalState({
+          profile: profileRow || optimisticProfile,
+          investorProfile,
+          inventorProfile: inventorRow || optimisticInventorProfile,
+          selectedRole: "inventor",
+        });
         await Promise.all([loadDiscovery("inventor"), loadConversations()]);
         setUploadProgress(100);
         return { ok: true };
       } catch (error) {
         console.error("Failed to save inventor profile", error);
-        return { ok: false, error };
+
+        const fallbackProfile = {
+          ...(profile || {}),
+          user_id: user.id,
+          full_name: values.fullName.trim(),
+          role: "inventor",
+          avatar_url: avatarUrl,
+          location: values.location.trim(),
+          bio: values.shortPitch.trim(),
+          email: values.contactEmail.trim(),
+          phone: values.phoneNumber.trim(),
+          email_public: values.emailPublic,
+          phone_public: values.phonePublic,
+          profile_completed: true,
+        };
+
+        const fallbackInventorProfile = {
+          ...(inventorProfile || {}),
+          user_id: user.id,
+          invention_name: values.inventionName.trim(),
+          invention_type: values.inventionType.trim(),
+          description: values.description.trim(),
+          revenue: toNumberOrNull(values.revenue),
+          equity_available: toNumberOrNull(values.equityAvailable),
+          funding_sought: toNumberOrNull(values.fundingSought),
+          category: values.category.trim(),
+          website_url: values.websiteUrl.trim() || null,
+          social_links: normalizeListInput(values.socialLinks),
+          short_pitch: values.shortPitch.trim(),
+        };
+
+        setProfile(fallbackProfile);
+        setInventorProfile(fallbackInventorProfile);
+        setSelectedRole("inventor");
+        persistLocalState({
+          profile: fallbackProfile,
+          investorProfile,
+          inventorProfile: fallbackInventorProfile,
+          selectedRole: "inventor",
+        });
+        await loadDiscovery("inventor");
+        return { ok: true, degraded: true };
       } finally {
         setSaving(false);
         window.setTimeout(() => setUploadProgress(0), 300);
       }
     },
-    [loadConversations, loadDiscovery, profile?.avatar_url, uploadFile, user?.id],
+    [
+      inventorProfile,
+      investorProfile,
+      loadConversations,
+      loadDiscovery,
+      persistLocalState,
+      profile,
+      uploadFile,
+      user?.id,
+    ],
   );
 
   const createSwipe = useCallback(
