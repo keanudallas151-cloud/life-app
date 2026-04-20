@@ -52,19 +52,22 @@ export default function RootLayout({ children }) {
         <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
         <style>{`
           @media (max-width: 640px) {
-            .life-auth-shell {
+            .life-auth-shell,
+            .life-landing-shell {
               justify-content: flex-start !important;
-              min-height: 100svh !important;
+              min-height: calc(100svh + 140px) !important;
               overflow-y: auto !important;
               overflow-x: hidden !important;
+              padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px)) !important;
+              padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)) !important;
+              box-sizing: border-box !important;
             }
+
             .life-auth-card {
               max-height: none !important;
               overflow: visible !important;
               width: min(100%, 360px) !important;
               max-width: 360px !important;
-              padding: 20px 16px !important;
-              gap: 12px !important;
             }
           }
         `}</style>
