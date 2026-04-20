@@ -1496,9 +1496,34 @@ select:focus-visible {
 
   /* Reader: tabs + actions fit narrow screens */
   .life-reader-toolbar {
-    flex-wrap: wrap !important;
-    row-gap: 8px !important;
-    padding-bottom: 10px !important;
+    flex-wrap: nowrap !important;
+    row-gap: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: max(10px, var(--safe-left)) !important;
+    padding-right: max(18px, var(--safe-right)) !important;
+    gap: 2px !important;
+  }
+
+  .life-reader-toolbar-actions {
+    gap: 4px !important;
+    padding-right: 2px !important;
+    min-width: max-content !important;
+  }
+
+  .life-reader-copy-btn {
+    font-size: 11px !important;
+    padding: 8px 9px !important;
+  }
+
+  .life-reader-star-btn {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 24px !important;
+  }
+
+  .life-reader-toolbar + div > div > div:last-child {
+    margin-top: 4px !important;
+    transform: translateY(-1px);
   }
 
   .life-share-sheet-grid {
@@ -1535,6 +1560,27 @@ select:focus-visible {
   .life-footer {
     margin-top: 24px !important;
     padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .life-quiz-page {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .life-quiz-page * {
+    box-sizing: border-box;
+  }
+
+  .life-quiz-page button {
+    width: 100%;
+  }
+
+  .life-quiz-page .life-quiz-tabs button,
+  .life-quiz-result-actions button,
+  .life-quiz-diff-row button {
+    width: auto;
   }
 }
 
