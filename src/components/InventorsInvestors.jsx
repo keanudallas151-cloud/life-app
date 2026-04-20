@@ -141,9 +141,8 @@ export function InventorsInvestors({ t, user, play }) {
     }
 
     if (!profile?.profile_completed) {
-      const setupView = effectiveRole === "investor" ? "investor_setup" : "inventor_setup";
-      if (view !== setupView) {
-        setView(setupView);
+      if (!["swipe", "investor_setup", "inventor_setup"].includes(view)) {
+        setView("swipe");
       }
       return;
     }
@@ -160,6 +159,7 @@ export function InventorsInvestors({ t, user, play }) {
   );
 
   const activeProfile = filteredProfiles[0] || null;
+  const profileCompleted = Boolean(profile?.profile_completed);
 
   if (!user) {
     return (
@@ -196,7 +196,7 @@ export function InventorsInvestors({ t, user, play }) {
     play?.("tap");
     setRoleSubmitting(true);
     setRoleChoice(nextRole);
-    setView(nextRole === "investor" ? "investor_setup" : "inventor_setup");
+    setView("swipe");
     try {
       await chooseRole(nextRole);
     } catch (error) {
@@ -204,6 +204,13 @@ export function InventorsInvestors({ t, user, play }) {
     } finally {
       setRoleSubmitting(false);
     }
+  };
+
+  const handleCompleteProfileSetup = () => {
+    play?.("tap");
+    const effectiveRole = profile?.role || selectedRole || roleChoice;
+    if (!effectiveRole) return;
+    setView(effectiveRole === "investor" ? "investor_setup" : "inventor_setup");
   };
 
   const handleInvestorSubmit = async () => {
@@ -275,7 +282,7 @@ export function InventorsInvestors({ t, user, play }) {
           onChange={setInvestorField}
           onAvatarChange={handleAvatarChange(setInvestorForm)}
           onSubmit={handleInvestorSubmit}
-          onBack={() => setView("landing")}
+          onBack={() => setView("swipe")}
           submitting={saving}
           uploadProgress={uploadProgress}
         />
@@ -290,7 +297,7 @@ export function InventorsInvestors({ t, user, play }) {
           onAvatarChange={handleAvatarChange(setInventorForm)}
           onGalleryChange={handleGalleryChange}
           onSubmit={handleInventorSubmit}
-          onBack={() => setView("landing")}
+          onBack={() => setView("swipe")}
           submitting={saving}
           uploadProgress={uploadProgress}
         />
@@ -325,6 +332,7 @@ export function InventorsInvestors({ t, user, play }) {
           <InventorsInvestorsSwipePage
             t={t}
             viewerRole={profile?.role || roleChoice}
+            profileCompleted={profileCompleted}
             searchTerm={searchTerm}
             onSearch={setSearchTerm}
             onOpenMessages={openMessages}
@@ -338,6 +346,7 @@ export function InventorsInvestors({ t, user, play }) {
             onBlock={() => activeProfile && handleBlock(activeProfile.user_id)}
             onReport={() => activeProfile && handleReport(activeProfile.user_id)}
             onResetSearch={() => setSearchTerm("")}
+            onCompleteProfile={handleCompleteProfileSetup}
           />
         </div>
       );
