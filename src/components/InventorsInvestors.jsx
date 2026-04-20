@@ -10,7 +10,7 @@ import {
   saveDraft,
   saveFeatureView,
 } from "../utils/inventorsInvestors";
-import { EmptyState, FeatureFrame, PrimaryButton } from "./inventorsInvestors/InventorsInvestorsUI";
+import { EmptyState, FeatureFrame, PrimaryButton, SecondaryButton } from "./inventorsInvestors/InventorsInvestorsUI";
 import { InventorsInvestorsLandingPage } from "./inventorsInvestors/pages/InventorsInvestorsLandingPage";
 import { InventorsInvestorsMessagesPage } from "./inventorsInvestors/pages/InventorsInvestorsMessagesPage";
 import { InventorsInvestorsSwipePage } from "./inventorsInvestors/pages/InventorsInvestorsSwipePage";
@@ -305,23 +305,28 @@ export function InventorsInvestors({ t, user, play }) {
 
     case "swipe":
       return (
-        <InventorsInvestorsSwipePage
-          t={t}
-          viewerRole={profile?.role || roleChoice}
-          searchTerm={searchTerm}
-          onSearch={setSearchTerm}
-          onOpenMessages={openMessages}
-          pendingMessageCount={unreadMessageCount}
-          activeProfile={activeProfile}
-          hasProfiles={Boolean(filteredProfiles.length)}
-          isLoading={loading || discoveryLoading}
-          onInterested={() => activeProfile && createSwipe(activeProfile.user_id, "interested")}
-          onPass={() => activeProfile && createSwipe(activeProfile.user_id, "pass")}
-          onStartChat={() => activeProfile && handleStartChat(activeProfile.user_id)}
-          onBlock={() => activeProfile && handleBlock(activeProfile.user_id)}
-          onReport={() => activeProfile && handleReport(activeProfile.user_id)}
-          onResetSearch={() => setSearchTerm("")}
-        />
+        <div>
+          <div style={{ width: "100%", maxWidth: 720, margin: "0 auto", padding: "12px 18px 0" }}>
+            <SecondaryButton t={t} onClick={() => { play?.("tap"); setView("landing"); }}>← Back</SecondaryButton>
+          </div>
+          <InventorsInvestorsSwipePage
+            t={t}
+            viewerRole={profile?.role || roleChoice}
+            searchTerm={searchTerm}
+            onSearch={setSearchTerm}
+            onOpenMessages={openMessages}
+            pendingMessageCount={unreadMessageCount}
+            activeProfile={activeProfile}
+            hasProfiles={Boolean(filteredProfiles.length)}
+            isLoading={loading || discoveryLoading}
+            onInterested={() => activeProfile && createSwipe(activeProfile.user_id, "interested")}
+            onPass={() => activeProfile && createSwipe(activeProfile.user_id, "pass")}
+            onStartChat={() => activeProfile && handleStartChat(activeProfile.user_id)}
+            onBlock={() => activeProfile && handleBlock(activeProfile.user_id)}
+            onReport={() => activeProfile && handleReport(activeProfile.user_id)}
+            onResetSearch={() => setSearchTerm("")}
+          />
+        </div>
       );
 
     case "role_selection":
