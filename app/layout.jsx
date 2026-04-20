@@ -1,8 +1,5 @@
 import '../src/index.css'
 
-// Next.js needs an absolute base to resolve social-card image URLs.
-// Prefer the prod URL but fall back to whatever Vercel assigns the build,
-// and finally localhost for dev.
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
@@ -48,18 +45,31 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        {/* iOS standalone PWA — hides Safari UI when launched from home screen */}
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Life." />
-        {/* Capacitor / WKWebView compatibility — format-detection prevents iOS
-            from auto-linking phone numbers and addresses in content */}
         <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
+        <style>{`
+          @media (max-width: 640px) {
+            .life-auth-shell {
+              justify-content: flex-start !important;
+              min-height: 100svh !important;
+              overflow-y: auto !important;
+              overflow-x: hidden !important;
+            }
+            .life-auth-card {
+              max-height: none !important;
+              overflow: visible !important;
+              width: min(100%, 360px) !important;
+              max-width: 360px !important;
+              padding: 20px 16px !important;
+              gap: 12px !important;
+            }
+          }
+        `}</style>
       </head>
-      <body>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
