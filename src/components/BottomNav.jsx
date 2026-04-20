@@ -1,5 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { isSupabaseConfigured, supabase } from "../supabaseClient";
+
+function countUnread(list) {
+  if (!Array.isArray(list)) return 0;
+  return list.filter((item) => item && item.read !== true).length;
+}
+
 export function BottomNav({
   t,
   dark,
@@ -13,6 +21,59 @@ export function BottomNav({
   unreadCount,
   initials,
 }) {
+  const [syncedUnreadCount, setSyncedUnreadCount] = useState(unreadCount);
+
+  useEffect(() => {
+    let active = true;
+
+    const syncNotificationMirror = async () => {
+      if (typeof window === "undefined") return;
+
+      const guestKey = "notif__";
+      let sourceKey = guestKey;
+
+      if (isSupabaseConfigured) {
+        try {
+          const { data } = await supabase.auth.getUser();
+          const email = data?.user?.email;
+          if (email) {
+            sourceKey = `notif_${email}`;
+          }
+        } catch (error) {
+          console.error("Failed to read auth user for notifications", error);
+        }
+      }
+
+      const raw = window.localStorage.getItem(sourceKey);
+      if (raw !== null && sourceKey !== guestKey) {
+        window.localStorage.setItem(guestKey, raw);
+      }
+
+      if (!active) return;
+
+      try {
+        const parsed = raw !== null ? JSON.parse(raw) : null;
+        if (Array.isArray(parsed)) {
+          setSyncedUnreadCount(countUnread(parsed));
+          return;
+        }
+      } catch {
+        // fall through to prop value
+      }
+
+      setSyncedUnreadCount(unreadCount);
+    };
+
+    syncNotificationMirror();
+    return () => {
+      active = false;
+    };
+  }, [page, showNotif, unreadCount]);
+
+  const badgeCount = Number.isFinite(syncedUnreadCount)
+    ? syncedUnreadCount
+    : unreadCount;
+
   return (
     <nav
       className={`life-bottom-nav${dark ? " life-bottom-nav-dark" : ""}`}
@@ -148,9 +209,9 @@ export function BottomNav({
           <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 01-3.46 0" />
         </svg>
-        {unreadCount > 0 && (
+        {badgeCount > 0 && (
           <span className="life-bottom-nav-badge">
-            {unreadCount > 9 ? "9+" : unreadCount}
+            {badgeCount > 9 ? "9+" : badgeCount}
           </span>
         )}
         <span
