@@ -85,6 +85,10 @@ export function getRoleChoiceStorageKey(userId) {
   return `life_ii_role_${userId}`;
 }
 
+export function getLocalNetworkingStateKey(userId) {
+  return `life_ii_state_${userId}`;
+}
+
 export function loadDraft(userId, role, defaults) {
   if (typeof window === "undefined") return defaults;
 
@@ -136,6 +140,36 @@ export function saveRoleChoice(userId, role) {
 export function loadRoleChoice(userId) {
   if (typeof window === "undefined") return "";
   return window.localStorage.getItem(getRoleChoiceStorageKey(userId)) || "";
+}
+
+export function saveLocalNetworkingState(userId, state) {
+  if (typeof window === "undefined") return;
+  const serializable = {
+    ...state,
+    profile: state?.profile || null,
+    investorProfile: state?.investorProfile || null,
+    inventorProfile: state?.inventorProfile || null,
+    selectedRole: state?.selectedRole || "",
+  };
+  window.localStorage.setItem(
+    getLocalNetworkingStateKey(userId),
+    JSON.stringify(serializable),
+  );
+}
+
+export function loadLocalNetworkingState(userId) {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(getLocalNetworkingStateKey(userId));
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearLocalNetworkingState(userId) {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(getLocalNetworkingStateKey(userId));
 }
 
 export function normalizeListInput(value) {
