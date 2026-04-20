@@ -13,7 +13,6 @@ import {
 import { EmptyState, FeatureFrame, PrimaryButton } from "./inventorsInvestors/InventorsInvestorsUI";
 import { InventorsInvestorsLandingPage } from "./inventorsInvestors/pages/InventorsInvestorsLandingPage";
 import { InventorsInvestorsMessagesPage } from "./inventorsInvestors/pages/InventorsInvestorsMessagesPage";
-import { InventorsInvestorsRoleSelectionPage } from "./inventorsInvestors/pages/InventorsInvestorsRoleSelectionPage";
 import { InventorsInvestorsSwipePage } from "./inventorsInvestors/pages/InventorsInvestorsSwipePage";
 import { InventorProfileSetupPage } from "./inventorsInvestors/pages/InventorProfileSetupPage";
 import { InvestorProfileSetupPage } from "./inventorsInvestors/pages/InvestorProfileSetupPage";
@@ -132,7 +131,7 @@ export function InventorsInvestors({ t, user, play }) {
     if (!user?.id) return;
 
     if (!profile?.role) {
-      if (!["landing", "role_selection", "messages"].includes(view)) {
+      if (!["landing", "messages"].includes(view)) {
         setView("landing");
       }
       return;
@@ -186,11 +185,12 @@ export function InventorsInvestors({ t, user, play }) {
     }
   };
 
-  const handleRoleContinue = async () => {
-    if (!roleChoice) return;
+  const handleRoleContinue = async (nextRole = roleChoice) => {
+    if (!nextRole) return;
     play?.("tap");
-    await chooseRole(roleChoice);
-    setView(roleChoice === "investor" ? "investor_setup" : "inventor_setup");
+    setRoleChoice(nextRole);
+    await chooseRole(nextRole);
+    setView(nextRole === "investor" ? "investor_setup" : "inventor_setup");
   };
 
   const handleInvestorSubmit = async () => {
@@ -254,20 +254,6 @@ export function InventorsInvestors({ t, user, play }) {
   };
 
   switch (view) {
-    case "role_selection":
-      return (
-        <InventorsInvestorsRoleSelectionPage
-          t={t}
-          selectedRole={roleChoice}
-          onSelectRole={(value) => {
-            play?.("tap");
-            setRoleChoice(value);
-          }}
-          onContinue={handleRoleContinue}
-          onBack={() => setView("landing")}
-        />
-      );
-
     case "investor_setup":
       return (
         <InvestorProfileSetupPage
@@ -276,7 +262,7 @@ export function InventorsInvestors({ t, user, play }) {
           onChange={setInvestorField}
           onAvatarChange={handleAvatarChange(setInvestorForm)}
           onSubmit={handleInvestorSubmit}
-          onBack={() => setView("role_selection")}
+          onBack={() => setView("landing")}
           submitting={saving}
           uploadProgress={uploadProgress}
         />
@@ -291,7 +277,7 @@ export function InventorsInvestors({ t, user, play }) {
           onAvatarChange={handleAvatarChange(setInventorForm)}
           onGalleryChange={handleGalleryChange}
           onSubmit={handleInventorSubmit}
-          onBack={() => setView("role_selection")}
+          onBack={() => setView("landing")}
           submitting={saving}
           uploadProgress={uploadProgress}
         />
@@ -338,16 +324,14 @@ export function InventorsInvestors({ t, user, play }) {
         />
       );
 
+    case "role_selection":
     case "landing":
     default:
       return (
         <InventorsInvestorsLandingPage
           t={t}
           hasMessages={Boolean(conversations.length)}
-          onGetStarted={() => {
-            play?.("tap");
-            setView("role_selection");
-          }}
+          onChooseRole={handleRoleContinue}
           onGoMessages={openMessages}
         />
       );

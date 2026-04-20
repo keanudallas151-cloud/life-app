@@ -204,6 +204,37 @@ export function TextField({
   );
 }
 
+export function MoneyField({ t, label, value, onChange, placeholder, error }) {
+  const displayValue = formatMoneyInput(value);
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <SectionLabel t={t}>{label}</SectionLabel>
+      <input
+        type="text"
+        value={displayValue}
+        inputMode="numeric"
+        onChange={(event) => onChange(formatMoneyInput(event.target.value))}
+        placeholder={placeholder}
+        style={{
+          width: "100%",
+          borderRadius: 16,
+          border: `1px solid ${error ? t.red : t.border}`,
+          background: t.skin,
+          color: t.ink,
+          fontSize: 14,
+          outline: "none",
+          padding: "0 14px",
+          minHeight: 50,
+          boxSizing: "border-box",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      />
+      {error ? <InlineError t={t}>{error}</InlineError> : null}
+    </div>
+  );
+}
+
 export function SelectField({ t, label, value, onChange, options, error }) {
   return (
     <div style={{ marginBottom: 16 }}>
@@ -344,7 +375,7 @@ export function ProgressMeter({ t, percent, label }) {
         }}
       >
         <span style={{ fontSize: 12, fontWeight: 800, color: t.ink }}>{label}</span>
-        <span style={{ fontSize: 12, color: t.mid }}>{percent}% complete</span>
+        <span style={{ fontSize: 13, fontWeight: 800, color: t.ink, whiteSpace: "nowrap" }}>{percent}%</span>
       </div>
       <div
         style={{
@@ -619,6 +650,14 @@ export function ConversationBadge({ count, t }) {
       {count}
     </span>
   );
+}
+
+export function formatMoneyInput(value) {
+  const digits = String(value || "").replace(/[^\d]/g, "");
+  if (!digits) return "";
+  const normalized = digits.replace(/^0+(?=\d)/, "") || "0";
+  const capped = Math.min(Number(normalized), 100000000);
+  return `$${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(capped)}`;
 }
 
 export function alpha(hex, opacity) {

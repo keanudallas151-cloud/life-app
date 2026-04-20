@@ -1,3 +1,4 @@
+import { useMemo, useRef, useState } from "react";
 import {
   Avatar,
   EmptyState,
@@ -6,7 +7,6 @@ import {
   SearchBar,
   SecondaryButton,
   SurfaceCard,
-  SwipeGestureCard,
   alpha,
 } from "../InventorsInvestorsUI";
 import {
@@ -14,6 +14,8 @@ import {
   formatPercent,
   formatRelativeJoined,
 } from "../../../utils/inventorsInvestors";
+
+const DECK_SWIPE_TRIGGER = 88;
 
 function MetricChip({ t, label, value }) {
   if (!value) return null;
@@ -37,6 +39,148 @@ function MetricChip({ t, label, value }) {
   );
 }
 
+function DeckSwipeCard({ t, onSwipeLeft, onSwipeRight, children }) {
+  const [offsetX, setOffsetX] = useState(0);
+  const [animatingOut, setAnimatingOut] = useState(false);
+  const startRef = useRef({ x: 0, y: 0, dragging: false });
+
+  const swipeState = useMemo(() => {
+    if (offsetX <= -28) return "left";
+    if (offsetX >= 28) return "right";
+    return "";
+  }, [offsetX]);
+
+  const beginDrag = (x, y) => {
+    if (animatingOut) return;
+    startRef.current = { x, y, dragging: true };
+  };
+
+  const moveDrag = (x, y) => {
+    if (!startRef.current.dragging || animatingOut) return;
+    const deltaX = x - startRef.current.x;
+    const deltaY = y - startRef.current.y;
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+    setOffsetX(Math.max(-180, Math.min(180, deltaX)));
+  };
+
+  const finishDrag = () => {
+    if (!startRef.current.dragging || animatingOut) return;
+    startRef.current.dragging = false;
+
+    if (Math.abs(offsetX) < DECK_SWIPE_TRIGGER) {
+      setOffsetX(0);
+      return;
+    }
+
+    const direction = offsetX < 0 ? -1 : 1;
+    setAnimatingOut(true);
+    setOffsetX(direction * 280);
+
+    window.setTimeout(() => {
+      if (direction < 0) onSwipeLeft?.();
+      if (direction > 0) onSwipeRight?.();
+      setAnimatingOut(false);
+      setOffsetX(0);
+    }, 180);
+  };
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        maxWidth: 520,
+        margin: "0 auto",
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: "10px 14px auto",
+          height: "100%",
+          borderRadius: 24,
+          border: `1px solid ${alpha(t.green, 0.14)}`,
+          background: `linear-gradient(180deg, ${alpha(t.green, 0.05)} 0%, ${t.white} 100%)`,
+          opacity: 0.7,
+          transform: "scale(0.98)",
+        }}
+      />
+      <div
+        onTouchStart={(event) => {
+          const touch = event.touches[0];
+          beginDrag(touch.clientX, touch.clientY);
+        }}
+        onTouchMove={(event) => {
+          const touch = event.touches[0];
+          moveDrag(touch.clientX, touch.clientY);
+        }}
+        onTouchEnd={finishDrag}
+        onMouseDown={(event) => beginDrag(event.clientX, event.clientY)}
+        onMouseMove={(event) => moveDrag(event.clientX, event.clientY)}
+        onMouseUp={finishDrag}
+        onMouseLeave={finishDrag}
+        className="ii-swipe-card"
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          maxWidth: 520,
+          margin: "0 auto",
+          touchAction: "pan-y",
+          borderRadius: 24,
+          border: `1px solid ${t.border}`,
+          background: t.white,
+          boxShadow: `0 16px 40px ${alpha(t.ink, 0.06)}`,
+          transform: `translateX(${offsetX}px) rotate(${offsetX / 24}deg)`,
+          opacity: animatingOut ? 0 : 1 - Math.min(Math.abs(offsetX) / 300, 0.18),
+          transition: startRef.current.dragging
+            ? "none"
+            : "transform 180ms ease, opacity 180ms ease",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 18,
+            left: 18,
+            padding: "8px 12px",
+            borderRadius: 999,
+            background: swipeState === "left" ? alpha(t.green, 0.14) : alpha(t.ink, 0.04),
+            border: `1px solid ${swipeState === "left" ? alpha(t.green, 0.35) : "transparent"}`,
+            color: swipeState === "left" ? t.green : t.mid,
+            fontSize: 11,
+            fontWeight: 800,
+            letterSpacing: 1.2,
+            textTransform: "uppercase",
+            zIndex: 2,
+          }}
+        >
+          Swipe left = Interested
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 18,
+            right: 18,
+            padding: "8px 12px",
+            borderRadius: 999,
+            background: swipeState === "right" ? alpha(t.red, 0.12) : alpha(t.ink, 0.04),
+            border: `1px solid ${swipeState === "right" ? alpha(t.red, 0.3) : "transparent"}`,
+            color: swipeState === "right" ? t.red : t.mid,
+            fontSize: 11,
+            fontWeight: 800,
+            letterSpacing: 1.2,
+            textTransform: "uppercase",
+            zIndex: 2,
+          }}
+        >
+          Swipe right = Pass
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function DiscoverCard({
   t,
   profile,
@@ -49,7 +193,7 @@ function DiscoverCard({
   if (!profile) return null;
 
   return (
-    <SwipeGestureCard t={t} onSwipeLeft={onInterested} onSwipeRight={onPass}>
+    <DeckSwipeCard t={t} onSwipeLeft={onInterested} onSwipeRight={onPass}>
       <div style={{ position: "relative", minHeight: 560 }}>
         {profile.hero_image_url || profile.avatar_url ? (
           <div style={{ width: "100%", aspectRatio: "1.1 / 1", overflow: "hidden", background: t.skin }}>
@@ -164,10 +308,10 @@ function DiscoverCard({
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 18 }}>
             <PrimaryButton t={t} onClick={onInterested}>
-              Swipe left = Interested
+              Interested
             </PrimaryButton>
             <SecondaryButton t={t} onClick={onPass}>
-              Swipe right = Pass
+              Pass
             </SecondaryButton>
           </div>
 
@@ -178,7 +322,7 @@ function DiscoverCard({
           </div>
         </div>
       </div>
-    </SwipeGestureCard>
+    </DeckSwipeCard>
   );
 }
 
@@ -204,7 +348,7 @@ export function InventorsInvestorsSwipePage({
       t={t}
       eyebrow="Discover"
       title={viewerRole === "investor" ? "Discover inventors" : "Discover investors"}
-      subtitle="One clear card. Swipe left to show interest. Swipe right to pass. You can also search and message without exposing private contact details."
+      subtitle="Swipe left to show interest. Swipe right to pass. It is the same simple deck mechanic, just built for investors and inventors instead of dating."
     >
       <SearchBar
         t={t}
