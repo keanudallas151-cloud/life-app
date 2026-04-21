@@ -11,7 +11,7 @@ const REDIRECT_FALLBACK_CODES = new Set([
 export async function signInWithGoogle() {
   if (!isFirebaseConfigured || !auth || !googleProvider) {
     throw new Error(
-      "Firebase auth is not configured. Set the NEXT_PUBLIC_FIREBASE_* values in your deployment settings.",
+      "Firebase auth is not configured. Set the NEXT_PUBLIC_FIREBASE_* values.",
     );
   }
 

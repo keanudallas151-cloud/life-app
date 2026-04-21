@@ -1,12 +1,11 @@
 :root {
-  /* ─── Vercel/Geist-inspired palette. Mirrors src/systems/theme.js `C`. ── */
-  --life-skin: #0a0a0a;
-  --life-ink: #ededed;
-  --life-green: #50c878;
-  --life-green-soft: #0f2818;
-  --life-muted: #a1a1a1;
-  --life-border: #2e2e2e;
-  --life-white: #111111;
+  --life-skin: #eceae6;
+  --life-ink: #161515;
+  --life-green: #4a8c5c;
+  --life-green-soft: #e3eee6;
+  --life-muted: #716a61;
+  --life-border: #cfc8bd;
+  --life-white: #f6f5f2;
   --life-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --life-ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
   --life-font: Georgia, "Times New Roman", "Iowan Old Style", serif;
@@ -27,8 +26,8 @@
 }
 
 body.life-dark {
-  background: #000000;
-  color: #fafafa;
+  background: #181818;
+  color: #f2f2f2;
   color-scheme: dark;
 }
 
@@ -44,8 +43,6 @@ html {
   overscroll-behavior-y: none;
   /* Prevent elastic over-scroll bounce on the html element on iOS */
   height: 100%;
-  height: 100dvh; /* preferred: dynamic viewport, adjusts with browser chrome on iOS */
-  overflow: hidden;
 }
 
 body {
@@ -63,10 +60,11 @@ body {
   touch-action: manipulation;
   overscroll-behavior-y: none;
   overscroll-behavior: none;
-  height: 100%;
-  height: 100dvh; /* preferred: dynamic viewport */
-  /* Prevent document-level scroll — only .life-main-scroll should scroll */
-  overflow: hidden;
+  min-height: 100svh;
+  min-height: -webkit-fill-available;
+  /* Prevent gap at bottom on iOS when address bar hides */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
 }
 
 body::before {
@@ -77,31 +75,31 @@ body::before {
   pointer-events: none;
   background:
     radial-gradient(
-      1400px 540px at 8% -10%,
-      rgba(80, 200, 120, 0.06),
+      1200px 460px at 8% -10%,
+      rgba(74, 140, 92, 0.09),
       transparent 62%
     ),
     radial-gradient(
-      1000px 480px at 92% 0%,
-      rgba(245, 166, 35, 0.03),
+      900px 420px at 92% 0%,
+      rgba(180, 151, 90, 0.08),
       transparent 58%
     ),
-    linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 52%, #080808 100%);
+    linear-gradient(180deg, #f7f3ec 0%, #f5f0e8 52%, #f2ebe1 100%);
 }
 
 body.life-dark::before {
   background:
     radial-gradient(
-      1400px 540px at 8% -10%,
-      rgba(80, 200, 120, 0.07),
+      1200px 460px at 8% -10%,
+      rgba(90, 157, 108, 0.11),
       transparent 62%
     ),
     radial-gradient(
-      1000px 480px at 92% 0%,
-      rgba(245, 166, 35, 0.04),
+      900px 420px at 92% 0%,
+      rgba(208, 174, 108, 0.1),
       transparent 58%
     ),
-    linear-gradient(180deg, #050505 0%, #000000 52%, #000000 100%);
+    linear-gradient(180deg, #1a1a1a 0%, #181818 52%, #151515 100%);
 }
 
 button,
@@ -109,11 +107,8 @@ button,
   touch-action: manipulation;
 }
 
-#root,
-#__next {
-  height: 100%;
-  height: 100dvh; /* preferred: dynamic viewport */
-  overflow: hidden;
+#root {
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
 }
@@ -123,48 +118,6 @@ button,
     scroll-behavior: smooth;
   }
 }
-
-@keyframes life-logo-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-/* ─── Badge swipe card animations ──────────────────────────────── */
-@keyframes life-badge-pulse {
-  0%, 100% { box-shadow: 0 0 16px var(--life-green, #50c878); opacity: 1; }
-  50%       { box-shadow: 0 0 32px var(--life-green, #50c878); opacity: 0.9; }
-}
-@keyframes life-badge-enter {
-  from { opacity: 0; transform: scale(0.88) translateY(16px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.life-badge-card-enter {
-  animation: life-badge-enter 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* ─── Swipe left hint arrow ─────────────────────────────────────── */
-@keyframes life-swipe-hint {
-  0%, 100% { transform: translateX(0); opacity: 0.6; }
-  50%       { transform: translateX(-5px); opacity: 1; }
-}
-
-/* ─── Stagger in animation for lists ────────────────────────────── */
-@keyframes life-stagger-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.life-stagger > *:nth-child(1) { animation: life-stagger-in 0.22s 0.00s cubic-bezier(0.22,1,0.36,1) both; }
-.life-stagger > *:nth-child(2) { animation: life-stagger-in 0.22s 0.05s cubic-bezier(0.22,1,0.36,1) both; }
-.life-stagger > *:nth-child(3) { animation: life-stagger-in 0.22s 0.10s cubic-bezier(0.22,1,0.36,1) both; }
-.life-stagger > *:nth-child(4) { animation: life-stagger-in 0.22s 0.15s cubic-bezier(0.22,1,0.36,1) both; }
-.life-stagger > *:nth-child(5) { animation: life-stagger-in 0.22s 0.20s cubic-bezier(0.22,1,0.36,1) both; }
-.life-stagger > *:nth-child(n+6) { animation: life-stagger-in 0.22s 0.24s cubic-bezier(0.22,1,0.36,1) both; }
 
 :focus-visible {
   outline: 2px solid var(--life-green);
@@ -261,7 +214,7 @@ p {
   opacity: 0;
   background: linear-gradient(
     130deg,
-    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.36),
     transparent 44%
   );
   transition: opacity 0.24s ease;
@@ -270,10 +223,9 @@ p {
 @media (prefers-reduced-motion: no-preference) {
   .life-card-hover:hover {
     transform: translateY(-2px);
-    border-color: rgba(80, 200, 120, 0.28);
     box-shadow:
-      0 4px 10px rgba(0, 0, 0, 0.4),
-      0 14px 32px rgba(80, 200, 120, 0.12);
+      0 4px 6px rgba(20, 20, 20, 0.06),
+      0 14px 32px rgba(74, 140, 92, 0.12);
   }
 
   .life-card-hover:hover::after {
@@ -282,180 +234,17 @@ p {
 }
 
 .life-card-hover:active {
-  transform: translateY(0) scale(0.985);
-}
-
-/* ─── Button glow outline: makes buttons pop against black bg ──────────
-   Adds a subtle green rim-light + stronger border so buttons never blend
-   into the page. Automatically applies to every <button> except the
-   explicitly-ghost styles (sidebar links, header icons). */
-button:not(.life-sidebar-link):not(.life-bottom-nav-item):not([data-ghost]):not(.life-password-toggle) {
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 1px 2px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  button:not(.life-sidebar-link):not(.life-bottom-nav-item):not([data-ghost]):not(.life-password-toggle):hover {
-    box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.06),
-      0 2px 6px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   PREMIUM POLISH — subtle animations that elevate the feel of the app
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* ─── Landing "Sign In" glass button: subtle border-light sweep on hover ── */
-@media (prefers-reduced-motion: no-preference) {
-  .life-signin-btn {
-    position: relative;
-    overflow: hidden;
-  }
-  .life-signin-btn::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(
-      110deg,
-      transparent 0%,
-      transparent 38%,
-      rgba(255, 255, 255, 0.18) 50%,
-      transparent 62%,
-      transparent 100%
-    );
-    background-size: 220% 100%;
-    background-position: 150% 0;
-    pointer-events: none;
-    transition: background-position 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .life-signin-btn:hover::before {
-    background-position: -50% 0;
-  }
-  .life-signin-btn:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border-color: rgba(255, 255, 255, 0.5) !important;
-    transform: translateY(-1px);
-  }
-}
-
-/* ─── Custom scrollbars: thin, themed, invisible-on-idle on desktop ────── */
-@media (pointer: fine) {
-  .life-main-scroll,
-  .life-sidebar-body,
-  .life-notif-dropdown > div {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(74, 140, 92, 0.28) transparent;
-  }
-  .life-main-scroll::-webkit-scrollbar,
-  .life-sidebar-body::-webkit-scrollbar,
-  .life-notif-dropdown > div::-webkit-scrollbar {
-    width: 8px;
-  }
-  .life-main-scroll::-webkit-scrollbar-thumb,
-  .life-sidebar-body::-webkit-scrollbar-thumb,
-  .life-notif-dropdown > div::-webkit-scrollbar-thumb {
-    background: rgba(74, 140, 92, 0.28);
-    border-radius: 4px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    transition: background 0.2s ease;
-  }
-  .life-main-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(74, 140, 92, 0.45);
-    background-clip: padding-box;
-  }
-}
-
-/* ─── Sidebar link hover: subtle padding nudge ─────────────────────────── */
-@media (prefers-reduced-motion: no-preference) {
-  .life-sidebar-link {
-    transition:
-      background 0.18s ease,
-      padding-left 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-/* ─── Smoother input focus: green ring grows from border ───────────────── */
-input:focus,
-textarea:focus {
-  box-shadow: 0 0 0 3px rgba(74, 140, 92, 0.15);
-}
-
-/* ─── Page transition: a touch more refined ────────────────────────────── */
-/* ─── Page transitions: Vercel-style clean fade-up (no blur = matte) ─── */
-@keyframes life-page-in-refined {
-  0%   { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes life-page-out {
-  0%   { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-6px); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  [data-page-tag] {
-    animation: life-page-in-refined 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-}
-
-/* ─── Selection color: use brand green instead of browser blue ─────────── */
-::selection {
-  background: rgba(74, 140, 92, 0.28);
-  color: inherit;
-}
-::-moz-selection {
-  background: rgba(74, 140, 92, 0.28);
-  color: inherit;
-}
-
-/* ─── Disable ugly default button tap flash on iOS ──────────────────────── */
-button,
-a,
-[role="button"] {
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════ */
-
-/* ─── A11Y: keyboard focus rings ──────────────────────────────────────
-   Visible only for keyboard users (not mouse) so the UI stays clean for
-   most people but remains navigable via tab. */
-button:focus-visible,
-[role="button"]:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  outline: 2px solid var(--life-green, #4a8c5c);
-  outline-offset: 2px;
-  border-radius: inherit;
-}
-
-/* Crisp rendering for small SVG icons on Retina displays */
-svg {
-  -webkit-font-smoothing: antialiased;
-  shape-rendering: geometricPrecision;
-}
-
-/* Prevent iOS Safari from auto-enlarging text on orientation change */
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+  transform: translateY(0);
 }
 
 /* Top bar glass + iOS safe area (notch / status bar) */
 .life-topbar {
   backdrop-filter: saturate(1.2) blur(12px);
   -webkit-backdrop-filter: saturate(1.2) blur(12px);
-  padding-top: var(--safe-top);
-  padding-left: max(16px, var(--safe-left));
-  padding-right: max(16px, var(--safe-right));
-  min-height: calc(62px + var(--safe-top));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  min-height: calc(62px + env(safe-area-inset-top, 0px));
   height: auto;
   box-sizing: border-box;
 }
@@ -466,41 +255,24 @@ html {
 
 /* Sticky layers sit below the top bar (height + safe area) */
 .life-search-dropdown {
-  top: calc(62px + var(--safe-top));
+  top: calc(62px + env(safe-area-inset-top, 0px));
   border-radius: 0 0 18px 18px;
   box-shadow: 0 14px 34px rgba(20, 20, 20, 0.13);
 }
 
-/* Desktop sidebar sits below topbar */
-.life-sidebar {
-  width: 288px;
-  max-width: min(288px, 100vw);
-  top: calc(62px + var(--safe-top));
-  padding-top: 0;
-  padding-bottom: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+.life-sidebar,
 .life-sidebar-backdrop {
-  top: calc(62px + var(--safe-top));
+  top: calc(62px + env(safe-area-inset-top, 0px));
+}
+
+.life-sidebar {
+  width: min(86vw, 340px);
 }
 
 .life-landing-shell,
 .life-auth-shell,
 .life-home-page {
   width: 100%;
-}
-
-/* Auth & landing shells must scroll internally now that body is overflow:hidden */
-.life-landing-shell,
-.life-auth-shell {
-  height: 100%;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
 }
 
 .life-auth-card {
@@ -520,20 +292,20 @@ html {
 
 .life-footer {
   width: 100%;
-  padding-bottom: calc(10px + var(--safe-bottom));
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
 }
 
-/* Interactive card hover (desktop)  */
+/* ── Interactive card hover (desktop) ──────────────────────── */
 @media (hover: hover) {
   .life-content-card:hover,
   .life-topic-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255,255,255,0.08);
+    box-shadow: 0 8px 24px rgba(74,140,92,0.12);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 }
 
-/* Social Login Buttons  */
+/* ── Social Login Buttons ───────────────────────────────────── */
 .social-btn {
   position: relative;
   overflow: hidden;
@@ -557,10 +329,10 @@ html {
   opacity: 1;
 }
 
-/* Scroll to Top Button  */
+/* ── Scroll to Top Button ──────────────────────────────────── */
 .scroll-to-top {
   position: fixed;
-  bottom: calc(24px + var(--safe-bottom));
+  bottom: calc(24px + env(safe-area-inset-bottom));
   right: 24px;
   width: 48px;
   height: 48px;
@@ -602,9 +374,9 @@ html {
 
 .life-offline-banner {
   position: fixed;
-  z-index: 90;
+  z-index: 260;
   left: 50%;
-  top: calc(10px + var(--safe-top));
+  top: calc(10px + env(safe-area-inset-top, 0px));
   transform: translateX(-50%);
   background: rgba(20, 20, 20, 0.94);
   color: #fff;
@@ -619,28 +391,8 @@ html {
   -webkit-backdrop-filter: blur(10px);
 }
 
-.life-cloud-banner {
-  position: fixed;
-  z-index: 89;
-  left: 50%;
-  top: calc(52px + var(--safe-top));
-  transform: translateX(-50%);
-  background: rgba(229, 72, 77, 0.94);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
 @media (max-width: 640px) {
-  .life-offline-banner,
-  .life-cloud-banner {
+  .life-offline-banner {
     width: calc(100% - 20px);
     max-width: 460px;
     text-align: center;
@@ -668,133 +420,87 @@ html {
 }
 
 /* Unified password show/hide toggle */
-/* Password toggle — bulletproof anchored to right side of input
-   Locked position. Never flickers. Never jumps. Never re-flows.
-   Uses translate3d to force GPU compositing for stability.
-   Active press does NOT change transform (prevents the jump bug).
-    */
-.life-password-field {
-  position: relative !important;
-  display: block !important;
-  width: 100% !important;
-}
-
-.life-password-field > input {
-  width: 100% !important;
-  /* Reserve space for the toggle so text never overlaps it */
-  padding-right: 72px !important;
-  box-sizing: border-box !important;
-}
-
-/* The toggle itself — absolutely anchored, GPU-composited, never re-flows */
-.life-password-field > .life-password-toggle,
-.life-password-field > button[data-password-toggle="true"],
-.life-auth-card div[style*="position:relative"] > input + button,
-.life-auth-card div[style*="position: relative"] > input + button {
-  position: absolute !important;
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  right: 10px !important;
-  top: 50% !important;
-  /* translate3d forces own compositing layer → no flicker, no re-paint jumps */
-  transform: translate3d(0, -50%, 0) !important;
-  will-change: auto !important;
-  z-index: 4 !important;
-
-  /* Fixed size — content change ("Show" ↔ "Hide") cannot resize it */
-  height: 36px !important;
-  min-height: 36px !important;
-  max-height: 36px !important;
-  width: 54px !important;
-  min-width: 54px !important;
-  max-width: 54px !important;
-
+.life-password-toggle,
+button:has(> .life-password-toggle-label) {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  backface-visibility: hidden !important;
-  transform-style: preserve-3d !important;
+  min-height: 32px !important;
+  min-width: 54px !important;
   border-radius: 8px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-
+  padding: 4px 8px !important;
   background: transparent !important;
   border: 1px solid transparent !important;
   color: var(--life-muted) !important;
   font-size: 12px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
-  letter-spacing: 0.01em !important;
-  white-space: nowrap !important;
-  text-align: center !important;
+  letter-spacing: 0.01em;
   cursor: pointer !important;
   touch-action: manipulation !important;
   -webkit-tap-highlight-color: transparent !important;
-  /* NO transition on transform or position — kills the flicker */
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
-/* Hover — only color changes. Transform stays pinned at -50%. */
-.life-password-field > .life-password-toggle:hover,
-.life-password-field > button[data-password-toggle="true"]:hover,
+.life-password-field {
+  position: relative;
+}
+
+.life-password-field > .life-password-toggle,
+.life-auth-card div[style*="position:relative"] > input + button,
+.life-auth-card div[style*="position: relative"] > input + button {
+  position: absolute !important;
+  right: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 4 !important;
+  min-height: 32px !important;
+  min-width: 54px !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--life-muted) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+.life-password-toggle:hover,
+button:has(> .life-password-toggle-label):hover {
+  background: rgba(74, 140, 92, 0.08) !important;
+  border-color: rgba(74, 140, 92, 0.22) !important;
+  color: var(--life-green) !important;
+}
+
 .life-auth-card div[style*="position:relative"] > input + button:hover,
 .life-auth-card div[style*="position: relative"] > input + button:hover {
   background: rgba(74, 140, 92, 0.08) !important;
   border-color: rgba(74, 140, 92, 0.22) !important;
   color: var(--life-green) !important;
-  /* CRITICAL: keep same transform — no translateY(-50%) scale drift */
-  transform: translate3d(0, -50%, 0) !important;
 }
 
-/* Active (press) — no transform change. Prevents the vertical jump bug. */
 .life-password-field > .life-password-toggle:active,
-.life-password-field > button[data-password-toggle="true"]:active,
 .life-auth-card div[style*="position:relative"] > input + button:active,
 .life-auth-card div[style*="position: relative"] > input + button:active {
-  transform: translate3d(0, -50%, 0) !important;
-  background: rgba(74, 140, 92, 0.14) !important;
+  transform: translateY(-50%) scale(0.97) !important;
 }
 
-.life-password-field > .life-password-toggle:focus-visible,
-.life-password-field > button[data-password-toggle="true"]:focus-visible {
+.life-password-toggle:active,
+button:has(> .life-password-toggle-label):active {
+  transform: scale(0.97) !important;
+}
+
+.life-password-toggle:focus-visible,
+button:has(> .life-password-toggle-label):focus-visible {
   outline: 2px solid var(--life-green) !important;
   outline-offset: 2px !important;
-  transform: translate3d(0, -50%, 0) !important;
 }
 
-/* The label span inside — fixed width so "Show"/"Hide" swap doesn't shift anything */
-.life-password-toggle-label {
-  display: inline-block !important;
-  width: 100% !important;
-  text-align: center !important;
-  white-space: nowrap !important;
+/* ── Visual bug-fix + polish pass (batch) ───────────────────── */
+body,
+#root {
+  overflow-x: clip;
 }
-
-/* Override the global button:active { transform: scale(0.98) } that caused the jump */
-button.life-password-toggle:active:not(:disabled),
-button[data-password-toggle="true"]:active:not(:disabled),
-.life-password-field > button:active:not(:disabled) {
-  transform: translate3d(0, -50%, 0) !important;
-  filter: none !important;
-}
-
-/* Extra specificity layer — defeat the JS-injected global button:active rule */
-.life-auth-card button.life-password-toggle:active,
-.life-auth-card button[data-password-toggle="true"]:active,
-.life-auth-shell button.life-password-toggle:active,
-.life-auth-shell button[data-password-toggle="true"]:active,
-.life-password-field button.life-password-toggle,
-.life-password-field button[data-password-toggle="true"] {
-  filter: none !important;
-}
-
-.life-password-field button.life-password-toggle:active,
-.life-password-field button[data-password-toggle="true"]:active {
-  transform: translate3d(0, -50%, 0) !important;
-  filter: none !important;
-}
-
-/* Visual bug-fix + polish pass (batch)  */
 
 img,
 svg,
@@ -813,6 +519,40 @@ canvas {
   display: inline-block;
 }
 
+.life-wordmark {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.02em;
+}
+
+.life-wordmark-text {
+  display: inline-block;
+}
+
+.life-wordmark-dot {
+  display: inline-block;
+  font-size: 0.78em;
+  line-height: 0.78;
+  transform: translateY(-0.08em);
+}
+
+.life-notif-dropdown {
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+}
+
+.life-notif-row {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.life-notif-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .life-auth-card input,
 .life-auth-card select,
 .life-auth-card textarea {
@@ -825,30 +565,16 @@ canvas {
   flex-shrink: 0;
 }
 
-.life-topbar .logo-btn,
-.life-topbar .profile-btn,
-.life-topbar .life-topbar-bell,
-.life-topbar .life-topbar-dark,
-.life-topbar .life-search-clear {
-  box-sizing: border-box;
-  flex: 0 0 auto;
-  line-height: 1;
-}
-
 .life-topbar input[type="text"] {
   width: 100%;
   max-width: 100%;
 }
 
 .life-notif-dropdown {
-  /* Layout handled inline; this class is kept for dark-mode overrides below */
-  animation: notif-drop-in 0.22s cubic-bezier(0.22,1,0.36,1) both;
-  transform-origin: top right;
-}
-
-@keyframes notif-drop-in {
-  from { opacity: 0; transform: scale(0.94) translateY(-8px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  max-height: min(72vh, 560px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .life-home-stats > div {
@@ -867,9 +593,7 @@ canvas {
 }
 
 .life-main-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+  height: 100%;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
 }
@@ -890,7 +614,7 @@ canvas {
 }
 
 .life-settings-page {
-  padding-bottom: calc(96px + var(--safe-bottom));
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
 }
 
 .life-settings-card,
@@ -917,18 +641,18 @@ body.life-dark .life-sidebar,
 body.life-dark .life-profile-card,
 body.life-dark .life-settings-card,
 body.life-dark .life-auth-card {
-  background: #0a0a0a !important;
-  border-color: #262626 !important;
-  color: #fafafa !important;
+  background: #1e1e1e !important;
+  border-color: #333 !important;
+  color: #e8e8e8 !important;
 }
 
 body.life-dark .life-auth-shell,
 body.life-dark .life-landing-shell {
-  background: linear-gradient(165deg, #000000 0%, #0a0a0a 45%, #000000 100%) !important;
+  background: linear-gradient(165deg, #181818 0%, #202520 45%, #181818 100%) !important;
 }
 
 body.life-dark .life-home-hero {
-  background: linear-gradient(180deg, #0a0a0a 0%, #0f0f0f 100%) !important;
+  background: linear-gradient(180deg, #1b1b1b 0%, #202520 100%) !important;
 }
 
 body.life-dark .life-auth-card,
@@ -939,23 +663,23 @@ body.life-dark .life-search-dropdown button,
 body.life-dark .life-notif-dropdown,
 body.life-dark .scroll-to-top,
 body.life-dark .life-glass-card {
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34) !important;
 }
 
 body.life-dark .life-topbar input[type="text"] {
-  background: #141414 !important;
-  border-color: #262626 !important;
-  color: #fafafa !important;
+  background: #222 !important;
+  border-color: #3b3b3b !important;
+  color: #f2f2f2 !important;
 }
 
 body.life-dark .life-topbar input[type="text"]::placeholder {
-  color: #a1a1a1 !important;
+  color: #a29d96 !important;
 }
 
 body.life-dark .life-topbar input[type="text"]:focus {
-  background: #1a1a1a !important;
-  border-color: #50c878 !important;
-  box-shadow: 0 0 0 3px rgba(80, 200, 120, 0.18) !important;
+  background: #2a2a2a !important;
+  border-color: #5a9d6c !important;
+  box-shadow: 0 0 0 3px rgba(90, 157, 108, 0.16) !important;
 }
 
 body.life-dark select {
@@ -1043,7 +767,7 @@ body.life-dark .life-main-scroll {
     left: max(8px, var(--safe-left)) !important;
     right: max(8px, var(--safe-right)) !important;
     width: auto !important;
-    top: calc(56px + var(--safe-top)) !important;
+    top: calc(56px + env(safe-area-inset-top, 0px)) !important;
   }
 
   .life-settings-page,
@@ -1062,186 +786,7 @@ body.life-dark .life-main-scroll {
   }
 }
 
-/* Device-specific sidebar widths
-   These run OUTSIDE the max-width:640px block to work on all browsers.
-    */
-
-/* iPhone 17 / Galaxy S26 / Xiaomi 15 — 390–429px viewport */
-@media (max-width: 640px) and (min-width: 390px) {
-  .life-sidebar {
-    width: 88vw !important;
-    max-width: 340px !important;
-  }
-}
-
-/* iPhone 17 Pro Max and large Androids — 430px+ viewport */
-@media (max-width: 640px) and (min-width: 430px) {
-  .life-sidebar {
-    width: 85vw !important;
-    max-width: 360px !important;
-  }
-}
-
-/* Sidebar flex layout: pins Sign Out to the bottom
-   The sidebar is a scroll container on mobile. We add flex-column
-   so marginTop:auto on the Sign Out div pushes it to the bottom.
-    */
-@media (max-width: 640px) {
-  .life-sidebar {
-    display: flex !important;
-    flex-direction: column !important;
-    box-shadow: 10px 0 28px rgba(20, 20, 20, 0.12) !important;
-  }
-}
-
-/* Sidebar item tap targets — min 44px on all 5 target devices
-   Ensures every nav item is finger-friendly per Apple HIG & Material.
-    */
-@media (max-width: 640px) {
-  .life-sidebar-header {
-    gap: 10px !important;
-  }
-
-  .life-sidebar-progress-card {
-    border-radius: 12px !important;
-  }
-
-  /* Section headers (SS component) */
-  .life-sidebar-section-header,
-  .life-sidebar > button {
-    min-height: 44px !important;
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
-  }
-
-  .life-sidebar-link {
-    min-height: 44px !important;
-    padding-top: 7px !important;
-    padding-bottom: 7px !important;
-    padding-left: 16px !important;
-    padding-right: 12px !important;
-  }
-
-  .life-sidebar-link span {
-    font-size: 12px !important;
-  }
-}
-
-/* Mobile content padding — prevents edge-to-edge bleed
-   Ensures readable line length and correct margins on all 5 devices.
-    */
-@media (max-width: 640px) {
-  /* Main content blocks get horizontal breathing room */
-  [data-page-tag] > div,
-  .life-home-page > div {
-    padding-left: max(16px, var(--safe-left));
-    padding-right: max(16px, var(--safe-right));
-    box-sizing: border-box;
-  }
-
-  /* Cards and centered max-width containers fill width correctly */
-  [data-page-tag] [style*="maxWidth"],
-  .life-home-page [style*="maxWidth"] {
-    max-width: 100% !important;
-    width: 100% !important;
-  }
-
-  /* Progress bar row on home page — stays in one line */
-  .life-home-progress-row {
-    flex-wrap: nowrap;
-    overflow: hidden;
-  }
-}
-
-/* Galaxy A16 (360px) — tighten horizontal padding slightly */
-@media (max-width: 390px) {
-  [data-page-tag] > div,
-  .life-home-page > div {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-}
-
-/* Parchment paper texture for the reading view
-   Uses a subtle layered SVG noise filter + linear gradients to simulate
-   real aged paper. Applied to the reading tab container and individual
-   page content. Dark mode uses a darker skin-toned parchment.
-    */
-.life-reader-parchment {
-  background-color: #f7f1e3;
-  background-image:
-    /* subtle horizontal fibers */
-    repeating-linear-gradient(
-      0deg,
-      rgba(139, 110, 74, 0.015) 0px,
-      rgba(139, 110, 74, 0.015) 1px,
-      transparent 1px,
-      transparent 3px
-    ),
-    /* warm page glow */
-    radial-gradient(
-      ellipse at 20% 10%,
-      rgba(255, 250, 230, 0.5) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 80% 90%,
-      rgba(220, 195, 150, 0.16) 0%,
-      transparent 60%
-    ),
-    /* base paper tint */
-    linear-gradient(
-      180deg,
-      #f9f3e3 0%,
-      #f4ead2 100%
-    );
-  background-blend-mode: multiply, normal, normal, normal;
-  box-shadow:
-    inset 0 0 38px rgba(160, 130, 85, 0.08),
-    inset 0 0 90px rgba(140, 110, 70, 0.04);
-}
-
-/* Dark mode — darker skin-toned parchment */
-body.life-dark .life-reader-parchment {
-  background-color: #2a2420;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgba(80, 60, 40, 0.12) 0px,
-      rgba(80, 60, 40, 0.12) 1px,
-      transparent 1px,
-      transparent 3px
-    ),
-    radial-gradient(
-      ellipse at 20% 10%,
-      rgba(80, 65, 45, 0.35) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 80% 90%,
-      rgba(55, 42, 28, 0.4) 0%,
-      transparent 60%
-    ),
-    linear-gradient(
-      180deg,
-      #2d2520 0%,
-      #241d18 100%
-    );
-  background-blend-mode: multiply, normal, normal, normal;
-  box-shadow:
-    inset 0 0 38px rgba(20, 15, 10, 0.4),
-    inset 0 0 90px rgba(0, 0, 0, 0.25);
-}
-
-/* Soft text color inside the parchment — stays readable in both modes */
-body.life-dark .life-reader-parchment,
-body.life-dark .life-reader-parchment p,
-body.life-dark .life-reader-parchment h1,
-body.life-dark .life-reader-parchment h2 {
-  color: #e8ddc6;
-}
-
-/* Enhanced Animations  */
+/* ── Enhanced Animations ───────────────────────────────────── */
 @keyframes life-float {
   0%,
   100% {
@@ -1285,7 +830,7 @@ body.life-dark .life-reader-parchment h2 {
   animation: life-shimmer 2s infinite;
 }
 
-/* Focus States  */
+/* ── Focus States ───────────────────────────────────────────── */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -1296,7 +841,7 @@ select:focus-visible {
   transition: outline-offset 0.15s ease;
 }
 
-/* Page Transitions  */
+/* ── Page Transitions ──────────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
   .page-transition-enter {
     opacity: 0;
@@ -1325,7 +870,7 @@ select:focus-visible {
   }
 }
 
-/* Toast Notifications  */
+/* ── Toast Notifications ─────────────────────────────────── */
 .life-toast {
   animation: life-toast-in 0.35s var(--life-ease-out) forwards;
 }
@@ -1341,10 +886,10 @@ select:focus-visible {
   }
 }
 
-/* Mobile Search & Top Bar  */
+/* ── Mobile Search & Top Bar ──────────────────────────────── */
 @media (max-width: 640px) {
   .scroll-to-top {
-    bottom: calc(16px + var(--safe-bottom));
+    bottom: calc(16px + env(safe-area-inset-bottom));
     right: 16px;
     width: 44px;
     height: 44px;
@@ -1367,11 +912,14 @@ select:focus-visible {
 
   /* Mobile search bar optimizations */
   .life-topbar {
-    padding-left: max(12px, var(--safe-left)) !important;
-    padding-right: max(12px, var(--safe-right)) !important;
-    padding-top: var(--safe-top) !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center !important;
+    padding-left: max(12px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(12px, env(safe-area-inset-right, 0px)) !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
     padding-bottom: 10px !important;
-    min-height: calc(62px + var(--safe-top)) !important;
+    min-height: calc(62px + env(safe-area-inset-top, 0px)) !important;
     height: auto !important;
   }
 
@@ -1379,6 +927,19 @@ select:focus-visible {
     font-size: 16px !important; /* Prevents zoom on iOS */
     padding: 11px 32px 11px 36px !important;
     border-radius: 24px !important;
+  }
+
+  .life-topbar-left {
+    gap: 8px !important;
+    min-width: max-content;
+    align-self: center;
+  }
+
+  .life-topbar-search {
+    min-width: 0;
+    width: 100%;
+    margin: 0 !important;
+    align-self: center;
   }
 
   .life-topbar input[type="text"]::placeholder {
@@ -1395,42 +956,29 @@ select:focus-visible {
   .life-topbar .profile-btn {
     width: 34px !important;
     height: 34px !important;
+    margin: 0 !important;
+    align-self: center !important;
   }
 
   /* Mobile search dropdown */
   .life-search-dropdown {
-    top: calc(56px + var(--safe-top)) !important;
+    top: calc(56px + env(safe-area-inset-top, 0px)) !important;
     max-height: min(
       70vh,
-      calc(100dvh - 56px - var(--safe-top))
+      calc(100dvh - 56px - env(safe-area-inset-top, 0px))
     ) !important;
     border-radius: 0 0 16px 16px !important;
   }
 
-  /* Mobile sidebar: full-height overlay drawer
-     top:0 so the drawer covers the FULL viewport height — no gaps.
-     Topbar is sticky z-50, sidebar is fixed z-40: topbar always wins.
-     padding-top clears the topbar (52px mobile) + iOS notch.
-     Widths per device:
-       Galaxy A16 (360px)           → 92vw, max 320px
-       iPhone 17 / S26 / Xiaomi 15  → 88vw, max 340px  (390–429px)
-       iPhone 17 Pro Max            → 85vw, max 360px  (430px+)
-      */
   .life-sidebar {
-    top: 0 !important;
-    bottom: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    width: 92vw !important;
+    top: calc(56px + env(safe-area-inset-top, 0px)) !important;
+    width: min(85vw, 320px) !important;
     max-width: 320px !important;
-    border-radius: 0 !important;
-    overflow: hidden !important;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
   }
 
   .life-sidebar-backdrop {
-    top: 0 !important;
-    bottom: 0 !important;
-    z-index: 39 !important;
+    top: calc(56px + env(safe-area-inset-top, 0px)) !important;
   }
 
   /* Home / landing hero — proportional on phone (avoid oversized display type) */
@@ -1444,12 +992,26 @@ select:focus-visible {
     font-size: clamp(2.15rem, 8.5vw, 3.25rem) !important;
   }
 
+  .life-wordmark--home {
+    font-size: clamp(2.9rem, 14vw, 4.3rem) !important;
+    letter-spacing: -0.08em !important;
+  }
+
+  .life-wordmark--landing {
+    font-size: clamp(2.25rem, 9vw, 3.3rem) !important;
+  }
+
+  .life-wordmark-dot {
+    font-size: 0.68em;
+    transform: translateY(-0.14em);
+  }
+
   .life-home-hero {
     padding: 28px 18px 28px !important;
   }
 
   .life-home-page {
-    padding-bottom: calc(88px + var(--safe-bottom)) !important;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important;
   }
 
   .life-home-hero-actions {
@@ -1496,34 +1058,9 @@ select:focus-visible {
 
   /* Reader: tabs + actions fit narrow screens */
   .life-reader-toolbar {
-    flex-wrap: nowrap !important;
-    row-gap: 0 !important;
-    padding-bottom: 0 !important;
-    padding-left: max(10px, var(--safe-left)) !important;
-    padding-right: max(18px, var(--safe-right)) !important;
-    gap: 2px !important;
-  }
-
-  .life-reader-toolbar-actions {
-    gap: 4px !important;
-    padding-right: 2px !important;
-    min-width: max-content !important;
-  }
-
-  .life-reader-copy-btn {
-    font-size: 11px !important;
-    padding: 8px 9px !important;
-  }
-
-  .life-reader-star-btn {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 24px !important;
-  }
-
-  .life-reader-toolbar + div > div > div:last-child {
-    margin-top: 4px !important;
-    transform: translateY(-1px);
+    flex-wrap: wrap !important;
+    row-gap: 8px !important;
+    padding-bottom: 10px !important;
   }
 
   .life-share-sheet-grid {
@@ -1551,7 +1088,7 @@ select:focus-visible {
 
   /* Mobile button sizing — iOS touch target (44px minimum)
      Exclude password-toggle buttons which sit inside an input row */
-  button:not(.life-password-toggle):not([data-password-toggle]):not(.logo-btn):not(.profile-btn):not(.life-topbar-bell):not(.life-topbar-dark):not(.life-search-clear),
+  button:not(.life-password-toggle):not([data-password-toggle]),
   [role="button"] {
     min-height: 44px;
   }
@@ -1559,28 +1096,7 @@ select:focus-visible {
   /* Mobile footer visibility - ensure it's visible above iOS home indicator */
   .life-footer {
     margin-top: 24px !important;
-    padding-bottom: calc(12px + var(--safe-bottom)) !important;
-  }
-
-  .life-quiz-page {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .life-quiz-page * {
-    box-sizing: border-box;
-  }
-
-  .life-quiz-page button {
-    width: 100%;
-  }
-
-  .life-quiz-page .life-quiz-tabs button,
-  .life-quiz-result-actions button,
-  .life-quiz-diff-row button {
-    width: auto;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
   }
 }
 
@@ -1607,7 +1123,7 @@ select:focus-visible {
   transform: scale(1.1);
 }
 
-/* Premium Input Focus  */
+/* ── Premium Input Focus ────────────────────────────────── */
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus {
@@ -1638,7 +1154,7 @@ select {
   padding-right: 28px !important;
 }
 
-/* Glass Card Effect  */
+/* ── Glass Card Effect ──────────────────────────────────── */
 .life-glass-card {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
@@ -1646,7 +1162,7 @@ select {
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Smooth Scroll  */
+/* ── Smooth Scroll ──────────────────────────────────────── */
 .life-sidebar,
 .life-search-dropdown {
   scroll-behavior: smooth;
@@ -1654,17 +1170,17 @@ select {
   overscroll-behavior: contain;
 }
 
-/* Sidebar section hover  */
+/* ── Sidebar section hover ──────────────────────────────── */
 .life-sidebar button:hover {
-  background: transparent;
+  background: rgba(74, 140, 92, 0.04);
 }
 
-/* Premium button press  */
+/* ── Premium button press ───────────────────────────────── */
 button:active:not(:disabled) {
   transform: scale(0.98) !important;
 }
 
-/* Stat card hover  */
+/* ── Stat card hover ────────────────────────────────────── */
 .life-stat-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -1692,14 +1208,14 @@ button:active:not(:disabled) {
   }
 }
 
-/* Lazy route loading  */
+/* ── Lazy route loading ───────────────────────────────────── */
 .life-page-suspense-fallback {
   min-height: min(50vh, 360px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px max(20px, var(--safe-right)) 48px
-    max(20px, var(--safe-left));
+  padding: 32px max(20px, env(safe-area-inset-right, 0px)) 48px
+    max(20px, env(safe-area-inset-left, 0px));
   box-sizing: border-box;
 }
 
@@ -1745,7 +1261,7 @@ button:active:not(:disabled) {
   }
 }
 
-/* Quiz: narrow breakpoints  */
+/* ── Quiz: narrow breakpoints ───────────────────────────── */
 @media (max-width: 420px) {
   .life-quiz-stat-grid {
     grid-template-columns: 1fr !important;
@@ -1766,7 +1282,7 @@ button:active:not(:disabled) {
   }
 }
 
-/* Post-It: avoid iOS zoom on focus in compose  */
+/* ── Post-It: avoid iOS zoom on focus in compose ─────────── */
 @media (max-width: 640px) {
   .life-postit-page input,
   .life-postit-page textarea {
@@ -1774,18 +1290,18 @@ button:active:not(:disabled) {
   }
 }
 
-/* Knowledge constellation (full-screen topic map)  */
+/* ── Knowledge constellation (full-screen topic map) ─────── */
 .life-constellation-overlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 240;
   display: flex;
   align-items: stretch;
   justify-content: center;
-  padding: max(12px, var(--safe-top))
-    max(12px, var(--safe-right))
-    max(12px, var(--safe-bottom))
-    max(12px, var(--safe-left));
+  padding: max(12px, env(safe-area-inset-top, 0px))
+    max(12px, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(12px, env(safe-area-inset-left, 0px));
   box-sizing: border-box;
   animation: life-constellation-overlay-in 0.45s var(--life-ease-out) both;
 }
@@ -1879,8 +1395,8 @@ button:active:not(:disabled) {
 }
 
 .life-constellation-pill {
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--life-green);
@@ -2065,15 +1581,15 @@ button:active:not(:disabled) {
   }
 }
 
-/* Global button interaction override  */
+/* ── Global button interaction override ──────────────────── */
 button,
 [role="button"] {
   transition:
-    transform 0.08s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.18s var(--life-ease-soft),
-    filter 0.12s ease,
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+    transform 0.16s var(--life-ease-soft),
+    box-shadow 0.22s var(--life-ease-soft),
+    filter 0.16s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
   transform-origin: center;
 }
@@ -2127,7 +1643,7 @@ button,
   transform: scale(0.985) !important;
 }
 
-/* Reader toolbar fixes (iPhone alignment)  */
+/* ── Reader toolbar fixes (iPhone alignment) ─────────────── */
 .life-reader-toolbar-actions {
   display: inline-flex;
   align-items: center;
@@ -2191,26 +1707,9 @@ button,
 
 .life-topbar .logo-btn {
   gap: 0 !important;
-  inline-size: 40px !important;
-  block-size: 40px !important;
-  min-inline-size: 40px !important;
-  min-block-size: 40px !important;
-  aspect-ratio: 1 / 1 !important;
-  border-radius: 999px !important;
-  padding: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
 }
 
 @media (max-width: 640px) {
-  .life-topbar .logo-btn {
-    inline-size: 36px !important;
-    block-size: 36px !important;
-    min-inline-size: 36px !important;
-    min-block-size: 36px !important;
-  }
-
   .life-topbar .logo-btn > div {
     inline-size: 34px !important;
     block-size: 34px !important;
@@ -2231,7 +1730,18 @@ button,
 }
 
 .life-sidebar::before {
-  content: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 90% at 0% 50%,
+      rgba(255, 255, 255, 0.35),
+      transparent 55%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+  mix-blend-mode: soft-light;
 }
 
 .life-sidebar-backdrop {
@@ -2327,22 +1837,15 @@ button:active:not(:disabled),
     margin-right: auto !important;
     border-radius: 20px !important;
     padding: 24px 16px 24px !important;
-    text-align: center !important;
+    text-align: center;
   }
 
   .life-home-hero h1 {
     max-width: 10.5ch;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    text-align: center !important;
-    display: block !important;
   }
 
   .life-home-hero p {
     max-width: 32ch;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    text-align: center !important;
   }
 }
 
@@ -2504,26 +2007,11 @@ button:active:not(:disabled),
 
 @media (max-width: 640px) {
   .life-topbar .profile-btn {
-    inline-size: 36px !important;
-    block-size: 36px !important;
-    min-inline-size: 36px !important;
-    min-block-size: 36px !important;
+    inline-size: 34px !important;
+    block-size: 34px !important;
+    min-inline-size: 34px !important;
+    min-block-size: 34px !important;
   }
-}
-
-.life-topbar .life-topbar-bell,
-.life-topbar .life-topbar-dark,
-.life-topbar .life-search-clear {
-  inline-size: 36px !important;
-  block-size: 36px !important;
-  min-inline-size: 36px !important;
-  min-block-size: 36px !important;
-  aspect-ratio: 1 / 1 !important;
-  border-radius: 999px !important;
-  padding: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
 }
 
 /* Add glow/light behind homepage primary action */
@@ -2674,9 +2162,9 @@ button:active:not(:disabled),
   box-shadow: none !important;
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    BOTTOM NAV BAR — mobile app navigation (iOS pattern)
-    */
+   ───────────────────────────────────────────────────────────── */
 
 .life-bottom-nav {
   display: none; /* hidden on desktop */
@@ -2716,14 +2204,6 @@ button:active:not(:disabled),
     border-top-color: #333 !important;
   }
 
-  .life-sidebar-backdrop {
-    z-index: 80 !important;
-  }
-
-  .life-sidebar {
-    z-index: 90 !important;
-  }
-
   .life-bottom-nav-item {
     flex: 1;
     display: flex;
@@ -2748,11 +2228,11 @@ button:active:not(:disabled),
 
   .life-bottom-nav-item svg {
     flex-shrink: 0;
-    transition: transform 0.22s var(--life-ease-soft);
+    transition: transform 0.2s var(--life-ease-soft);
   }
 
   .life-bottom-nav-item--active svg {
-    transform: translateY(-1px) scale(1.05);
+    transform: translateY(-1px);
   }
 
   .life-bottom-nav-item--active::after {
@@ -2761,17 +2241,10 @@ button:active:not(:disabled),
     top: 6px;
     left: 50%;
     transform: translateX(-50%);
-    width: 20px;
-    height: 3px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #4a8c5c, #6FBE77);
-    box-shadow: 0 1px 3px rgba(74, 140, 92, 0.4);
-    animation: life-nav-pill 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  @keyframes life-nav-pill {
-    0%   { transform: translateX(-50%) scaleX(0.2); opacity: 0; }
-    100% { transform: translateX(-50%) scaleX(1); opacity: 1; }
+    width: 16px;
+    height: 2.5px;
+    border-radius: 2px;
+    background: var(--life-green, #4a8c5c);
   }
 
   .life-bottom-nav-label {
@@ -2785,24 +2258,20 @@ button:active:not(:disabled),
 
   .life-bottom-nav-badge {
     position: absolute;
-    top: 4px;
+    top: 6px;
     left: 50%;
-    transform: translateX(8px);
-    min-width: 16px;
-    height: 16px;
-    border-radius: 8px;
-    background: #d63031;
+    margin-left: 5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #c0392b;
     color: #fff;
-    font-size: 9px;
-    font-weight: 800;
-    font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    display: grid;
-    place-items: center;
-    border: 1.5px solid var(--life-white, #fff);
-    line-height: 1;
-    padding: 0 3px;
-    box-sizing: border-box;
-    letter-spacing: 0;
+    font-size: 8px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--life-white);
   }
 
   /* Push page content above the bottom nav */
@@ -2823,10 +2292,10 @@ button:active:not(:disabled),
   }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    iOS INPUT ZOOM PREVENTION
    All text inputs must be ≥ 16px to prevent auto-zoom on iOS
-    */
+   ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
   input[type="text"],
@@ -2843,10 +2312,10 @@ button:active:not(:disabled),
   }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    iOS FULL-HEIGHT FIX
    100svh / -webkit-fill-available for Chrome/Safari parity
-    */
+   ───────────────────────────────────────────────────────────── */
 
 .life-full-height {
   min-height: 100svh;
@@ -2854,16 +2323,16 @@ button:active:not(:disabled),
   min-height: -webkit-fill-available;
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    PWA / ADD-TO-HOME-SCREEN BANNER
-    */
+   ───────────────────────────────────────────────────────────── */
 
 .life-a2hs-banner {
   position: fixed;
   bottom: calc(var(--life-bottom-nav-height) + 12px);
   left: 12px;
   right: 12px;
-  z-index: 85;
+  z-index: 250;
   background: var(--life-white);
   border: 1px solid var(--life-border);
   border-radius: 18px;
@@ -2889,7 +2358,7 @@ button:active:not(:disabled),
 .life-a2hs-icon {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 10px;
   background: linear-gradient(145deg, var(--life-green), #2d6e42);
   display: flex;
   align-items: center;
@@ -2933,42 +2402,31 @@ button:active:not(:disabled),
 }
 
 .life-a2hs-dismiss {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--life-border);
-  border-radius: 50%;
+  background: none;
+  border: none;
   color: var(--life-muted);
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
+  font-size: 20px;
   cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 4px;
+  line-height: 1;
   flex-shrink: 0;
-  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.life-a2hs-dismiss:hover {
-  background: rgba(229, 72, 77, 0.12);
-  border-color: rgba(229, 72, 77, 0.3);
-  color: #e5484d;
-}
-
-/*
+/* ─────────────────────────────────────────────────────────────
    MOBILE PAGE PADDING — account for bottom nav
-    */
+   ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
-  /* All full-page containers need bottom padding for bottom nav.
-     Note: .life-main-scroll already adds this, so [data-page-tag] inside
-     it does NOT need its own padding-bottom (that was causing double-stack
-     making the user unable to scroll back to the top of the hero). */
-  .life-home-page {
-    padding-bottom: calc(var(--life-bottom-nav-height) + 16px) !important;
+  /* All full-page containers need bottom padding for bottom nav */
+  .life-home-page,
+  [data-page-tag] {
+    padding-bottom: calc(var(--life-bottom-nav-height) + 24px) !important;
   }
 
-  /* Sidebar padding-bottom is set in the mobile sidebar block above */
+  /* Sidebar gets bottom padding so last items aren't hidden behind nav */
+  .life-sidebar {
+    padding-bottom: calc(var(--life-bottom-nav-height) + 16px) !important;
+  }
 
   /* Auth / landing pages are full-screen, don't need bottom nav offset */
   .life-auth-shell,
@@ -2994,11 +2452,17 @@ button:active:not(:disabled),
   [data-page-tag] > div {
     max-width: 100% !important;
   }
+
+  /* Fix sidebar backdrop to cover whole screen including bottom nav */
+  .life-sidebar-backdrop {
+    top: 0 !important;
+    bottom: 0 !important;
+  }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    DARK MODE — bottom nav
-    */
+   ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
   /* Dark body applies life-bottom-nav-dark class via JS */
@@ -3008,10 +2472,10 @@ button:active:not(:disabled),
   }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    OVERSCROLL / SCROLL CHAINING
    Prevent inner scroll from leaking to body on iOS
-    */
+   ───────────────────────────────────────────────────────────── */
 
 .life-sidebar,
 .life-main-scroll,
@@ -3020,9 +2484,9 @@ button:active:not(:disabled),
   -webkit-overflow-scrolling: touch;
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    CHECKBOX / TOGGLE — iOS style with better tap targets
-    */
+   ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
   input[type="checkbox"] {
@@ -3041,9 +2505,9 @@ button:active:not(:disabled),
   }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    NOTIFICATION DROPDOWN — mobile position fix
-    */
+   ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
   .life-notif-dropdown {
@@ -3056,13 +2520,13 @@ button:active:not(:disabled),
     border-radius: 16px !important;
     overflow-y: auto;
     overscroll-behavior: contain;
-    z-index: 70;
+    z-index: 200;
   }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    READING PAGE — mobile optimisations
-    */
+   ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
   .life-reader-content {
@@ -3077,18 +2541,14 @@ button:active:not(:disabled),
   }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    LANDING PAGE — full-bleed on iPhone
-    */
+   ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
   .life-landing-shell {
-    padding:
-      max(calc(var(--safe-top) + 28px), 56px)
-      16px
-      calc(104px + var(--safe-bottom))
-      !important;
-    min-height: calc(100svh + 120px);
+    padding: max(var(--safe-top), 52px) 16px calc(88px + var(--safe-bottom)) !important;
+    min-height: 100svh;
     justify-content: flex-start;
     align-items: center;
   }
@@ -3105,9 +2565,9 @@ button:active:not(:disabled),
   }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    AUTH SCREENS — iPhone optimisations
-    */
+   ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
   .life-auth-shell {
@@ -3126,20 +2586,32 @@ button:active:not(:disabled),
   }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    TOPBAR — compact & safe on iPhone
-    */
+   ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
   .life-topbar {
     padding-left: max(12px, var(--safe-left)) !important;
     padding-right: max(12px, var(--safe-right)) !important;
   }
+
+  /* When inside a PWA (standalone), add extra top padding for the status bar */
+  @media (display-mode: standalone) {
+    .life-topbar {
+      padding-top: max(var(--safe-top), 12px) !important;
+      min-height: calc(52px + max(var(--safe-top), 12px)) !important;
+    }
+
+    .life-search-dropdown {
+      top: calc(52px + max(var(--safe-top), 12px)) !important;
+    }
+  }
 }
 
-/*
+/* ─────────────────────────────────────────────────────────────
    PREVENT TEXT SELECTION on swipe/tap for app feel
-    */
+   ───────────────────────────────────────────────────────────── */
 
 .life-bottom-nav,
 .life-topbar,
@@ -3148,7 +2620,7 @@ button:active:not(:disabled),
   -webkit-user-select: none;
 }
 
-/* Momentum System — cards, hub, missions, quick actions  */
+/* ── Momentum System — cards, hub, missions, quick actions ─────────────── */
 
 .life-momentum-card {
   margin-top: 18px;
@@ -3181,8 +2653,8 @@ button:active:not(:disabled),
 
 .life-momentum-card-head h3 {
   margin: 4px 0 0;
-  font-size: 1.15rem;
-  line-height: 1.25;
+  font-size: clamp(1rem, 2.8vw, 1.18rem);
+  line-height: 1.2;
   color: var(--life-ink);
 }
 
@@ -3208,25 +2680,6 @@ button:active:not(:disabled),
   letter-spacing: 0.02em;
   font-family: var(--life-font);
   cursor: pointer;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-/* Keep Open Hub button anchored — global button hover lifts buttons by
-   1px which visually bumps the adjacent numbers. Override for these
-   momentum buttons so they only change color + border on hover. */
-.life-momentum-link-btn:hover,
-.life-momentum-go-btn:hover,
-.life-momentum-link-btn:active,
-.life-momentum-go-btn:active {
-  transform: none !important;
-}
-.life-momentum-link-btn:hover {
-  background: rgba(74, 140, 92, 0.08);
-  border-color: rgba(74, 140, 92, 0.5);
-}
-.life-momentum-link-btn:active {
-  background: rgba(74, 140, 92, 0.14);
 }
 
 .life-momentum-go-btn {
@@ -3244,36 +2697,22 @@ button:active:not(:disabled),
 }
 
 .life-momentum-stat-row > div {
-  min-height: 72px;
+  min-height: 64px;
   border-radius: 12px;
   border: 1px solid rgba(74, 140, 92, 0.2);
   background: rgba(255, 255, 255, 0.82);
-  padding: 10px 6px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  text-align: center;
   gap: 4px;
-  /* Prevent the tile from shrinking/growing as its numeric content
-     swaps between 1-digit, 2-digit, and "Lv 12" strings. */
-  contain: layout style;
 }
 
 .life-momentum-stat-value {
-  font-size: 1.05rem;
+  font-size: clamp(0.92rem, 3.4vw, 1.15rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1;
   color: var(--life-ink);
-  /* Tabular (monospaced) digits so "1" and "7" occupy the same width.
-     Eliminates the horizontal jitter as the number updates. */
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1, "lnum" 1;
-  /* Stop the value spans from being laid out as inline — gives them a
-     stable block box with a consistent height regardless of content. */
-  display: block;
-  white-space: nowrap;
-  letter-spacing: -0.01em;
 }
 
 .life-momentum-stat-label {
@@ -3281,21 +2720,6 @@ button:active:not(:disabled),
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--life-muted);
-  display: block;
-  line-height: 1.2;
-}
-
-/* Stop the page-in blur/slide animation from re-firing on MomentumCard
-   every time a parent re-renders. The animation should play once when
-   the PAGE enters, not when individual cards' numbers tick. */
-.life-momentum-card,
-.life-momentum-card * {
-  animation: none;
-}
-.life-momentum-stat-row > div,
-.life-momentum-stat-value {
-  /* Isolate transitions so they don't compound with parent transforms. */
-  transition: none;
 }
 
 .life-momentum-next {
@@ -3304,7 +2728,6 @@ button:active:not(:disabled),
   border-radius: 14px;
   background: rgba(234, 243, 236, 0.75);
   padding: 12px;
-  text-align: center;
 }
 
 .life-momentum-next-kicker {
@@ -3314,7 +2737,6 @@ button:active:not(:disabled),
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--life-green);
-  text-align: center;
 }
 
 .life-momentum-next-title {
@@ -3322,7 +2744,6 @@ button:active:not(:disabled),
   color: var(--life-ink);
   font-size: 0.98rem;
   font-weight: 700;
-  text-align: center;
 }
 
 .life-momentum-next-body {
@@ -3330,49 +2751,6 @@ button:active:not(:disabled),
   color: var(--life-muted);
   font-size: 13px;
   line-height: 1.45;
-  text-align: center;
-}
-
-.life-momentum-quotes {
-  margin-top: 12px;
-}
-
-.life-momentum-quotes-kicker {
-  margin: 0 0 8px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--life-green);
-}
-
-.life-momentum-quote-list {
-  display: grid;
-  gap: 8px;
-}
-
-.life-momentum-quote-item {
-  border-radius: 14px;
-  border: 1px solid rgba(74, 140, 92, 0.24);
-  background: rgba(255, 255, 255, 0.78);
-  padding: 12px;
-}
-
-.life-momentum-quote-item p {
-  margin: 0;
-  color: var(--life-ink);
-  font-size: 14px;
-  line-height: 1.65;
-}
-
-.life-momentum-quote-item span {
-  display: block;
-  margin-top: 8px;
-  color: var(--life-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .life-momentum-progress {
@@ -3621,8 +2999,7 @@ body.life-dark .life-momentum-mission-item {
 body.life-dark .life-momentum-stat-row > div,
 body.life-dark .life-momentum-next,
 body.life-dark .life-momentum-suggestion,
-body.life-dark .life-momentum-highlights > div,
-body.life-dark .life-momentum-quote-item {
+body.life-dark .life-momentum-highlights > div {
   background: #181818;
   border-color: #3a3a3a;
 }
@@ -3635,7 +3012,6 @@ body.life-dark .life-momentum-stat-value,
 body.life-dark .life-momentum-next-title,
 body.life-dark .life-momentum-suggestion h4,
 body.life-dark .life-momentum-highlights > div > strong,
-body.life-dark .life-momentum-quote-item p,
 body.life-dark .life-momentum-quick-actions > button {
   color: #e8e8e8;
 }
@@ -3647,8 +3023,7 @@ body.life-dark .life-momentum-progress-head,
 body.life-dark .life-momentum-stat-label,
 body.life-dark .life-momentum-hub-header > span,
 body.life-dark .life-momentum-hub-section-head > span,
-body.life-dark .life-momentum-highlights > div > span,
-body.life-dark .life-momentum-quote-item span {
+body.life-dark .life-momentum-highlights > div > span {
   color: #b8b8b8;
 }
 
@@ -3711,14 +3086,21 @@ body.life-dark .life-momentum-progress-track {
   }
 }
 
-/* Enhanced focus/interaction states  */
+/* ── Enhanced focus/interaction states ───────────────────────────────── */
 input:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--life-green, #4a8c5c);
   outline-offset: 0px;
 }
 
-/* Smooth scrollbar hide on mobile  */
+/* ── Prevent text size adjust on landscape rotate ────────────────────── */
+@media (max-width: 640px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* ── Smooth scrollbar hide on mobile ────────────────────────────────── */
 .life-main-scroll::-webkit-scrollbar {
   display: none;
 }
@@ -3726,7 +3108,7 @@ textarea:focus-visible {
   scrollbar-width: none;
 }
 
-/* Toast animation  */
+/* ── Toast animation ─────────────────────────────────────────────────── */
 .life-toast {
   animation: life-toast-in 0.22s cubic-bezier(0.34,1.56,0.64,1) both;
 }
@@ -3735,7 +3117,7 @@ textarea:focus-visible {
   to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 
-/* Bottom nav label font  */
+/* ── Bottom nav label font ───────────────────────────────────────────── */
 .life-bottom-nav-label {
   font-size: 10px;
   font-weight: 600;
@@ -3744,20 +3126,20 @@ textarea:focus-visible {
   transition: color 0.15s ease;
 }
 
-/* Card interactive press feedback  */
+/* ── Card interactive press feedback ────────────────────────────────── */
 button:active .life-card-inner,
 .life-card-press:active {
   transform: scale(0.98);
   transition: transform 0.1s ease;
 }
 
-/* Progress bar shimmer  */
+/* ── Progress bar shimmer ────────────────────────────────────── */
 @keyframes life-shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
 }
 
-/* Number badge pulse  */
+/* ── Number badge pulse ──────────────────────────────────────── */
 @keyframes life-badge-pop {
   0%   { transform: scale(1); }
   50%  { transform: scale(1.18); }
@@ -3768,7 +3150,7 @@ button:active .life-card-inner,
   animation: life-badge-pop 0.3s ease;
 }
 
-/* Sidebar overlay backdrop  */
+/* ── Sidebar overlay backdrop ────────────────────────────────── */
 .life-sidebar-backdrop {
   position: fixed;
   inset: 0;
@@ -3784,309 +3166,7 @@ button:active .life-card-inner,
   to   { opacity: 1; }
 }
 
-/* Certified badge glow  */
+/* ── Certified badge glow ────────────────────────────────────── */
 .life-cert-badge {
   box-shadow: 0 0 0 3px rgba(208,174,108,0.2), 0 4px 16px rgba(208,174,108,0.25);
-}
-
-
-/* ─── Text-link buttons: no border, no outline ring ─────────────────── */
-.life-text-btn {
-  background: none !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-.life-text-btn:focus-visible {
-  outline: none !important;
-}
-
-/* ─── Hide scrollbar for page indicators ───────────────────────────── */
-.life-page-dots::-webkit-scrollbar {
-  display: none;
-}
-
-
-/* ==========================================================================
-   v0.6.6 — iOS & Mobile Polish
-   Top 20 global devices covered:
-     iPhone 16 Pro Max / 15 Pro Max (430×932)  — iPhone 16 / 15 (393×852)
-     iPhone 14 Pro / 13 / 12 (390×844)         — iPhone SE 3rd gen (375×667)
-     Samsung Galaxy S24 Ultra / S24+ (412×915) — Galaxy S24 (360×780)
-     Galaxy A55 / A35 / A15 (360×800–780)      — Xiaomi 14 / Redmi Note 13 (393×852)
-     OPPO A58 / Vivo Y100 / Realme C65 (360×780–800)
-     OnePlus 12 (412×917)                       — Google Pixel 8 (412×892)
-   ========================================================================== */
-
-/* ── 1. Global iOS base improvements ─────────────────────────────────────── */
-
-/* Remove tap flash on ALL interactive elements (iOS Safari default is grey) */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Prevent callout (copy/define popover) on long-press images & cards */
-img,
-.life-card-press,
-.life-bottom-nav-item,
-button {
-  -webkit-touch-callout: none;
-}
-
-/* Momentum scrolling on every scroll container */
-.life-main-scroll,
-.life-sidebar,
-[data-scroll],
-.life-reader-body {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* Prevent rubber-band on fixed overlays */
-.life-sidebar,
-.life-sidebar-backdrop {
-  overscroll-behavior: none;
-}
-
-/* iOS: remove default appearance from inputs / buttons */
-input,
-textarea,
-select,
-button {
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-/* ── 2. 360 px — Galaxy S24, A55, A35, A15, OPPO, Vivo, Realme ───────────── */
-@media (max-width: 390px) {
-  /* Tighten horizontal padding on the hero and cards on very narrow screens */
-  .life-home-hero {
-    padding-left: 14px !important;
-    padding-right: 14px !important;
-  }
-
-  /* Shrink the bottom-nav labels slightly so 5 items fit comfortably */
-  .life-bottom-nav-label {
-    font-size: 9px !important;
-    letter-spacing: 0 !important;
-  }
-
-  /* Make bottom-nav icons slightly smaller on narrow screens */
-  .life-bottom-nav-item svg {
-    width: 20px !important;
-    height: 20px !important;
-  }
-
-  /* Sidebar slightly narrower */
-  .life-sidebar {
-    width: 92vw !important;
-    max-width: 310px !important;
-  }
-
-  /* Reduce reader toolbar font size so items don't wrap */
-  .life-reader-toolbar-chapter {
-    font-size: 11px !important;
-    max-width: 130px !important;
-  }
-
-  /* Tighten card padding */
-  .life-section-card {
-    padding: 14px 12px !important;
-  }
-}
-
-/* ── 3. 375 px — iPhone SE 3rd gen ───────────────────────────────────────── */
-@media (max-width: 390px) and (min-width: 370px) {
-  .life-home-hero {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-
-  .life-bottom-nav-label {
-    font-size: 9.5px !important;
-  }
-}
-
-/* ── 4. 390–393 px — iPhone 12 / 13 / 14 / 15, Xiaomi 14 ───────────────── */
-@media (max-width: 430px) and (min-width: 390px) {
-  .life-home-hero {
-    padding-left: 18px !important;
-    padding-right: 18px !important;
-  }
-
-  .life-bottom-nav-label {
-    font-size: 10px !important;
-  }
-}
-
-/* ── 5. 412 px — Galaxy S24 Ultra, OnePlus 12, Pixel 8 ─────────────────── */
-@media (max-width: 430px) and (min-width: 410px) {
-  .life-sidebar {
-    width: 86vw !important;
-    max-width: 355px !important;
-  }
-}
-
-/* ── 6. 430 px — iPhone 16 Pro Max / 15 Pro Max ─────────────────────────── */
-/* Already handled in existing 430px rule above; this extends it */
-@media (min-width: 430px) and (max-width: 640px) {
-  .life-home-hero {
-    padding-left: 22px !important;
-    padding-right: 22px !important;
-  }
-}
-
-/* ── 7. iPhone Dynamic Island / notch safe-area guard ────────────────────── */
-/* Works in both browser and standalone; the @supports ensures these rules
-   only apply on devices that actually have a safe area (notch/island/pill). */
-@supports (padding-top: env(safe-area-inset-top)) {
-  /* Reader toolbar and toast container clear the notch */
-  .life-reader-toolbar,
-  .life-toast-container {
-    padding-top: max(8px, var(--safe-top));
-  }
-
-  /* Bottom nav clears the home indicator */
-  .life-bottom-nav {
-    padding-bottom: max(var(--safe-bottom, 0px), 12px);
-  }
-}
-
-/* ── 8. PWA / Home screen standalone — one unified layout system ─────────── */
-/* All standalone-specific overrides live here. No more screen-by-screen patches. */
-@media (display-mode: standalone) {
-  /* Topbar: status-bar clearance for Dynamic Island, notch, or pill */
-  .life-topbar {
-    padding-top: max(var(--safe-top), 12px) !important;
-    min-height: calc(52px + max(var(--safe-top), 12px)) !important;
-  }
-
-  /* Search dropdown: offset matches new standalone topbar height */
-  .life-search-dropdown {
-    top: calc(52px + max(var(--safe-top), 12px)) !important;
-  }
-
-  /* Reader toolbar: clear status bar */
-  .life-reader-toolbar {
-    padding-top: max(12px, var(--safe-top));
-  }
-
-  /* Bottom nav: home-indicator clearance */
-  .life-bottom-nav {
-    padding-bottom: max(16px, var(--safe-bottom)) !important;
-  }
-
-  /* Auth / onboarding screens: top padding covers the status bar */
-  .life-auth-shell,
-  .life-landing-shell {
-    padding-top: max(var(--safe-top), 20px) !important;
-  }
-
-  /* Hide scrollbars for native app feel */
-  ::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-/* ── 9. Touch target minimums (Apple HIG: 44×44pt) ──────────────────────── */
-@media (max-width: 640px) {
-  /* Ensure all interactive buttons have at minimum 44px touch height */
-  .life-bottom-nav-item {
-    min-height: 44px !important;
-  }
-
-  /* Reader prev/next page buttons */
-  .life-reader-turn-btn {
-    min-width: 44px !important;
-    min-height: 44px !important;
-  }
-
-  /* Dismiss/close buttons */
-  button[aria-label*="Dismiss"],
-  button[aria-label*="Close"],
-  button[aria-label*="close"],
-  button[aria-label*="dismiss"] {
-    min-width: 44px !important;
-    min-height: 44px !important;
-  }
-}
-
-/* ── 10. Scroll container momentum & over-scroll polish ─────────────────── */
-@media (max-width: 640px) {
-  .life-main-scroll {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    overscroll-behavior-y: contain;
-  }
-
-  /* Prevent the sidebar scroll from propagating to the page */
-  .life-sidebar {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-  }
-}
-
-/* ── 11. iOS font rendering & text legibility ────────────────────────────── */
-@media (max-width: 640px) {
-  body {
-    /* Stronger subpixel rendering hint for retina displays */
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-
-  /* Prevent double-tap zoom on buttons and links */
-  button, a {
-    touch-action: manipulation;
-  }
-
-  /* Prevent iOS from enlarging small text in landscape */
-  p, span, div, li, td {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-}
-
-/* ── 12. Inventors & Investors mobile layout fixes ───────────────────────── */
-@media (max-width: 640px) {
-  /* Two-column message layout collapses to single column */
-  .ii-messages-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Swipe card full width on mobile */
-  .ii-swipe-card {
-    max-width: 100% !important;
-    border-radius: 18px !important;
-  }
-
-  /* Metric chips: 2 per row on narrow screens */
-  .ii-metrics-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-}
-
-/* ── 13. Landscape phone support ─────────────────────────────────────────── */
-@media (max-height: 500px) and (orientation: landscape) and (max-width: 900px) {
-  /* In landscape, the bottom nav wastes too much vertical space — keep it slim */
-  .life-bottom-nav {
-    min-height: 44px !important;
-    padding-top: 4px !important;
-  }
-
-  .life-bottom-nav-label {
-    display: none !important;
-  }
-
-  /* Reader gets more vertical room in landscape */
-  .life-reader-body {
-    padding-bottom: 52px !important;
-  }
-}
-
-/* ── 14. High-DPI / Retina sharpness ────────────────────────────────────── */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  /* Borders look crisper at 0.5px on retina */
-  .life-bottom-nav {
-    border-top-width: 0.5px;
-  }
 }

@@ -65,39 +65,6 @@ export const TSD_WEIGHTS={
     "Interactive/Hands-on": {practical:3,interactive:3},
     "Audio":                {audio:3},
   },
-  age_group:{
-    "13-17":  {beginner:3,simple:2,mindset:1},
-    "18-24":  {practical:2,business:1,finance:2},
-    "25-34":  {finance:3,business:2,practical:2},
-    "35-44":  {finance:2,practical:3,mindset:1},
-    "45+":    {philosophy:2,mindset:2,finance:1},
-  },
-  biggest_challenge:{
-    "Lack of motivation":           {mindset:3,psychology:2},
-    "Not enough money":             {finance:3,business:2,practical:1},
-    "No clear direction":           {philosophy:2,mindset:2,practical:1},
-    "Bad habits / discipline":      {mindset:3,psychology:1,practical:1},
-    "Social anxiety / confidence":  {social:3,psychology:2,mindset:1},
-    "Time management":              {practical:3,mindset:1,business:1},
-  },
-  reading_frequency:{
-    "Never / rarely":     {simple:3,short:2,beginner:1},
-    "A few times a month":{standard:2,beginner:1},
-    "Weekly":             {standard:3,intermediate:1},
-    "Daily reader":       {advanced_reading:2,intermediate:2},
-  },
-  accountability_style:{
-    "I prefer solo learning":         {reading:2,mindset:1},
-    "I like tracking my progress":    {practical:2,interactive:1},
-    "I need a community":             {social:3,psychology:1},
-    "I work best with a mentor":      {practical:2,social:1,psychology:1},
-  },
-  content_depth:{
-    "Quick tips & summaries":         {short:3,simple:2,beginner:1},
-    "Balanced — some detail":         {standard:3,intermediate:1},
-    "Deep dives & full breakdowns":   {advanced_reading:3,advanced:2},
-    "I want everything available":    {standard:1,advanced_reading:1,advanced:1},
-  },
   life_areas:{
     "Finance":              {finance:3,practical:2},
     "Psychology/Mindset":   {mindset:3,psychology:2},
@@ -118,11 +85,6 @@ export function buildProfile(answers){
   if(answers.finance_level)Object.entries(TSD_WEIGHTS.finance_level[answers.finance_level]||{}).forEach(([k,v])=>add(k,v));
   if(answers.english_level)Object.entries(TSD_WEIGHTS.english_level[answers.english_level]||{}).forEach(([k,v])=>add(k,v));
   if(answers.learning_style)Object.entries(TSD_WEIGHTS.learning_style[answers.learning_style]||{}).forEach(([k,v])=>add(k,v));
-  if(answers.age_group)Object.entries(TSD_WEIGHTS.age_group[answers.age_group]||{}).forEach(([k,v])=>add(k,v));
-  if(answers.biggest_challenge)Object.entries(TSD_WEIGHTS.biggest_challenge[answers.biggest_challenge]||{}).forEach(([k,v])=>add(k,v));
-  if(answers.reading_frequency)Object.entries(TSD_WEIGHTS.reading_frequency[answers.reading_frequency]||{}).forEach(([k,v])=>add(k,v));
-  if(answers.accountability_style)Object.entries(TSD_WEIGHTS.accountability_style[answers.accountability_style]||{}).forEach(([k,v])=>add(k,v));
-  if(answers.content_depth)Object.entries(TSD_WEIGHTS.content_depth[answers.content_depth]||{}).forEach(([k,v])=>add(k,v));
   if(answers.life_areas)answers.life_areas.forEach(area=>{Object.entries(TSD_WEIGHTS.life_areas[area]||{}).forEach(([k,v])=>add(k,v));});
   const diffMap={"No understanding (Beginner)":"beginner","Basic understanding":"beginner","Intermediate":"intermediate","Advanced":"advanced","Expert Understanding":"advanced"};
   const difficulty=diffMap[answers.finance_level]||"beginner";

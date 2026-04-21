@@ -17,126 +17,43 @@ class ErrorBoundary extends React.Component {
 
   handleRetry = () => {
     this.setState({ hasError: false, error: null, errorInfo: null })
-    if (typeof window !== 'undefined') window.location.reload()
+    window.location.reload()
   }
 
   handleHome = () => {
-    if (typeof window !== 'undefined') window.location.href = '/'
+    window.location.href = '/'
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div
-          role="alert"
-          style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 24,
-            background: '#0f172a',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: 560,
-              textAlign: 'center',
-              padding: 32,
-              borderRadius: 24,
-              border: '1px solid rgba(148, 163, 184, 0.18)',
-              background: 'rgba(15, 23, 42, 0.92)',
-              backdropFilter: 'blur(14px)',
-              boxShadow: '0 24px 60px rgba(2, 6, 23, 0.45)',
-              color: '#ffffff',
-            }}
-          >
-            <div
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                background: 'rgba(239, 68, 68, 0.12)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 24px',
-              }}
-            >
-              <span style={{ color: '#ef4444', fontSize: 40, fontWeight: 700 }}>!</span>
+        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-950">
+          <div className="bg-slate-900/90 backdrop-blur border border-slate-800 rounded-3xl p-8 max-w-lg text-center">
+            <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6">
+              <span className="text-red-500 text-4xl font-bold">!</span>
             </div>
-
-            <h1 style={{ margin: '0 0 12px', fontSize: 32, fontWeight: 700 }}>
-              Something went wrong
-            </h1>
-            <p style={{ margin: '0 0 24px', color: '#94a3b8', lineHeight: 1.6 }}>
+            
+            <h1 className="text-2xl font-bold mb-3 text-white">Something went wrong</h1>
+            <p className="text-slate-400 mb-6">
               We encountered an unexpected error. Don't worry, your data is safe.
             </p>
 
             {this.state.error && (
-              <div
-                style={{
-                  textAlign: 'left',
-                  marginBottom: 24,
-                  padding: 16,
-                  maxHeight: 160,
-                  overflow: 'auto',
-                  borderRadius: 16,
-                  background: '#020617',
-                  border: '1px solid rgba(239, 68, 68, 0.14)',
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    color: '#f87171',
-                    fontSize: 12,
-                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                  }}
-                >
-                  {this.state.error.toString()}
-                </p>
+              <div className="text-left mb-6 p-4 rounded-xl bg-slate-950 overflow-auto max-h-40">
+                <p className="text-xs text-red-400 font-mono">{this.state.error.toString()}</p>
               </div>
             )}
 
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 12,
-                justifyContent: 'center',
-              }}
-            >
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={this.handleRetry}
-                style={{
-                  minWidth: 140,
-                  minHeight: 48,
-                  padding: '12px 24px',
-                  borderRadius: 14,
-                  border: 'none',
-                  background: '#f59e0b',
-                  color: '#0f172a',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                }}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400 transition-all"
               >
                 Try Again
               </button>
               <button
                 onClick={this.handleHome}
-                style={{
-                  minWidth: 140,
-                  minHeight: 48,
-                  padding: '12px 24px',
-                  borderRadius: 14,
-                  border: '1px solid rgba(148, 163, 184, 0.28)',
-                  background: 'transparent',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                }}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-700 text-white hover:bg-slate-800 transition-colors"
               >
                 Go Home
               </button>

@@ -3,17 +3,16 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../firebaseClient";
 
 const DEFAULT_STATS = {
-  totalPlayed:   0,
+  totalPlayed: 0,
   totalAnswered: 0,
-  totalCorrect:  0,
-  bestStreak:    0,
-  topicsPlayed:  {},
-  achievements:  [],
-  history:       [],
-  dailyDate:     "",
+  totalCorrect: 0,
+  bestStreak: 0,
+  topicsPlayed: {},
+  achievements: [],
+  history: [],
+  dailyDate: "",
 };
 
-// Maps DB snake_case → component camelCase and back
 function fromDB(row) {
   if (!row) return { ...DEFAULT_STATS };
   return {
@@ -44,9 +43,9 @@ function toDB(stats, userId) {
 }
 
 export function useQuizStats(userId) {
-  const [stats,   setStatsState] = useState({ ...DEFAULT_STATS });
-  const [loading, setLoading]    = useState(false);
-  const [error,   setError]      = useState("");
+  const [stats, setStatsState] = useState({ ...DEFAULT_STATS });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const isGuest = !db || !userId || userId === "_";
 
@@ -56,9 +55,11 @@ export function useQuizStats(userId) {
       setError("");
       return;
     }
+
     let cancelled = false;
     setLoading(true);
     setError("");
+
     getDoc(doc(db, "quizStats", userId))
       .then((snapshot) => {
         if (cancelled) return;
@@ -67,31 +68,51 @@ export function useQuizStats(userId) {
           setLoading(false);
           return;
         }
+
         try {
           setStatsState(fromDB(snapshot.data()));
           setError("");
-        } catch (error) {
-          console.error("useQuizStats fetch:", error.message);
-          setError("Quiz stats are unavailable right now. You can still play, but cloud stats may not update until the connection recovers.");
+        } catch (fetchError) {
+          console.error("useQuizStats fetch:", fetchError.message);
+          setError(
+            "Quiz stats are unavailable right now. You can still play, but cloud stats may not update until the connection recovers.",
+          );
         }
         setLoading(false);
+      })
+      .catch((fetchError) => {
+        if (cancelled) return;
+        console.error("useQuizStats fetch:", fetchError.message);
+        setError(
+          "Quiz stats are unavailable right now. You can still play, but cloud stats may not update until the connection recovers.",
+        );
+        setLoading(false);
       });
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId, isGuest]);
 
-  const saveStats = useCallback(async (next) => {
-    setStatsState(next);
-    if (isGuest) return;
-    try {
-      await setDoc(doc(db, "quizStats", userId), toDB(next, userId), {
-        merge: true,
-      });
-      setError("");
-    } catch (error) {
-      console.error("useQuizStats save:", error.message);
-      setError("Quiz stats are unavailable right now. You can still play, but cloud stats may not update until the connection recovers.");
-    }
-  }, [userId, isGuest]);
+  const saveStats = useCallback(
+    async (next) => {
+      setStatsState(next);
+      if (isGuest) return;
+
+      try {
+        await setDoc(doc(db, "quizStats", userId), toDB(next, userId), {
+          merge: true,
+        });
+        setError("");
+      } catch (saveError) {
+        console.error("useQuizStats save:", saveError.message);
+        setError(
+          "Quiz stats are unavailable right now. You can still play, but cloud stats may not update until the connection recovers.",
+        );
+      }
+    },
+    [isGuest, userId],
+  );
 
   return { stats, saveStats, loading, error };
 }

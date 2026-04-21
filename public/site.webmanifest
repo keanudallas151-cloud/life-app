@@ -1,24 +1,24 @@
 {
   "name": "Life.",
   "short_name": "Life.",
-  "description": "Build wealth, learn anything, and connect with investors and creators.",
+  "description": "Knowledge, finance, psychology, and growth in one app.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f5f0e8",
-  "theme_color": "#50c878",
+  "theme_color": "#4a8c5c",
   "orientation": "portrait-primary",
-  "categories": ["finance", "education", "business", "lifestyle"],
+  "categories": ["education", "finance", "lifestyle"],
   "icons": [
     {
-      "src": "/share_icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/share_icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ],
@@ -28,14 +28,14 @@
       "short_name": "Library",
       "description": "Jump into the reading library",
       "url": "/#library",
-      "icons": [{ "src": "/share_icon.png", "sizes": "512x512", "type": "image/png" }]
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
     },
     {
       "name": "Daily Growth",
       "short_name": "Growth",
       "description": "View today's growth tasks",
       "url": "/#daily",
-      "icons": [{ "src": "/share_icon.png", "sizes": "512x512", "type": "image/png" }]
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
     }
   ]
 }

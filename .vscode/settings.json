@@ -1,41 +1,7 @@
 {
-  "github.codespaces.defaultExtensions": [
-    "GitHub.codespaces",
-    "GitHub.vscode-pull-request-github",
-    "Github.copilot",
-    "dbaeumer.vscode-eslint",
-    "eamodio.gitlens",
-    "github.vscode-github-actions",
-    "gruntfuggly.todo-tree",
-    "mtxr.sqltools",
-    "ms-ossdata.vscode-pgsql",
-    "phu1237.vs-browser",
-    "supabase.vscode-supabase-extension",
-    "usernamehw.errorlens"
-  ],
-  "github.copilot.chat.agent.autoFix": true,
-  "github.copilot.chat.copilotMemory.enabled": true,
-  "github.copilot.chat.gpt54ConcisePrompt.enabled": true,
-  "github.copilot.chat.agent.omitFileAttachmentContents": true,
-  "terminal.integrated.initialHint.copilotCli": true,
-  "terminal.integrated.defaultProfile.linux": "bash",
-  "editor.cursorSmoothCaretAnimation": "on",
-  "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "modificationsIfAvailable",
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "eslint.validate": ["javascript", "javascriptreact"],
-  "git.autofetch": true,
-  "git.openRepositoryInParentFolders": "always",
-  "todo-tree.tree.showCountsInTree": true,
-  "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|\\*)\\s*(TODO|FIXME|NOTE|IDEA)\\b",
-  "mediaPreview.video.loop": true,
-  "workbench.externalBrowser": "chrome",
-  "github.copilot.chat.claudeAgent.allowDangerouslySkipPermissions": true,
-  "cSpell.words": ["Supabase"],
-  "editor.tokenColorCustomizations": {
-    "comments": "",
-    "textMateRules": []
-  }
+    "github.codespaces.defaultExtensions": [
+        "GitHub.codespaces",
+        "GitHub.vscode-pull-request-github",
+        "Github.copilot"
+    ]
 }

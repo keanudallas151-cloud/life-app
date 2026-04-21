@@ -15,12 +15,6 @@ dist
 .env.local
 .env.*.local
 
-# Local AI/editor tooling noise
-.history/
-.roo/
-.copilot/
-.cursor/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -31,15 +25,6 @@ dist
 *.njsproj
 *.sln
 *.sw?
-
-# Additional secrets & local tooling
-.supabase/
-.vercel/
-.netlify/
-.secrets/
-*.key
-*.pem
-*.p12
-.env.production
-.env.test
-
+.vercel
+.env*.local
+.env.vercel.*

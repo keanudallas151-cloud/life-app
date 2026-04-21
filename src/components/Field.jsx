@@ -33,19 +33,8 @@ export function Field({label,type="text",value,onChange,error,placeholder}){
             type="button"
             aria-label={show ? "Hide password" : "Show password"}
             onClick={()=>setShow(!show)}
-            style={{
-              position:"absolute",
-              right:14,
-              top:"50%",
-              transform:"translateY(-50%)",
-              background:"transparent",
-              border:"none",
-              cursor:"pointer",
-              color:C.muted,
-              fontSize:12
-            }}
           >
-            {show?"Hide":"Show"}
+            <span className="life-password-toggle-label">{show?"Hide":"Show"}</span>
           </button>
         )}
       </div>
@@ -54,9 +43,8 @@ export function Field({label,type="text",value,onChange,error,placeholder}){
   );
 }
 
-export function TreeNode({nodeKey,node,depth=0,onSelect,onFolderSelect,selectedKey,defaultOpen=false,play,theme}){
+export function TreeNode({nodeKey,node,depth=0,onSelect,selectedKey,defaultOpen=false,play}){
   const[open,setOpen]=useState(defaultOpen);
-  const th=theme||C;
 
   const hasChildren=node.children&&Object.keys(node.children).length>0;
   const isLeaf=!!node.content;
@@ -73,10 +61,6 @@ export function TreeNode({nodeKey,node,depth=0,onSelect,onFolderSelect,selectedK
             play("open");
             onSelect(nodeKey,node);
           }else{
-            if(onFolderSelect && depth <= 1){
-              play("tap");
-              onFolderSelect(nodeKey,node);
-            }
             setOpen(!open);
           }
         }}
@@ -91,12 +75,12 @@ export function TreeNode({nodeKey,node,depth=0,onSelect,onFolderSelect,selectedK
           paddingLeft:paddingLeft,
           paddingRight:10,
 
-          background:isSel?th.greenLt:"transparent",
+          background:isSel?C.greenLt:"transparent",
           border:"none",
-          borderLeft:isSel?`3px solid ${th.green}`:"3px solid transparent",
+          borderLeft:isSel?`3px solid ${C.green}`:"3px solid transparent",
 
           cursor:"pointer",
-          color:isTop?th.ink:depth===1?th.mid:th.muted,
+          color:isTop?C.ink:depth===1?C.mid:C.muted,
           fontSize:isTop?15:depth===1?14:13,
           fontWeight:isTop?700:depth===1?500:400,
 
@@ -104,6 +88,8 @@ export function TreeNode({nodeKey,node,depth=0,onSelect,onFolderSelect,selectedK
           fontFamily:"Georgia,serif",
           lineHeight:1.4
         }}
+        onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background=C.light;}}
+        onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background="transparent";}}
       >
 
         {/* ICON FIX */}
@@ -120,7 +106,7 @@ export function TreeNode({nodeKey,node,depth=0,onSelect,onFolderSelect,selectedK
             }}
           >
             {Ic[node.icon]
-              ? Ic[node.icon]("none", isTop?th.green:th.muted, 16)
+              ? Ic[node.icon]("none", isTop?"#4a8c5c":"#8a8070", 16)
               : <span style={{fontSize:14,lineHeight:1}}>{node.icon}</span>
             }
           </span>
@@ -142,11 +128,11 @@ export function TreeNode({nodeKey,node,depth=0,onSelect,onFolderSelect,selectedK
           >
             <polyline
               points="2,2 8,5 2,8"
-                fill="none"
-                stroke={th.muted}
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              fill="none"
+              stroke={C.muted}
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         )}
@@ -155,7 +141,7 @@ export function TreeNode({nodeKey,node,depth=0,onSelect,onFolderSelect,selectedK
       {hasChildren&&open&&(
         <div
           style={{
-            borderLeft:`1px solid ${th.border}`,
+            borderLeft:`1px solid ${C.border}`,
             marginLeft:paddingLeft+9
           }}
         >
@@ -166,10 +152,8 @@ export function TreeNode({nodeKey,node,depth=0,onSelect,onFolderSelect,selectedK
               node={child}
               depth={depth+1}
               onSelect={onSelect}
-              onFolderSelect={onFolderSelect}
               selectedKey={selectedKey}
               play={play}
-              theme={th}
             />
           ))}
         </div>

@@ -1,13 +1,16 @@
 // src/components/AppShell.jsx// 16.04.26
+// ─────────────────────────────────────────────────────────────
 // Pure components and hooks extracted from App.jsx.
 // These have NO dependency on LifeApp state — all values come
 // through props. Safe to edit independently.
+// ─────────────────────────────────────────────────────────────
 "use client";
 
 import { lazy, Suspense } from "react";
+import Image from "next/image";
 import { C } from "../systems/theme";
-import { Ic } from "../icons/Ic";
 
+// ── Lazy-loaded heavy components ─────────────────────────────
 export const EbookReader = lazy(() =>
   import("./Reader").then((m) => ({ default: m.EbookReader })),
 );
@@ -27,12 +30,10 @@ export const TailorResult = lazy(() =>
   import("./Tailor").then((m) => ({ default: m.TailorResult })),
 );
 export const MomentumHubPage = lazy(() =>
-  import("./MomentumHub").then((m) => ({ default: m.MomentumHub })),
-);
-export const IncomeIdeasPage = lazy(() =>
-  import("./IncomeIdeasPage").then((m) => ({ default: m.IncomeIdeasPage })),
+  import("./MomentumHub").then((m) => ({ default: m.MomentumHubPage })),
 );
 
+// ── Loading fallback ─────────────────────────────────────────
 export function RouteFallback() {
   return (
     <div
@@ -52,18 +53,9 @@ export function RouteFallback() {
   );
 }
 
+// ── Sidebar Section wrapper ───────────────────────────────────
 // Props: label, open, setOpen, children, tag, theme, playFn
-export function SS({
-  label,
-  open,
-  setOpen,
-  children,
-  tag,
-  theme,
-  playFn,
-  onLabelClick,
-  active = false,
-}) {
+export function SS({ label, open, setOpen, children, tag, theme, playFn }) {
   const th = theme || C;
   return (
     <div
@@ -72,29 +64,25 @@ export function SS({
         borderTop: `1px solid ${th.border}22`,
       }}
     >
-      <div
-        className="life-sidebar-section-header"
+      <button
+        onClick={() => {
+          playFn("tap");
+          setOpen(!open);
+        }}
         style={{
           display: "flex",
           alignItems: "center",
           width: "100%",
-          padding: "8px 14px",
-          gap: 8,
+          padding: "10px 18px 10px",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          minHeight: 44,
         }}
       >
-        <button
-          type="button"
-          onClick={() => {
-            playFn("tap");
-            if (onLabelClick) {
-              setOpen(true);
-              onLabelClick();
-              return;
-            }
-            setOpen(!open);
-          }}
+        <p
           style={{
-            color: active ? th.green : th.muted,
+            color: th.muted,
             fontSize: 9,
             fontWeight: 700,
             letterSpacing: 2,
@@ -103,78 +91,48 @@ export function SS({
             flex: 1,
             textAlign: "left",
             fontFamily: "Georgia,serif",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            minHeight: 44,
-            padding: "0 0 0 6px",
           }}
         >
           {label}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            playFn("tap");
-            setOpen(!open);
-          }}
+        </p>
+        <svg
+          width="9"
+          height="9"
+          viewBox="0 0 10 10"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 32,
-            height: 32,
-            minHeight: 32,
-            padding: 0,
-            border: `1px solid ${th.border}44`,
-            borderRadius: 8,
-            background: "transparent",
-            cursor: "pointer",
+            transform: open ? "rotate(90deg)" : "none",
+            transition: "transform 0.18s ease",
             flexShrink: 0,
-            marginRight: 4,
           }}
-          aria-label={open ? `Collapse ${label}` : `Expand ${label}`}
         >
-          <svg
-            width="9"
-            height="9"
-            viewBox="0 0 10 10"
-            style={{
-              transform: open ? "rotate(90deg)" : "none",
-              transition: "transform 0.18s ease",
-              flexShrink: 0,
-            }}
-          >
-            <polyline
-              points="2,2 8,5 2,8"
-              fill="none"
-              stroke={th.muted}
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
+          <polyline
+            points="2,2 8,5 2,8"
+            fill="none"
+            stroke={th.muted}
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
       {open && children}
     </div>
   );
 }
 
+// ── Sidebar Link item ─────────────────────────────────────────
 // Props: label, icon, onClick, active, theme
-export function SL({ label, icon, onClick, active, theme }) {
+export function SL({ label, onClick, active, theme }) {
   const th = theme || C;
-  const Icon = icon && typeof Ic[icon] === "function" ? Ic[icon] : null;
   return (
     <button
-      className="life-sidebar-link"
       onClick={onClick}
       style={{
         display: "flex",
         alignItems: "center",
         gap: 10,
         width: "100%",
-        padding: "8px 14px 8px 18px",
+        padding: "9px 20px 9px 24px",
         background: active ? `${th.green}14` : "transparent",
         border: "none",
         borderLeft: active ? `2.5px solid ${th.green}` : "2.5px solid transparent",
@@ -184,22 +142,6 @@ export function SL({ label, icon, onClick, active, theme }) {
         transition: "background 0.15s",
       }}
     >
-      {Icon && (
-        <span
-          aria-hidden
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 20,
-            height: 20,
-            color: active ? th.green : th.muted,
-            flexShrink: 0,
-          }}
-        >
-          {Icon("none", active ? th.green : th.muted, 17)}
-        </span>
-      )}
       <span style={{ fontSize: 13, color: active ? th.green : th.muted, flex: 1, fontWeight: active ? 700 : 500 }}>
         {label}
       </span>

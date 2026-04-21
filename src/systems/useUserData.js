@@ -3,14 +3,13 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../firebaseClient";
 
 export function useUserData(userId) {
-  const [bookmarks,   setBookmarksState]  = useState([]);
-  const [notes,       setNotesState]      = useState({});
-  const [readKeys,    setReadKeysState]   = useState([]);
-  const [highlights,  setHighlightsState] = useState([]);
-  const [tsdProfile,  setTsdProfileState] = useState(null);
+  const [bookmarks, setBookmarksState] = useState([]);
+  const [notes, setNotesState] = useState({});
+  const [readKeys, setReadKeysState] = useState([]);
+  const [tsdProfile, setTsdProfileState] = useState(null);
   const [momentumState, setMomentumStateRaw] = useState(null);
-  const [loading,     setLoading]         = useState(false);
-  const [error,       setError]           = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const isGuest = !db || !userId || userId === "_";
   const persistTimerRef = useRef(null);
@@ -24,10 +23,9 @@ export function useUserData(userId) {
   }, []);
 
   const applyFetchedData = useCallback((data = {}) => {
-    setBookmarksState(data.bookmarks  ?? []);
-    setNotesState(data.notes          ?? {});
-    setReadKeysState(data.read_keys   ?? []);
-    setHighlightsState(data.highlights ?? []);
+    setBookmarksState(data.bookmarks ?? []);
+    setNotesState(data.notes ?? {});
+    setReadKeysState(data.read_keys ?? []);
     setTsdProfileState(data.tsd_profile ?? null);
     setMomentumStateRaw(data.momentum_state ?? null);
   }, []);
@@ -52,10 +50,11 @@ export function useUserData(userId) {
         try {
           await setDoc(doc(db, "userData", userId), payload, { merge: true });
           setError("");
-          continue;
-        } catch (error) {
-          console.error("useUserData persist:", error.message);
-          setError("Profile sync is temporarily unavailable. Your latest changes may stay local until the connection recovers.");
+        } catch (persistError) {
+          console.error("useUserData persist:", persistError.message);
+          setError(
+            "Profile sync is temporarily unavailable. Your latest changes may stay local until the connection recovers.",
+          );
         }
       }
     } finally {
@@ -64,120 +63,115 @@ export function useUserData(userId) {
     }
   }, [clearPersistTimer, isGuest, userId]);
 
-  const schedulePersist = useCallback((patch, delay = 250) => {
-    if (isGuest) return;
-    pendingPatchRef.current = {
-      ...(pendingPatchRef.current || {}),
-      ...patch,
-    };
-    clearPersistTimer();
-    persistTimerRef.current = setTimeout(() => {
-      persistTimerRef.current = null;
-      void flushPersistQueue();
-    }, delay);
-  }, [clearPersistTimer, flushPersistQueue, isGuest]);
+  const schedulePersist = useCallback(
+    (patch, delay = 250) => {
+      if (isGuest) return;
+      pendingPatchRef.current = {
+        ...(pendingPatchRef.current || {}),
+        ...patch,
+      };
+      clearPersistTimer();
+      persistTimerRef.current = setTimeout(() => {
+        persistTimerRef.current = null;
+        void flushPersistQueue();
+      }, delay);
+    },
+    [clearPersistTimer, flushPersistQueue, isGuest],
+  );
 
   useEffect(() => {
-    clearPersistTimer();
-    pendingPatchRef.current = null;
-    persistInFlightRef.current = false;
-
     if (isGuest) {
       setBookmarksState([]);
       setNotesState({});
       setReadKeysState([]);
-      setHighlightsState([]);
       setTsdProfileState(null);
       setMomentumStateRaw(null);
       setError("");
-      return;
+      return undefined;
     }
 
     let cancelled = false;
     setLoading(true);
     setError("");
+
     getDoc(doc(db, "userData", userId))
       .then((snapshot) => {
         if (cancelled) return;
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          applyFetchedData({
-            bookmarks: data.bookmarks,
-            notes: data.notes,
-            read_keys: data.readKeys,
-            highlights: data.highlights,
-            tsd_profile: data.tsdProfile,
-            momentum_state: data.momentumState,
-          });
+        if (!snapshot.exists()) {
+          applyFetchedData();
           setLoading(false);
           return;
         }
+
+        applyFetchedData(snapshot.data());
         setLoading(false);
       })
-      .catch((error) => {
+      .catch((fetchError) => {
         if (cancelled) return;
-        console.error("useUserData fetch:", error.message);
-        setError("Profile sync is unavailable right now. Cached data will still work until the cloud connection recovers.");
+        console.error("useUserData fetch:", fetchError.message);
+        setError(
+          "Profile sync is temporarily unavailable. Local progress still works, but cloud data may not refresh until the connection recovers.",
+        );
         setLoading(false);
       });
+
     return () => {
       cancelled = true;
+      clearPersistTimer();
     };
-  }, [applyFetchedData, clearPersistTimer, userId, isGuest]);
+  }, [applyFetchedData, clearPersistTimer, isGuest, userId]);
 
-  useEffect(() => () => clearPersistTimer(), [clearPersistTimer]);
+  const setBookmarks = useCallback(
+    (value) => {
+      setBookmarksState(value);
+      schedulePersist({ bookmarks: value }, 0);
+    },
+    [schedulePersist],
+  );
 
-  const setBookmarks = useCallback((v) => {
-    setBookmarksState(v);
-    schedulePersist({ bookmarks: v }, 180);
-  }, [schedulePersist]);
+  const setNotes = useCallback(
+    (value) => {
+      setNotesState(value);
+      schedulePersist({ notes: value }, 600);
+    },
+    [schedulePersist],
+  );
 
-  const setNotes = useCallback((v) => {
-    setNotesState(v);
-    schedulePersist({ notes: v }, 700);
-  }, [schedulePersist]);
+  const setReadKeys = useCallback(
+    (value) => {
+      setReadKeysState(value);
+      schedulePersist({ read_keys: value }, 0);
+    },
+    [schedulePersist],
+  );
 
-  const setReadKeys = useCallback((v) => {
-    setReadKeysState(v);
-    schedulePersist({ read_keys: v }, 180);
-  }, [schedulePersist]);
+  const setTsdProfile = useCallback(
+    (value) => {
+      setTsdProfileState(value);
+      schedulePersist({ tsd_profile: value }, 0);
+    },
+    [schedulePersist],
+  );
 
-  const setHighlights = useCallback((v) => {
-    setHighlightsState(v);
-    schedulePersist({ highlights: v }, 220);
-  }, [schedulePersist]);
-
-  const setTsdProfile = useCallback((v) => {
-    setTsdProfileState(v);
-    schedulePersist({ tsd_profile: v }, 220);
-  }, [schedulePersist]);
-
-  const setMomentumState = useCallback((v) => {
-    setMomentumStateRaw(v);
-    schedulePersist({ momentum_state: v }, 260);
-  }, [schedulePersist]);
-
-  const replaceAllData = useCallback((next) => {
-    const merged = {
-      bookmarks: next?.bookmarks ?? [],
-      notes: next?.notes ?? {},
-      read_keys: next?.read_keys ?? [],
-      highlights: next?.highlights ?? [],
-      tsd_profile: next?.tsd_profile ?? null,
-      momentum_state: next?.momentum_state ?? null,
-    };
-    applyFetchedData(merged);
-    schedulePersist(merged, 120);
-  }, [applyFetchedData, schedulePersist]);
+  const setMomentumState = useCallback(
+    (value) => {
+      setMomentumStateRaw(value);
+      schedulePersist({ momentum_state: value }, 0);
+    },
+    [schedulePersist],
+  );
 
   return {
-    bookmarks,  setBookmarks,
-    notes,      setNotes,
-    readKeys,   setReadKeys,
-    highlights, setHighlights,
-    tsdProfile, setTsdProfile,
-    momentumState, setMomentumState,
-    replaceAllData,
+    bookmarks,
+    setBookmarks,
+    notes,
+    setNotes,
+    readKeys,
+    setReadKeys,
+    tsdProfile,
+    setTsdProfile,
+    momentumState,
+    setMomentumState,
     loading,
     error,
   };

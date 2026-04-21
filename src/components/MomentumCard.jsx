@@ -10,6 +10,7 @@ export function MomentumCard({
   const suggestion = snapshot.nextSuggestion;
   const missions = Array.isArray(snapshot.missions) ? snapshot.missions : [];
   const nextMission = missions.find((mission) => !mission.completed) || missions[0];
+
   return (
     <section className={`life-momentum-card${compact ? " is-compact" : ""}`}>
       <div className="life-momentum-card-head">

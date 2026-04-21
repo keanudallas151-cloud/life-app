@@ -9,10 +9,10 @@
 
 ## Architecture
 
-- This is a Next.js + React 19 single-page app shell with Supabase for auth and backend.
+- This is a Vite + React 19 single-page app with Supabase for auth and backend.
 - There is NO React Router in active use — screen switching is done via state in `src/App.jsx`.
 - The app uses a single internal scroll container: `.life-main-scroll`. Never add `overflow` to `body` or `html`. Always scroll `.life-main-scroll`.
-- Supabase client is in `src/supabaseClient.js`. It reads `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` from env.
+- Supabase client is in `src/supabaseClient.js`. It reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from env.
 
 ## Styling Rules
 
@@ -59,7 +59,7 @@
 - Do NOT remove files without first confirming they are unreferenced (search all imports).
 - Preserve all existing fixes for scroll behavior, dark mode, settings, and auth.
 - Always run `npm run lint` and `npm run build` before finishing any task.
-- The app deploys on Vercel. `vercel.json` should stay aligned with the Next.js build output.
+- The app deploys on Netlify. Config is in `netlify.toml`. Do not break the build.
 
 ## Dark Mode
 

@@ -1,0 +1,14 @@
+name: ChatGPT Integration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  chatgpt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: chatgpt-action
+        uses: unsafecoerce/chatgpt-action@release/v2

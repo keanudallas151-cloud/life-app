@@ -147,7 +147,7 @@ export function KnowledgeConstellation({ allContent, readKeys, onPick, onClose, 
               <linearGradient id="life-edge-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor={C.green} stopOpacity="0.15" />
                 <stop offset="50%" stopColor={C.green} stopOpacity="0.35" />
-                <stop offset="100%" stopColor={C.greenAlt} stopOpacity="0.12" />
+                <stop offset="100%" stopColor="#6FBE77" stopOpacity="0.12" />
               </linearGradient>
             </defs>
 
@@ -164,7 +164,7 @@ export function KnowledgeConstellation({ allContent, readKeys, onPick, onClose, 
                     y1={p1.y}
                     x2={p2.x}
                     y2={p2.y}
-                    stroke={lit ? `url(#life-edge-grad)` : "rgba(61,90,76,0.12)"}
+                    stroke={lit ? `url(#life-edge-grad)` : "rgba(74,140,92,0.12)"}
                     strokeWidth={lit ? 1.4 : 0.7}
                     className={lit ? "life-constellation-line-lit" : ""}
                   />
@@ -204,7 +204,7 @@ export function KnowledgeConstellation({ allContent, readKeys, onPick, onClose, 
                     <circle
                       r={r}
                       fill={read ? C.green : "rgba(138,128,112,0.35)"}
-                      stroke={read ? C.green : C.border}
+                      stroke={read ? "#2d6e42" : C.border}
                       strokeWidth={read ? 2 : 1}
                       filter={read ? "url(#life-node-glow)" : undefined}
                     />

@@ -27,8 +27,7 @@ function isMomentumType(value) {
 }
 
 function scoreToLevel(score = 0) {
-  const safe = isNaN(score) ? 0 : Math.max(0, Math.floor(Number(score)));
-  return Math.max(1, Math.floor(safe / 100) + 1);
+  return Math.max(1, Math.floor(Number(score || 0) / 100) + 1);
 }
 
 function coerceProgress(progressCount = 0, targetCount = 1) {
@@ -169,15 +168,8 @@ export function rolloverMomentumState(state, dateKey = getDateKey()) {
   let streakDays = current.streakDays;
   if (current.lastActiveAt) {
     const lastKey = getDateKey(current.lastActiveAt);
-    if (lastKey === previousDateKey(dateKey)) {
-      // Active yesterday — increment streak
-      streakDays += 1;
-    } else if (lastKey === dateKey) {
-      // Active today — keep streak unchanged
-    } else {
-      // Gap of 2+ days — reset streak
-      streakDays = 1;
-    }
+    if (lastKey === previousDateKey(dateKey)) streakDays += 1;
+    else if (lastKey !== dateKey) streakDays = 1;
   }
 
   const next = {
@@ -269,10 +261,9 @@ export function deriveMomentumSnapshot({
     missions.length > 0 ? Math.round((completedCount / missions.length) * 100) : 0;
   const notesCount = Object.keys(notes || {}).filter((key) => notes?.[key]).length;
   const quizzesPlayed = Number(quizStats?.totalPlayed || 0);
-  const highlightStats = [
+  const highlights = [
     { label: "Topics", value: readKeys.length, tone: "growth" },
     { label: "Notes", value: notesCount, tone: "focus" },
-    { label: "Missions", value: completedCount, tone: "growth" },
     { label: "Quizzes", value: quizzesPlayed, tone: "challenge" },
     {
       label: "Profile",
@@ -288,7 +279,7 @@ export function deriveMomentumSnapshot({
     completionRate,
     missions,
     nextSuggestion: state.nextSuggestion,
-    highlights: highlightStats,
+    highlights,
   };
 
   return {

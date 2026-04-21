@@ -12,14 +12,16 @@ const firebaseConfig = {
 };
 
 export const isFirebaseConfigured = Boolean(
-  firebaseConfig.apiKey
-    && firebaseConfig.authDomain
-    && firebaseConfig.projectId
-    && firebaseConfig.appId,
+  firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId &&
+    firebaseConfig.appId,
 );
 
 const app = isFirebaseConfigured
-  ? (getApps().length ? getApp() : initializeApp(firebaseConfig))
+  ? getApps().length
+    ? getApp()
+    : initializeApp(firebaseConfig)
   : null;
 
 export const auth = app ? getAuth(app) : null;
