@@ -14,6 +14,84 @@ npm run dev
 
 Without env vars the shell still runs, but auth, cloud-synced library data, quiz stats, and Post-It stay offline.
 
+## Renaming your local folder on Windows (`life-app-vite` → `life-app`)
+
+> Do this on your machine only. This repository cannot rename your local folder for you.
+
+### Option A: File Explorer (manual)
+
+1. Save your work in your editor and close VS Code/terminals that are using the repo.
+2. Open `C:\Users\louie\`.
+3. Right-click `life-app-vite` → **Rename** → `life-app`.
+4. Re-open a terminal in `C:\Users\louie\life-app`.
+
+### Option B: PowerShell
+
+```powershell
+Move-Item -LiteralPath "C:\Users\louie\life-app-vite" -Destination "C:\Users\louie\life-app"
+```
+
+If you get a file-lock error, close apps using that folder and retry.
+
+### Git-safe checks after rename
+
+```powershell
+cd "C:\Users\louie\life-app"
+git status
+git branch --show-current
+git remote -v
+git log -n 1 --oneline
+```
+
+### Continue development after rename
+
+```powershell
+cd "C:\Users\louie\life-app"
+npm ci
+npm run lint
+npm run build
+npm run dev
+```
+
+## Updating repository references (`life-app-vite` text) if needed
+
+There are currently no in-repo `life-app-vite` matches, but use this flow for future cleanup PRs.
+
+### Search
+
+```powershell
+Get-ChildItem -Path . -Recurse -Include *.md,*.json,*.yml,*.yaml,*.sh,*.ps1,*.txt -File |
+  Select-String -Pattern "life-app-vite" -SimpleMatch
+```
+
+### Scoped replace (review diffs before commit)
+
+```powershell
+Get-ChildItem -Path . -Recurse -Include *.md,*.json,*.yml,*.yaml,*.sh,*.ps1,*.txt -File |
+  ForEach-Object {
+    (Get-Content $_.FullName) -replace "life-app-vite", "life-app" | Set-Content $_.FullName
+  }
+```
+
+### Suggested PR metadata
+
+- **Title:** `Rename repository references from "life-app-vite" to "life-app"`
+- **Scope to check:** `README.md`, `package.json`, `.github/*`, `.clinerules/*`, and root docs/scripts.
+
+### Suggested QA checklist
+
+- [ ] `npm ci`
+- [ ] `npm run lint`
+- [ ] `npm run build`
+- [ ] `npm run dev` starts without path errors
+- [ ] Re-check `git diff` to confirm only targeted text/reference updates
+
+### Recommended follow-ups outside this repo
+
+- Update local env files, IDE workspace paths, and terminal shortcuts that still point to `life-app-vite`.
+- Verify CI/deployment settings that may include old names (GitHub Actions envs, Vercel/Netlify project naming, Docker/container configs).
+- Re-open any editor workspaces from the new `C:\Users\louie\life-app` path.
+
 ## Vercel + Supabase + GitHub setup
 
 1. Import the GitHub repository into **Vercel** so pushes and pull requests create deployments automatically.
