@@ -1,8 +1,13 @@
 import '../src/index.css'
 
+const siteUrlCandidates = [
+  process.env.NEXT_PUBLIC_SITE_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  'http://localhost:3000',
+].filter(Boolean);
+
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  siteUrlCandidates.find((candidate) => URL.canParse(candidate)) ||
   'http://localhost:3000';
 
 export const metadata = {
