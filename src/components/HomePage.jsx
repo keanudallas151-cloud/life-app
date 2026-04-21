@@ -397,101 +397,97 @@ export function HomePage({
         <div
           style={{
             position: "relative",
-            background: `linear-gradient(135deg, ${t.white} 0%, ${t.greenLt} 100%)`,
-            border: `1px solid ${t.green}2b`,
+            background: "linear-gradient(135deg, rgb(10, 10, 10) 0%, rgb(10, 31, 16) 100%)",
+            border: "1px solid rgba(80, 200, 120, 0.17)",
             borderRadius: 22,
             padding: "32px 26px 30px",
-            boxShadow: S.md,
+            boxShadow: "rgba(20, 20, 20, 0.04) 0px 4px 6px, rgba(74, 140, 92, 0.08) 0px 12px 28px, rgba(20, 20, 20, 0.04) 0px 2px 4px",
             overflow: "hidden",
             marginBottom: 24,
           }}
         >
           <span
-            aria-hidden
+            aria-hidden="true"
             style={{
               position: "absolute",
-              top: 4,
-              left: 14,
-              fontSize: 110,
+              top: 2,
+              left: 10,
+              fontSize: 90,
               lineHeight: 1,
-              color: t.green,
+              color: "rgb(80, 200, 120)",
               opacity: 0.12,
-              fontFamily: "Georgia,serif",
-              fontWeight: 700,
+              fontFamily: "Georgia, serif",
+              fontWeight: 100,
               pointerEvents: "none",
               userSelect: "none",
             }}
           >
-            &ldquo;
+            “
           </span>
-
           <p
             style={{
-              margin: "0 0 12px",
+              margin: "0 0 15px",
               fontSize: 10.5,
               fontWeight: 800,
-              letterSpacing: 2.8,
+              letterSpacing: 3,
               textTransform: "uppercase",
-              color: t.green,
-              position: "relative",
+              color: "rgb(80, 200, 120)",
+              position: "absolute",
+              top: 23,
+              left: 55,
             }}
           >
-            A Note From The Author
+            The Creation Of Life -
           </p>
-
           <p
             style={{
-              margin: "0 0 14px",
-              color: t.ink,
+              margin: "10px 0 14px",
+              color: "rgb(250, 250, 250)",
               fontSize: 17,
               lineHeight: 1.55,
-              fontFamily: "Georgia,serif",
+              fontFamily: "Georgia, serif",
               fontWeight: 500,
               fontStyle: "italic",
               position: "relative",
             }}
           >
-            Most people never learn how money, the mind, or the world actually
-            works &mdash; because no one ever shows them.
+            "Becoming Succesful Has Never Been This Easier" - K.C
           </p>
           <p
             style={{
               margin: 0,
-              color: t.mid,
+              color: "rgb(212, 212, 212)",
               fontSize: 14.5,
               lineHeight: 1.75,
-              fontFamily: "Georgia,serif",
+              fontFamily: "Georgia, serif",
               position: "relative",
             }}
           >
-            Life. is where that changes. Read clearly. Think sharply. Move with
-            purpose. Build something real &mdash; one page, one habit, one win
-            at a time.
+            I love writing, about a year ago I bought my first notebook and called it "Idea #1," a life guide sectioned into categories with sticky notes. A documented notebook of finance, philosophy and lessons learned. Growing up poor, moving to Australia at age 10 with just my mother, I had no one to tell me anything. I would have to figure out life for myself alone. This app is not just another course that wants to steal your money. It is an actual tool I made, a rough life guide with knowledge they don’t teach in school. You are born into a world with invisible handcuffs, modern slavery, but this app releases you. Discover the reality, and find what it takes to survive, network with like-minded individuals, and make decisions. Success has never been this easy, all in one app right at your fingertips.
           </p>
-
           <div
             style={{
               marginTop: 20,
               paddingTop: 14,
-              borderTop: `1px solid ${t.green}22`,
+              borderTop: "1px solid rgba(80, 200, 120, 0.133)",
               display: "flex",
               alignItems: "center",
               gap: 10,
               position: "relative",
             }}
           >
-            <span style={{ display: "inline-block", width: 28, height: 2, background: t.green }} />
+            <span style={{ display: "inline-block", width: 28, height: 2, background: "rgb(80, 200, 120)" }} />
             <span
               style={{
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: 1.6,
                 textTransform: "uppercase",
-                color: t.green,
-                fontFamily: "Georgia,serif",
+                color: "rgb(80, 200, 120)",
+                fontFamily: "Georgia, serif",
               }}
             >
-              Let&apos;s get rich.
+              K.C.
             </span>
           </div>
         </div>
