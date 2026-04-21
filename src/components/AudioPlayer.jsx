@@ -1,18 +1,42 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { C } from "../systems/theme";
 
+const PILOT_AUDIO_BY_TITLE = {
+  "Fractional Reserve Lending": {
+    mp3Url:
+      "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/4430feedd1db49b4b7be2139b8dddc4f.mp3",
+    externalUrl: "https://www.aidocmaker.com/g0/audio?name=4430feedd1db49b4b7be2139b8dddc4f",
+    helperText:
+      "Pilot narration is live for this topic. On iPhone, tap play once to start the audio.",
+  },
+};
+
 /**
  * AudioPlayer — theme-aware MP3 player with HTML5 Audio.
  *
  * Props:
- *   title     — display title (required)
- *   mp3Url    — URL of the MP3 file. When null the player shows a "Coming soon" placeholder.
- *   duration  — fallback duration in seconds used when mp3Url is null (default 180)
- *   playSound — parent's sound callback (tap/back/open) for UI feedback
- *   t         — theme object (falls back to C)
+ *   title        — display title (required)
+ *   mp3Url       — direct URL of the MP3 file. When null the player shows a placeholder.
+ *   externalUrl  — optional hosted full narration link for this topic.
+ *   helperText   — optional helper note shown beneath the controls.
+ *   duration     — fallback duration in seconds used when mp3Url is null (default 180)
+ *   playSound    — parent's sound callback (tap/back/open) for UI feedback
+ *   t            — theme object (falls back to C)
  */
-export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration = 180, playSound, t: theme }) {
+export function AudioPlayer({
+  title,
+  mp3Url = null,
+  externalUrl = null,
+  helperText = null,
+  duration: fallbackDuration = 180,
+  playSound,
+  t: theme,
+}) {
   const t = theme || C;
+  const pilotAudio = PILOT_AUDIO_BY_TITLE[title] || null;
+  const resolvedMp3Url = mp3Url || pilotAudio?.mp3Url || null;
+  const resolvedExternalUrl = externalUrl || pilotAudio?.externalUrl || null;
+  const resolvedHelperText = helperText || pilotAudio?.helperText || null;
 
   // ── refs ──
   const audioRef = useRef(null);
@@ -25,12 +49,12 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const hasAudio = !!mp3Url;
+  const hasAudio = !!resolvedMp3Url;
 
   // ── create / destroy audio element ──
   useEffect(() => {
     if (!hasAudio) return;
-    const audio = new Audio(mp3Url);
+    const audio = new Audio(resolvedMp3Url);
     audio.preload = "metadata";
     audioRef.current = audio;
 
@@ -38,8 +62,14 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
       if (audio.duration && isFinite(audio.duration)) setDuration(Math.ceil(audio.duration));
       setLoading(false);
     };
-    const onError  = () => { setError("Unable to load audio"); setLoading(false); };
-    const onEnded  = () => { setPlaying(false); setElapsed(0); };
+    const onError = () => {
+      setError("Unable to load audio");
+      setLoading(false);
+    };
+    const onEnded = () => {
+      setPlaying(false);
+      setElapsed(0);
+    };
 
     audio.addEventListener("loadedmetadata", onLoaded);
     audio.addEventListener("error", onError);
@@ -61,7 +91,7 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
       }
       audioRef.current = null;
     };
-  }, [mp3Url, hasAudio]);
+  }, [resolvedMp3Url, hasAudio]);
 
   // ── sync elapsed via requestAnimationFrame tick ──
   useEffect(() => {
@@ -81,8 +111,12 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
     if (hasAudio) return;
     if (playing) {
       intervalRef.current = setInterval(() => {
-        setElapsed(e => {
-          if (e >= duration) { clearInterval(intervalRef.current); setPlaying(false); return 0; }
+        setElapsed((e) => {
+          if (e >= duration) {
+            clearInterval(intervalRef.current);
+            setPlaying(false);
+            return 0;
+          }
           return e + 1;
         });
       }, 1000);
@@ -105,11 +139,17 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
       } else {
         setLoading(true);
         a.play()
-          .then(() => { setLoading(false); setPlaying(true); })
-          .catch(() => { setLoading(false); setError("Playback failed"); });
+          .then(() => {
+            setLoading(false);
+            setPlaying(true);
+          })
+          .catch(() => {
+            setLoading(false);
+            setError("Playback failed");
+          });
       }
     } else {
-      setPlaying(p => !p);
+      setPlaying((p) => !p);
     }
   }, [playing, hasAudio, playSound]);
 
@@ -125,25 +165,31 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
   }, [hasAudio]);
 
   // ── seek ──
-  const seek = useCallback((e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const time = Math.floor(pct * duration);
-    setElapsed(time);
-    if (hasAudio && audioRef.current) {
-      audioRef.current.currentTime = time;
-    }
-  }, [duration, hasAudio]);
+  const seek = useCallback(
+    (e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const time = Math.floor(pct * duration);
+      setElapsed(time);
+      if (hasAudio && audioRef.current) {
+        audioRef.current.currentTime = time;
+      }
+    },
+    [duration, hasAudio],
+  );
 
   // ── skip ±15s ──
-  const skip = useCallback((delta) => {
-    const next = Math.max(0, Math.min(duration, elapsed + delta));
-    setElapsed(next);
-    if (hasAudio && audioRef.current) audioRef.current.currentTime = next;
-  }, [elapsed, duration, hasAudio]);
+  const skip = useCallback(
+    (delta) => {
+      const next = Math.max(0, Math.min(duration, elapsed + delta));
+      setElapsed(next);
+      if (hasAudio && audioRef.current) audioRef.current.currentTime = next;
+    },
+    [elapsed, duration, hasAudio],
+  );
 
   // ── format helper ──
-  const fmt = s => {
+  const fmt = (s) => {
     const sec = Math.floor(Math.max(0, s));
     return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
   };
@@ -274,6 +320,39 @@ export function AudioPlayer({ title, mp3Url = null, duration: fallbackDuration =
           ↺
         </button>
       </div>
+
+      {resolvedHelperText && (
+        <p style={{ margin: "16px 0 0", fontSize: 11.5, color: t.muted, fontStyle: "italic", textAlign: "center", lineHeight: 1.6 }}>
+          {resolvedHelperText}
+        </p>
+      )}
+
+      {resolvedExternalUrl && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 14 }}>
+          <a
+            href={resolvedExternalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              minHeight: 42,
+              padding: "0 16px",
+              borderRadius: 999,
+              textDecoration: "none",
+              background: t.light,
+              border: `1px solid ${t.border}`,
+              color: t.mid,
+              fontSize: 12.5,
+              fontWeight: 700,
+            }}
+          >
+            Open full narration
+          </a>
+        </div>
+      )}
 
       {/* Placeholder note when no URL */}
       {!hasAudio && (
