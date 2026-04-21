@@ -51,15 +51,30 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-title" content="Life." />
         <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
         <style>{`
+          html,
+          body {
+            min-height: 100dvh;
+            height: 100dvh;
+          }
+
+          body {
+            padding-bottom: 0 !important;
+          }
+
+          body > div {
+            min-height: 100dvh;
+          }
+
           @media (max-width: 640px) {
             .life-auth-shell,
             .life-landing-shell {
               justify-content: flex-start !important;
-              min-height: calc(100svh + 140px) !important;
+              min-height: 100dvh !important;
+              height: 100dvh !important;
               overflow-y: auto !important;
               overflow-x: hidden !important;
               padding-top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px)) !important;
-              padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)) !important;
+              padding-bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 16px)) !important;
               box-sizing: border-box !important;
             }
 
@@ -68,6 +83,53 @@ export default function RootLayout({ children }) {
               overflow: visible !important;
               width: min(100%, 360px) !important;
               max-width: 360px !important;
+            }
+
+            .life-reader-toolbar {
+              padding-left: 0 !important;
+              padding-right: max(10px, env(safe-area-inset-right, 0px)) !important;
+              gap: 0 !important;
+            }
+
+            .life-reader-toolbar-actions {
+              margin-left: auto !important;
+              padding-left: 10px !important;
+              gap: 8px !important;
+              border-left: 1px solid var(--life-border) !important;
+            }
+
+            .life-reader-mode-btn,
+            .life-reader-star-btn {
+              width: 40px !important;
+              height: 40px !important;
+              min-width: 40px !important;
+              min-height: 40px !important;
+              box-shadow: none !important;
+            }
+          }
+
+          @media (display-mode: standalone) {
+            html,
+            body {
+              min-height: 100dvh !important;
+              height: 100dvh !important;
+              overflow: hidden;
+            }
+
+            body {
+              padding-bottom: 0 !important;
+              background: #000;
+            }
+
+            body > div {
+              min-height: 100dvh !important;
+            }
+
+            .life-auth-shell,
+            .life-landing-shell {
+              min-height: 100dvh !important;
+              height: 100dvh !important;
+              padding-bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 16px)) !important;
             }
           }
         `}</style>
