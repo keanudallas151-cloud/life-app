@@ -66,6 +66,31 @@ function mapInventorForm(profile, inventorProfile, userId) {
   };
 }
 
+function MatchOverlay({ t, matchState, onClose, onOpenMessages }) {
+  if (!matchState) return null;
+  const isMatch = matchState.type === "match";
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 1500, background: "rgba(0,0,0,0.68)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div style={{ width: "min(100%, 420px)", borderRadius: 28, background: "linear-gradient(180deg, rgba(7,7,7,0.98) 0%, rgba(18,18,18,0.98) 100%)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 28px 70px rgba(0,0,0,0.45)", padding: "24px 22px 22px", color: "#ffffff", textAlign: "center" }}>
+        <div style={{ fontSize: isMatch ? 38 : 30, lineHeight: 1, marginBottom: 10 }}>{isMatch ? "🔥" : "✓"}</div>
+        <div style={{ fontSize: isMatch ? 30 : 22, fontWeight: 800, letterSpacing: -0.6, lineHeight: 1.05 }}>
+          {isMatch ? "It’s a match" : `You liked ${matchState.name}`}
+        </div>
+        <div style={{ marginTop: 12, fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.76)" }}>
+          {isMatch
+            ? `${matchState.name} looks aligned with your direction. Open messages and start the conversation while the interest is fresh.`
+            : `${matchState.name} has been added to your interest trail. Keep swiping to build momentum.`}
+        </div>
+        <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
+          {isMatch ? <PrimaryButton t={t} onClick={onOpenMessages}>Open messages</PrimaryButton> : null}
+          <SecondaryButton t={t} onClick={onClose}>{isMatch ? "Keep browsing" : "Continue swiping"}</SecondaryButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function InventorsInvestors({ t, user, play }) {
   const {
     loading,
@@ -100,6 +125,7 @@ export function InventorsInvestors({ t, user, play }) {
   const [investorForm, setInvestorForm] = useState(() => mapInvestorForm(null, null, userId));
   const [inventorForm, setInventorForm] = useState(() => mapInventorForm(null, null, userId));
   const [roleSubmitting, setRoleSubmitting] = useState(false);
+  const [matchState, setMatchState] = useState(null);
 
   useEffect(() => {
     if (!userId || userId === "guest") return;
@@ -189,6 +215,16 @@ export function InventorsInvestors({ t, user, play }) {
     if (activeConversationId) {
       await markConversationRead(activeConversationId);
     }
+  };
+
+  const showSwipeFeedback = (targetProfile) => {
+    if (!targetProfile) return;
+    const shouldMatch = Math.random() < 0.35;
+    setMatchState({
+      type: shouldMatch ? "match" : "liked",
+      name: targetProfile.full_name || "this profile",
+      targetUserId: targetProfile.user_id,
+    });
   };
 
   const handleRoleContinue = async (nextRole = roleChoice) => {
@@ -305,62 +341,75 @@ export function InventorsInvestors({ t, user, play }) {
 
     case "messages":
       return (
-        <InventorsInvestorsMessagesPage
-          t={t}
-          conversations={conversations}
-          activeConversationId={activeConversationId}
-          onOpenConversation={async (conversationId) => {
-            play?.("tap");
-            setActiveConversationId(conversationId);
-            await markConversationRead(conversationId);
-          }}
-          onBackToDiscovery={() => {
-            play?.("tap");
-            setView("swipe");
-          }}
-          onSendMessage={sendMessage}
-          sending={messageSending}
-        />
+        <>
+          <InventorsInvestorsMessagesPage
+            t={t}
+            conversations={conversations}
+            activeConversationId={activeConversationId}
+            onOpenConversation={async (conversationId) => {
+              play?.("tap");
+              setActiveConversationId(conversationId);
+              await markConversationRead(conversationId);
+            }}
+            onBackToDiscovery={() => {
+              play?.("tap");
+              setView("swipe");
+            }}
+            onSendMessage={sendMessage}
+            sending={messageSending}
+          />
+          <MatchOverlay t={t} matchState={matchState} onClose={() => setMatchState(null)} onOpenMessages={openMessages} />
+        </>
       );
 
     case "swipe":
       return (
-        <div>
-          <div style={{ width: "100%", maxWidth: 720, margin: "0 auto", padding: "12px 18px 0" }}>
-            <SecondaryButton t={t} onClick={() => { play?.("tap"); setView("landing"); }}>← Back</SecondaryButton>
+        <>
+          <div>
+            <div style={{ width: "100%", maxWidth: 720, margin: "0 auto", padding: "12px 18px 0" }}>
+              <SecondaryButton t={t} onClick={() => { play?.("tap"); setView("landing"); }}>← Back</SecondaryButton>
+            </div>
+            <InventorsInvestorsSwipePage
+              t={t}
+              viewerRole={profile?.role || roleChoice}
+              profileCompleted={profileCompleted}
+              searchTerm={searchTerm}
+              onSearch={setSearchTerm}
+              onOpenMessages={openMessages}
+              pendingMessageCount={unreadMessageCount}
+              activeProfile={activeProfile}
+              hasProfiles={Boolean(filteredProfiles.length)}
+              isLoading={loading || discoveryLoading}
+              onInterested={() => {
+                if (!activeProfile) return;
+                showSwipeFeedback(activeProfile);
+                createSwipe(activeProfile.user_id, "interested");
+              }}
+              onPass={() => activeProfile && createSwipe(activeProfile.user_id, "pass")}
+              onStartChat={() => activeProfile && handleStartChat(activeProfile.user_id)}
+              onBlock={() => activeProfile && handleBlock(activeProfile.user_id)}
+              onReport={() => activeProfile && handleReport(activeProfile.user_id)}
+              onResetSearch={() => setSearchTerm("")}
+              onCompleteProfile={handleCompleteProfileSetup}
+            />
           </div>
-          <InventorsInvestorsSwipePage
-            t={t}
-            viewerRole={profile?.role || roleChoice}
-            profileCompleted={profileCompleted}
-            searchTerm={searchTerm}
-            onSearch={setSearchTerm}
-            onOpenMessages={openMessages}
-            pendingMessageCount={unreadMessageCount}
-            activeProfile={activeProfile}
-            hasProfiles={Boolean(filteredProfiles.length)}
-            isLoading={loading || discoveryLoading}
-            onInterested={() => activeProfile && createSwipe(activeProfile.user_id, "interested")}
-            onPass={() => activeProfile && createSwipe(activeProfile.user_id, "pass")}
-            onStartChat={() => activeProfile && handleStartChat(activeProfile.user_id)}
-            onBlock={() => activeProfile && handleBlock(activeProfile.user_id)}
-            onReport={() => activeProfile && handleReport(activeProfile.user_id)}
-            onResetSearch={() => setSearchTerm("")}
-            onCompleteProfile={handleCompleteProfileSetup}
-          />
-        </div>
+          <MatchOverlay t={t} matchState={matchState} onClose={() => setMatchState(null)} onOpenMessages={openMessages} />
+        </>
       );
 
     case "role_selection":
     case "landing":
     default:
       return (
-        <InventorsInvestorsLandingPage
-          t={t}
-          hasMessages={Boolean(conversations.length)}
-          onChooseRole={handleRoleContinue}
-          onGoMessages={openMessages}
-        />
+        <>
+          <InventorsInvestorsLandingPage
+            t={t}
+            hasMessages={Boolean(conversations.length)}
+            onChooseRole={handleRoleContinue}
+            onGoMessages={openMessages}
+          />
+          <MatchOverlay t={t} matchState={matchState} onClose={() => setMatchState(null)} onOpenMessages={openMessages} />
+        </>
       );
   }
 }
