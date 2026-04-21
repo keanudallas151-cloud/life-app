@@ -674,7 +674,7 @@ function CommunicationPracticePage({ activity, t, play, onBack }) {
     <div
       style={{
         padding:
-          "28px max(16px, env(safe-area-inset-left, 0px)) max(40px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px))",
+          "28px max(16px, var(--safe-left, 0px)) max(40px, var(--safe-bottom, 0px)) max(16px, var(--safe-right, 0px))",
         maxWidth: 560,
         margin: "0 auto",
         boxSizing: "border-box",
@@ -1033,7 +1033,7 @@ export function QuizPage({
     return (
       <div className="life-quiz-page" style={{ paddingBottom:40 }}>
         {/* Header tabs */}
-        <div className="life-quiz-tabs" style={{ display:"flex", borderBottom:`1px solid ${t.border}`, background:t.white, padding:"0 max(12px, env(safe-area-inset-left, 0px)) 0 max(12px, env(safe-area-inset-right, 0px))", position:"sticky", top:0, zIndex:10, overflowX:"auto", WebkitOverflowScrolling:"touch", gap:4 }}>
+        <div className="life-quiz-tabs" style={{ display:"flex", borderBottom:`1px solid ${t.border}`, background:t.white, padding:"0 max(12px, var(--safe-left, 0px)) 0 max(12px, var(--safe-right, 0px))", position:"sticky", top:0, zIndex:10, overflowX:"auto", WebkitOverflowScrolling:"touch", gap:4 }}>
           {[["play","Quiz"],["stats","My Stats"],["achievements","Badges"]].map(([id,label]) => (
             <button key={id} onClick={() => { setActiveTab(id); }}
               style={{ padding:"14px 14px", flexShrink:0, background:"none", border:"none",
@@ -1056,7 +1056,7 @@ export function QuizPage({
         )}
 
         {activeTab === "stats" && (
-          <div className="life-quiz-panel" style={{ padding:"28px max(16px, env(safe-area-inset-left, 0px)) 28px max(16px, env(safe-area-inset-right, 0px))", maxWidth:520, margin:"0 auto", boxSizing:"border-box" }}>
+          <div className="life-quiz-panel" style={{ padding:"28px max(16px, var(--safe-left, 0px)) 28px max(16px, var(--safe-right, 0px))", maxWidth:520, margin:"0 auto", boxSizing:"border-box" }}>
             <div className="life-quiz-stat-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:24 }}>
               <StatCard t={t} label="Quizzes Played" value={stats.totalPlayed||0}   col={t.green}/>
               <StatCard t={t} label="Accuracy"        value={`${overallAcc}%`}       col={t.gold}/>
@@ -1104,7 +1104,7 @@ export function QuizPage({
         )}
 
         {activeTab === "play" && (
-          <div className="life-quiz-panel" style={{ padding:"28px max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px))", maxWidth:520, margin:"0 auto", boxSizing:"border-box" }}>
+          <div className="life-quiz-panel" style={{ padding:"28px max(16px, var(--safe-left, 0px)) 0 max(16px, var(--safe-right, 0px))", maxWidth:520, margin:"0 auto", boxSizing:"border-box" }}>
             {/* Daily Challenge banner */}
             <div className="life-quiz-daily-banner" style={{ background:`linear-gradient(135deg,${t.green},${t.greenAlt})`, borderRadius:14, padding:"16px 18px", marginBottom:24, display:"flex", alignItems:"center", gap:12, cursor:"pointer", flexWrap:"wrap" }}
               onClick={() => { setFmt("daily"); }}>
@@ -1246,7 +1246,7 @@ export function QuizPage({
     const grade    = pct===100?"Perfect! 🎉":pct>=90?"Excellent":pct>=70?"Good work":pct>=50?"Decent":"Keep reading";
     const topicMeta = TOPIC_META[topic];
     return (
-      <div className="life-quiz-page life-quiz-result-wrap" style={{ padding:"32px max(16px, env(safe-area-inset-left, 0px)) max(60px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px))", maxWidth:500, margin:"0 auto", boxSizing:"border-box" }}>
+      <div className="life-quiz-page life-quiz-result-wrap" style={{ padding:"32px max(16px, var(--safe-left, 0px)) max(60px, var(--safe-bottom, 0px)) max(16px, var(--safe-right, 0px))", maxWidth:500, margin:"0 auto", boxSizing:"border-box" }}>
         {newAchs.length > 0 && (
         <div style={{ background:t.ink, borderRadius:14, padding:"16px 20px", marginBottom:20, display:"flex", alignItems:"center", gap:12 }}>
             <span style={{ fontSize:24 }}>{newAchs[0].icon}</span>
@@ -1342,7 +1342,7 @@ export function QuizPage({
   const topicMeta  = TOPIC_META[topic];
 
   return (
-    <div className="life-quiz-page" style={{ padding:"20px max(16px, env(safe-area-inset-left, 0px)) max(40px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px))", maxWidth:520, margin:"0 auto", boxSizing:"border-box" }}>
+    <div className="life-quiz-page" style={{ padding:"20px max(16px, var(--safe-left, 0px)) max(40px, var(--safe-bottom, 0px)) max(16px, var(--safe-right, 0px))", maxWidth:520, margin:"0 auto", boxSizing:"border-box" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14, gap:12, flexWrap:"wrap" }}>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <div style={{ width:26, height:26, borderRadius:7, background:topicMeta.bg, display:"flex", alignItems:"center", justifyContent:"center" }}>

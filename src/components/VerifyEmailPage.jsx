@@ -21,7 +21,7 @@ export function VerifyEmailPage({
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "Georgia,serif",
-        padding: "40px 24px calc(40px + env(safe-area-inset-bottom))",
+        padding: "40px 24px calc(40px + var(--safe-bottom, 0px))",
         position: "relative",
       }}
     >

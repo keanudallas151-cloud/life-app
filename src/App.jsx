@@ -2333,7 +2333,7 @@ export default function LifeApp() {
           className="life-toast"
           style={{
             position: "fixed",
-            top: "calc(70px + env(safe-area-inset-top, 0px))",
+            top: "calc(70px + var(--safe-top, 0px))",
             left: "50%",
             transform: "translateX(-50%)",
             background: t.ink,
@@ -2363,11 +2363,11 @@ export default function LifeApp() {
             className="life-notif-dropdown"
             style={{
               position: "fixed",
-              top: `calc(56px + env(safe-area-inset-top, 0px))`,
+              top: `calc(56px + var(--safe-top, 0px))`,
               left: isNarrowViewport ? 10 : "auto",
               right: isNarrowViewport
                 ? 10
-                : "max(10px, env(safe-area-inset-right, 0px))",
+                : "max(10px, var(--safe-right, 0px))",
               zIndex: 70,
               background: dark ? "#1a1a1a" : "#ffffff",
               border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
@@ -2493,7 +2493,7 @@ export default function LifeApp() {
           position: "sticky",
           top: 0,
           zIndex: 50,
-          paddingTop: "env(safe-area-inset-top, 0px)",
+          paddingTop: "var(--safe-top, 0px)",
           backdropFilter: "saturate(1.4) blur(16px)",
           WebkitBackdropFilter: "saturate(1.4) blur(16px)",
           boxShadow:
@@ -2951,7 +2951,7 @@ export default function LifeApp() {
             className="life-sidebar-header"
             style={{
               padding: isNarrowViewport
-                ? "calc(10px + env(safe-area-inset-top, 0px)) 12px 10px"
+                ? "calc(10px + var(--safe-top, 0px)) 12px 10px"
                 : "12px 14px 10px",
               borderBottom: `1px solid ${t.light}`,
               display: "flex",
@@ -3514,7 +3514,7 @@ export default function LifeApp() {
             data-page-tag="#side_bar_sign_out"
             className="life-sidebar-signout"
             style={{
-              padding: "12px 14px calc(12px + env(safe-area-inset-bottom, 0px))",
+              padding: "12px 14px calc(12px + var(--safe-bottom, 0px))",
               borderTop: `1px solid ${t.light}`,
               background: t.white,
               flexShrink: 0,

@@ -6,7 +6,7 @@ import { CONTENT } from "../data/content";
 export function TailorIntro({userName,onExplore,onTailor,t:theme}){
   const t = theme || C;
   return(
-    <div style={{height:"100%",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:`linear-gradient(165deg, ${t.skin} 0%, ${t.light} 35%, ${t.skin} 70%, ${t.light} 100%)`,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif",overflowY:"auto",WebkitOverflowScrolling:"touch",position:"relative"}}>
+    <div style={{height:"100%",paddingBottom:"var(--safe-bottom, 0px)",background:`linear-gradient(165deg, ${t.skin} 0%, ${t.light} 35%, ${t.skin} 70%, ${t.light} 100%)`,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif",overflowY:"auto",WebkitOverflowScrolling:"touch",position:"relative"}}>
       {/* Decorative background circles */}
       <div aria-hidden style={{position:"absolute",top:-60,right:-40,width:200,height:200,borderRadius:"50%",border:`1.5px solid ${t.green}12`,pointerEvents:"none"}}/>
       <div aria-hidden style={{position:"absolute",bottom:"20%",left:-30,width:140,height:140,borderRadius:"50%",background:`${t.green}08`,pointerEvents:"none"}}/>
@@ -126,7 +126,7 @@ export function TailorQuestions({onComplete,onBack,t:theme}){
   const pct=Math.round(((step+1)/total)*100);
 
   return(
-    <div data-page-tag="#tailor_questions" style={{height:"100%",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:`linear-gradient(180deg, ${t.skin} 0%, ${t.light} 100%)`,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+    <div data-page-tag="#tailor_questions" style={{height:"100%",paddingBottom:"var(--safe-bottom, 0px)",background:`linear-gradient(180deg, ${t.skin} 0%, ${t.light} 100%)`,display:"flex",flexDirection:"column",fontFamily:"Georgia,serif",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
       {/* Header bar */}
       <div style={{background:t.white,borderBottom:`1px solid ${t.border}`,padding:"16px 20px"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
@@ -249,8 +249,8 @@ export function TailorResult({profile,userName,onContinue,t:theme}){
     .map(x=>x.key);
 
   return(
-    <div style={{height:"100%",paddingBottom:"env(safe-area-inset-bottom, 0px)",background:t.skin,fontFamily:"Georgia,serif",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
-      <div style={{background:`linear-gradient(160deg,${t.greenAlt} 0%,${t.green} 100%)`,padding:"max(40px, env(safe-area-inset-top, 0px)) 28px 36px",textAlign:"center",position:"relative"}}>
+    <div style={{height:"100%",paddingBottom:"var(--safe-bottom, 0px)",background:t.skin,fontFamily:"Georgia,serif",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+      <div style={{background:`linear-gradient(160deg,${t.greenAlt} 0%,${t.green} 100%)`,padding:"max(40px, var(--safe-top, 0px)) 28px 36px",textAlign:"center",position:"relative"}}>
         <div style={{width:56,height:56,borderRadius:"18px",background:"rgba(255,255,255,0.18)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
         </div>

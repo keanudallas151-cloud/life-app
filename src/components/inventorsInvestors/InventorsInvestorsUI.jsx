@@ -8,7 +8,7 @@ export function FeatureFrame({ t, eyebrow, title, subtitle, actions, children })
         width: "100%",
         maxWidth: 720,
         margin: "0 auto",
-        padding: "22px 16px calc(96px + env(safe-area-inset-bottom, 0px))",
+        padding: "22px 16px calc(96px + var(--safe-bottom, 0px))",
         minHeight: "100%",
         boxSizing: "border-box",
       }}

@@ -135,7 +135,7 @@ export function NotesTab({
     <div
       style={{
         padding:
-          "24px max(16px, env(safe-area-inset-left, 0px)) 32px max(16px, env(safe-area-inset-right, 0px))",
+          "24px max(16px, var(--safe-left, 0px)) 32px max(16px, var(--safe-right, 0px))",
         maxWidth: 660,
         margin: "0 auto",
         width: "100%",
@@ -345,7 +345,7 @@ export function NotesTab({
                 display: "grid",
                 gridTemplateColumns: "repeat(4,1fr)",
                 gap: 8,
-                padding: "0 20px calc(20px + env(safe-area-inset-bottom, 0px))",
+                padding: "0 20px calc(20px + var(--safe-bottom, 0px))",
               }}
             >
               {[
@@ -1107,7 +1107,7 @@ export function EbookReader({
               style={{
                 overflowY: "auto",
                 padding:
-                  "48px max(24px, env(safe-area-inset-right, 0px)) max(36px, env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px))",
+                  "48px max(24px, var(--safe-right, 0px)) max(36px, var(--safe-bottom, 0px)) max(24px, var(--safe-left, 0px))",
                 boxSizing: "border-box",
                 background: getParchmentBackground(t),
                 border: `1px solid ${t.border}`,

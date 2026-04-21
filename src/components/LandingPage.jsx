@@ -104,7 +104,7 @@ export function LandingPage({
         alignItems: "center",
         justifyContent: "space-between",
         fontFamily: "Georgia,serif",
-        padding: "max(36px, calc(22px + env(safe-area-inset-top))) 20px max(38px, calc(24px + env(safe-area-inset-bottom)))",
+        padding: "max(36px, calc(22px + var(--safe-top, 0px))) 20px max(38px, calc(24px + var(--safe-bottom, 0px)))",
         position: "relative",
         minHeight: "100dvh",
         boxSizing: "border-box",
@@ -206,7 +206,7 @@ export function LandingPage({
         {activeValuePropData && (
           <div data-page-tag="#landing_value_prop_overlay" style={{ position: "fixed", inset: 0, zIndex: 90, display: "flex", alignItems: "stretch", justifyContent: "center", background: "rgba(0,0,0,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
             <button type="button" aria-label="Close overview" onClick={() => setActiveValueProp(null)} style={{ position: "absolute", inset: 0, border: "none", background: "transparent", cursor: "pointer" }} />
-            <div role="dialog" aria-modal="true" aria-labelledby="landing-value-prop-title" style={{ position: "relative", zIndex: 1, width: "min(100vw, 520px)", minHeight: "100dvh", padding: "max(26px, calc(18px + env(safe-area-inset-top))) 22px max(26px, calc(22px + env(safe-area-inset-bottom)))", background: "linear-gradient(180deg, rgba(8,8,8,0.98) 0%, rgba(14,14,14,0.98) 100%)", color: "#ffffff", boxSizing: "border-box", overflowY: "auto" }}>
+            <div role="dialog" aria-modal="true" aria-labelledby="landing-value-prop-title" style={{ position: "relative", zIndex: 1, width: "min(100vw, 520px)", minHeight: "100dvh", padding: "max(26px, calc(18px + var(--safe-top, 0px))) 22px max(26px, calc(22px + var(--safe-bottom, 0px)))", background: "linear-gradient(180deg, rgba(8,8,8,0.98) 0%, rgba(14,14,14,0.98) 100%)", color: "#ffffff", boxSizing: "border-box", overflowY: "auto" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 22 }}>
                 <div>
                   <h2 id="landing-value-prop-title" style={{ margin: 0, fontSize: "clamp(2rem, 8vw, 2.8rem)", fontWeight: 800, color: "#ffffff", fontFamily: "Georgia,serif", letterSpacing: -0.8 }}>

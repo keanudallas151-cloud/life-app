@@ -74,7 +74,7 @@ export function GoalSettingPage({ t, play }) {
     <div
       data-page-tag="#goal_setting"
       style={{
-        padding: "32px 20px calc(96px + env(safe-area-inset-bottom, 0px)) 20px",
+        padding: "32px 20px calc(96px + var(--safe-bottom, 0px)) 20px",
         maxWidth: 560,
         margin: "0 auto",
         fontFamily: "Georgia,serif",

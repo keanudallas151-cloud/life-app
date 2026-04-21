@@ -38,9 +38,8 @@ export function SignInPage({
         alignItems: "center",
         justifyContent: "flex-start",
         fontFamily: "Georgia,serif",
-        padding: "26px 20px calc(118px + env(safe-area-inset-bottom))",
+        padding: "max(26px, calc(16px + var(--safe-top, 0px))) 20px max(40px, calc(16px + var(--safe-bottom, 0px)))",
         position: "relative",
-        minHeight: "100svh",
         boxSizing: "border-box",
       }}
     >

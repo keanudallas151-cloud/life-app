@@ -129,7 +129,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
 
   const vp = posts.find(p => p.id === viewing);
   if (vp) return (
-    <div className="life-postit-page" style={{ padding:"20px max(16px, env(safe-area-inset-left, 0px)) 28px max(16px, env(safe-area-inset-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
+    <div className="life-postit-page" style={{ padding:"20px max(16px, var(--safe-left, 0px)) 28px max(16px, var(--safe-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
       <button onClick={() => setViewing(null)}
         style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontSize:13, padding:"0 0 16px", fontFamily:"Georgia,serif" }}>
         ← Back to Feed
@@ -190,7 +190,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
   );
 
   return (
-    <div className="life-postit-page" style={{ padding:"20px max(16px, env(safe-area-inset-left, 0px)) max(28px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
+    <div className="life-postit-page" style={{ padding:"20px max(16px, var(--safe-left, 0px)) max(28px, var(--safe-bottom, 0px)) max(16px, var(--safe-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
       {error && (
         <div style={{ background:"#fdf2f2", border:`1px solid ${C.red}`, borderRadius:12, padding:"14px 16px", marginBottom:16, fontSize:13, color:C.ink, lineHeight:1.6 }}>
           <strong style={{ display:"block", marginBottom:4 }}>Could not load the feed</strong>

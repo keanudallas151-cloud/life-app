@@ -142,7 +142,7 @@ export function ThemePickerPage({
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "Georgia,serif",
-        padding: "40px 24px calc(40px + env(safe-area-inset-bottom))",
+        padding: "max(40px, calc(20px + var(--safe-top, 0px))) 24px max(40px, calc(20px + var(--safe-bottom, 0px)))",
         position: "relative",
         transition: "background 0.4s ease",
       }}
