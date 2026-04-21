@@ -7,6 +7,15 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+} from "firebase/auth";
 import { TreeNode } from "./components/Field";
 import {
   allContent,
@@ -16,11 +25,7 @@ import {
   MAP,
 } from "./data/content";
 import { Ic } from "./icons/Ic";
-import {
-  getAuthRedirectUrl,
-  isSupabaseConfigured,
-  supabase,
-} from "./supabaseClient";
+import { auth, isFirebaseConfigured } from "./firebaseClient";
 import { getReadingStreak, recordReadingDay } from "./systems/readingStreak";
 import { setResumeTopic } from "./systems/resumeReading";
 import { LS } from "./systems/storage";
@@ -67,6 +72,7 @@ import { SignInPage } from "./components/SignInPage";
 import { ThemePickerPage } from "./components/ThemePickerPage";
 import { VerifyEmailPage } from "./components/VerifyEmailPage";
 import { WhereToStartPage } from "./components/WhereToStartPage";
+import { signInWithGoogle } from "./services/firebaseAuth";
 
 
 const PREF_DEFAULTS = {
@@ -388,7 +394,7 @@ export default function LifeApp() {
     setRpErr("");
   }, []);
 
-  // Only 3 providers on landing page: Google, Phone, Facebook
+  // Landing page providers: Google is live; Phone is a placeholder.
   const AUTH_PROVIDERS = [
     {
       key: "google",
@@ -402,74 +408,22 @@ export default function LifeApp() {
       live: false,
       color: "#3d5a4c",
     },
-    {
-      key: "facebook",
-      label: "Facebook",
-      live: false,
-      color: "#1877F2",
-    },
   ];
 
-  const shapeUser = useCallback((sbUser) => {
-    const meta = sbUser.user_metadata || {};
+  const shapeUser = useCallback((firebaseUser) => {
     return {
-      id: sbUser.id,
-      email: sbUser.email,
-      name: meta.name || meta.full_name || sbUser.email,
-      username: meta.username || meta.user_name || "",
-      emailConfirmed: Boolean(sbUser.email_confirmed_at),
-      avatarUrl: meta.avatar_url || "",
+      id: firebaseUser.uid,
+      email: firebaseUser.email || "",
+      name: firebaseUser.displayName || firebaseUser.email || "",
+      username: "",
+      emailConfirmed: Boolean(firebaseUser.emailVerified),
+      avatarUrl: firebaseUser.photoURL || "",
     };
   }, []);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) {
-      setUser(null);
-      setScreen("landing");
-      return undefined;
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        if (!session.user.email_confirmed_at) {
-          setUser(null);
-          setVerifyEmailAddress(session.user.email || "");
-          setScreen("verify_email");
-          return;
-        }
-        setUser(shapeUser(session.user));
-        const lastScreen = LS.get("life_last_screen", "app");
-        const validScreens = [
-          "app",
-          "tailor_intro",
-          "tailor_qs",
-          "tailor_result",
-        ];
-        setScreen(validScreens.includes(lastScreen) ? lastScreen : "app");
-      } else {
-        setScreen("landing");
-      }
-    });
-
-    // Listen for auth changes (login, logout, token refresh)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
-        passwordRecoveryRef.current = true;
-        postAuthScreenRef.current = "signin";
-        setUser(null);
-        setForgotMode(false);
-        setFpErr("");
-        setFpMsg("");
-        setRpErr("");
-        setRpPass("");
-        setRpPass2("");
-        setScreen("reset_password");
-        return;
-      }
-
-      if (event === "SIGNED_OUT") {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!firebaseUser) {
         const nextScreen = postAuthScreenRef.current || "landing";
         postAuthScreenRef.current = null;
         passwordRecoveryRef.current = false;
@@ -479,65 +433,37 @@ export default function LifeApp() {
         return;
       }
 
-      if (event === "TOKEN_REFRESHED" && session?.user) {
-        if (!session.user.email_confirmed_at) {
-          setUser(null);
-          setVerifyEmailAddress(session.user.email || "");
-          setScreen("verify_email");
-          return;
-        }
-        setUser(shapeUser(session.user));
-        return;
-      }
+      const isGoogleUser = firebaseUser.providerData?.some(
+        (provider) => provider.providerId === "google.com",
+      );
 
-      if (event === "USER_UPDATED" && passwordRecoveryRef.current) {
-        return;
-      }
-
-      if (session?.user) {
-        // Block access if email is not confirmed
-        if (!session.user.email_confirmed_at) {
-          setUser(null);
-          setVerifyEmailAddress(session.user.email || "");
-          setScreen("verify_email");
-          return;
-        }
-        const shapedUser = shapeUser(session.user);
-        setUser(shapedUser);
-
-        // Only send truly-new users through onboarding.
-        // Signals used, in priority order:
-        //   1) `onboarded_<id>` in LS (set on any prior successful load of `app`)
-        //   2) user.user_metadata.onboarded flag (set during register)
-        //   3) account created_at within the last 10 minutes AND SIGNED_IN event
-        //      (means they JUST registered in this session)
-        const onboarded = LS.get(`onboarded_${shapedUser.id}`, false);
-        const metaOnboarded = Boolean(session.user.user_metadata?.onboarded);
-        const createdAt = session.user.created_at
-          ? new Date(session.user.created_at).getTime()
-          : 0;
-        const justCreated = createdAt > 0 && Date.now() - createdAt < 10 * 60 * 1000;
-
-        // New user ONLY if they were just created AND this is a fresh SIGNED_IN.
-        // INITIAL_SESSION (page reloads) should always go straight to app for
-        // returning users — they already finished onboarding before.
-        const isNewUser =
-          !onboarded && !metaOnboarded && justCreated && event === "SIGNED_IN";
-
-        if (isNewUser) {
-          setScreen("theme_picker");
-        } else {
-          // Mark onboarded on first successful entry so future checks short-circuit.
-          if (!onboarded) LS.set(`onboarded_${shapedUser.id}`, true);
-          setScreen("app");
-        }
-      } else {
+      if (!firebaseUser.emailVerified && !isGoogleUser) {
         setUser(null);
-        setScreen("landing");
+        setVerifyEmailAddress(firebaseUser.email || "");
+        setScreen("verify_email");
+        return;
       }
+
+      const shapedUser = shapeUser(firebaseUser);
+      setUser(shapedUser);
+
+      const onboarded = LS.get(`onboarded_${shapedUser.id}`, false);
+      if (!onboarded) {
+        LS.set(`onboarded_${shapedUser.id}`, true);
+      }
+
+      const lastScreen = LS.get("life_last_screen", "app");
+      const validScreens = ["app", "tailor_intro", "tailor_qs", "tailor_result"];
+      setScreen(
+        !onboarded && !isGoogleUser
+          ? "theme_picker"
+          : validScreens.includes(lastScreen)
+            ? lastScreen
+            : "app",
+      );
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, [clearAuthFormState, shapeUser]);
 
   useEffect(() => {
@@ -563,7 +489,7 @@ export default function LifeApp() {
   }, [screen]);
 
   const uid = user?.email || "_";
-  const userIdForData = isSupabaseConfigured && user?.id ? user.id : null;
+  const userIdForData = user?.id || null;
   const [uiPrefs, setUiPrefs] = useState(() => ({
     ...PREF_DEFAULTS,
     ...LS.get(`prefs_${uid}`, PREF_DEFAULTS),
@@ -636,7 +562,7 @@ export default function LifeApp() {
     }
   };
 
-  const quizStatsState = useQuizStats(isSupabaseConfigured ? user?.id : null);
+  const quizStatsState = useQuizStats(user?.id || null);
   const quizStats = quizStatsState.stats;
   const { snapshot: momentumSnapshot, recordEvent: momentumRecordEvent } =
     useMomentum({
@@ -1186,31 +1112,12 @@ export default function LifeApp() {
     if (authLoading) return;
     play("tap");
     setSiSocialErr("");
-    if (!isSupabaseConfigured) {
-      setSiSocialErr(
-        "Sign in is unavailable until NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are configured.",
-      );
-      play("err");
-      return;
-    }
     setAuthLoading(true);
     await new Promise((r) => setTimeout(r, 3000));
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: getAuthRedirectUrl(),
-          queryParams: { prompt: "select_account" },
-        },
-      });
-      if (error) {
-        setSiSocialErr(
-          String(error.message || "Could not start Google sign in."),
-        );
-        play("err");
-      }
-    } catch {
-      setSiSocialErr("Something went wrong. Please try again.");
+      await signInWithGoogle();
+    } catch (error) {
+      setSiSocialErr(String(error.message || "Could not start Google sign in."));
       play("err");
     } finally {
       setAuthLoading(false);
@@ -1232,13 +1139,6 @@ export default function LifeApp() {
     if (authLoading) return;
     setSiErr("");
     setSiSocialErr("");
-    if (!isSupabaseConfigured) {
-      setSiErr(
-        "Sign in is unavailable until NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are configured.",
-      );
-      play("err");
-      return;
-    }
     if (!siEmail.trim()) {
       setSiErr("Please enter your email.");
       play("err");
@@ -1252,24 +1152,19 @@ export default function LifeApp() {
     setAuthLoading(true);
     const _siStart = Date.now();
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: siEmail.toLowerCase().trim(),
-        password: siPass,
-      });
+      await signInWithEmailAndPassword(auth, siEmail.toLowerCase().trim(), siPass);
       await new Promise((r) =>
         setTimeout(r, Math.max(0, 3000 - (Date.now() - _siStart))),
       );
-      if (error) {
-        const msg = String(error.message || "").toLowerCase();
-        if (msg.includes("invalid")) setSiErr("no_account_or_wrong_password");
-        else if (msg.includes("rate") || msg.includes("too many"))
-          setSiErr("Too many attempts. Wait a moment.");
-        else setSiErr("Could not sign in. Check your details.");
-        play("err");
+    } catch (error) {
+      const msg = String(error.message || "").toLowerCase();
+      if (msg.includes("invalid") || error.code === "auth/invalid-credential") {
+        setSiErr("no_account_or_wrong_password");
+      } else if (msg.includes("rate") || msg.includes("too many")) {
+        setSiErr("Too many attempts. Wait a moment.");
+      } else {
+        setSiErr("Could not sign in. Check your details.");
       }
-      // success → onAuthStateChange fires → screen = "app"
-    } catch {
-      setSiErr("Something went wrong. Please try again.");
       play("err");
     } finally {
       setAuthLoading(false);
@@ -1280,13 +1175,6 @@ export default function LifeApp() {
     if (authLoading) return;
     setFpErr("");
     setFpMsg("");
-    if (!isSupabaseConfigured) {
-      setFpErr(
-        "Password reset is unavailable until NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are configured.",
-      );
-      play("err");
-      return;
-    }
     if (!fpEmail.trim() || !fpEmail.includes("@")) {
       setFpErr("Please enter a valid email.");
       play("err");
@@ -1294,21 +1182,11 @@ export default function LifeApp() {
     }
     setAuthLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(
-        fpEmail.toLowerCase().trim(),
-        {
-          redirectTo: getAuthRedirectUrl(),
-        },
-      );
-      if (error) {
-        setFpErr(String(error.message || "Could not send reset email."));
-        play("err");
-      } else {
-        setFpMsg("Password reset email sent. Check your inbox.");
-        play("ok");
-      }
-    } catch {
-      setFpErr("Something went wrong. Please try again.");
+      await sendPasswordResetEmail(auth, fpEmail.toLowerCase().trim());
+      setFpMsg("Password reset email sent. Check your inbox.");
+      play("ok");
+    } catch (error) {
+      setFpErr(String(error.message || "Could not send reset email."));
       play("err");
     } finally {
       setAuthLoading(false);
@@ -1316,74 +1194,14 @@ export default function LifeApp() {
   };
 
   const doResetPassword = async () => {
-    if (authLoading) return;
     setRpErr("");
-    if (!isSupabaseConfigured) {
-      setRpErr(
-        "Password recovery is unavailable until NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are configured.",
-      );
-      play("err");
-      return;
-    }
-
-    if (rpPass.length < 8) {
-      setRpErr("Password must be at least 8 characters.");
-      play("err");
-      return;
-    }
-
-    if (
-      !/[A-Z]/.test(rpPass) ||
-      !/[a-z]/.test(rpPass) ||
-      !/[0-9]/.test(rpPass) ||
-      !/[^A-Za-z0-9]/.test(rpPass)
-    ) {
-      setRpErr("Use upper/lowercase letters, a number, and a symbol.");
-      play("err");
-      return;
-    }
-
-    if (rpPass !== rpPass2) {
-      setRpErr("Passwords do not match.");
-      play("err");
-      return;
-    }
-
-    setAuthLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: rpPass });
-      if (error) {
-        setRpErr(String(error.message || "Could not update password."));
-        play("err");
-        return;
-      }
-
-      postAuthScreenRef.current = "signin";
-      passwordRecoveryRef.current = false;
-      clearAuthFormState();
-      play("ok");
-      await supabase.auth.signOut();
-      setUser(null);
-      setScreen("signin");
-    } catch {
-      setRpErr("Something went wrong. Please try again.");
-      play("err");
-    } finally {
-      setAuthLoading(false);
-    }
+    setRpErr("Use the reset link from your email to choose a new password.");
+    play("err");
   };
 
   const doRegister = async () => {
     if (authLoading) return;
     setRErr({});
-    if (!isSupabaseConfigured) {
-      setRErr({
-        email:
-          "Account creation is unavailable until NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are configured.",
-      });
-      play("err");
-      return;
-    }
     // Helper that snapshots current form values BEFORE updating errors,
     // so the clearing-effect knows what "old" values looked like.
     const setRErrSnap = (errs) => {
@@ -1439,61 +1257,39 @@ export default function LifeApp() {
     setAuthLoading(true);
     const _regStart = Date.now();
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: rEmail.toLowerCase().trim(),
-        password: rPass,
-        options: {
-          emailRedirectTo: getAuthRedirectUrl(),
-          data: {
-            name: rName.trim(),
-            full_name: rName.trim(),
-            dob: rDob.trim(),
-          },
-        },
+      const credentials = await createUserWithEmailAndPassword(
+        auth,
+        rEmail.toLowerCase().trim(),
+        rPass,
+      );
+      await updateProfile(credentials.user, {
+        displayName: rName.trim(),
       });
+      await sendEmailVerification(credentials.user);
       await new Promise((r) =>
         setTimeout(r, Math.max(0, 3000 - (Date.now() - _regStart))),
       );
-
-      if (error) {
-        const raw = String(error.message || "").trim();
-        const msg = raw.toLowerCase();
-        if (msg.includes("already")) {
-          setRErrSnap({ email: "already_registered" });
-        } else if (
-          msg.includes("password") ||
-          msg.includes("character") ||
-          msg.includes("weak")
-        ) {
-          setRErrSnap({
-            pass: "Password too weak. Use upper/lowercase, number, and symbol.",
-          });
-        } else if (msg.includes("email")) {
-          setRErrSnap({ email: "Please enter a valid email address." });
-        } else {
-          setRErrSnap({ email: "Could not create account. Please check details." });
-        }
-        play("err");
-        return;
-      }
-
-      if (data?.user && !data.user.email_confirmed_at) {
-        // Email confirmation required — show verify screen
-        setVerifyEmailAddress(data.user.email || rEmail.toLowerCase().trim());
-        play("ok");
-        setScreen("verify_email");
-        return;
-      }
-      if (data?.user) {
-        setUser(shapeUser(data.user));
-        // Remember locally that this account JUST registered — so they
-        // get the theme_picker + tailoring onboarding flow this session.
-        LS.set(`onboarded_${data.user.id}`, false);
-      }
+      setVerifyEmailAddress(credentials.user.email || rEmail.toLowerCase().trim());
+      LS.set(`onboarded_${credentials.user.uid}`, false);
       play("ok");
-      setScreen("theme_picker");
-    } catch {
-      setRErrSnap({ email: "Something went wrong. Please try again." });
+      setScreen("verify_email");
+    } catch (error) {
+      const raw = String(error.message || "").trim().toLowerCase();
+      if (raw.includes("already")) {
+        setRErrSnap({ email: "already_registered" });
+      } else if (
+        raw.includes("password") ||
+        raw.includes("character") ||
+        raw.includes("weak")
+      ) {
+        setRErrSnap({
+          pass: "Password too weak. Use upper/lowercase, number, and symbol.",
+        });
+      } else if (raw.includes("email")) {
+        setRErrSnap({ email: "Please enter a valid email address." });
+      } else {
+        setRErrSnap({ email: "Could not create account. Please check details." });
+      }
       play("err");
     } finally {
       setAuthLoading(false);
@@ -1503,7 +1299,7 @@ export default function LifeApp() {
   const doSignOut = async () => {
     postAuthScreenRef.current = "landing";
     passwordRecoveryRef.current = false;
-    await supabase.auth.signOut();
+    await signOut(auth);
     clearAuthFormState();
     setUser(null);
     setScreen("landing");
@@ -2124,13 +1920,16 @@ export default function LifeApp() {
         play={play}
         setScreen={setScreen}
         verifyTargetEmail={verifyTargetEmail}
-        supabase={supabase}
-        emailRedirectTo={getAuthRedirectUrl()}
+        onResend={() =>
+          auth.currentUser
+            ? sendEmailVerification(auth.currentUser)
+            : Promise.reject(new Error("No signed-in user available."))
+        }
         systemNotice={{
           tone: "info",
-          title: "Verification link returns here",
+          title: "Verify then return to the app",
           body:
-            "If verification opens the wrong site, update NEXT_PUBLIC_SITE_URL and your Supabase redirect URLs to match this app.",
+            "After opening the link from your inbox, come back here and sign in again if needed.",
         }}
       />
     );
@@ -2156,12 +1955,12 @@ export default function LifeApp() {
         doResetPassword={doResetPassword}
         passwordRecoveryRef={passwordRecoveryRef}
         systemNotice={
-          !isSupabaseConfigured
+          !isFirebaseConfigured
             ? {
                 tone: "warning",
                 title: "Cloud auth is not configured yet",
                 body:
-                  "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to enable password recovery and account access.",
+                  "Set the NEXT_PUBLIC_FIREBASE_* values to enable password recovery and account access.",
               }
             : null
         }
@@ -2246,12 +2045,12 @@ export default function LifeApp() {
         doProviderSignIn={doProviderSignIn}
         siSocialErr={siSocialErr}
         systemNotice={
-          !isSupabaseConfigured
+          !isFirebaseConfigured
             ? {
                 tone: "warning",
                 title: "Cloud auth and sync are offline",
                 body:
-                  "This build is missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, so sign-in, registration, and community features are disabled until they are configured.",
+                  "This build is missing Firebase config, so sign-in, registration, and community features are disabled until the NEXT_PUBLIC_FIREBASE_* values are set.",
               }
             : null
         }
@@ -2275,12 +2074,12 @@ export default function LifeApp() {
         doForgotPassword={doForgotPassword}
         setSiSocialErr={setSiSocialErr}
         systemNotice={
-          !isSupabaseConfigured
+          !isFirebaseConfigured
             ? {
                 tone: "warning",
                 title: "Cloud auth is not configured yet",
                 body:
-                  "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to enable sign-in, password reset, and synced account data.",
+                  "Set the NEXT_PUBLIC_FIREBASE_* values to enable sign-in, password reset, and synced account data.",
               }
             : null
         }
@@ -2301,12 +2100,12 @@ export default function LifeApp() {
         authLoading={authLoading} doRegister={doRegister}
         setSiEmail={setSiEmail}
         systemNotice={
-          !isSupabaseConfigured
+          !isFirebaseConfigured
             ? {
                 tone: "warning",
                 title: "Account creation is unavailable",
                 body:
-                  "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to enable registration, email verification, and cloud sync.",
+                  "Set the NEXT_PUBLIC_FIREBASE_* values to enable registration, email verification, and cloud sync.",
               }
             : null
         }
@@ -3669,7 +3468,7 @@ export default function LifeApp() {
                 <QuizPage
                   play={play}
                   t={t}
-                  userId={isSupabaseConfigured ? user?.id : null}
+                  userId={user?.id || null}
                   initialTopic={quizPreset?.topic}
                   initialActivity={quizPreset?.activity}
                   readKeys={readKeys}

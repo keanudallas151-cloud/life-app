@@ -1,5 +1,21 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { supabase, isSupabaseConfigured } from "../supabaseClient";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  increment,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  runTransaction,
+  serverTimestamp,
+  setDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
+import { db } from "../firebaseClient";
 
 // Transforms a Supabase post row + its comments array into the
 // shape PostItFeed already expects so the component needs zero changes.
@@ -52,171 +68,160 @@ export function usePostIt(user) {
     setLoading(true);
     setError(null);
 
-    if (!isSupabaseConfigured) {
-      setPosts([]);
-      setMyVotes({});
-      myVotesRef.current = {};
-      setError(
-        "Post-It needs Supabase (set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)."
+    try {
+      const postSnapshot = await getDocs(
+        query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(100)),
       );
-      setLoading(false);
-      return;
-    }
+      const postRows = postSnapshot.docs.map((row) => ({
+        id: row.id,
+        ...row.data(),
+        created_at:
+          typeof row.data().createdAt?.toDate === "function"
+            ? row.data().createdAt.toDate().toISOString()
+            : null,
+      }));
 
-    // Fetch posts
-    const { data: postRows, error: pErr } = await supabase
-      .from("posts")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
+      const postIds = postRows.map((p) => p.id);
+      if (postIds.length === 0) {
+        votesRef.current = {};
+        myVotesRef.current = {};
+        setMyVotes({});
+        setPosts([]);
+        setLoading(false);
+        return;
+      }
 
-    if (pErr) { setError(pErr.message); setLoading(false); return; }
-
-    const postIds = postRows.map(p => p.id);
-
-    if (postIds.length === 0) {
-      votesRef.current = {};
-      myVotesRef.current = {};
-      setMyVotes({});
-      setPosts([]);
-      setLoading(false);
-      return;
-    }
-
-    const { data: commentRows } = await supabase
-      .from("comments")
-      .select("*")
-      .in("post_id", postIds)
-      .order("created_at", { ascending: true });
-
-    // Build maps
-    const commentsMap = {};
-    (commentRows || []).forEach(c => {
-      if (!c.post_id) return; // guard: skip rows with missing post_id
-      if (!commentsMap[c.post_id]) commentsMap[c.post_id] = [];
-      commentsMap[c.post_id].push(c);
-    });
-
-    const votesMap = {};
-    postRows.forEach((p) => {
-      votesMap[p.id] = Number(p.votes || 0);
-    });
-    votesRef.current = votesMap;
-
-    let myVoteMap = {};
-    if (user?.id) {
-      const { data: mine } = await supabase
-        .from("post_votes")
-        .select("post_id, dir")
-        .eq("user_id", user.id);
-      (mine || []).forEach((v) => {
-        myVoteMap[v.post_id] = v.dir;
+      const commentSnapshot = await getDocs(
+        query(collection(db, "comments"), where("postId", "in", postIds)),
+      );
+      const commentRows = commentSnapshot.docs.map((row) => {
+        const data = row.data();
+        return {
+          id: row.id,
+          post_id: data.postId,
+          author: data.author,
+          author_avatar_url: data.authorAvatarUrl || "",
+          text: data.text,
+          created_at:
+            typeof data.createdAt?.toDate === "function"
+              ? data.createdAt.toDate().toISOString()
+              : null,
+        };
       });
-    }
-    myVotesRef.current = myVoteMap;
-    setMyVotes(myVoteMap);
 
-    setPosts(shapePosts(postRows, commentsMap, votesMap));
-    setLoading(false);
+      // Build maps
+      const commentsMap = {};
+      (commentRows || []).forEach(c => {
+        if (!c.post_id) return;
+        if (!commentsMap[c.post_id]) commentsMap[c.post_id] = [];
+        commentsMap[c.post_id].push(c);
+      });
+
+      const votesMap = {};
+      postRows.forEach((p) => {
+        votesMap[p.id] = Number(p.voteCount ?? p.votes ?? 0);
+      });
+      votesRef.current = votesMap;
+
+      let myVoteMap = {};
+      if (user?.id) {
+        const myVoteSnapshot = await getDocs(
+          query(collection(db, "postVotes"), where("userId", "==", user.id)),
+        );
+        myVoteSnapshot.forEach((voteDoc) => {
+          const data = voteDoc.data();
+          if (data.postId) myVoteMap[data.postId] = data.dir;
+        });
+      }
+
+      myVotesRef.current = myVoteMap;
+      setMyVotes(myVoteMap);
+      setPosts(shapePosts(postRows, commentsMap, votesMap));
+      setError(null);
+    } catch (loadError) {
+      setError(loadError.message || "Could not load Post-It right now.");
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
-    const channel = supabase
-      .channel("postit_realtime")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" },
-        payload => {
-          if (!payload.new?.id) return;
-          const newPost = shapePosts([payload.new], {}, { [payload.new.id]: payload.new.votes ?? 0 })[0];
-          if (newPost) setPosts(prev => [newPost, ...prev]);
-        })
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "posts" },
-        payload => {
-          if (!payload.old?.id) return;
-          setPosts(prev => prev.filter(p => p.id !== payload.old.id));
-        })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "comments" },
-        payload => {
-          const c = payload.new;
-          if (!c?.id || !c?.post_id) return;
-          const shaped = { id: c.id, author: c.author || "Anon", text: c.text || "", time: "just now" };
-          setPosts(prev => prev.map(p =>
-            p.id === c.post_id
-              ? { ...p, comments: [...(p.comments || []), shaped] }
-              : p
-          ));
-        })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "post_votes" },
-        payload => {
-          if (!payload.new?.post_id) return;
-          const { post_id, dir } = payload.new;
-          if ((pendingVoteIds.current[post_id] ?? 0) > 0) {
-            pendingVoteIds.current[post_id] = Math.max(0, pendingVoteIds.current[post_id] - 1);
-            return;
-          }
-          setPosts(prev => prev.map(p =>
-            p.id === post_id ? { ...p, votes: (p.votes || 0) + (dir || 0) } : p
-          ));
-        })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "post_votes" },
-        payload => {
-          if (!payload.new?.post_id || payload.new.dir == null || payload.old?.dir == null) return;
-          const diff = payload.new.dir - payload.old.dir;
-          if ((pendingVoteIds.current[payload.new.post_id] ?? 0) > 0) {
-            pendingVoteIds.current[payload.new.post_id] = Math.max(0, pendingVoteIds.current[payload.new.post_id] - 1);
-            return;
-          }
-          setPosts(prev => prev.map(p =>
-            p.id === payload.new.post_id ? { ...p, votes: (p.votes || 0) + diff } : p
-          ));
-        })
-      .subscribe();
+    const unsubscribe = onSnapshot(
+      query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(100)),
+      () => {
+        void load();
+      },
+      (snapshotError) => {
+        setError(snapshotError.message || "Could not sync Post-It right now.");
+      },
+    );
 
-    return () => { supabase.removeChannel(channel); };
-  }, []);
+    return () => unsubscribe();
+  }, [load]);
 
   const addPost = useCallback(async ({ title, body, flair }) => {
-    if (!isSupabaseConfigured || !user?.id) return;
+    if (!user?.id) return;
     const author = user.name
       ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
       : "??";
 
-    const { error } = await supabase.from("posts").insert({
-      user_id: user.id,
-      author,
-      author_avatar_url: user.avatarUrl || "",
-      title: title.trim(),
-      body:  body.trim(),
-      flair,
-      votes: 1,
-    });
-    if (error) console.error("addPost:", error.message);
-    // Realtime INSERT event will update state
+    try {
+      const postRef = await addDoc(collection(db, "posts"), {
+        userId: user.id,
+        author,
+        authorAvatarUrl: user.avatarUrl || "",
+        title: title.trim(),
+        body: body.trim(),
+        flair,
+        voteCount: 1,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      await setDoc(doc(db, "postVotes", `${postRef.id}_${user.id}`), {
+        postId: postRef.id,
+        userId: user.id,
+        dir: 1,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("addPost:", error.message);
+      setError(error.message || "Could not create post.");
+    }
   }, [user]);
 
   const addComment = useCallback(async (postId, text) => {
-    if (!isSupabaseConfigured || !user?.id || !text.trim()) return;
+    if (!user?.id || !text.trim()) return;
     const author = user.name
       ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
       : "??";
 
-    const { error } = await supabase.from("comments").insert({
-      post_id: postId,
-      user_id: user.id,
-      author,
-      author_avatar_url: user.avatarUrl || "",
-      text: text.trim(),
-    });
-    if (error) console.error("addComment:", error.message);
-    // Realtime INSERT event will update state
+    try {
+      const batch = writeBatch(db);
+      batch.set(doc(collection(db, "comments")), {
+        postId,
+        userId: user.id,
+        author,
+        authorAvatarUrl: user.avatarUrl || "",
+        text: text.trim(),
+        createdAt: serverTimestamp(),
+      });
+      batch.update(doc(db, "posts", postId), {
+        updatedAt: serverTimestamp(),
+      });
+      await batch.commit();
+    } catch (error) {
+      console.error("addComment:", error.message);
+      setError(error.message || "Could not add comment.");
+    }
   }, [user]);
 
   // Upserts into post_votes. Realtime handles the UI update.
   // We do an optimistic update here as well so it feels instant.
   const vote = useCallback(async (postId, dir) => {
-    if (!isSupabaseConfigured || !user?.id) return;
+    if (!user?.id) return;
 
     const prev = myVotesRef.current[postId] ?? 0;
     // One vote per direction per user (like Reddit): same click again does nothing
@@ -235,11 +240,26 @@ export function usePostIt(user) {
       p.id === postId ? { ...p, votes: p.votes + delta } : p
     ));
 
-    const { error } = await supabase.from("post_votes").upsert(
-      { user_id: user.id, post_id: postId, dir },
-      { onConflict: "user_id,post_id" }
-    );
-    if (error) {
+    try {
+      await runTransaction(db, async (transaction) => {
+        const postRef = doc(db, "posts", postId);
+        const voteRef = doc(db, "postVotes", `${postId}_${user.id}`);
+        transaction.update(postRef, {
+          voteCount: increment(delta),
+          updatedAt: serverTimestamp(),
+        });
+        transaction.set(
+          voteRef,
+          {
+            postId,
+            userId: user.id,
+            dir,
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true },
+        );
+      });
+    } catch (error) {
       pendingVoteIds.current[postId] = Math.max(0, (pendingVoteIds.current[postId] || 0) - 1);
       const rolled = { ...myVotesRef.current };
       if (prev === 0) delete rolled[postId];
@@ -250,6 +270,7 @@ export function usePostIt(user) {
         p.id === postId ? { ...p, votes: p.votes - delta } : p
       ));
       console.error("vote:", error.message);
+      setError(error.message || "Could not record vote.");
     }
   }, [user]);
 

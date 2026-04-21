@@ -6,8 +6,7 @@ export function VerifyEmailPage({
   play,
   setScreen,
   verifyTargetEmail,
-  supabase,
-  emailRedirectTo,
+  onResend,
   systemNotice,
 }) {
   return (
@@ -126,11 +125,7 @@ export function VerifyEmailPage({
           onClick={async () => {
             if (!verifyTargetEmail) return;
             try {
-              await supabase.auth.resend({
-                type: "signup",
-                email: verifyTargetEmail.toLowerCase().trim(),
-                options: emailRedirectTo ? { emailRedirectTo } : undefined,
-              });
+              await onResend?.();
               play("ok");
             } catch {
               play("err");
@@ -168,7 +163,7 @@ export function VerifyEmailPage({
             textAlign: "center",
           }}
         >
-          Verification emails will return to this app when the redirect URL is configured correctly.
+          Open the link in your inbox after verifying to come back into the app.
         </p>
 
         {/* Back to sign in */}

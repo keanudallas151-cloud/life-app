@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "../supabaseClient";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { db } from "../firebaseClient";
 
 export function useUserData(userId) {
   const [bookmarks,   setBookmarksState]  = useState([]);
@@ -43,47 +44,19 @@ export function useUserData(userId) {
         pendingPatchRef.current = null;
 
         const payload = {
-          user_id: userId,
+          userId,
           ...patch,
-          updated_at: new Date().toISOString(),
+          updatedAt: serverTimestamp(),
         };
 
-        const { error } = await supabase
-          .from("user_data")
-          .upsert(payload, { onConflict: "user_id" });
-
-        if (!error) {
+        try {
+          await setDoc(doc(db, "userData", userId), payload, { merge: true });
           setError("");
           continue;
+        } catch (error) {
+          console.error("useUserData persist:", error.message);
+          setError("Profile sync is temporarily unavailable. Your latest changes may stay local until the connection recovers.");
         }
-
-        if (
-          Object.prototype.hasOwnProperty.call(patch, "highlights") &&
-          String(error.message || "").toLowerCase().includes("highlights")
-        ) {
-          const { highlights: _ignoredHighlights, ...fallbackPatch } = patch;
-          if (Object.keys(fallbackPatch).length === 0) continue;
-
-          const { error: fallbackError } = await supabase
-            .from("user_data")
-            .upsert(
-              {
-                user_id: userId,
-                ...fallbackPatch,
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: "user_id" },
-            );
-
-          if (fallbackError) {
-            console.error("useUserData persist fallback:", fallbackError.message);
-            setError("Profile sync is temporarily unavailable. Your latest changes may stay local until the connection recovers.");
-          }
-          continue;
-        }
-
-        console.error("useUserData persist:", error.message);
-        setError("Profile sync is temporarily unavailable. Your latest changes may stay local until the connection recovers.");
       }
     } finally {
       persistInFlightRef.current = false;
@@ -123,49 +96,29 @@ export function useUserData(userId) {
     let cancelled = false;
     setLoading(true);
     setError("");
-    supabase
-      .from("user_data")
-      .select("bookmarks, notes, read_keys, highlights, tsd_profile, momentum_state")
-      .eq("user_id", userId)
-      .maybeSingle()
-      .then(({ data, error }) => {
+    getDoc(doc(db, "userData", userId))
+      .then((snapshot) => {
         if (cancelled) return;
-        if (!error) {
-          if (data) applyFetchedData(data);
-          setLoading(false);
-          return;
-        }
-
-        if (!String(error.message || "").toLowerCase().includes("highlights")) {
-          console.error("useUserData fetch:", error.message);
-          setError("Profile sync is unavailable right now. Cached data will still work until Supabase responds again.");
-          setLoading(false);
-          return;
-        }
-
-        console.error("useUserData fetch: highlights column missing, using fallback query.");
-        supabase
-          .from("user_data")
-          .select("bookmarks, notes, read_keys, tsd_profile, momentum_state")
-          .eq("user_id", userId)
-          .maybeSingle()
-          .then(({ data: fallbackData, error: fallbackError }) => {
-            if (cancelled) return;
-            if (fallbackError) {
-              console.error("useUserData fallback fetch:", fallbackError.message);
-              setError("Profile sync is unavailable right now. Cached data will still work until Supabase responds again.");
-              setLoading(false);
-              return;
-            }
-            if (fallbackData) applyFetchedData({ ...fallbackData, highlights: [] });
-            setLoading(false);
-          })
-          .catch(() => {
-            if (cancelled) return;
-            console.error("useUserData fallback query failed");
-            setError("Profile sync is unavailable right now. Cached data will still work until Supabase responds again.");
-            setLoading(false);
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          applyFetchedData({
+            bookmarks: data.bookmarks,
+            notes: data.notes,
+            read_keys: data.readKeys,
+            highlights: data.highlights,
+            tsd_profile: data.tsdProfile,
+            momentum_state: data.momentumState,
           });
+          setLoading(false);
+          return;
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("useUserData fetch:", error.message);
+        setError("Profile sync is unavailable right now. Cached data will still work until the cloud connection recovers.");
+        setLoading(false);
       });
     return () => {
       cancelled = true;
