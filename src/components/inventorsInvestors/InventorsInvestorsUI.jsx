@@ -3,16 +3,20 @@ import { useMemo } from "react";
 export function FeatureFrame({ t, eyebrow, title, subtitle, actions, children }) {
   return (
     <div
+      className="ii-feature-frame"
       style={{
         width: "100%",
         maxWidth: 720,
         margin: "0 auto",
-        padding: "28px 18px 110px",
+        padding: "22px 16px calc(96px + env(safe-area-inset-bottom, 0px))",
+        minHeight: "100%",
+        boxSizing: "border-box",
       }}
     >
       <div
+        className="ii-feature-frame-head"
         style={{
-          marginBottom: 20,
+          marginBottom: 18,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",
@@ -23,6 +27,7 @@ export function FeatureFrame({ t, eyebrow, title, subtitle, actions, children })
         <div>
           {eyebrow ? (
             <p
+              className="ii-feature-frame-eyebrow"
               style={{
                 margin: "0 0 6px",
                 fontSize: 11,
@@ -36,6 +41,7 @@ export function FeatureFrame({ t, eyebrow, title, subtitle, actions, children })
             </p>
           ) : null}
           <h2
+            className="ii-feature-frame-title"
             style={{
               margin: 0,
               fontSize: 30,
@@ -49,6 +55,7 @@ export function FeatureFrame({ t, eyebrow, title, subtitle, actions, children })
           </h2>
           {subtitle ? (
             <p
+              className="ii-feature-frame-subtitle"
               style={{
                 margin: "10px 0 0",
                 fontSize: 14,
@@ -455,7 +462,6 @@ export function ImagePicker({
                 background: t.skin,
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={preview}
                 alt="Preview"
@@ -593,7 +599,6 @@ export function SwipeGestureCard({
 export function Avatar({ src, name, size = 56, t }) {
   if (src) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt={name || "Avatar"}
