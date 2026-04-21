@@ -68,24 +68,40 @@ export function useInventorsInvestorsData(user) {
               .eq("blocked_user_id", user.id),
           ]);
 
+        if (viewResponse.error) throw viewResponse.error;
+        if (swipesResponse.error) throw swipesResponse.error;
+        if (outgoingBlocksResponse.error) throw outgoingBlocksResponse.error;
+        if (incomingBlocksResponse.error) throw incomingBlocksResponse.error;
+
         const rawProfiles = viewResponse.data || [];
+        const dedupedProfiles = [];
+        const seenUsers = new Set();
+        rawProfiles.forEach((item) => {
+          if (!seenUsers.has(item.user_id)) {
+            seenUsers.add(item.user_id);
+            dedupedProfiles.push(item);
+          }
+        });
+
         const swiped = new Set((swipesResponse.data || []).map((item) => item.to_user_id));
         const blocked = new Set([
           ...(outgoingBlocksResponse.data || []).map((item) => item.blocked_user_id),
           ...(incomingBlocksResponse.data || []).map((item) => item.blocker_user_id),
         ]);
 
-        const inventorProfileIds = rawProfiles
+        const inventorProfileIds = dedupedProfiles
           .filter((item) => item.role === "inventor" && item.inventor_profile_id)
           .map((item) => item.inventor_profile_id);
 
         let imageMap = new Map();
         if (inventorProfileIds.length) {
-          const { data: imageRows } = await supabase
+          const { data: imageRows, error: imageError } = await supabase
             .from("inventor_profile_images")
             .select("inventor_profile_id, image_url, sort_order")
             .in("inventor_profile_id", inventorProfileIds)
             .order("sort_order", { ascending: true });
+
+          if (imageError) throw imageError;
 
           imageMap = new Map();
           (imageRows || []).forEach((row) => {
@@ -95,13 +111,13 @@ export function useInventorsInvestorsData(user) {
           });
         }
 
-        const filtered = rawProfiles
+        const filtered = dedupedProfiles
           .filter((item) => item.user_id !== user.id)
           .filter((item) => !blocked.has(item.user_id))
           .filter((item) => !swiped.has(item.user_id))
           .map((item) => ({
             ...item,
-            hero_image_url: imageMap.get(item.inventor_profile_id) || "",
+            hero_image_url: imageMap.get(item.inventor_profile_id) || item.hero_image_url || "",
           }));
 
         const ranked = filtered
@@ -617,8 +633,17 @@ export function useInventorsInvestorsData(user) {
   const createSwipe = useCallback(
     async (toUserId, action) => {
       if (!user?.id || !toUserId) return;
-      await supabase.from("swipes").insert({ from_user_id: user.id, to_user_id: toUserId, action });
-      await loadDiscovery();
+      setDiscoveryProfiles((current) => current.filter((item) => item.user_id !== toUserId));
+      try {
+        const { error } = await supabase.from("swipes").insert({ from_user_id: user.id, to_user_id: toUserId, action });
+        if (error && !String(error.message || "").toLowerCase().includes("duplicate")) {
+          throw error;
+        }
+      } catch (error) {
+        console.error("Failed to create swipe", error);
+      } finally {
+        await loadDiscovery();
+      }
     },
     [loadDiscovery, user?.id],
   );
@@ -655,18 +680,24 @@ export function useInventorsInvestorsData(user) {
     async (conversationId, messageText) => {
       if (!user?.id || !conversationId || !messageText.trim()) return false;
       setMessageSending(true);
-      const { error } = await supabase.from("messages").insert({
-        conversation_id: conversationId,
-        sender_user_id: user.id,
-        message_text: messageText.trim(),
-      });
-      setMessageSending(false);
-      if (error) {
+      try {
+        const { error } = await supabase.from("messages").insert({
+          conversation_id: conversationId,
+          sender_user_id: user.id,
+          message_text: messageText.trim(),
+        });
+        if (error) {
+          console.error("Failed to send message", error);
+          return false;
+        }
+        await Promise.all([loadConversations(), markConversationRead(conversationId)]);
+        return true;
+      } catch (error) {
         console.error("Failed to send message", error);
         return false;
+      } finally {
+        setMessageSending(false);
       }
-      await Promise.all([loadConversations(), markConversationRead(conversationId)]);
-      return true;
     },
     [loadConversations, markConversationRead, user?.id],
   );
@@ -758,7 +789,13 @@ function computeDiscoveryRank(profile) {
       : 0;
 
   const completeness = Number(profile.profile_completed) ? 14 : 0;
-  const publicContactSignal = Number(Boolean(profile.public_email || profile.public_phone)) * 4;
+  const hasPublicContact = Boolean(
+    profile.public_email ||
+      profile.public_phone ||
+      profile.email_public ||
+      profile.phone_public,
+  );
+  const publicContactSignal = Number(hasPublicContact) * 4;
 
   return freshnessScore + hasHeroImage + hasAvatar + bioScore + investorSignal + inventorSignal + completeness + publicContactSignal;
 }
