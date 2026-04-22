@@ -124,8 +124,14 @@ export function InventorsInvestorsLandingPage({ t, onChooseRole, onGoMessages, h
       t={t}
       eyebrow="Networking"
       title="Investors & Inventors"
-      subtitle="Pick your side, then move into a cleaner deck that feels closer to a real mobile discovery app."
-      actions={hasMessages ? <SecondaryButton t={t} onClick={onGoMessages}>Messages</SecondaryButton> : null}
+      subtitle="Match with the right people. Whether you're building something or backing something, find your fit here."
+      actions={
+        hasMessages ? (
+          <SecondaryButton t={t} onClick={onGoMessages}>
+            Messages
+          </SecondaryButton>
+        ) : null
+      }
     >
       <div style={{ display: "grid", gap: 16 }}>
         <div
@@ -153,17 +159,43 @@ export function InventorsInvestorsLandingPage({ t, onChooseRole, onGoMessages, h
             }}
           />
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, textTransform: "uppercase", color: t.green }}>
-              Pick your lane
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: 2,
+                textTransform: "uppercase",
+                color: t.green,
+              }}
+            >
+              How it works
             </div>
-            <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.7, color: t.mid, maxWidth: 560 }}>
-              Tinder feels clean because it shows one strong choice at a time. This screen now pushes toward that same mobile rhythm instead of cramming both roles too tightly.
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 14,
+                lineHeight: 1.7,
+                color: t.mid,
+                maxWidth: 560,
+              }}
+            >
+              Browse real profiles from investors and inventors across
+              Australia. Swipe through the deck, express interest, and start a
+              private in-app conversation. Your contact details stay hidden
+              unless you choose to share them.
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                marginTop: 14,
+              }}
+            >
               {[
-                "Cleaner mobile sizing",
-                "Less cramped text",
-                "Tap to choose",
+                "Private messaging",
+                "Verified interest signals",
+                "No spam, no cold calls",
               ].map((item) => (
                 <div
                   key={item}
@@ -184,7 +216,14 @@ export function InventorsInvestorsLandingPage({ t, onChooseRole, onGoMessages, h
           </div>
         </div>
 
-        <div className="ii-role-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14 }}>
+        <div
+          className="ii-role-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: 14,
+          }}
+        >
           <RoleCard
             t={t}
             title="Investor"
@@ -217,8 +256,12 @@ export function InventorsInvestorsLandingPage({ t, onChooseRole, onGoMessages, h
           />
         </div>
 
-        <div className="ii-role-footer-note" style={{ textAlign: "center", fontSize: 12.5, color: t.mid }}>
-          Tap the card that matches your side. On mobile, you can also swipe the role cards horizontally to compare them more comfortably.
+        <div
+          className="ii-role-footer-note"
+          style={{ textAlign: "center", fontSize: 12.5, color: t.mid }}
+        >
+          Tap the card that matches your side. You can switch roles at any time
+          from your profile settings.
         </div>
       </div>
     </FeatureFrame>

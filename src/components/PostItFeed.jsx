@@ -1,11 +1,33 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { C, S } from "../systems/theme";
 import { Ic } from "../icons/Ic";
 import { usePostIt } from "../systems/usePostIt";
 
 const DRAFT_KEY = "life_postit_draft";
 
-/** Renders a circular avatar — photo if available, initials fallback */
+const FLAIRS = ["Finance", "Psychology", "Philosophy", "Money", "General"];
+
+const FLAIR_COLORS = {
+  Finance: { bg: "rgba(80,200,120,0.13)", color: "#50c878" },
+  Psychology: { bg: "rgba(147,112,219,0.13)", color: "#9370db" },
+  Philosophy: { bg: "rgba(96,165,250,0.13)", color: "#60a5fa" },
+  Money: { bg: "rgba(245,166,35,0.13)", color: "#f5a623" },
+  General: { bg: "rgba(161,161,161,0.13)", color: "#a1a1a1" },
+};
+
+function timeAgo(iso) {
+  if (!iso) return "";
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  if (diff < 2592000) return `${Math.floor(diff / 86400)}d`;
+  return new Intl.DateTimeFormat("en-AU", {
+    day: "numeric",
+    month: "short",
+  }).format(new Date(iso));
+}
+
 function PostAvatar({ avatarUrl, initials, size = 28, fontSize = 10 }) {
   if (avatarUrl) {
     return (
@@ -14,7 +36,8 @@ function PostAvatar({ avatarUrl, initials, size = 28, fontSize = 10 }) {
         src={avatarUrl}
         alt={initials}
         style={{
-          width: size, height: size,
+          width: size,
+          height: size,
           borderRadius: "50%",
           objectFit: "cover",
           flexShrink: 0,
@@ -24,30 +47,199 @@ function PostAvatar({ avatarUrl, initials, size = 28, fontSize = 10 }) {
     );
   }
   return (
-    <div style={{
-      width: size, height: size,
-      borderRadius: "50%",
-      background: C.ink,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      flexShrink: 0,
-    }}>
-      <span style={{ color: C.white, fontSize, fontWeight: 700 }}>{initials}</span>
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: `linear-gradient(135deg, ${C.green} 0%, #3a9e60 100%)`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+      }}
+    >
+      <span style={{ color: "#fff", fontSize, fontWeight: 700 }}>
+        {initials}
+      </span>
+    </div>
+  );
+}
+
+function FlairBadge({ flair }) {
+  const fc = FLAIR_COLORS[flair] || FLAIR_COLORS.General;
+  return (
+    <span
+      style={{
+        background: fc.bg,
+        color: fc.color,
+        fontSize: 10,
+        fontWeight: 800,
+        padding: "3px 9px",
+        borderRadius: 20,
+        letterSpacing: 0.4,
+        flexShrink: 0,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {flair}
+    </span>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div
+      style={{
+        background: C.white,
+        border: `1px solid ${C.border}`,
+        borderRadius: 14,
+        marginBottom: 10,
+        display: "flex",
+        overflow: "hidden",
+        opacity: 0.7,
+      }}
+    >
+      <div
+        style={{
+          width: 50,
+          background: C.skin,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "16px 0",
+          gap: 8,
+        }}
+      >
+        <div
+          style={{
+            width: 24,
+            height: 20,
+            borderRadius: 6,
+            background: C.border,
+          }}
+        />
+        <div
+          style={{
+            width: 18,
+            height: 14,
+            borderRadius: 4,
+            background: C.border,
+          }}
+        />
+        <div
+          style={{
+            width: 24,
+            height: 20,
+            borderRadius: 6,
+            background: C.border,
+          }}
+        />
+      </div>
+      <div
+        style={{
+          flex: 1,
+          padding: "14px 14px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}
+      >
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: "50%",
+              background: C.border,
+            }}
+          />
+          <div
+            style={{
+              width: 80,
+              height: 10,
+              borderRadius: 5,
+              background: C.border,
+            }}
+          />
+          <div
+            style={{
+              width: 40,
+              height: 10,
+              borderRadius: 5,
+              background: C.border,
+            }}
+          />
+        </div>
+        <div
+          style={{
+            width: "75%",
+            height: 16,
+            borderRadius: 6,
+            background: C.border,
+          }}
+        />
+        <div
+          style={{
+            width: "90%",
+            height: 11,
+            borderRadius: 5,
+            background: C.border,
+          }}
+        />
+        <div
+          style={{
+            width: "60%",
+            height: 11,
+            borderRadius: 5,
+            background: C.border,
+          }}
+        />
+        <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+          <div
+            style={{
+              width: 80,
+              height: 24,
+              borderRadius: 8,
+              background: C.border,
+            }}
+          />
+          <div
+            style={{
+              width: 55,
+              height: 24,
+              borderRadius: 8,
+              background: C.border,
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
 
 export function PostItFeed({ play, user, onMomentumEvent }) {
-  const { posts, addPost, addComment, vote, myVotes, loading, error, reload } = usePostIt(user);
+  // #postit_feed
+  const { posts, addPost, addComment, vote, myVotes, loading, error, reload } =
+    usePostIt(user);
 
-  const [sort,        setSort]        = useState("recent");
-  const [viewing,     setViewing]     = useState(null);
+  const [sort, setSort] = useState("recent");
+  const [viewing, setViewing] = useState(null);
   const [showCompose, setShowCompose] = useState(false);
-  const [newTitle,    setNewTitle]    = useState("");
-  const [newBody,     setNewBody]     = useState("");
-  const [newFlair,    setNewFlair]    = useState("Finance");
+  const [newTitle, setNewTitle] = useState("");
+  const [newBody, setNewBody] = useState("");
+  const [newFlair, setNewFlair] = useState("Finance");
   const [commentText, setCommentText] = useState("");
-
-  const flairs = ["Finance","Psychology","Philosophy","Money","General"];
+  const [savedPosts, setSavedPosts] = useState(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem("life_saved_posts") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const [shareCopied, setShareCopied] = useState(null); // post id that just copied
+  const [replyingTo, setReplyingTo] = useState(null); // comment id in thread view
+  const commentInputRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -63,11 +255,19 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
     }
   }, []);
 
-  const sorted = useMemo(() => [...posts].sort((a,b) =>
-    sort==="votes"    ? b.votes - a.votes
-    : sort==="trending" ? (b.votes + b.comments.length*3) - (a.votes + a.comments.length*3)
-    : new Date(b.created_at || 0) - new Date(a.created_at || 0)
-  ), [posts, sort]);
+  const sorted = useMemo(
+    () =>
+      [...posts].sort((a, b) =>
+        sort === "votes"
+          ? b.votes - a.votes
+          : sort === "trending"
+            ? b.votes +
+              b.comments.length * 3 -
+              (a.votes + a.comments.length * 3)
+            : new Date(b.created_at || 0) - new Date(a.created_at || 0),
+      ),
+    [posts, sort],
+  );
 
   const handleVote = (id, dir) => {
     if (!user?.id) {
@@ -89,23 +289,12 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
     });
   };
 
-  const voteBtn = (active, color, activeBg) => ({
-    background: active ? activeBg : "none",
-    border: `1.5px solid ${active ? color : C.border}`,
-    borderRadius: 8,
-    padding: "6px 12px",
-    cursor: "pointer",
-    fontSize: 13,
-    color,
-    fontWeight: active ? 700 : 500,
-    opacity: active ? 1 : 0.88,
-  });
-
   const handleAddComment = () => {
     if (!commentText.trim()) return;
     play("ok");
     addComment(viewing, commentText);
     setCommentText("");
+    setReplyingTo(null);
     onMomentumEvent?.({
       type: "community",
       points: 5,
@@ -118,7 +307,9 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
     if (!newTitle.trim()) return;
     play("ok");
     addPost({ title: newTitle, body: newBody, flair: newFlair });
-    setNewTitle(""); setNewBody(""); setShowCompose(false);
+    setNewTitle("");
+    setNewBody("");
+    setShowCompose(false);
     onMomentumEvent?.({
       type: "community",
       points: 8,
@@ -127,174 +318,1112 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
     });
   };
 
-  const vp = posts.find(p => p.id === viewing);
-  if (vp) return (
-    <div className="life-postit-page" style={{ padding:"20px max(16px, var(--safe-left, 0px)) 28px max(16px, var(--safe-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
-      <button onClick={() => setViewing(null)}
-        style={{ background:"none", border:"none", cursor:"pointer", color:C.muted, fontSize:13, padding:"0 0 16px", fontFamily:"Georgia,serif" }}>
-        ← Back to Feed
-      </button>
-      <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:20, boxSizing:"border-box" }}>
-        <div className="life-postit-detail-meta" style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14, flexWrap:"wrap" }}>
-          <PostAvatar avatarUrl={vp.authorAvatarUrl} initials={vp.author?.slice(0,2)} size={32} fontSize={11} />
-          <span style={{ fontSize:13, fontWeight:600, color:C.ink, minWidth:0, wordBreak:"break-word" }}>{vp.author}</span>
-          <span style={{ fontSize:11, color:C.muted }}>{vp.time}</span>
-          <span style={{ marginLeft:"auto", background:C.greenLt, color:C.green, fontSize:10, fontWeight:700, padding:"3px 10px", borderRadius:20, flexShrink:0 }}>{vp.flair}</span>
-        </div>
-        <h2 style={{ fontSize:19, fontWeight:700, color:C.ink, margin:"0 0 12px", lineHeight:1.35 }}>{vp.title}</h2>
-        <p style={{ fontSize:15, color:C.mid, lineHeight:1.8, margin:"0 0 20px", fontFamily:"Georgia,serif" }}>{vp.body}</p>
-        <div style={{ display:"flex", gap:10, borderTop:`1px solid ${C.light}`, paddingTop:14, flexWrap:"wrap" }}>
-          <button
-            type="button"
-            aria-pressed={myVotes[vp.id] === 1}
-            onClick={() => handleVote(vp.id, 1)}
-            style={voteBtn(myVotes[vp.id] === 1, C.green, C.greenLt)}>
-            ▲ {vp.votes}
-          </button>
-          <button
-            type="button"
-            aria-pressed={myVotes[vp.id] === -1}
-            onClick={() => handleVote(vp.id, -1)}
-            style={voteBtn(myVotes[vp.id] === -1, C.red, "#fdf2f2")}>
-            ▼
-          </button>
-        </div>
-      </div>
+  const handleSave = (postId) => {
+    play("star");
+    setSavedPosts((prev) => {
+      const next = prev.includes(postId)
+        ? prev.filter((id) => id !== postId)
+        : [...prev, postId];
+      try {
+        sessionStorage.setItem("life_saved_posts", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
 
-      <div style={{ marginTop:24 }}>
-        <p style={{ fontSize:11, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:C.muted, margin:"0 0 16px" }}>
-          Comments ({vp.comments.length})
-        </p>
-        {vp.comments.map(c => (
-          <div key={c.id} style={{ display:"flex", gap:12, marginBottom:14 }}>
-            <PostAvatar avatarUrl={c.authorAvatarUrl} initials={c.author?.slice(0,2)} size={28} fontSize={10} />
-            <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:10, padding:"10px 14px", flex:1 }}>
-              <span style={{ fontSize:12, fontWeight:600, color:C.ink }}>{c.author}</span>
-              <span style={{ fontSize:11, color:C.muted, marginLeft:8 }}>{c.time}</span>
-              <p style={{ margin:"5px 0 0", fontSize:14, color:C.mid, fontFamily:"Georgia,serif", lineHeight:1.6 }}>{c.text}</p>
+  const handleShare = (post) => {
+    const text = `${post.title} — via Life. app`;
+    if (navigator.share) {
+      navigator.share({ title: post.title, text }).catch(() => {});
+    } else {
+      try {
+        navigator.clipboard.writeText(text);
+      } catch {}
+      setShareCopied(post.id);
+      setTimeout(() => setShareCopied(null), 2000);
+    }
+    play("ok");
+  };
+
+  // ── Thread / detail view ──────────────────────────────────────────────────
+  const vp = posts.find((p) => p.id === viewing);
+  if (vp) {
+    const upvoted = myVotes[vp.id] === 1;
+    const downvoted = myVotes[vp.id] === -1;
+    return (
+      <div
+        className="life-postit-page"
+        style={{
+          padding: "0 0 max(32px, env(safe-area-inset-bottom, 0px))",
+          maxWidth: 640,
+          margin: "0 auto",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Back bar */}
+        <div
+          style={{
+            padding: "14px 16px 0",
+            position: "sticky",
+            top: 0,
+            background: C.skin,
+            zIndex: 10,
+          }}
+        >
+          <button
+            onClick={() => {
+              setViewing(null);
+              setReplyingTo(null);
+              setCommentText("");
+            }}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: C.muted,
+              fontSize: 13,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 0",
+              minHeight: 44,
+            }}
+          >
+            ← Back
+          </button>
+        </div>
+
+        {/* Post card — reddit layout */}
+        <div
+          style={{
+            margin: "10px 12px 0",
+            background: C.white,
+            border: `1px solid ${C.border}`,
+            borderRadius: 14,
+            overflow: "hidden",
+            boxShadow: S.sm,
+          }}
+        >
+          <div style={{ display: "flex" }}>
+            {/* Vote column */}
+            <div
+              style={{
+                width: 50,
+                background: C.skin,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                paddingTop: 14,
+                paddingBottom: 14,
+                gap: 4,
+                flexShrink: 0,
+              }}
+            >
+              <button
+                type="button"
+                aria-pressed={upvoted}
+                onClick={() => handleVote(vp.id, 1)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 18,
+                  color: upvoted ? C.green : C.muted,
+                  padding: "4px 8px",
+                  minHeight: 44,
+                  transition: "color 140ms",
+                }}
+              >
+                ▲
+              </button>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: upvoted ? C.green : downvoted ? C.red : C.ink,
+                  lineHeight: 1,
+                }}
+              >
+                {vp.votes}
+              </span>
+              <button
+                type="button"
+                aria-pressed={downvoted}
+                onClick={() => handleVote(vp.id, -1)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 18,
+                  color: downvoted ? C.red : C.muted,
+                  padding: "4px 8px",
+                  minHeight: 44,
+                  transition: "color 140ms",
+                }}
+              >
+                ▼
+              </button>
+            </div>
+            {/* Content */}
+            <div style={{ flex: 1, padding: "14px 14px 16px", minWidth: 0 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 10,
+                  flexWrap: "wrap",
+                }}
+              >
+                <PostAvatar
+                  avatarUrl={vp.authorAvatarUrl}
+                  initials={vp.author?.slice(0, 2)}
+                  size={22}
+                  fontSize={8}
+                />
+                <span style={{ fontSize: 12, fontWeight: 700, color: C.ink }}>
+                  {vp.author || "Anonymous"}
+                </span>
+                <span style={{ fontSize: 11, color: C.muted }}>
+                  {timeAgo(vp.created_at) || vp.time}
+                </span>
+                <FlairBadge flair={vp.flair} />
+              </div>
+              <h2
+                style={{
+                  fontSize: 17,
+                  fontWeight: 700,
+                  color: C.ink,
+                  margin: "0 0 10px",
+                  lineHeight: 1.4,
+                }}
+              >
+                {vp.title}
+              </h2>
+              {vp.body ? (
+                <p
+                  style={{
+                    margin: "0 0 14px",
+                    fontSize: 14,
+                    color: C.mid,
+                    lineHeight: 1.8,
+                    fontFamily: "Georgia,serif",
+                  }}
+                >
+                  {vp.body}
+                </p>
+              ) : null}
+              {/* Action row */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 4,
+                  borderTop: `1px solid ${C.border}`,
+                  paddingTop: 10,
+                  marginTop: 4,
+                  flexWrap: "wrap",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    commentInputRef.current?.focus();
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    color: C.muted,
+                    padding: "6px 10px",
+                    borderRadius: 8,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    minHeight: 36,
+                    transition: "background 120ms",
+                  }}
+                >
+                  {Ic.chat("none", C.muted, 13)} {vp.comments.length} Comments
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleShare(vp)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    color: shareCopied === vp.id ? C.green : C.muted,
+                    padding: "6px 10px",
+                    borderRadius: 8,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    minHeight: 36,
+                    transition: "color 140ms",
+                  }}
+                >
+                  {shareCopied === vp.id ? "✓ Copied" : "Share"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSave(vp.id)}
+                  style={{
+                    background: savedPosts.includes(vp.id)
+                      ? "rgba(80,200,120,0.12)"
+                      : "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    color: savedPosts.includes(vp.id) ? C.green : C.muted,
+                    padding: "6px 10px",
+                    borderRadius: 8,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    minHeight: 36,
+                    transition: "background 120ms, color 120ms",
+                  }}
+                >
+                  {savedPosts.includes(vp.id) ? "★ Saved" : "☆ Save"}
+                </button>
+              </div>
             </div>
           </div>
-        ))}
-        <div className="life-postit-comment-row" style={{ display:"flex", gap:10, marginTop:8, alignItems:"stretch" }}>
-          <input value={commentText} onChange={e => setCommentText(e.target.value)}
-            placeholder="Write a comment..."
-            onKeyDown={e => { if (e.key==="Enter") handleAddComment(); }}
-            style={{ flex:1, background:C.white, border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 14px", fontSize:14, outline:"none", fontFamily:"Georgia,serif", color:C.ink }}/>
-          <button onClick={handleAddComment}
-            style={{ background:C.green, border:"none", borderRadius:10, padding:"12px 18px", color:C.white, fontSize:14, fontWeight:700, cursor:"pointer" }}>
-            Post
+        </div>
+
+        {/* Comments */}
+        <div style={{ padding: "20px 12px 0" }}>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: 2,
+              textTransform: "uppercase",
+              color: C.muted,
+              margin: "0 0 14px",
+            }}
+          >
+            {vp.comments.length}{" "}
+            {vp.comments.length === 1 ? "Comment" : "Comments"}
+          </p>
+
+          {vp.comments.length === 0 && (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "32px 20px",
+                color: C.muted,
+                fontSize: 13,
+                fontFamily: "Georgia,serif",
+                fontStyle: "italic",
+              }}
+            >
+              No comments yet — be the first to reply.
+            </div>
+          )}
+
+          {vp.comments.map((c) => (
+            <div
+              key={c.id}
+              style={{ display: "flex", gap: 10, marginBottom: 12 }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <PostAvatar
+                  avatarUrl={c.authorAvatarUrl}
+                  initials={c.author?.slice(0, 2)}
+                  size={28}
+                  fontSize={10}
+                />
+                {/* Thread line */}
+                <div
+                  style={{
+                    flex: 1,
+                    width: 2,
+                    background: C.border,
+                    borderRadius: 1,
+                    margin: "6px 0 0",
+                    minHeight: 12,
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: 0, paddingBottom: 6 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 5,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span style={{ fontSize: 12, fontWeight: 700, color: C.ink }}>
+                    {c.author || "Anonymous"}
+                  </span>
+                  <span style={{ fontSize: 11, color: C.muted }}>
+                    {timeAgo(c.created_at) || c.time}
+                  </span>
+                </div>
+                <p
+                  style={{
+                    margin: "0 0 6px",
+                    fontSize: 14,
+                    color: C.mid,
+                    lineHeight: 1.65,
+                    fontFamily: "Georgia,serif",
+                  }}
+                >
+                  {c.text}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReplyingTo(c.id);
+                    setCommentText(`@${c.author || "user"} `);
+                    commentInputRef.current?.focus();
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 11,
+                    color: C.muted,
+                    padding: "4px 0",
+                    fontWeight: 600,
+                    letterSpacing: 0.3,
+                  }}
+                >
+                  Reply
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Comment composer */}
+          <div
+            style={{
+              marginTop: 16,
+              background: C.white,
+              border: `1px solid ${C.border}`,
+              borderRadius: 12,
+              padding: "12px 14px",
+              boxSizing: "border-box",
+            }}
+          >
+            {replyingTo && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 8,
+                }}
+              >
+                <span
+                  style={{ fontSize: 11, color: C.muted, fontStyle: "italic" }}
+                >
+                  Replying to a comment
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReplyingTo(null);
+                    setCommentText("");
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 11,
+                    color: C.muted,
+                  }}
+                >
+                  ✕ Cancel
+                </button>
+              </div>
+            )}
+            <textarea
+              ref={commentInputRef}
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Add a comment…"
+              rows={3}
+              style={{
+                width: "100%",
+                background: "none",
+                border: "none",
+                outline: "none",
+                fontSize: 16,
+                color: C.ink,
+                fontFamily: "Georgia,serif",
+                resize: "none",
+                lineHeight: 1.6,
+                boxSizing: "border-box",
+              }}
+            />
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginTop: 8,
+                gap: 8,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setCommentText("");
+                  setReplyingTo(null);
+                }}
+                style={{
+                  background: "none",
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 8,
+                  padding: "8px 14px",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  color: C.muted,
+                }}
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={handleAddComment}
+                style={{
+                  background: commentText.trim() ? C.green : C.border,
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "8px 18px",
+                  cursor: commentText.trim() ? "pointer" : "default",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "#fff",
+                  transition: "background 150ms",
+                }}
+              >
+                Comment
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Feed view ─────────────────────────────────────────────────────────────
+  const SORT_TABS = [
+    { key: "trending", label: "🔥 Hot" },
+    { key: "recent", label: "✨ New" },
+    { key: "votes", label: "📈 Top" },
+  ];
+
+  return (
+    <div
+      className="life-postit-page"
+      style={{
+        padding: "0 0 max(32px, env(safe-area-inset-bottom, 0px))",
+        maxWidth: 640,
+        margin: "0 auto",
+        boxSizing: "border-box",
+      }}
+    >
+      {/* Community header */}
+      <div
+        style={{
+          background: `linear-gradient(135deg, rgba(80,200,120,0.12) 0%, rgba(80,200,120,0.04) 100%)`,
+          borderBottom: `1px solid ${C.border}`,
+          padding: "16px 16px 14px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: "50%",
+              background: `linear-gradient(135deg, ${C.green} 0%, #3a9e60 100%)`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: 20 }}>💡</span>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 800,
+                color: C.ink,
+                letterSpacing: -0.2,
+              }}
+            >
+              r/life
+            </div>
+            <div style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>
+              12.4k members · Your daily growth community
+            </div>
+          </div>
+          <button
+            type="button"
+            aria-label="New post"
+            onClick={() => setShowCompose((v) => !v)}
+            style={{
+              background: C.green,
+              border: "none",
+              borderRadius: 20,
+              padding: "9px 18px",
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+              flexShrink: 0,
+              minHeight: 44,
+              transition: "opacity 150ms",
+            }}
+          >
+            + Post
           </button>
         </div>
       </div>
-    </div>
-  );
 
-  return (
-    <div className="life-postit-page" style={{ padding:"20px max(16px, var(--safe-left, 0px)) max(28px, var(--safe-bottom, 0px)) max(16px, var(--safe-right, 0px))", maxWidth:620, margin:"0 auto", boxSizing:"border-box" }}>
+      {/* Error banner */}
       {error && (
-        <div style={{ background:"#fdf2f2", border:`1px solid ${C.red}`, borderRadius:12, padding:"14px 16px", marginBottom:16, fontSize:13, color:C.ink, lineHeight:1.6 }}>
-          <strong style={{ display:"block", marginBottom:4 }}>Could not load the feed</strong>
-          <span style={{ color:C.mid }}>{error}</span>
-          <button type="button" onClick={() => reload()} style={{ display:"block", marginTop:10, background:C.white, border:`1px solid ${C.border}`, borderRadius:8, padding:"8px 14px", cursor:"pointer", fontFamily:"Georgia,serif", fontSize:13 }}>
+        <div
+          style={{
+            background: "rgba(229,72,77,0.08)",
+            border: `1px solid ${C.red}`,
+            borderRadius: 12,
+            padding: "12px 16px",
+            margin: "12px 12px 0",
+            fontSize: 13,
+            color: C.ink,
+          }}
+        >
+          <strong style={{ display: "block", marginBottom: 3 }}>
+            Could not load the feed
+          </strong>
+          <span style={{ color: C.mid, fontSize: 12 }}>{error}</span>
+          <button
+            type="button"
+            onClick={() => reload()}
+            style={{
+              display: "block",
+              marginTop: 10,
+              background: C.white,
+              border: `1px solid ${C.border}`,
+              borderRadius: 8,
+              padding: "8px 14px",
+              cursor: "pointer",
+              fontSize: 13,
+            }}
+          >
             Try again
           </button>
         </div>
       )}
-      <div className="life-postit-header" style={{ display:"flex", alignItems:"center", marginBottom:20, gap:12, flexWrap:"wrap" }}>
-        <h2 style={{ margin:0, fontSize:"clamp(1.15rem, 4vw, 1.375rem)", fontWeight:700, color:C.ink, flex:"1 1 auto", minWidth:0 }}>Post-It</h2>
-        {loading && <span style={{ fontSize:11, color:C.muted, fontStyle:"italic" }}>Syncing…</span>}
-        <button type="button" aria-label="New post" onClick={() => setShowCompose(true)}
-          style={{ background:C.green, border:"none", borderRadius:10, padding:"10px 18px", color:C.white, fontSize:22, fontWeight:300, cursor:"pointer", lineHeight:1, flexShrink:0 }}>
-          +
-        </button>
-      </div>
 
+      {/* Compose panel */}
       {showCompose && (
-        <div style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"20px 18px", marginBottom:20, boxSizing:"border-box" }}>
-          <div style={{ display:"flex", gap:8, marginBottom:14, flexWrap:"wrap" }}>
-            {flairs.map(f => (
-              <button key={f} onClick={() => setNewFlair(f)}
-                style={{ background:newFlair===f?C.green:C.light, border:"none", borderRadius:20, padding:"5px 14px",
-                  fontSize:12, fontWeight:newFlair===f?700:400, color:newFlair===f?C.white:C.muted, cursor:"pointer" }}>
-                {f}
-              </button>
-            ))}
+        <div
+          style={{
+            background: C.white,
+            border: `1px solid ${C.border}`,
+            borderRadius: 14,
+            margin: "12px 12px 0",
+            padding: "18px 16px",
+            boxSizing: "border-box",
+            boxShadow: S.sm,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 14,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 800,
+                color: C.ink,
+                letterSpacing: -0.1,
+              }}
+            >
+              Create a post
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowCompose(false)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 18,
+                color: C.muted,
+                lineHeight: 1,
+                minHeight: 44,
+                minWidth: 44,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ✕
+            </button>
           </div>
-          <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Title"
-            style={{ width:"100%", background:C.skin, border:`1px solid ${C.border}`, borderRadius:10, padding:"14px",
-              fontSize:15, fontWeight:600, color:C.ink, outline:"none", fontFamily:"Georgia,serif", boxSizing:"border-box", marginBottom:10 }}/>
-          <textarea value={newBody} onChange={e => setNewBody(e.target.value)}
-            placeholder="Share your thoughts..." rows={4}
-            style={{ width:"100%", background:C.skin, border:`1px solid ${C.border}`, borderRadius:10, padding:"14px",
-              fontSize:14, color:C.mid, outline:"none", fontFamily:"Georgia,serif", resize:"vertical", boxSizing:"border-box", marginBottom:14 }}/>
-          <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-            <button onClick={handleSubmitPost}
-              style={{ flex:"1 1 120px", minWidth:0, background:C.green, border:"none", borderRadius:10, padding:"13px", color:C.white, fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:"Georgia,serif" }}>
+
+          {/* Flair pills */}
+          <div
+            style={{
+              display: "flex",
+              gap: 6,
+              marginBottom: 14,
+              flexWrap: "wrap",
+            }}
+          >
+            {FLAIRS.map((f) => {
+              const fc = FLAIR_COLORS[f];
+              const active = newFlair === f;
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setNewFlair(f)}
+                  style={{
+                    background: active ? fc.bg : "none",
+                    border: `1.5px solid ${active ? fc.color : C.border}`,
+                    borderRadius: 20,
+                    padding: "5px 13px",
+                    fontSize: 12,
+                    fontWeight: active ? 800 : 500,
+                    color: active ? fc.color : C.muted,
+                    cursor: "pointer",
+                    transition: "all 150ms",
+                  }}
+                >
+                  {f}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Title */}
+          <div style={{ position: "relative", marginBottom: 10 }}>
+            <input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value.slice(0, 150))}
+              placeholder="Title *"
+              maxLength={150}
+              style={{
+                width: "100%",
+                background: C.skin,
+                border: `1px solid ${newTitle.length > 130 ? C.red : C.border}`,
+                borderRadius: 10,
+                padding: "13px 14px",
+                fontSize: 16,
+                fontWeight: 600,
+                color: C.ink,
+                outline: "none",
+                fontFamily: "Georgia,serif",
+                boxSizing: "border-box",
+              }}
+            />
+            <span
+              style={{
+                position: "absolute",
+                bottom: 8,
+                right: 10,
+                fontSize: 10,
+                color: newTitle.length > 130 ? C.red : C.muted,
+              }}
+            >
+              {newTitle.length}/150
+            </span>
+          </div>
+
+          {/* Body */}
+          <div style={{ position: "relative", marginBottom: 14 }}>
+            <textarea
+              value={newBody}
+              onChange={(e) => setNewBody(e.target.value)}
+              placeholder="Share your thoughts… (optional)"
+              rows={4}
+              style={{
+                width: "100%",
+                background: C.skin,
+                border: `1px solid ${C.border}`,
+                borderRadius: 10,
+                padding: "12px 14px",
+                fontSize: 16,
+                color: C.mid,
+                outline: "none",
+                fontFamily: "Georgia,serif",
+                resize: "vertical",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              onClick={handleSubmitPost}
+              style={{
+                flex: "1 1 auto",
+                background: newTitle.trim() ? C.green : C.border,
+                border: "none",
+                borderRadius: 10,
+                padding: "13px",
+                color: "#fff",
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: newTitle.trim() ? "pointer" : "default",
+                transition: "background 150ms",
+              }}
+            >
               Post
             </button>
-            <button type="button" onClick={() => setShowCompose(false)}
-              style={{ flex:"0 1 auto", background:"none", border:`1px solid ${C.border}`, borderRadius:10, padding:"13px 20px", color:C.muted, fontSize:14, cursor:"pointer" }}>
+            <button
+              type="button"
+              onClick={() => setShowCompose(false)}
+              style={{
+                background: "none",
+                border: `1px solid ${C.border}`,
+                borderRadius: 10,
+                padding: "13px 18px",
+                color: C.muted,
+                fontSize: 14,
+                cursor: "pointer",
+              }}
+            >
               Cancel
             </button>
           </div>
         </div>
       )}
 
-      <div className="life-postit-sort" style={{ display:"flex", gap:8, marginBottom:20, flexWrap:"wrap" }}>
-        {["recent","trending","votes"].map(s => (
-          <button key={s} onClick={() => { setSort(s); }}
-            style={{ background:sort===s?C.ink:C.white, border:`1px solid ${C.border}`, borderRadius:20,
-              padding:"7px 16px", fontSize:12, fontWeight:sort===s?700:400,
-              color:sort===s?C.white:C.muted, cursor:"pointer", textTransform:"capitalize" }}>
-            {s==="votes" ? "Top" : s.charAt(0).toUpperCase()+s.slice(1)}
+      {/* Sort tabs */}
+      <div style={{ display: "flex", padding: "12px 12px 0", gap: 4 }}>
+        {SORT_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => setSort(tab.key)}
+            style={{
+              background: sort === tab.key ? C.green : C.white,
+              border: `1.5px solid ${sort === tab.key ? C.green : C.border}`,
+              borderRadius: 20,
+              padding: "7px 15px",
+              fontSize: 12,
+              fontWeight: sort === tab.key ? 800 : 500,
+              color: sort === tab.key ? "#fff" : C.muted,
+              cursor: "pointer",
+              transition: "all 160ms",
+              flexShrink: 0,
+            }}
+          >
+            {tab.label}
           </button>
         ))}
+        {loading && (
+          <span
+            style={{
+              fontSize: 11,
+              color: C.muted,
+              fontStyle: "italic",
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            Syncing…
+          </span>
+        )}
       </div>
 
-      {sorted.map(post => (
-        <div key={post.id} className="life-card-hover" style={{ background:C.white, border:`1px solid ${C.border}`, borderRadius:14, padding:"18px 16px", marginBottom:12, boxShadow:S.sm, transition:"box-shadow 0.25s ease, border-color 0.2s ease", boxSizing:"border-box" }}>
-          <div className="life-postit-card-meta" style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10, flexWrap:"wrap" }}>
-            <PostAvatar avatarUrl={post.authorAvatarUrl} initials={post.author?.slice(0,2)} size={28} fontSize={10} />
-            <span style={{ fontSize:12, color:C.muted, flex:"1 1 auto", minWidth:0 }}>{post.time}</span>
-            <span style={{ marginLeft:"auto", background:C.greenLt, color:C.green, fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:20, flexShrink:0 }}>{post.flair}</span>
-          </div>
-          <h3 style={{ margin:"0 0 8px", fontSize:15, fontWeight:700, color:C.ink, lineHeight:1.35, cursor:"pointer" }}
-            onClick={() => { play("open"); setViewing(post.id); }}>
-            {post.title}
-          </h3>
-          <p style={{ margin:"0 0 14px", fontSize:13, color:C.mid, lineHeight:1.6, fontFamily:"Georgia,serif" }}>
-            {post.body.length>160 ? post.body.slice(0,160)+"…" : post.body}
-          </p>
-          <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-            <button
-              type="button"
-              aria-pressed={myVotes[post.id] === 1}
-              onClick={() => handleVote(post.id, 1)}
-              style={{ ...voteBtn(myVotes[post.id] === 1, C.green, C.greenLt), padding:"5px 10px", fontSize:12 }}>
-              ▲ {post.votes}
-            </button>
-            <button
-              type="button"
-              aria-pressed={myVotes[post.id] === -1}
-              onClick={() => handleVote(post.id, -1)}
-              style={{ ...voteBtn(myVotes[post.id] === -1, C.red, "#fdf2f2"), padding:"5px 10px", fontSize:12 }}>
-              ▼
-            </button>
-            <button onClick={() => { play("open"); setViewing(post.id); }}
-              style={{ background:"none", border:"none", cursor:"pointer", fontSize:12, color:C.muted, fontFamily:"Georgia,serif" }}>
-              <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
-                {Ic.chat("none",C.muted,14)} {post.comments.length}
-              </span>
-            </button>
-          </div>
-        </div>
-      ))}
-
-      {!loading && posts.length === 0 && (
-        <div style={{ textAlign:"center", padding:"60px 20px", color:C.muted, fontFamily:"Georgia,serif", fontStyle:"italic" }}>
-          No posts yet. Be the first to share something.
+      {/* Skeleton loading */}
+      {loading && posts.length === 0 && (
+        <div style={{ padding: "12px 12px 0" }}>
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
         </div>
       )}
+
+      {/* Empty state */}
+      {!loading && posts.length === 0 && !error && (
+        <div style={{ textAlign: "center", padding: "60px 24px" }}>
+          <div style={{ fontSize: 52, marginBottom: 16 }}>💬</div>
+          <p
+            style={{
+              fontSize: 17,
+              fontWeight: 700,
+              color: C.ink,
+              margin: "0 0 8px",
+            }}
+          >
+            Nothing here yet
+          </p>
+          <p
+            style={{
+              fontSize: 13,
+              color: C.muted,
+              margin: "0 0 24px",
+              fontFamily: "Georgia,serif",
+              lineHeight: 1.6,
+            }}
+          >
+            Be the first to start a conversation in this community.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowCompose(true)}
+            style={{
+              background: C.green,
+              border: "none",
+              borderRadius: 20,
+              padding: "12px 28px",
+              color: "#fff",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Create the first post
+          </button>
+        </div>
+      )}
+
+      {/* Post cards — Reddit layout */}
+      <div style={{ padding: "12px 12px 0" }}>
+        {sorted.map((post) => {
+          const up = myVotes[post.id] === 1;
+          const down = myVotes[post.id] === -1;
+          const saved = savedPosts.includes(post.id);
+          return (
+            <div
+              key={post.id}
+              className="life-card-hover"
+              style={{
+                background: C.white,
+                border: `1px solid ${C.border}`,
+                borderRadius: 14,
+                marginBottom: 10,
+                display: "flex",
+                overflow: "hidden",
+                boxShadow: S.sm,
+                transition: "box-shadow 220ms ease, border-color 200ms ease",
+              }}
+            >
+              {/* Vote column */}
+              <div
+                style={{
+                  width: 50,
+                  background: C.skin,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  gap: 2,
+                  flexShrink: 0,
+                }}
+              >
+                <button
+                  type="button"
+                  aria-pressed={up}
+                  onClick={() => handleVote(post.id, 1)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 16,
+                    color: up ? C.green : C.muted,
+                    padding: "6px 4px",
+                    minHeight: 36,
+                    transition: "color 140ms, transform 120ms",
+                    transform: up ? "scale(1.2)" : "scale(1)",
+                  }}
+                >
+                  ▲
+                </button>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: up ? C.green : down ? C.red : C.ink,
+                    lineHeight: 1,
+                  }}
+                >
+                  {post.votes}
+                </span>
+                <button
+                  type="button"
+                  aria-pressed={down}
+                  onClick={() => handleVote(post.id, -1)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 16,
+                    color: down ? C.red : C.muted,
+                    padding: "6px 4px",
+                    minHeight: 36,
+                    transition: "color 140ms, transform 120ms",
+                    transform: down ? "scale(1.2)" : "scale(1)",
+                  }}
+                >
+                  ▼
+                </button>
+              </div>
+
+              {/* Content column */}
+              <div style={{ flex: 1, padding: "12px 12px 10px", minWidth: 0 }}>
+                {/* Meta row */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 7,
+                    marginBottom: 7,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <PostAvatar
+                    avatarUrl={post.authorAvatarUrl}
+                    initials={post.author?.slice(0, 2)}
+                    size={20}
+                    fontSize={7}
+                  />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: C.ink }}>
+                    {post.author || "Anonymous"}
+                  </span>
+                  <span style={{ fontSize: 10, color: C.muted }}>
+                    {timeAgo(post.created_at) || post.time}
+                  </span>
+                  <FlairBadge flair={post.flair} />
+                </div>
+
+                {/* Title */}
+                <h3
+                  style={{
+                    margin: "0 0 6px",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: C.ink,
+                    lineHeight: 1.4,
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    play("open");
+                    setViewing(post.id);
+                  }}
+                >
+                  {post.title}
+                </h3>
+
+                {/* Body preview */}
+                {post.body ? (
+                  <p
+                    style={{
+                      margin: "0 0 10px",
+                      fontSize: 12,
+                      color: C.mid,
+                      lineHeight: 1.6,
+                      fontFamily: "Georgia,serif",
+                    }}
+                  >
+                    {post.body.length > 140
+                      ? post.body.slice(0, 140) + "…"
+                      : post.body}
+                  </p>
+                ) : null}
+
+                {/* Action row */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 2,
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      play("open");
+                      setViewing(post.id);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 11,
+                      color: C.muted,
+                      padding: "5px 8px",
+                      borderRadius: 8,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      minHeight: 32,
+                      transition: "background 120ms",
+                    }}
+                  >
+                    {Ic.chat("none", C.muted, 12)} {post.comments.length}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleShare(post)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 11,
+                      color: shareCopied === post.id ? C.green : C.muted,
+                      padding: "5px 8px",
+                      borderRadius: 8,
+                      minHeight: 32,
+                      transition: "color 140ms",
+                    }}
+                  >
+                    {shareCopied === post.id ? "✓ Copied" : "Share"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSave(post.id)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 11,
+                      color: saved ? C.green : C.muted,
+                      padding: "5px 8px",
+                      borderRadius: 8,
+                      minHeight: 32,
+                      transition: "color 140ms",
+                    }}
+                  >
+                    {saved ? "★ Saved" : "☆ Save"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
