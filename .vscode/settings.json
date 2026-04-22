@@ -14,7 +14,7 @@
     "ms-ossdata.vscode-pgsql",
     "phu1237.vs-browser",
     "supabase.vscode-supabase-extension",
-    "usernamehw.errorlens"
+    "usernamehw.errorlens",
   ],
   "github.copilot.chat.agent.autoFix": true,
   "github.copilot.chat.copilotMemory.enabled": true,
@@ -29,7 +29,7 @@
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "modificationsIfAvailable",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "explicit",
   },
   "eslint.validate": ["javascript", "javascriptreact"],
   "git.autofetch": true,
@@ -42,6 +42,14 @@
   "cSpell.words": ["Supabase"],
   "editor.tokenColorCustomizations": {
     "comments": "",
-    "textMateRules": []
-  }
+    "textMateRules": [],
+  },
+  "chat.mcp.discovery.enabled": {
+    "claude-desktop": true,
+    "windsurf": true,
+    "cursor-global": true,
+    "cursor-workspace": true,
+  },
+  "github.copilot.chat.githubMcpServer.enabled": true,
+  "chat.mcp.assisted.nuget.enabled": true,
 }

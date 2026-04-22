@@ -7,9 +7,13 @@ import {
   SurfaceCard,
   alpha,
 } from "../InventorsInvestorsUI";
+<<<<<<< HEAD
+import { formatCurrency } from "../../../utils/inventorsInvestors";
+=======
 import {
   formatCurrency,
 } from "../../../utils/inventorsInvestors";
+>>>>>>> a59b2e27355e6c4f2a2eed2930e03aad9e503c24
 
 const DECK_SWIPE_TRIGGER = 88;
 
