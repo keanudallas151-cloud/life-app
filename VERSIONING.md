@@ -4,20 +4,20 @@ Life is still in prototype phase. The project uses semantic versioning with a `v
 
 ## Canonical format
 
-- Git tag: `v0.6.10`
-- GitHub release title: `v0.6.10 - Mobile geometry and alignment polish`
-- `package.json` version: `0.6.10`
+- Git tag: `v0.7.0`
+- GitHub release title: `v0.7.0 - Firebase platform migration and release hardening`
+- `package.json` version: `0.7.0`
 
 ## Prototype bump rules
 
-- Use `v0.6.x` for current prototype snapshots.
+- Use `v0.7.x` for the current prototype snapshot line.
 - Increment the patch version for each substantial completed release batch.
 - Use the next minor version only for a clearly new release phase.
 - Use `v1.0.0` only for the first real public release.
 
 ## Release naming rules
 
-- Keep tags exact: `v0.6.10`
+- Keep tags exact: `v0.7.0`
 - Keep release titles short and readable.
 - Keep `package.json` aligned with the same numeric version, without the `v`
 - Avoid tiny release commits; prefer one commit per meaningful completed project batch.
@@ -41,9 +41,9 @@ Life is still in prototype phase. The project uses semantic versioning with a `v
 - `v0.6.8`: Security, deploy, and Supabase core hardening
 - `v0.6.9`: Auth and backend status hardening
 - `v0.6.10`: Mobile geometry and alignment polish
-- `v0.6.8`: Security, config, and core Supabase hardening
-- `v0.6.9`: Auth and backend status hardening
+- `v0.6.11`: Security scripts, secret scanning, and untrack guidance
+- `v0.7.0`: Firebase platform migration and release hardening
 
 ## Current target
 
-The current `main` branch should be treated as the `v0.6.9` prototype baseline, with `main_backup` kept aligned as the backup branch.
+The current `main` branch should be treated as the `v0.7.0` prototype baseline, with `main_backup` kept aligned as the backup branch.

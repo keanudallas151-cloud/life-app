@@ -1,5 +1,23 @@
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { supabase } from "../supabaseClient";
+import { db, isFirebaseConfigured } from "../firebaseClient";
+import {
+  mergeFirebaseProfile,
+  saveFirebaseProfileAndAuth,
+  uploadFirebaseMedia,
+} from "../services/firebaseProfile";
 import {
   loadLocalNetworkingState,
   loadRoleChoice,
@@ -8,7 +26,75 @@ import {
   saveRoleChoice,
 } from "../utils/inventorsInvestors";
 
-const STORAGE_BUCKET = "inventors-investors-media";
+const COLLECTIONS = {
+  profiles: "profiles",
+  investorProfiles: "investorProfiles",
+  inventorProfiles: "inventorProfiles",
+  swipes: "swipes",
+  conversations: "conversations",
+  messages: "messages",
+  blockedUsers: "blockedUsers",
+  reportedProfiles: "reportedProfiles",
+};
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function conversationIdFor(userId, otherUserId) {
+  return [userId, otherUserId].filter(Boolean).sort().join("__");
+}
+
+function toDocData(snapshot) {
+  if (!snapshot.exists()) return null;
+  const data = snapshot.data() || {};
+  return {
+    ...data,
+    id: data.id || snapshot.id,
+  };
+}
+
+async function readDoc(collectionName, documentId) {
+  if (!db || !documentId) return null;
+  const snapshot = await getDoc(doc(db, collectionName, documentId));
+  return toDocData(snapshot);
+}
+
+async function readMessages(conversationId, userId) {
+  if (!db || !conversationId) return [];
+
+  const snapshot = await getDocs(
+    query(
+      collection(
+        db,
+        COLLECTIONS.conversations,
+        conversationId,
+        COLLECTIONS.messages,
+      ),
+      orderBy("created_at", "asc"),
+      limit(200),
+    ),
+  );
+
+  return snapshot.docs.map((messageDoc) => {
+    const data = messageDoc.data() || {};
+    return {
+      ...data,
+      id: data.id || messageDoc.id,
+      isMine: data.sender_user_id === userId,
+    };
+  });
+}
+
+function isBlobPreviewUrl(value) {
+  return typeof value === "string" && value.startsWith("blob:");
+}
+
+function toNumberOrNull(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const numeric = Number(String(value).replace(/[^\d.-]/g, ""));
+  return Number.isFinite(numeric) ? numeric : null;
+}
 
 export function useInventorsInvestorsData(user) {
   const [loading, setLoading] = useState(true);
@@ -41,7 +127,7 @@ export function useInventorsInvestorsData(user) {
   const loadDiscovery = useCallback(
     async (roleOverride) => {
       const role = roleOverride || profile?.role || selectedRole;
-      if (!user?.id || !role) {
+      if (!user?.id || !role || !db || !isFirebaseConfigured) {
         setDiscoveryProfiles([]);
         return;
       }
@@ -50,77 +136,102 @@ export function useInventorsInvestorsData(user) {
       try {
         const targetRole = role === "investor" ? "inventor" : "investor";
 
-        const [viewResponse, swipesResponse, outgoingBlocksResponse, incomingBlocksResponse] =
-          await Promise.all([
-            supabase
-              .from("inventors_investors_public_profiles")
-              .select("*")
-              .eq("role", targetRole)
-              .order("updated_at", { ascending: false }),
-            supabase.from("swipes").select("to_user_id").eq("from_user_id", user.id),
-            supabase
-              .from("blocked_users")
-              .select("blocked_user_id")
-              .eq("blocker_user_id", user.id),
-            supabase
-              .from("blocked_users")
-              .select("blocker_user_id")
-              .eq("blocked_user_id", user.id),
-          ]);
-
-        if (viewResponse.error) throw viewResponse.error;
-        if (swipesResponse.error) throw swipesResponse.error;
-        if (outgoingBlocksResponse.error) throw outgoingBlocksResponse.error;
-        if (incomingBlocksResponse.error) throw incomingBlocksResponse.error;
-
-        const rawProfiles = viewResponse.data || [];
-        const dedupedProfiles = [];
-        const seenUsers = new Set();
-        rawProfiles.forEach((item) => {
-          if (!seenUsers.has(item.user_id)) {
-            seenUsers.add(item.user_id);
-            dedupedProfiles.push(item);
-          }
-        });
-
-        const swiped = new Set((swipesResponse.data || []).map((item) => item.to_user_id));
-        const blocked = new Set([
-          ...(outgoingBlocksResponse.data || []).map((item) => item.blocked_user_id),
-          ...(incomingBlocksResponse.data || []).map((item) => item.blocker_user_id),
+        const [
+          profileSnapshots,
+          swipeSnapshots,
+          outgoingBlocks,
+          incomingBlocks,
+        ] = await Promise.all([
+          getDocs(
+            query(
+              collection(db, COLLECTIONS.profiles),
+              where("role", "==", targetRole),
+              where("profile_completed", "==", true),
+              orderBy("updated_at", "desc"),
+              limit(80),
+            ),
+          ),
+          getDocs(
+            query(
+              collection(db, COLLECTIONS.swipes),
+              where("from_user_id", "==", user.id),
+              limit(200),
+            ),
+          ),
+          getDocs(
+            query(
+              collection(db, COLLECTIONS.blockedUsers),
+              where("blocker_user_id", "==", user.id),
+              limit(200),
+            ),
+          ),
+          getDocs(
+            query(
+              collection(db, COLLECTIONS.blockedUsers),
+              where("blocked_user_id", "==", user.id),
+              limit(200),
+            ),
+          ),
         ]);
 
-        const inventorProfileIds = dedupedProfiles
-          .filter((item) => item.role === "inventor" && item.inventor_profile_id)
-          .map((item) => item.inventor_profile_id);
+        const rawProfiles = profileSnapshots.docs.map((snapshot) => ({
+          ...(snapshot.data() || {}),
+          id: snapshot.id,
+          user_id: snapshot.data()?.user_id || snapshot.id,
+        }));
 
-        let imageMap = new Map();
-        if (inventorProfileIds.length) {
-          const { data: imageRows, error: imageError } = await supabase
-            .from("inventor_profile_images")
-            .select("inventor_profile_id, image_url, sort_order")
-            .in("inventor_profile_id", inventorProfileIds)
-            .order("sort_order", { ascending: true });
+        const swiped = new Set(
+          swipeSnapshots.docs
+            .map((snapshot) => snapshot.data()?.to_user_id)
+            .filter(Boolean),
+        );
+        const blocked = new Set(
+          [
+            ...outgoingBlocks.docs.map(
+              (snapshot) => snapshot.data()?.blocked_user_id,
+            ),
+            ...incomingBlocks.docs.map(
+              (snapshot) => snapshot.data()?.blocker_user_id,
+            ),
+          ].filter(Boolean),
+        );
 
-          if (imageError) throw imageError;
-
-          imageMap = new Map();
-          (imageRows || []).forEach((row) => {
-            if (!imageMap.has(row.inventor_profile_id)) {
-              imageMap.set(row.inventor_profile_id, row.image_url);
-            }
-          });
-        }
-
-        const filtered = dedupedProfiles
+        const filteredProfiles = rawProfiles
           .filter((item) => item.user_id !== user.id)
           .filter((item) => !blocked.has(item.user_id))
-          .filter((item) => !swiped.has(item.user_id))
-          .map((item) => ({
-            ...item,
-            hero_image_url: imageMap.get(item.inventor_profile_id) || item.hero_image_url || "",
-          }));
+          .filter((item) => !swiped.has(item.user_id));
 
-        const ranked = filtered
+        const enrichedProfiles = await Promise.all(
+          filteredProfiles.map(async (item) => {
+            if (item.role === "inventor") {
+              const inventorDetails = await readDoc(
+                COLLECTIONS.inventorProfiles,
+                item.user_id,
+              );
+              return {
+                ...item,
+                ...(inventorDetails || {}),
+                inventor_profile_id: inventorDetails?.id || item.user_id,
+                hero_image_url:
+                  inventorDetails?.gallery_urls?.[0] ||
+                  item.hero_image_url ||
+                  "",
+              };
+            }
+
+            const investorDetails = await readDoc(
+              COLLECTIONS.investorProfiles,
+              item.user_id,
+            );
+            return {
+              ...item,
+              ...(investorDetails || {}),
+              investor_profile_id: investorDetails?.id || item.user_id,
+            };
+          }),
+        );
+
+        const ranked = enrichedProfiles
           .map((item) => ({
             ...item,
             discovery_rank: computeDiscoveryRank(item),
@@ -139,83 +250,89 @@ export function useInventorsInvestorsData(user) {
   );
 
   const loadConversations = useCallback(async () => {
-    if (!user?.id) {
+    if (!user?.id || !db || !isFirebaseConfigured) {
       setConversations([]);
       setActiveConversationId("");
       return;
     }
 
     try {
-      const { data: participantRows } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id, last_read_at")
-        .eq("user_id", user.id);
+      const conversationSnapshots = await getDocs(
+        query(
+          collection(db, COLLECTIONS.conversations),
+          where("participant_ids", "array-contains", user.id),
+          limit(60),
+        ),
+      );
 
-      const conversationIds = (participantRows || []).map((row) => row.conversation_id);
-      if (!conversationIds.length) {
+      const conversationRows = conversationSnapshots.docs.map((snapshot) => ({
+        ...(snapshot.data() || {}),
+        id: snapshot.id,
+      }));
+
+      if (!conversationRows.length) {
         setConversations([]);
         setActiveConversationId("");
         return;
       }
 
-      const [{ data: conversationRows }, { data: peerRows }, { data: messageRows }] = await Promise.all([
-        supabase
-          .from("conversations")
-          .select("id, created_at, updated_at")
-          .in("id", conversationIds)
-          .order("updated_at", { ascending: false }),
-        supabase
-          .from("conversation_participants")
-          .select("conversation_id, user_id")
-          .in("conversation_id", conversationIds)
-          .neq("user_id", user.id),
-        supabase
-          .from("messages")
-          .select("id, conversation_id, sender_user_id, message_text, created_at")
-          .in("conversation_id", conversationIds)
-          .order("created_at", { ascending: true }),
-      ]);
+      const peerIds = Array.from(
+        new Set(
+          conversationRows
+            .map((row) =>
+              (row.participant_ids || []).find(
+                (participantId) => participantId !== user.id,
+              ),
+            )
+            .filter(Boolean),
+        ),
+      );
 
-      const peerIds = Array.from(new Set((peerRows || []).map((row) => row.user_id)));
-      const { data: peerProfiles } = peerIds.length
-        ? await supabase
-            .from("inventors_investors_public_profiles")
-            .select("user_id, full_name, avatar_url, role, location")
-            .in("user_id", peerIds)
-        : { data: [] };
+      const peerProfiles = await Promise.all(
+        peerIds.map(async (peerId) => [
+          peerId,
+          await readDoc(COLLECTIONS.profiles, peerId),
+        ]),
+      );
+      const participantMap = new Map(peerProfiles);
 
-      const participantMap = new Map((peerProfiles || []).map((row) => [row.user_id, row]));
-      const peerMap = new Map((peerRows || []).map((row) => [row.conversation_id, row.user_id]));
-      const readMap = new Map((participantRows || []).map((row) => [row.conversation_id, row.last_read_at]));
+      const nextConversations = await Promise.all(
+        conversationRows.map(async (row) => {
+          const messages = await readMessages(row.id, user.id);
+          const lastMessage = messages[messages.length - 1] || null;
+          const peerId = (row.participant_ids || []).find(
+            (participantId) => participantId !== user.id,
+          );
+          const lastReadAt = row.last_read_at_map?.[user.id] || "";
+          const unreadCount = messages.filter((message) => {
+            if (message.sender_user_id === user.id) return false;
+            if (!lastReadAt) return true;
+            return (
+              new Date(message.created_at).getTime() >
+              new Date(lastReadAt).getTime()
+            );
+          }).length;
 
-      const groupedMessages = new Map();
-      (messageRows || []).forEach((row) => {
-        const bucket = groupedMessages.get(row.conversation_id) || [];
-        bucket.push({ ...row, isMine: row.sender_user_id === user.id });
-        groupedMessages.set(row.conversation_id, bucket);
-      });
+          return {
+            ...row,
+            participant: participantMap.get(peerId) || null,
+            messages,
+            lastMessage,
+            unreadCount,
+          };
+        }),
+      );
 
-      const nextConversations = (conversationRows || []).map((row) => {
-        const messages = groupedMessages.get(row.id) || [];
-        const lastMessage = messages[messages.length - 1] || null;
-        const lastReadAt = readMap.get(row.id);
-        const unreadCount = messages.filter((message) => {
-          if (message.sender_user_id === user.id) return false;
-          if (!lastReadAt) return true;
-          return new Date(message.created_at).getTime() > new Date(lastReadAt).getTime();
-        }).length;
-
-        return {
-          ...row,
-          participant: participantMap.get(peerMap.get(row.id)) || null,
-          messages,
-          lastMessage,
-          unreadCount,
-        };
-      });
+      nextConversations.sort(
+        (a, b) =>
+          new Date(b.updated_at || b.created_at || 0).getTime() -
+          new Date(a.updated_at || a.created_at || 0).getTime(),
+      );
 
       setConversations(nextConversations);
-      setActiveConversationId((current) => current || nextConversations[0]?.id || "");
+      setActiveConversationId(
+        (current) => current || nextConversations[0]?.id || "",
+      );
     } catch (error) {
       console.error("Failed to load conversations", error);
       setConversations([]);
@@ -229,31 +346,52 @@ export function useInventorsInvestorsData(user) {
       return;
     }
 
-    setLoading(true);
     const localState = loadLocalNetworkingState(user.id) || null;
 
+    if (!db || !isFirebaseConfigured) {
+      const nextRole = localState?.selectedRole || loadRoleChoice(user.id);
+      setProfile(localState?.profile || null);
+      setInvestorProfile(localState?.investorProfile || null);
+      setInventorProfile(localState?.inventorProfile || null);
+      setSelectedRole(nextRole || "");
+      setDiscoveryProfiles([]);
+      setConversations([]);
+      setActiveConversationId("");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
     try {
-      const [{ data: profileRow }, { data: investorRow }, { data: inventorRow }] = await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("investor_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("inventor_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+      const [profileRow, investorRow, inventorRow] = await Promise.all([
+        readDoc(COLLECTIONS.profiles, user.id),
+        readDoc(COLLECTIONS.investorProfiles, user.id),
+        readDoc(COLLECTIONS.inventorProfiles, user.id),
       ]);
 
       const nextProfile = profileRow || localState?.profile || null;
-      const nextInvestorProfile = investorRow || localState?.investorProfile || null;
-      const nextInventorProfile = inventorRow || localState?.inventorProfile || null;
+      const nextInvestorProfile =
+        investorRow || localState?.investorProfile || null;
+      const nextInventorProfile =
+        inventorRow || localState?.inventorProfile || null;
       const nextRole =
-        profileRow?.role ||
-        localState?.selectedRole ||
-        loadRoleChoice(user.id);
+        profileRow?.role || localState?.selectedRole || loadRoleChoice(user.id);
 
       setProfile(nextProfile);
       setInvestorProfile(nextInvestorProfile);
       setInventorProfile(nextInventorProfile);
       setSelectedRole(nextRole || "");
+      persistLocalState({
+        profile: nextProfile,
+        investorProfile: nextInvestorProfile,
+        inventorProfile: nextInventorProfile,
+        selectedRole: nextRole || "",
+      });
 
       await Promise.all([
-        nextRole ? loadDiscovery(nextRole) : Promise.resolve(setDiscoveryProfiles([])),
+        nextRole
+          ? loadDiscovery(nextRole)
+          : Promise.resolve(setDiscoveryProfiles([])),
         loadConversations(),
       ]);
     } catch (error) {
@@ -264,36 +402,62 @@ export function useInventorsInvestorsData(user) {
       setInventorProfile(localState?.inventorProfile || null);
       setSelectedRole(nextRole || "");
       await Promise.all([
-        nextRole ? loadDiscovery(nextRole) : Promise.resolve(setDiscoveryProfiles([])),
+        nextRole
+          ? loadDiscovery(nextRole)
+          : Promise.resolve(setDiscoveryProfiles([])),
         loadConversations(),
       ]);
     } finally {
       setLoading(false);
     }
-  }, [loadConversations, loadDiscovery, user?.id]);
+  }, [loadConversations, loadDiscovery, persistLocalState, user?.id]);
 
   useEffect(() => {
     loadInitial();
   }, [loadInitial]);
 
   useEffect(() => {
-    if (!user?.id) return undefined;
+    if (!user?.id || !db || !isFirebaseConfigured) return undefined;
 
-    const channel = supabase
-      .channel(`ii_messages_${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "messages" },
-        async () => {
-          await loadConversations();
-        },
-      )
-      .subscribe();
+    const conversationsQuery = query(
+      collection(db, COLLECTIONS.conversations),
+      where("participant_ids", "array-contains", user.id),
+      limit(60),
+    );
+
+    const unsubscribe = onSnapshot(conversationsQuery, async () => {
+      await loadConversations();
+    });
 
     return () => {
-      supabase.removeChannel(channel);
+      unsubscribe();
     };
   }, [loadConversations, user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !db || !isFirebaseConfigured || !activeConversationId) {
+      return undefined;
+    }
+
+    const activeMessagesQuery = query(
+      collection(
+        db,
+        COLLECTIONS.conversations,
+        activeConversationId,
+        COLLECTIONS.messages,
+      ),
+      orderBy("created_at", "asc"),
+      limit(200),
+    );
+
+    const unsubscribe = onSnapshot(activeMessagesQuery, async () => {
+      await loadConversations();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [activeConversationId, loadConversations, user?.id]);
 
   const chooseRole = useCallback(
     async (role) => {
@@ -306,6 +470,7 @@ export function useInventorsInvestorsData(user) {
         email: profile?.email || user.email || "",
         role,
         profile_completed: profile?.profile_completed || false,
+        updated_at: nowIso(),
       };
 
       saveRoleChoice(user.id, role);
@@ -314,23 +479,18 @@ export function useInventorsInvestorsData(user) {
       persistLocalState({ profile: optimisticProfile, selectedRole: role });
 
       try {
-        const payload = {
-          user_id: user.id,
-          role,
+        const nextProfile = await mergeFirebaseProfile(user.id, {
           full_name: optimisticProfile.full_name,
           email: optimisticProfile.email,
+          role,
           profile_completed: optimisticProfile.profile_completed,
-        };
+        });
 
-        const { data } = await supabase
-          .from("profiles")
-          .upsert(payload, { onConflict: "user_id" })
-          .select()
-          .single();
-
-        const nextProfile = data || optimisticProfile;
-        setProfile(nextProfile);
-        persistLocalState({ profile: nextProfile, selectedRole: role });
+        setProfile(nextProfile || optimisticProfile);
+        persistLocalState({
+          profile: nextProfile || optimisticProfile,
+          selectedRole: role,
+        });
       } catch (error) {
         console.error("Failed to choose role", error);
       }
@@ -340,17 +500,12 @@ export function useInventorsInvestorsData(user) {
     [loadDiscovery, persistLocalState, profile, user],
   );
 
-  const uploadFile = useCallback(async (file, folder) => {
-    const extension = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const safeFileName = `${folder}/${window.crypto.randomUUID()}.${extension}`;
-    const { error } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(safeFileName, file, { upsert: true, cacheControl: "3600" });
-
-    if (error) throw error;
-    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(safeFileName);
-    return data.publicUrl;
-  }, []);
+  const uploadFile = useCallback(
+    async (file, folder) => {
+      return uploadFirebaseMedia(user?.id, file, folder);
+    },
+    [user?.id],
+  );
 
   const saveInvestorProfile = useCallback(
     async (values) => {
@@ -360,11 +515,14 @@ export function useInventorsInvestorsData(user) {
 
       let avatarUrl = !isBlobPreviewUrl(values.avatarPreviewUrl)
         ? values.avatarPreviewUrl || profile?.avatar_url || ""
-        : profile?.avatar_url || values.avatarPreviewUrl || "";
+        : profile?.avatar_url || "";
 
       try {
         if (values.avatarFile) {
-          avatarUrl = await uploadFile(values.avatarFile, `${user.id}/avatar`);
+          avatarUrl = await uploadFile(
+            values.avatarFile,
+            "inventors-investors-media/avatar",
+          );
           setUploadProgress(40);
         }
 
@@ -381,6 +539,7 @@ export function useInventorsInvestorsData(user) {
           email_public: values.emailPublic,
           phone_public: values.phonePublic,
           profile_completed: true,
+          updated_at: nowIso(),
         };
 
         const optimisticInvestorProfile = {
@@ -392,37 +551,44 @@ export function useInventorsInvestorsData(user) {
           looking_to_invest_in: values.lookingToInvestIn.trim(),
           preferred_industries: normalizeListInput(values.preferredIndustries),
           stage_preference: values.stagePreference,
+          updated_at: nowIso(),
         };
 
-        const { data: profileRow, error: profileError } = await supabase
-          .from("profiles")
-          .upsert(optimisticProfile, { onConflict: "user_id" })
-          .select()
-          .single();
-
-        if (profileError) throw profileError;
+        const syncResult = await saveFirebaseProfileAndAuth({
+          userId: user.id,
+          profilePatch: optimisticProfile,
+          authPatch: {
+            displayName: optimisticProfile.full_name,
+            photoURL: avatarUrl || undefined,
+          },
+        });
+        if (!syncResult.ok && !syncResult.partial) {
+          throw syncResult.errors[0] || new Error("Investor profile sync failed.");
+        }
+        const nextProfile = syncResult.profile || optimisticProfile;
         setUploadProgress(70);
 
-        const { data: investorRow, error: investorError } = await supabase
-          .from("investor_profiles")
-          .upsert(optimisticInvestorProfile, { onConflict: "user_id" })
-          .select()
-          .single();
+        await setDoc(
+          doc(db, COLLECTIONS.investorProfiles, user.id),
+          {
+            ...(investorProfile?.created_at ? {} : { created_at: nowIso() }),
+            ...optimisticInvestorProfile,
+          },
+          { merge: true },
+        );
 
-        if (investorError) throw investorError;
-
-        setProfile(profileRow || optimisticProfile);
-        setInvestorProfile(investorRow || optimisticInvestorProfile);
+        setProfile(nextProfile || optimisticProfile);
+        setInvestorProfile(optimisticInvestorProfile);
         setSelectedRole("investor");
         persistLocalState({
-          profile: profileRow || optimisticProfile,
-          investorProfile: investorRow || optimisticInvestorProfile,
+          profile: nextProfile || optimisticProfile,
+          investorProfile: optimisticInvestorProfile,
           inventorProfile,
           selectedRole: "investor",
         });
         await Promise.all([loadDiscovery("investor"), loadConversations()]);
         setUploadProgress(100);
-        return { ok: true };
+        return syncResult.partial ? { ok: true, partial: true } : { ok: true };
       } catch (error) {
         console.error("Failed to save investor profile", error);
 
@@ -439,6 +605,7 @@ export function useInventorsInvestorsData(user) {
           email_public: values.emailPublic,
           phone_public: values.phonePublic,
           profile_completed: true,
+          updated_at: nowIso(),
         };
 
         const fallbackInvestorProfile = {
@@ -450,6 +617,7 @@ export function useInventorsInvestorsData(user) {
           looking_to_invest_in: values.lookingToInvestIn.trim(),
           preferred_industries: normalizeListInput(values.preferredIndustries),
           stage_preference: values.stagePreference,
+          updated_at: nowIso(),
         };
 
         setProfile(fallbackProfile);
@@ -462,7 +630,7 @@ export function useInventorsInvestorsData(user) {
           selectedRole: "investor",
         });
         await loadDiscovery("investor");
-        return { ok: true, degraded: true };
+        return { ok: false, degraded: true, error };
       } finally {
         setSaving(false);
         window.setTimeout(() => setUploadProgress(0), 300);
@@ -488,12 +656,39 @@ export function useInventorsInvestorsData(user) {
 
       let avatarUrl = !isBlobPreviewUrl(values.avatarPreviewUrl)
         ? values.avatarPreviewUrl || profile?.avatar_url || ""
-        : profile?.avatar_url || values.avatarPreviewUrl || "";
+        : profile?.avatar_url || "";
+
+      const existingGalleryUrls = Array.isArray(inventorProfile?.gallery_urls)
+        ? inventorProfile.gallery_urls
+        : Array.isArray(values.galleryPreviewUrls)
+          ? values.galleryPreviewUrls.filter(
+              (url) => url && !isBlobPreviewUrl(url),
+            )
+          : [];
 
       try {
         if (values.avatarFile) {
-          avatarUrl = await uploadFile(values.avatarFile, `${user.id}/avatar`);
+          avatarUrl = await uploadFile(
+            values.avatarFile,
+            "inventors-investors-media/avatar",
+          );
           setUploadProgress(25);
+        }
+
+        let galleryUrls = existingGalleryUrls;
+        if (values.galleryFiles.length) {
+          const uploadedGallery = [];
+          for (let index = 0; index < values.galleryFiles.length; index += 1) {
+            const url = await uploadFile(
+              values.galleryFiles[index],
+              "inventors-investors-media/gallery",
+            );
+            uploadedGallery.push(url);
+            setUploadProgress(
+              30 + Math.round(((index + 1) / values.galleryFiles.length) * 30),
+            );
+          }
+          galleryUrls = Array.from(new Set([...existingGalleryUrls, ...uploadedGallery]));
         }
 
         const optimisticProfile = {
@@ -509,6 +704,7 @@ export function useInventorsInvestorsData(user) {
           email_public: values.emailPublic,
           phone_public: values.phonePublic,
           profile_completed: true,
+          updated_at: nowIso(),
         };
 
         const optimisticInventorProfile = {
@@ -524,51 +720,46 @@ export function useInventorsInvestorsData(user) {
           website_url: values.websiteUrl.trim() || null,
           social_links: normalizeListInput(values.socialLinks),
           short_pitch: values.shortPitch.trim(),
+          gallery_urls: galleryUrls,
+          hero_image_url: galleryUrls[0] || "",
+          updated_at: nowIso(),
         };
 
-        const { data: profileRow, error: profileError } = await supabase
-          .from("profiles")
-          .upsert(optimisticProfile, { onConflict: "user_id" })
-          .select()
-          .single();
-
-        if (profileError) throw profileError;
-        setUploadProgress(45);
-
-        const { data: inventorRow, error: inventorError } = await supabase
-          .from("inventor_profiles")
-          .upsert(optimisticInventorProfile, { onConflict: "user_id" })
-          .select()
-          .single();
-
-        if (inventorError) throw inventorError;
-        setUploadProgress(60);
-
-        if (values.galleryFiles.length) {
-          const galleryRows = [];
-          for (let index = 0; index < values.galleryFiles.length; index += 1) {
-            const url = await uploadFile(values.galleryFiles[index], `${user.id}/gallery`);
-            galleryRows.push({ inventor_profile_id: inventorRow.id, image_url: url, sort_order: index });
-            setUploadProgress(60 + Math.round(((index + 1) / values.galleryFiles.length) * 25));
-          }
-
-          await supabase.from("inventor_profile_images").delete().eq("inventor_profile_id", inventorRow.id);
-          const { error: imageError } = await supabase.from("inventor_profile_images").insert(galleryRows);
-          if (imageError) throw imageError;
+        const syncResult = await saveFirebaseProfileAndAuth({
+          userId: user.id,
+          profilePatch: optimisticProfile,
+          authPatch: {
+            displayName: optimisticProfile.full_name,
+            photoURL: avatarUrl || undefined,
+          },
+        });
+        if (!syncResult.ok && !syncResult.partial) {
+          throw syncResult.errors[0] || new Error("Inventor profile sync failed.");
         }
+        const nextProfile = syncResult.profile || optimisticProfile;
+        setUploadProgress(70);
 
-        setProfile(profileRow || optimisticProfile);
-        setInventorProfile(inventorRow || optimisticInventorProfile);
+        await setDoc(
+          doc(db, COLLECTIONS.inventorProfiles, user.id),
+          {
+            ...(inventorProfile?.created_at ? {} : { created_at: nowIso() }),
+            ...optimisticInventorProfile,
+          },
+          { merge: true },
+        );
+
+        setProfile(nextProfile || optimisticProfile);
+        setInventorProfile(optimisticInventorProfile);
         setSelectedRole("inventor");
         persistLocalState({
-          profile: profileRow || optimisticProfile,
+          profile: nextProfile || optimisticProfile,
           investorProfile,
-          inventorProfile: inventorRow || optimisticInventorProfile,
+          inventorProfile: optimisticInventorProfile,
           selectedRole: "inventor",
         });
         await Promise.all([loadDiscovery("inventor"), loadConversations()]);
         setUploadProgress(100);
-        return { ok: true };
+        return syncResult.partial ? { ok: true, partial: true } : { ok: true };
       } catch (error) {
         console.error("Failed to save inventor profile", error);
 
@@ -585,6 +776,7 @@ export function useInventorsInvestorsData(user) {
           email_public: values.emailPublic,
           phone_public: values.phonePublic,
           profile_completed: true,
+          updated_at: nowIso(),
         };
 
         const fallbackInventorProfile = {
@@ -600,6 +792,9 @@ export function useInventorsInvestorsData(user) {
           website_url: values.websiteUrl.trim() || null,
           social_links: normalizeListInput(values.socialLinks),
           short_pitch: values.shortPitch.trim(),
+          gallery_urls: existingGalleryUrls,
+          hero_image_url: existingGalleryUrls[0] || "",
+          updated_at: nowIso(),
         };
 
         setProfile(fallbackProfile);
@@ -612,7 +807,7 @@ export function useInventorsInvestorsData(user) {
           selectedRole: "inventor",
         });
         await loadDiscovery("inventor");
-        return { ok: true, degraded: true };
+        return { ok: false, degraded: true, error };
       } finally {
         setSaving(false);
         window.setTimeout(() => setUploadProgress(0), 300);
@@ -632,13 +827,24 @@ export function useInventorsInvestorsData(user) {
 
   const createSwipe = useCallback(
     async (toUserId, action) => {
-      if (!user?.id || !toUserId) return;
-      setDiscoveryProfiles((current) => current.filter((item) => item.user_id !== toUserId));
+      if (!user?.id || !toUserId || !db || !isFirebaseConfigured) return;
+      setDiscoveryProfiles((current) =>
+        current.filter((item) => item.user_id !== toUserId),
+      );
       try {
-        const { error } = await supabase.from("swipes").insert({ from_user_id: user.id, to_user_id: toUserId, action });
-        if (error && !String(error.message || "").toLowerCase().includes("duplicate")) {
-          throw error;
-        }
+        const swipeId = `${user.id}__${toUserId}`;
+        await setDoc(
+          doc(db, COLLECTIONS.swipes, swipeId),
+          {
+            id: swipeId,
+            from_user_id: user.id,
+            to_user_id: toUserId,
+            action,
+            created_at: nowIso(),
+            updated_at: nowIso(),
+          },
+          { merge: true },
+        );
       } catch (error) {
         console.error("Failed to create swipe", error);
       } finally {
@@ -650,47 +856,124 @@ export function useInventorsInvestorsData(user) {
 
   const ensureConversation = useCallback(
     async (otherUserId) => {
-      if (!user?.id || !otherUserId) return "";
-      const { data, error } = await supabase.rpc("ensure_inventors_investors_conversation", {
-        other_user_id: otherUserId,
-      });
-      if (error) {
+      if (!user?.id || !otherUserId || !db || !isFirebaseConfigured) return "";
+
+      const conversationId = conversationIdFor(user.id, otherUserId);
+      const existingConversation = await readDoc(
+        COLLECTIONS.conversations,
+        conversationId,
+      );
+      const now = nowIso();
+
+      try {
+        await setDoc(
+          doc(db, COLLECTIONS.conversations, conversationId),
+          {
+            id: conversationId,
+            participant_ids: [user.id, otherUserId].sort(),
+            created_at: existingConversation?.created_at || now,
+            updated_at: existingConversation?.updated_at || now,
+            last_read_at_map: {
+              ...(existingConversation?.last_read_at_map || {}),
+              [user.id]:
+                existingConversation?.last_read_at_map?.[user.id] || now,
+            },
+          },
+          { merge: true },
+        );
+        await loadConversations();
+        setActiveConversationId(conversationId);
+        return conversationId;
+      } catch (error) {
         console.error("Failed to ensure conversation", error);
         return "";
       }
-      await loadConversations();
-      setActiveConversationId(data || "");
-      return data || "";
     },
     [loadConversations, user?.id],
   );
 
   const markConversationRead = useCallback(
     async (conversationId) => {
-      if (!conversationId) return;
-      await supabase.rpc("mark_inventors_investors_conversation_read", {
-        target_conversation_id: conversationId,
-      });
+      if (!conversationId || !user?.id || !db || !isFirebaseConfigured) return;
+
+      const currentConversation = await readDoc(
+        COLLECTIONS.conversations,
+        conversationId,
+      );
+      const now = nowIso();
+
+      await setDoc(
+        doc(db, COLLECTIONS.conversations, conversationId),
+        {
+          id: conversationId,
+          participant_ids: currentConversation?.participant_ids || [user.id],
+          created_at: currentConversation?.created_at || now,
+          updated_at: now,
+          last_read_at_map: {
+            ...(currentConversation?.last_read_at_map || {}),
+            [user.id]: now,
+          },
+        },
+        { merge: true },
+      );
       await loadConversations();
     },
-    [loadConversations],
+    [loadConversations, user?.id],
   );
 
   const sendMessage = useCallback(
     async (conversationId, messageText) => {
-      if (!user?.id || !conversationId || !messageText.trim()) return false;
+      if (
+        !user?.id ||
+        !conversationId ||
+        !messageText.trim() ||
+        !db ||
+        !isFirebaseConfigured
+      )
+        return false;
       setMessageSending(true);
       try {
-        const { error } = await supabase.from("messages").insert({
-          conversation_id: conversationId,
-          sender_user_id: user.id,
-          message_text: messageText.trim(),
-        });
-        if (error) {
-          console.error("Failed to send message", error);
-          return false;
-        }
-        await Promise.all([loadConversations(), markConversationRead(conversationId)]);
+        const now = nowIso();
+        const conversationRef = doc(
+          db,
+          COLLECTIONS.conversations,
+          conversationId,
+        );
+        const currentConversation = await readDoc(
+          COLLECTIONS.conversations,
+          conversationId,
+        );
+
+        await addDoc(
+          collection(
+            db,
+            COLLECTIONS.conversations,
+            conversationId,
+            COLLECTIONS.messages,
+          ),
+          {
+            conversation_id: conversationId,
+            sender_user_id: user.id,
+            message_text: messageText.trim(),
+            created_at: now,
+          },
+        );
+
+        await setDoc(
+          conversationRef,
+          {
+            id: conversationId,
+            participant_ids: currentConversation?.participant_ids || [user.id],
+            created_at: currentConversation?.created_at || now,
+            updated_at: now,
+          },
+          { merge: true },
+        );
+
+        await Promise.all([
+          loadConversations(),
+          markConversationRead(conversationId),
+        ]);
         return true;
       } catch (error) {
         console.error("Failed to send message", error);
@@ -704,34 +987,52 @@ export function useInventorsInvestorsData(user) {
 
   const blockUser = useCallback(
     async (targetUserId) => {
-      if (!user?.id || !targetUserId) return;
-      await supabase.from("blocked_users").upsert(
-        {
-          blocker_user_id: user.id,
-          blocked_user_id: targetUserId,
-        },
-        { onConflict: "blocker_user_id,blocked_user_id" },
-      );
-      await Promise.all([loadDiscovery(), loadConversations()]);
+      if (!user?.id || !targetUserId || !db || !isFirebaseConfigured) return;
+      try {
+        const blockId = `${user.id}__${targetUserId}`;
+        await setDoc(
+          doc(db, COLLECTIONS.blockedUsers, blockId),
+          {
+            id: blockId,
+            blocker_user_id: user.id,
+            blocked_user_id: targetUserId,
+            created_at: nowIso(),
+            updated_at: nowIso(),
+          },
+          { merge: true },
+        );
+        await Promise.all([loadDiscovery(), loadConversations()]);
+      } catch (error) {
+        console.error("Failed to block user", error);
+      }
     },
     [loadConversations, loadDiscovery, user?.id],
   );
 
   const reportUser = useCallback(
     async (targetUserId, reason, details = "") => {
-      if (!user?.id || !targetUserId) return;
-      await supabase.from("reported_profiles").insert({
-        reporter_user_id: user.id,
-        reported_user_id: targetUserId,
-        reason,
-        details,
-      });
+      if (!user?.id || !targetUserId || !db || !isFirebaseConfigured) return;
+      try {
+        await addDoc(collection(db, COLLECTIONS.reportedProfiles), {
+          reporter_user_id: user.id,
+          reported_user_id: targetUserId,
+          reason,
+          details,
+          created_at: nowIso(),
+        });
+      } catch (error) {
+        console.error("Failed to report user", error);
+      }
     },
     [user?.id],
   );
 
   const unreadMessageCount = useMemo(
-    () => conversations.reduce((total, conversation) => total + (conversation.unreadCount || 0), 0),
+    () =>
+      conversations.reduce(
+        (total, conversation) => total + (conversation.unreadCount || 0),
+        0,
+      ),
     [conversations],
   );
 
@@ -765,19 +1066,26 @@ export function useInventorsInvestorsData(user) {
 
 function computeDiscoveryRank(profile) {
   const now = Date.now();
-  const updatedAt = new Date(profile.updated_at || profile.created_at || now).getTime();
+  const updatedAt = new Date(
+    profile.updated_at || profile.created_at || now,
+  ).getTime();
   const ageHours = Math.max(1, (now - updatedAt) / (1000 * 60 * 60));
   const freshnessScore = Math.max(0, 60 - Math.min(60, ageHours * 1.2));
 
   const hasHeroImage = profile.hero_image_url ? 18 : 0;
   const hasAvatar = profile.avatar_url ? 12 : 0;
-  const bioLength = String(profile.bio || profile.short_pitch || profile.description || "").trim().length;
+  const bioLength = String(
+    profile.bio || profile.short_pitch || profile.description || "",
+  ).trim().length;
   const bioScore = Math.min(18, Math.floor(bioLength / 18));
 
   const investorSignal =
     profile.role === "investor"
       ? Number(Boolean(profile.investment_budget)) * 12 +
-        Number(Boolean(profile.investment_range_min && profile.investment_range_max)) * 8 +
+        Number(
+          Boolean(profile.investment_range_min && profile.investment_range_max),
+        ) *
+          8 +
         Number(Boolean(profile.stage_preference)) * 6
       : 0;
 
@@ -791,21 +1099,20 @@ function computeDiscoveryRank(profile) {
   const completeness = Number(profile.profile_completed) ? 14 : 0;
   const hasPublicContact = Boolean(
     profile.public_email ||
-      profile.public_phone ||
-      profile.email_public ||
-      profile.phone_public,
+    profile.public_phone ||
+    profile.email_public ||
+    profile.phone_public,
   );
   const publicContactSignal = Number(hasPublicContact) * 4;
 
-  return freshnessScore + hasHeroImage + hasAvatar + bioScore + investorSignal + inventorSignal + completeness + publicContactSignal;
-}
-
-function toNumberOrNull(value) {
-  if (value === null || value === undefined || value === "") return null;
-  const numeric = Number(String(value).replace(/[^\d.-]/g, ""));
-  return Number.isFinite(numeric) ? numeric : null;
-}
-
-function isBlobPreviewUrl(value) {
-  return typeof value === "string" && value.startsWith("blob:");
+  return (
+    freshnessScore +
+    hasHeroImage +
+    hasAvatar +
+    bioScore +
+    investorSignal +
+    inventorSignal +
+    completeness +
+    publicContactSignal
+  );
 }

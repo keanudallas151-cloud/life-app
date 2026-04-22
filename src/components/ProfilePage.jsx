@@ -1,20 +1,14 @@
-import { useMemo, useRef, useState } from "react";
-import { LS } from "../systems/storage";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  isFirebaseConfigured,
+  isFirebaseStorageConfigured,
+} from "../firebaseClient";
+import {
+  saveFirebaseProfileAndAuth,
+  uploadFirebaseAvatar,
+} from "../services/firebaseProfile";
 import { getReadingStreak } from "../systems/readingStreak";
-import { supabase, isSupabaseConfigured } from "../supabaseClient";
-
-const AVATAR_BUCKET = "profile-avatars";
-
-async function uploadAvatar(userId, file) {
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-  const path = `${userId}/avatar.${ext}`;
-  const { error: upErr } = await supabase.storage
-    .from(AVATAR_BUCKET)
-    .upload(path, file, { upsert: true, cacheControl: "3600" });
-  if (upErr) throw upErr;
-  const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
-  return data.publicUrl;
-}
+import { LS } from "../systems/storage";
 
 export default function ProfilePage({
   t,
@@ -29,9 +23,23 @@ export default function ProfilePage({
   onAvatarChange,
 }) {
   const fileInputRef = useRef(null);
+  const previewUrlRef = useRef("");
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || "");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState("");
+
+  useEffect(() => {
+    if (!avatarUploading) {
+      setAvatarPreview(user?.avatarUrl || "");
+    }
+  }, [avatarUploading, user?.avatarUrl]);
+
+  useEffect(() => () => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = "";
+    }
+  }, []);
 
   const handleAvatarClick = () => {
     play?.("tap");
@@ -40,23 +48,56 @@ export default function ProfilePage({
 
   const handleAvatarFile = async (e) => {
     const file = e.target.files?.[0];
-    if (!file || !user?.id || !isSupabaseConfigured) return;
+    if (!file || !user?.id || !isFirebaseConfigured) return;
+    if (!isFirebaseStorageConfigured) {
+      setAvatarError("Profile photo uploads need Firebase Storage configured first.");
+      return;
+    }
     const maxBytes = 5 * 1024 * 1024;
-    if (file.size > maxBytes) { setAvatarError("Image must be under 5 MB."); return; }
-    if (!["image/jpeg","image/png","image/webp"].includes(file.type)) {
-      setAvatarError("JPG, PNG, or WEBP only."); return;
+    if (file.size > maxBytes) {
+      setAvatarError("Image must be under 5 MB.");
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setAvatarError("JPG, PNG, or WEBP only.");
+      return;
     }
     setAvatarError("");
-    setAvatarPreview(URL.createObjectURL(file));
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = "";
+    }
+    const objectUrl = URL.createObjectURL(file);
+    previewUrlRef.current = objectUrl;
+    setAvatarPreview(objectUrl);
     setAvatarUploading(true);
     try {
-      const publicUrl = await uploadAvatar(user.id, file);
-      await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
+      const publicUrl = await uploadFirebaseAvatar(user.id, file);
+      const result = await saveFirebaseProfileAndAuth({
+        userId: user.id,
+        profilePatch: { avatar_url: publicUrl },
+        authPatch: { photoURL: publicUrl },
+      });
+
+      if (!result.ok && !result.partial) {
+        throw result.errors[0] || new Error("Avatar sync failed.");
+      }
+
+      setAvatarPreview(publicUrl);
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = "";
+      }
+      setAvatarError(result.partial ? "Photo saved, but account sync needs a refresh." : "");
       onAvatarChange?.(publicUrl);
     } catch (err) {
       console.error("Avatar upload failed", err);
       setAvatarError("Upload failed. Try again.");
       setAvatarPreview(user?.avatarUrl || "");
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = "";
+      }
     } finally {
       setAvatarUploading(false);
       e.target.value = "";
@@ -106,18 +147,43 @@ export default function ProfilePage({
       label: "Progress",
       sub: `${progressPercent}% complete`,
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={t.green}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
         </svg>
       ),
     },
     {
       key: "goal_setting",
       label: "Goals",
-      sub: goals.length > 0 ? `${completedGoals}/${goals.length} complete` : "No goals yet",
+      sub:
+        goals.length > 0
+          ? `${completedGoals}/${goals.length} complete`
+          : "No goals yet",
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={t.green}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="6" />
+          <circle cx="12" cy="12" r="2" />
         </svg>
       ),
     },
@@ -126,8 +192,18 @@ export default function ProfilePage({
       label: "Account",
       sub: user?.email ? user.email.split("@")[0] : "Edit profile",
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={t.green}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
         </svg>
       ),
     },
@@ -136,8 +212,18 @@ export default function ProfilePage({
       label: "Settings",
       sub: "Theme, sound & more",
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={t.green}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
         </svg>
       ),
     },
@@ -165,7 +251,14 @@ export default function ProfilePage({
           boxShadow: "0 2px 16px rgba(0,0,0,0.04)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            marginBottom: 20,
+          }}
+        >
           {/* Tappable avatar — shows photo if uploaded, otherwise initials */}
           <button
             type="button"
@@ -199,10 +292,23 @@ export default function ProfilePage({
               <img
                 src={avatarPreview}
                 alt="Profile"
-                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "50%",
+                }}
               />
             ) : (
-              <span style={{ fontSize: 26, fontWeight: 800, color: "#fff", letterSpacing: -0.5, lineHeight: 1 }}>
+              <span
+                style={{
+                  fontSize: 26,
+                  fontWeight: 800,
+                  color: "#fff",
+                  letterSpacing: -0.5,
+                  lineHeight: 1,
+                }}
+              >
                 {initials}
               </span>
             )}
@@ -223,11 +329,22 @@ export default function ProfilePage({
               }}
             >
               {avatarUploading ? (
-                <span style={{ fontSize: 9, color: "#fff", fontWeight: 700 }}>…</span>
+                <span style={{ fontSize: 9, color: "#fff", fontWeight: 700 }}>
+                  …
+                </span>
               ) : (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-                  <circle cx="12" cy="13" r="4"/>
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                  <circle cx="12" cy="13" r="4" />
                 </svg>
               )}
             </span>
@@ -241,21 +358,51 @@ export default function ProfilePage({
             style={{ display: "none" }}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 style={{ margin: "0 0 3px", fontSize: 20, fontWeight: 800, color: t.ink, wordBreak: "break-word", lineHeight: 1.2 }}>
+            <h2
+              style={{
+                margin: "0 0 3px",
+                fontSize: 20,
+                fontWeight: 800,
+                color: t.ink,
+                wordBreak: "break-word",
+                lineHeight: 1.2,
+              }}
+            >
               {user?.name || "User"}
             </h2>
-            <p style={{ margin: 0, fontSize: 13, color: t.muted, fontStyle: "italic", wordBreak: "break-word" }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 13,
+                color: t.muted,
+                fontStyle: "italic",
+                wordBreak: "break-word",
+              }}
+            >
               {user?.email}
             </p>
             {avatarError && (
-              <p style={{ margin: "6px 0 0", fontSize: 11, color: t.red, fontWeight: 600 }}>
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  fontSize: 11,
+                  color: t.red,
+                  fontWeight: 600,
+                }}
+              >
                 {avatarError}
               </p>
             )}
           </div>
         </div>
         {/* Stats grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 8,
+          }}
+        >
           {stats.map((s) => (
             <div
               key={s.label}
@@ -267,20 +414,38 @@ export default function ProfilePage({
                 border: `1px solid ${t.border}`,
               }}
             >
-              <div style={{ fontSize: 18, lineHeight: 1, marginBottom: 4 }}>{s.icon}</div>
-              <div style={{
-                fontSize: 16, fontWeight: 800, color: s.accent,
-                fontVariantNumeric: "tabular-nums", lineHeight: 1,
-              }}>
+              <div style={{ fontSize: 18, lineHeight: 1, marginBottom: 4 }}>
+                {s.icon}
+              </div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 800,
+                  color: s.accent,
+                  fontVariantNumeric: "tabular-nums",
+                  lineHeight: 1,
+                }}
+              >
                 {s.value}
                 {s.suffix && (
-                  <span style={{ fontSize: 10, color: t.muted, fontWeight: 600 }}>{s.suffix}</span>
+                  <span
+                    style={{ fontSize: 10, color: t.muted, fontWeight: 600 }}
+                  >
+                    {s.suffix}
+                  </span>
                 )}
               </div>
-              <div style={{
-                fontSize: 9, fontWeight: 700, letterSpacing: 0.5,
-                textTransform: "uppercase", color: t.muted, marginTop: 3, lineHeight: 1.2,
-              }}>
+              <div
+                style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  textTransform: "uppercase",
+                  color: t.muted,
+                  marginTop: 3,
+                  lineHeight: 1.2,
+                }}
+              >
                 {s.label}
               </div>
             </div>
@@ -303,7 +468,10 @@ export default function ProfilePage({
           <button
             key={link.key}
             type="button"
-            onClick={() => { play("tap"); setPage(link.key); }}
+            onClick={() => {
+              play("tap");
+              setPage(link.key);
+            }}
             style={{
               width: "100%",
               display: "flex",
@@ -312,29 +480,61 @@ export default function ProfilePage({
               padding: "14px 18px",
               background: "transparent",
               border: "none",
-              borderBottom: i < quickLinks.length - 1 ? `1px solid ${t.border}` : "none",
+              borderBottom:
+                i < quickLinks.length - 1 ? `1px solid ${t.border}` : "none",
               cursor: "pointer",
               textAlign: "left",
               fontFamily: "Georgia,serif",
               WebkitTapHighlightColor: "transparent",
             }}
           >
-            <span style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: `${t.green}14`,
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
+            <span
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: `${t.green}14`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
               {link.icon}
             </span>
             <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", fontSize: 14, fontWeight: 700, color: t.ink, lineHeight: 1.2 }}>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: t.ink,
+                  lineHeight: 1.2,
+                }}
+              >
                 {link.label}
               </span>
-              <span style={{ display: "block", fontSize: 12, color: t.muted, marginTop: 1 }}>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 12,
+                  color: t.muted,
+                  marginTop: 1,
+                }}
+              >
                 {link.sub}
               </span>
             </span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={t.muted}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -363,13 +563,36 @@ export default function ProfilePage({
           transition: "background 0.18s ease, color 0.18s ease",
           WebkitTapHighlightColor: "transparent",
         }}
-        onTouchStart={(e) => { e.currentTarget.style.background = t.red; e.currentTarget.style.color = "#fff"; }}
-        onTouchEnd={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = t.red; }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = t.red; e.currentTarget.style.color = "#fff"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = t.red; }}
+        onTouchStart={(e) => {
+          e.currentTarget.style.background = t.red;
+          e.currentTarget.style.color = "#fff";
+        }}
+        onTouchEnd={(e) => {
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.color = t.red;
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = t.red;
+          e.currentTarget.style.color = "#fff";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.color = t.red;
+        }}
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
         </svg>
         Sign Out
       </button>

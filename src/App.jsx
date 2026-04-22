@@ -1,12 +1,4 @@
-// v1.0.1 - auth fixes: DOB validation, 3s loading, Supabase hardcoded
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+// v1.0.1 - auth fixes: DOB validation, 3s loading, Firebase migration follow-up
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -16,6 +8,14 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { TreeNode } from "./components/Field";
 import {
   allContent,
@@ -24,8 +24,9 @@ import {
   LIBRARY,
   MAP,
 } from "./data/content";
-import { Ic } from "./icons/Ic";
 import { auth, isFirebaseConfigured } from "./firebaseClient";
+import { Ic } from "./icons/Ic";
+import { getFirebaseProfile } from "./services/firebaseProfile";
 import { getReadingStreak, recordReadingDay } from "./systems/readingStreak";
 import { setResumeTopic } from "./systems/resumeReading";
 import { LS } from "./systems/storage";
@@ -35,6 +36,7 @@ import { useQuizStats } from "./systems/useQuizStats";
 import { useSound } from "./systems/useSound";
 import { useUserData } from "./systems/useUserData";
 
+import { AccountCustomizePage } from "./components/AccountCustomizePage";
 import {
   EbookReader,
   IncomeIdeasPage,
@@ -51,12 +53,11 @@ import {
 import { BottomNav } from "./components/BottomNav";
 import { CategoriesPage } from "./components/CategoriesPage";
 import { CategoryHubPage } from "./components/CategoryHubPage";
-import { AccountCustomizePage } from "./components/AccountCustomizePage";
-import { InventorsInvestors } from "./components/InventorsInvestors";
 import { DailyGrowthPage } from "./components/DailyGrowthPage";
 import { GoalSettingPage } from "./components/GoalSettingPage";
 import { HelpPage } from "./components/HelpPage";
 import { HomePage } from "./components/HomePage";
+import { InventorsInvestors } from "./components/InventorsInvestors";
 import { LandingPage } from "./components/LandingPage";
 import { LeaderboardPage } from "./components/LeaderboardPage";
 import { MentorshipPage } from "./components/MentorshipPage";
@@ -73,7 +74,6 @@ import { ThemePickerPage } from "./components/ThemePickerPage";
 import { VerifyEmailPage } from "./components/VerifyEmailPage";
 import { WhereToStartPage } from "./components/WhereToStartPage";
 import { signInWithGoogle } from "./services/firebaseAuth";
-
 
 const PREF_DEFAULTS = {
   soundEnabled: true,
@@ -106,6 +106,43 @@ function notifIcon(n) {
   return "✨";
 }
 
+function getDefaultNotifications() {
+  return [
+    {
+      id: 1,
+      text: "Welcome to Life. — start your journey today!",
+      time: "Just now",
+      read: false,
+      targetPage: "home",
+    },
+    {
+      id: 2,
+      text: "Complete the tailoring questionnaire to personalize your experience.",
+      time: "5m ago",
+      read: false,
+    },
+    {
+      id: 3,
+      text: "New content available: Advanced Finance strategies.",
+      time: "1h ago",
+      read: false,
+      targetPage: "where_to_start",
+    },
+    {
+      id: 4,
+      text: "Improve Communication with a guided speaking practice.",
+      time: "2h ago",
+      read: false,
+      targetPage: "communication_quiz",
+      activity: "audio",
+    },
+  ];
+}
+
+function loadNotificationsFor(uid) {
+  return LS.get(`notif_${uid || "_"}`, getDefaultNotifications());
+}
+
 function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
   const [offset, setOffset] = useState(0);
   const [exiting, setExiting] = useState(false);
@@ -132,9 +169,14 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
     if (!dragging.current || exiting) return;
     const dx = clientX - startX.current;
     const dy = clientY - startY.current;
-    if (directionLocked.current === null && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+    if (
+      directionLocked.current === null &&
+      (Math.abs(dx) > 5 || Math.abs(dy) > 5)
+    ) {
       directionLocked.current =
-        Math.abs(dx) > Math.abs(dy) * SWIPE_HORIZONTAL_BIAS ? "horizontal" : "vertical";
+        Math.abs(dx) > Math.abs(dy) * SWIPE_HORIZONTAL_BIAS
+          ? "horizontal"
+          : "vertical";
     }
     if (directionLocked.current === "vertical") return;
     currentX.current = clientX;
@@ -186,19 +228,46 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
           transition: dragging.current ? "none" : "opacity 0.2s ease",
         }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#fff"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6l-1 14H6L5 6" />
+          <path d="M10 11v6M14 11v6" />
+          <path d="M9 6V4h6v2" />
         </svg>
-        <span style={{ color: "#fff", fontSize: 11, fontWeight: 700, letterSpacing: 0.5 }}>Delete</span>
+        <span
+          style={{
+            color: "#fff",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: 0.5,
+          }}
+        >
+          Delete
+        </span>
       </div>
 
       {/* Foreground card */}
       <div
         role="button"
         tabIndex={0}
-        onClick={() => { if (!didDrag.current) onTap?.(); }}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onTap?.(); }}
-        onTouchStart={(e) => onStart(e.touches[0].clientX, e.touches[0].clientY)}
+        onClick={() => {
+          if (!didDrag.current) onTap?.();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") onTap?.();
+        }}
+        onTouchStart={(e) =>
+          onStart(e.touches[0].clientX, e.touches[0].clientY)
+        }
         onTouchMove={(e) => onMove(e.touches[0].clientX, e.touches[0].clientY)}
         onTouchEnd={onEnd}
         onMouseDown={(e) => onStart(e.clientX, e.clientY)}
@@ -209,8 +278,12 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
           position: "relative",
           padding: "13px 14px",
           background: n.read
-            ? (dark ? "#1e1e1e" : "#ffffff")
-            : (dark ? "rgba(61,90,76,0.10)" : "rgba(61,90,76,0.06)"),
+            ? dark
+              ? "#1e1e1e"
+              : "#ffffff"
+            : dark
+              ? "rgba(61,90,76,0.10)"
+              : "rgba(61,90,76,0.06)",
           cursor: "pointer",
           transform: `translateX(${offset}px)`,
           transition: dragging.current
@@ -225,51 +298,62 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
       >
         <div style={{ display: "flex", alignItems: "flex-start", gap: 11 }}>
           {/* Icon bubble */}
-          <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            background: dark ? "rgba(255,255,255,0.06)" : "rgba(61,90,76,0.1)",
-            display: "grid",
-            placeItems: "center",
-            fontSize: 16,
-            flexShrink: 0,
-          }}>
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: dark
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(61,90,76,0.1)",
+              display: "grid",
+              placeItems: "center",
+              fontSize: 16,
+              flexShrink: 0,
+            }}
+          >
             {notifIcon(n)}
           </div>
 
           {/* Text */}
           <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
-            <p style={{
-              margin: 0,
-              fontSize: 13,
-              color: dark ? "#e8e8e8" : "#1a1a1a",
-              lineHeight: 1.45,
-              fontWeight: n.read ? 400 : 500,
-            }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 13,
+                color: dark ? "#e8e8e8" : "#1a1a1a",
+                lineHeight: 1.45,
+                fontWeight: n.read ? 400 : 500,
+              }}
+            >
               {n.text}
             </p>
-            <p style={{
-              margin: "4px 0 0",
-              fontSize: 10.5,
-              color: dark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.38)",
-              fontFamily: "-apple-system,BlinkMacSystemFont,system-ui,sans-serif",
-            }}>
+            <p
+              style={{
+                margin: "4px 0 0",
+                fontSize: 10.5,
+                color: dark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.38)",
+                fontFamily:
+                  "-apple-system,BlinkMacSystemFont,system-ui,sans-serif",
+              }}
+            >
               {n.time}
             </p>
           </div>
 
           {/* Unread dot */}
           {!n.read && (
-            <span style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: theme.green,
-              flexShrink: 0,
-              marginTop: 5,
-              boxShadow: `0 0 0 2px ${dark ? "#1e1e1e" : "#fff"}`,
-            }} />
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: theme.green,
+                flexShrink: 0,
+                marginTop: 5,
+                boxShadow: `0 0 0 2px ${dark ? "#1e1e1e" : "#fff"}`,
+              }}
+            />
           )}
         </div>
       </div>
@@ -278,7 +362,8 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
 }
 
 export default function LifeApp() {
-  const { dark, toggleTheme, t, themeMode, setThemeMode, systemDark } = useTheme();
+  const { dark, toggleTheme, t, themeMode, setThemeMode, systemDark } =
+    useTheme();
 
   useEffect(() => {
     document.body.classList.toggle("life-dark", dark);
@@ -324,7 +409,13 @@ export default function LifeApp() {
   // AND the new value is valid. This fixes the "errors flash and
   // disappear" bug where server-side errors were instantly erased
   // because the submitted values were already "valid-looking".
-  const rErrSnapshot = useRef({ name: "", email: "", dob: "", pass: "", pass2: "" });
+  const rErrSnapshot = useRef({
+    name: "",
+    email: "",
+    dob: "",
+    pass: "",
+    pass2: "",
+  });
 
   useEffect(() => {
     if (!rErr || Object.keys(rErr).length === 0) return;
@@ -339,7 +430,12 @@ export default function LifeApp() {
         changed = true;
       }
       // email: clear only on actual edit + valid-looking address.
-      if (next.email && rEmail !== snap.email && rEmail.includes("@") && rEmail.includes(".")) {
+      if (
+        next.email &&
+        rEmail !== snap.email &&
+        rEmail.includes("@") &&
+        rEmail.includes(".")
+      ) {
         delete next.email;
         changed = true;
       }
@@ -410,14 +506,15 @@ export default function LifeApp() {
     },
   ];
 
-  const shapeUser = useCallback((firebaseUser) => {
+  const shapeUser = useCallback((firebaseUser, profileDoc = null) => {
     return {
       id: firebaseUser.uid,
-      email: firebaseUser.email || "",
-      name: firebaseUser.displayName || firebaseUser.email || "",
-      username: "",
+      email: profileDoc?.email || firebaseUser.email || "",
+      name:
+        profileDoc?.full_name || firebaseUser.displayName || firebaseUser.email || "",
+      username: profileDoc?.username || "",
       emailConfirmed: Boolean(firebaseUser.emailVerified),
-      avatarUrl: firebaseUser.photoURL || "",
+      avatarUrl: profileDoc?.avatar_url || firebaseUser.photoURL || "",
     };
   }, []);
 
@@ -428,11 +525,14 @@ export default function LifeApp() {
       return undefined;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    let active = true;
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
         const nextScreen = postAuthScreenRef.current || "landing";
         postAuthScreenRef.current = null;
         passwordRecoveryRef.current = false;
+        if (!active) return;
         setUser(null);
         clearAuthFormState();
         setScreen(nextScreen);
@@ -444,13 +544,23 @@ export default function LifeApp() {
       );
 
       if (!firebaseUser.emailVerified && !isGoogleUser) {
+        if (!active) return;
         setUser(null);
         setVerifyEmailAddress(firebaseUser.email || "");
         setScreen("verify_email");
         return;
       }
 
-      const shapedUser = shapeUser(firebaseUser);
+      let profileDoc = null;
+      try {
+        profileDoc = await getFirebaseProfile(firebaseUser.uid);
+      } catch (error) {
+        console.error("Failed to load Firebase profile during auth restore", error);
+      }
+
+      if (!active) return;
+
+      const shapedUser = shapeUser(firebaseUser, profileDoc);
       setUser(shapedUser);
 
       const onboarded = LS.get(`onboarded_${shapedUser.id}`, false);
@@ -459,7 +569,12 @@ export default function LifeApp() {
       }
 
       const lastScreen = LS.get("life_last_screen", "app");
-      const validScreens = ["app", "tailor_intro", "tailor_qs", "tailor_result"];
+      const validScreens = [
+        "app",
+        "tailor_intro",
+        "tailor_qs",
+        "tailor_result",
+      ];
       setScreen(
         !onboarded && !isGoogleUser
           ? "theme_picker"
@@ -469,7 +584,10 @@ export default function LifeApp() {
       );
     });
 
-    return () => unsubscribe();
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, [clearAuthFormState, shapeUser]);
 
   useEffect(() => {
@@ -754,7 +872,9 @@ export default function LifeApp() {
 
   const libraryCategoryCards = useMemo(() => {
     return Object.entries(LIBRARY).map(([key, node]) => {
-      const topicCount = allContent.filter((entry) => entry.path?.[0] === node.label).length;
+      const topicCount = allContent.filter(
+        (entry) => entry.path?.[0] === node.label,
+      ).length;
       return { key, node, topicCount };
     });
   }, []);
@@ -823,39 +943,30 @@ export default function LifeApp() {
   };
 
   const [notifications, setNotifications] = useState(() =>
-    LS.get(`notif_${uid}`, [
-      {
-        id: 1,
-        text: "Welcome to Life. — start your journey today!",
-        time: "Just now",
-        read: false,
-        targetPage: "home",
-      },
-      {
-        id: 2,
-        text: "Complete the tailoring questionnaire to personalize your experience.",
-        time: "5m ago",
-        read: false,
-      },
-      {
-        id: 3,
-        text: "New content available: Advanced Finance strategies.",
-        time: "1h ago",
-        read: false,
-        targetPage: "where_to_start",
-      },
-      {
-        id: 4,
-        text: "Improve Communication with a guided speaking practice.",
-        time: "2h ago",
-        read: false,
-        targetPage: "communication_quiz",
-        activity: "audio",
-      },
-    ]),
+    loadNotificationsFor(uid),
   );
   const [showNotif, setShowNotif] = useState(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    setNotifications(loadNotificationsFor(uid));
+  }, [uid]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const syncNotifications = () => {
+      setNotifications(loadNotificationsFor(uid));
+    };
+
+    window.addEventListener("life_notifications_updated", syncNotifications);
+    window.addEventListener("storage", syncNotifications);
+
+    return () => {
+      window.removeEventListener("life_notifications_updated", syncNotifications);
+      window.removeEventListener("storage", syncNotifications);
+    };
+  }, [uid]);
 
   // Android back button / iOS swipe-back: close open overlays before the
   // browser tries to navigate away. Pushes a history entry when any
@@ -1052,7 +1163,7 @@ export default function LifeApp() {
     migratedRef.current = false;
   }, [userIdForData]);
 
-  /* One-time copy from localStorage into Supabase when the cloud row is empty.
+  /* One-time copy from localStorage into Firebase when the cloud row is empty.
      useUserData returns a new object each render; we depend on fields, not `cloud`. */
   useEffect(() => {
     if (!userIdForData || cloud.loading || migratedRef.current) return;
@@ -1130,7 +1241,9 @@ export default function LifeApp() {
     try {
       await signInWithGoogle();
     } catch (error) {
-      setSiSocialErr(String(error.message || "Could not start Google sign in."));
+      setSiSocialErr(
+        String(error.message || "Could not start Google sign in."),
+      );
       play("err");
     } finally {
       setAuthLoading(false);
@@ -1172,7 +1285,11 @@ export default function LifeApp() {
     setAuthLoading(true);
     const _siStart = Date.now();
     try {
-      await signInWithEmailAndPassword(auth, siEmail.toLowerCase().trim(), siPass);
+      await signInWithEmailAndPassword(
+        auth,
+        siEmail.toLowerCase().trim(),
+        siPass,
+      );
       await new Promise((r) =>
         setTimeout(r, Math.max(0, 3000 - (Date.now() - _siStart))),
       );
@@ -1304,12 +1421,16 @@ export default function LifeApp() {
       await new Promise((r) =>
         setTimeout(r, Math.max(0, 3000 - (Date.now() - _regStart))),
       );
-      setVerifyEmailAddress(credentials.user.email || rEmail.toLowerCase().trim());
+      setVerifyEmailAddress(
+        credentials.user.email || rEmail.toLowerCase().trim(),
+      );
       LS.set(`onboarded_${credentials.user.uid}`, false);
       play("ok");
       setScreen("verify_email");
     } catch (error) {
-      const raw = String(error.message || "").trim().toLowerCase();
+      const raw = String(error.message || "")
+        .trim()
+        .toLowerCase();
       if (raw.includes("already")) {
         setRErrSnap({ email: "already_registered" });
       } else if (
@@ -1323,7 +1444,9 @@ export default function LifeApp() {
       } else if (raw.includes("email")) {
         setRErrSnap({ email: "Please enter a valid email address." });
       } else {
-        setRErrSnap({ email: "Could not create account. Please check details." });
+        setRErrSnap({
+          email: "Could not create account. Please check details.",
+        });
       }
       play("err");
     } finally {
@@ -1543,9 +1666,7 @@ export default function LifeApp() {
   const completedNotes = Object.keys(notes).filter((key) => notes[key]).length;
   const verifyTargetEmail = verifyEmailAddress || rEmail || user?.email || "";
 
-
-
-  // Loading splash — shown while Supabase resolves session
+  // Loading splash — shown while Firebase restores the session
   if (screen === "loading")
     return (
       <div
@@ -1754,7 +1875,7 @@ export default function LifeApp() {
             ],
             [
               "Data Storage",
-              "Your data is stored securely using Supabase infrastructure. Reading progress and preferences are stored locally and synced to the cloud when you are signed in.",
+              "Your data is stored securely using Firebase infrastructure. Reading progress and preferences are stored locally and synced to the cloud when you are signed in.",
             ],
             [
               "Cookies & Local Storage",
@@ -1965,8 +2086,7 @@ export default function LifeApp() {
         systemNotice={{
           tone: "info",
           title: "Verify then return to the app",
-          body:
-            "After opening the link from your inbox, come back here and sign in again if needed.",
+          body: "After opening the link from your inbox, come back here and sign in again if needed.",
         }}
       />
     );
@@ -1996,8 +2116,7 @@ export default function LifeApp() {
             ? {
                 tone: "warning",
                 title: "Cloud auth is not configured yet",
-                body:
-                  "Set the NEXT_PUBLIC_FIREBASE_* values to enable password recovery and account access.",
+                body: "Set the NEXT_PUBLIC_FIREBASE_* values to enable password recovery and account access.",
               }
             : null
         }
@@ -2086,8 +2205,7 @@ export default function LifeApp() {
             ? {
                 tone: "warning",
                 title: "Cloud auth and sync are offline",
-                body:
-                  "This build is missing Firebase config, so sign-in, registration, and community features are disabled until the NEXT_PUBLIC_FIREBASE_* values are set.",
+                body: "This build is missing Firebase config, so sign-in, registration, and community features are disabled until the NEXT_PUBLIC_FIREBASE_* values are set.",
               }
             : null
         }
@@ -2098,16 +2216,27 @@ export default function LifeApp() {
   if (screen === "signin")
     return (
       <SignInPage
-        C={C} play={play} setScreen={setScreen}
-        siEmail={siEmail} setSiEmail={setSiEmail}
-        siPass={siPass} setSiPass={setSiPass}
-        siShowPass={siShowPass} setSiShowPass={setSiShowPass}
-        siErr={siErr} setSiErr={setSiErr}
-        authLoading={authLoading} doEmailSignIn={doEmailSignIn}
-        forgotMode={forgotMode} setForgotMode={setForgotMode}
-        fpEmail={fpEmail} setFpEmail={setFpEmail}
-        fpErr={fpErr} setFpErr={setFpErr}
-        fpMsg={fpMsg} setFpMsg={setFpMsg}
+        C={C}
+        play={play}
+        setScreen={setScreen}
+        siEmail={siEmail}
+        setSiEmail={setSiEmail}
+        siPass={siPass}
+        setSiPass={setSiPass}
+        siShowPass={siShowPass}
+        setSiShowPass={setSiShowPass}
+        siErr={siErr}
+        setSiErr={setSiErr}
+        authLoading={authLoading}
+        doEmailSignIn={doEmailSignIn}
+        forgotMode={forgotMode}
+        setForgotMode={setForgotMode}
+        fpEmail={fpEmail}
+        setFpEmail={setFpEmail}
+        fpErr={fpErr}
+        setFpErr={setFpErr}
+        fpMsg={fpMsg}
+        setFpMsg={setFpMsg}
         doForgotPassword={doForgotPassword}
         setSiSocialErr={setSiSocialErr}
         systemNotice={
@@ -2115,8 +2244,7 @@ export default function LifeApp() {
             ? {
                 tone: "warning",
                 title: "Cloud auth is not configured yet",
-                body:
-                  "Set the NEXT_PUBLIC_FIREBASE_* values to enable sign-in, password reset, and synced account data.",
+                body: "Set the NEXT_PUBLIC_FIREBASE_* values to enable sign-in, password reset, and synced account data.",
               }
             : null
         }
@@ -2127,22 +2255,34 @@ export default function LifeApp() {
   if (screen === "register")
     return (
       <RegisterPage
-        C={C} play={play} setScreen={setScreen}
-        rName={rName} setRName={setRName} rEmail={rEmail} setREmail={setREmail}
-        rDob={rDob} setRDob={setRDob} rPass={rPass} setRPass={setRPass}
-        rPass2={rPass2} setRPass2={setRPass2}
-        rShowPass={rShowPass} setRShowPass={setRShowPass}
-        rShowPass2={rShowPass2} setRShowPass2={setRShowPass2}
-        rErr={rErr} setRErr={setRErr}
-        authLoading={authLoading} doRegister={doRegister}
+        C={C}
+        play={play}
+        setScreen={setScreen}
+        rName={rName}
+        setRName={setRName}
+        rEmail={rEmail}
+        setREmail={setREmail}
+        rDob={rDob}
+        setRDob={setRDob}
+        rPass={rPass}
+        setRPass={setRPass}
+        rPass2={rPass2}
+        setRPass2={setRPass2}
+        rShowPass={rShowPass}
+        setRShowPass={setRShowPass}
+        rShowPass2={rShowPass2}
+        setRShowPass2={setRShowPass2}
+        rErr={rErr}
+        setRErr={setRErr}
+        authLoading={authLoading}
+        doRegister={doRegister}
         setSiEmail={setSiEmail}
         systemNotice={
           !isFirebaseConfigured
             ? {
                 tone: "warning",
                 title: "Account creation is unavailable",
-                body:
-                  "Set the NEXT_PUBLIC_FIREBASE_* values to enable registration, email verification, and cloud sync.",
+                body: "Set the NEXT_PUBLIC_FIREBASE_* values to enable registration, email verification, and cloud sync.",
               }
             : null
         }
@@ -2219,29 +2359,41 @@ export default function LifeApp() {
             }}
           >
             {/* Header */}
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "14px 16px 13px",
-              borderBottom: `1px solid ${dark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}`,
-              flexShrink: 0,
-            }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px 13px",
+                borderBottom: `1px solid ${dark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}`,
+                flexShrink: 0,
+              }}
+            >
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: dark ? "#f0f0f0" : "#111", letterSpacing: -0.2 }}>
+                <span
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: dark ? "#f0f0f0" : "#111",
+                    letterSpacing: -0.2,
+                  }}
+                >
                   Notifications
                 </span>
                 {unreadCount > 0 && (
-                  <span style={{
-                    background: t.green,
-                    color: "#fff",
-                    fontSize: 10,
-                    fontWeight: 700,
-                    borderRadius: 20,
-                    padding: "1px 6px",
-                    lineHeight: "16px",
-                    fontFamily: "-apple-system,BlinkMacSystemFont,system-ui,sans-serif",
-                  }}>
+                  <span
+                    style={{
+                      background: t.green,
+                      color: "#fff",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      borderRadius: 20,
+                      padding: "1px 6px",
+                      lineHeight: "16px",
+                      fontFamily:
+                        "-apple-system,BlinkMacSystemFont,system-ui,sans-serif",
+                    }}
+                  >
                     {unreadCount}
                   </span>
                 )}
@@ -2257,7 +2409,8 @@ export default function LifeApp() {
                     fontWeight: 500,
                     cursor: "pointer",
                     padding: "4px 0",
-                    fontFamily: "-apple-system,BlinkMacSystemFont,system-ui,sans-serif",
+                    fontFamily:
+                      "-apple-system,BlinkMacSystemFont,system-ui,sans-serif",
                   }}
                 >
                   Mark all read
@@ -2266,22 +2419,35 @@ export default function LifeApp() {
             </div>
 
             {/* Scrollable list */}
-            <div style={{
-              flex: 1,
-              overflowY: "auto",
-              WebkitOverflowScrolling: "touch",
-              overscrollBehavior: "contain",
-            }}>
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                WebkitOverflowScrolling: "touch",
+                overscrollBehavior: "contain",
+              }}
+            >
               {notifications.length === 0 ? (
-                <div style={{
-                  padding: "40px 24px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 10,
-                }}>
+                <div
+                  style={{
+                    padding: "40px 24px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 10,
+                  }}
+                >
                   <span style={{ fontSize: 32 }}>🔔</span>
-                  <p style={{ margin: 0, color: dark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)", fontSize: 13, textAlign: "center" }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      color: dark
+                        ? "rgba(255,255,255,0.35)"
+                        : "rgba(0,0,0,0.35)",
+                      fontSize: 13,
+                      textAlign: "center",
+                    }}
+                  >
                     You&apos;re all caught up!
                   </p>
                 </div>
@@ -2301,14 +2467,34 @@ export default function LifeApp() {
 
             {/* Footer hint */}
             {notifications.length > 0 && (
-              <div style={{
-                padding: "9px 16px",
-                borderTop: `1px solid ${dark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}`,
-                flexShrink: 0,
-                textAlign: "center",
-              }}>
-                <span style={{ fontSize: 10.5, color: dark ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.3)", fontFamily: "-apple-system,BlinkMacSystemFont,system-ui,sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-                  <span style={{ display: "inline-block", animation: "life-swipe-hint 1.6s ease-in-out infinite" }}>←</span>
+              <div
+                style={{
+                  padding: "9px 16px",
+                  borderTop: `1px solid ${dark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}`,
+                  flexShrink: 0,
+                  textAlign: "center",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 10.5,
+                    color: dark ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.3)",
+                    fontFamily:
+                      "-apple-system,BlinkMacSystemFont,system-ui,sans-serif",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 5,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      animation: "life-swipe-hint 1.6s ease-in-out infinite",
+                    }}
+                  >
+                    ←
+                  </span>
                   Swipe left to dismiss
                 </span>
               </div>
@@ -2332,14 +2518,14 @@ export default function LifeApp() {
           paddingTop: "var(--safe-top, 0px)",
           backdropFilter: "saturate(1.4) blur(16px)",
           WebkitBackdropFilter: "saturate(1.4) blur(16px)",
-          boxShadow:
-            "0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(61,90,76,0.06)",
+          boxShadow: "0 1px 0 rgba(0,0,0,0.04), 0 8px 24px rgba(61,90,76,0.06)",
         }}
       >
         <div
           style={{
             display: "flex",
-            alignItems: "center",  /* vertically centers hamburger with logo + search */
+            alignItems:
+              "center" /* vertically centers hamburger with logo + search */,
             gap: 10,
             flexShrink: 0,
             height: "100%",
@@ -2361,7 +2547,8 @@ export default function LifeApp() {
               cursor: "pointer",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",  /* aligns hamburger dashes with siblings */
+              justifyContent:
+                "center" /* aligns hamburger dashes with siblings */,
               alignItems: "flex-start",
               gap: 6,
               /* Match height of logo/search so it's perfectly centered */
@@ -2610,7 +2797,8 @@ export default function LifeApp() {
                 placeItems: "center",
                 lineHeight: 1,
                 padding: "0 3px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+                fontFamily:
+                  "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
                 boxSizing: "border-box",
                 border: `1.5px solid ${dark ? "#1a1a1a" : "#fff"}`,
                 letterSpacing: 0,
@@ -2641,7 +2829,8 @@ export default function LifeApp() {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = t.green;
-            e.currentTarget.style.boxShadow = "0 2px 8px rgba(255,255,255,0.12)";
+            e.currentTarget.style.boxShadow =
+              "0 2px 8px rgba(255,255,255,0.12)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.borderColor = t.border;
@@ -2777,7 +2966,8 @@ export default function LifeApp() {
             boxShadow: sidebarOpen ? "4px 0 24px rgba(0,0,0,0.08)" : "none",
             zIndex: 40,
             transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
-            transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s ease",
+            transition:
+              "transform 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s ease",
             display: "flex",
             flexDirection: "column",
           }}
@@ -2841,10 +3031,10 @@ export default function LifeApp() {
                     lineHeight: 1.25,
                   }}
                 >
-                    {user?.email || ""}
-                  </p>
-                </div>
+                  {user?.email || ""}
+                </p>
               </div>
+            </div>
             <button
               type="button"
               className="life-sidebar-progress-card"
@@ -2880,7 +3070,9 @@ export default function LifeApp() {
                 >
                   Progress &middot; {readKeys.length}/{allContent.length}
                 </span>
-                <span style={{ fontSize: 10.5, fontWeight: 700, color: t.green }}>
+                <span
+                  style={{ fontSize: 10.5, fontWeight: 700, color: t.green }}
+                >
                   {progressPercent}%
                 </span>
               </div>
@@ -2979,373 +3171,409 @@ export default function LifeApp() {
               overscrollBehavior: "contain",
             }}
           >
-
-          {sidebarQuery.trim().length >= 2 && (
-            <div
-              style={{
-                padding: "12px 14px 8px",
-                borderBottom: `1px solid ${t.light}`,
-              }}
-            >
-              <p
+            {sidebarQuery.trim().length >= 2 && (
+              <div
                 style={{
-                  margin: "0 0 10px",
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                  color: t.muted,
+                  padding: "12px 14px 8px",
+                  borderBottom: `1px solid ${t.light}`,
                 }}
               >
-                Search Results
-              </p>
-              {sidebarSearchResults.length === 0 ? (
-                <p style={{ margin: 0, fontSize: 12, color: t.muted, lineHeight: 1.6 }}>
-                  No topics match that search yet.
+                <p
+                  style={{
+                    margin: "0 0 10px",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: 2,
+                    textTransform: "uppercase",
+                    color: t.muted,
+                  }}
+                >
+                  Search Results
                 </p>
-              ) : (
-                <div style={{ display: "grid", gap: 8 }}>
-                  {sidebarSearchResults.map((item) => (
+                {sidebarSearchResults.length === 0 ? (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 12,
+                      color: t.muted,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    No topics match that search yet.
+                  </p>
+                ) : (
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {sidebarSearchResults.map((item) => (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => {
+                          play("open");
+                          handleSelect(item.key, item.node);
+                        }}
+                        style={{
+                          width: "100%",
+                          textAlign: "left",
+                          border: `1px solid ${t.border}`,
+                          background: t.white,
+                          borderRadius: 12,
+                          padding: "10px 12px",
+                          cursor: "pointer",
+                          fontFamily: "Georgia,serif",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: t.ink,
+                          }}
+                        >
+                          {item.node.label}
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 3,
+                            fontSize: 11,
+                            color: t.muted,
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {item.path.join(" / ")}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <SL
+              theme={t}
+              label="Home"
+              icon="home"
+              onClick={() => {
+                play("tap");
+                setPage("home");
+              }}
+              active={page === "home"}
+            />
+            <SS
+              theme={t}
+              playFn={play}
+              label="Life"
+              open={lifeOpen}
+              setOpen={setLifeOpen}
+              tag="#side_bar_life"
+              onLabelClick={() =>
+                openSidebarSectionPage("sidebar_life", setLifeOpen)
+              }
+              active={page === "sidebar_life"}
+            >
+              <SL
+                theme={t}
+                label="Browse Life"
+                icon="compass"
+                onClick={() => {
+                  openSidebarSectionPage("sidebar_life", setLifeOpen);
+                }}
+                active={page === "sidebar_life"}
+              />
+            </SS>
+            <SS
+              theme={t}
+              playFn={play}
+              label="Library"
+              open={libOpen}
+              setOpen={setLibOpen}
+              tag="#side_bar_library"
+              onLabelClick={() =>
+                openSidebarSectionPage("sidebar_library", setLibOpen)
+              }
+              active={page === "sidebar_library"}
+            >
+              {isNarrowViewport ? (
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 8,
+                    padding: "0 12px 10px",
+                  }}
+                >
+                  {libraryCategoryCards.map(({ key, node, topicCount }) => (
                     <button
-                      key={item.key}
+                      key={key}
                       type="button"
                       onClick={() => {
-                        play("open");
-                        handleSelect(item.key, item.node);
+                        play("tap");
+                        handleFolderSelect(key, node);
                       }}
                       style={{
                         width: "100%",
                         textAlign: "left",
                         border: `1px solid ${t.border}`,
                         background: t.white,
-                        borderRadius: 12,
-                        padding: "10px 12px",
+                        borderRadius: 14,
+                        padding: "12px 12px",
                         cursor: "pointer",
                         fontFamily: "Georgia,serif",
                       }}
                     >
-                      <div style={{ fontSize: 13, fontWeight: 700, color: t.ink }}>
-                        {item.node.label}
-                      </div>
                       <div
                         style={{
-                          marginTop: 3,
-                          fontSize: 11,
-                          color: t.muted,
-                          lineHeight: 1.5,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 12,
                         }}
                       >
-                        {item.path.join(" / ")}
+                        <div>
+                          <div
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 700,
+                              color: t.ink,
+                            }}
+                          >
+                            {node.label}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: 3,
+                              fontSize: 11,
+                              color: t.muted,
+                            }}
+                          >
+                            {topicCount} topics
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            padding: "5px 8px",
+                            borderRadius: 999,
+                            background: t.greenLt,
+                            color: t.green,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            letterSpacing: 1,
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Browse
+                        </div>
                       </div>
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
-          )}
-
-          <SL
-            theme={t}
-            label="Home"
-            icon="home"
-            onClick={() => {
-              play("tap");
-              setPage("home");
-            }}
-            active={page === "home"}
-          />
-          <SS
-            theme={t}
-            playFn={play}
-            label="Life"
-            open={lifeOpen}
-            setOpen={setLifeOpen}
-            tag="#side_bar_life"
-            onLabelClick={() => openSidebarSectionPage("sidebar_life", setLifeOpen)}
-            active={page === "sidebar_life"}
-          >
-            <SL
-              theme={t}
-              label="Browse Life"
-              icon="compass"
-              onClick={() => {
-                openSidebarSectionPage("sidebar_life", setLifeOpen);
-              }}
-              active={page === "sidebar_life"}
-            />
-          </SS>
-          <SS
-            theme={t}
-            playFn={play}
-            label="Library"
-            open={libOpen}
-            setOpen={setLibOpen}
-            tag="#side_bar_library"
-            onLabelClick={() =>
-              openSidebarSectionPage("sidebar_library", setLibOpen)
-            }
-            active={page === "sidebar_library"}
-          >
-            {isNarrowViewport ? (
-              <div
-                style={{
-                  display: "grid",
-                  gap: 8,
-                  padding: "0 12px 10px",
-                }}
-              >
-                {libraryCategoryCards.map(({ key, node, topicCount }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => {
-                      play("tap");
-                      handleFolderSelect(key, node);
-                    }}
-                    style={{
-                      width: "100%",
-                      textAlign: "left",
-                      border: `1px solid ${t.border}`,
-                      background: t.white,
-                      borderRadius: 14,
-                      padding: "12px 12px",
-                      cursor: "pointer",
-                      fontFamily: "Georgia,serif",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: 12,
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: t.ink }}>
-                          {node.label}
-                        </div>
-                        <div style={{ marginTop: 3, fontSize: 11, color: t.muted }}>
-                          {topicCount} topics
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          padding: "5px 8px",
-                          borderRadius: 999,
-                          background: t.greenLt,
-                          color: t.green,
-                          fontSize: 10,
-                          fontWeight: 700,
-                          letterSpacing: 1,
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Browse
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              Object.entries(LIBRARY).map(([k, node]) => (
-                <TreeNode
-                  key={k}
-                  nodeKey={k}
-                  node={node}
-                  depth={0}
-                  onSelect={handleSelect}
-                  onFolderSelect={handleFolderSelect}
-                  selectedKey={selKey}
-                  defaultOpen={k === "life"}
-                  play={play}
-                  theme={t}
-                />
-              ))
-            )}
-          </SS>
-          <SS
-            theme={t}
-            playFn={play}
-            label="Socials"
-            open={socialsOpen}
-            setOpen={setSocialsOpen}
-            tag="#side_bar_socials"
-            onLabelClick={() =>
-              openSidebarSectionPage("sidebar_socials", setSocialsOpen)
-            }
-            active={page === "sidebar_socials"}
-          >
-            <SL
-              theme={t}
-              label="Post-It"
-              icon="pin"
-              onClick={() => {
-                play("tap");
-                setPage("postit");
-              }}
-              active={page === "postit"}
-            />
-            <SL
-              theme={t}
-              label="Networking Group"
-              icon="users"
-              onClick={() => {
-                play("tap");
-                setPage("discord_networking");
-              }}
-              active={page === "discord_networking"}
-            />
-            <SL
-              theme={t}
-              label="Investors & Inventors"
-              icon="bolt"
-              onClick={() => {
-                play("tap");
-                setPage("networking");
-              }}
-              active={page === "networking"}
-            />
-            <SL
-              theme={t}
-              label="Leaderboard"
-              icon="trending"
-              onClick={() => {
-                play("tap");
-                setPage("leaderboard");
-              }}
-              active={page === "leaderboard"}
-            />
-          </SS>
-          <SS
-            theme={t}
-            playFn={play}
-            label="Guided"
-            open={guidedOpen}
-            setOpen={setGuidedOpen}
-            onLabelClick={() =>
-              openSidebarSectionPage("sidebar_guided", setGuidedOpen)
-            }
-            active={page === "sidebar_guided"}
-          >
-            {GUIDED_ORDER.map((k) => {
-              const node = CONTENT[k];
-              if (!node) return null;
-              return (
-                <SL
-                  theme={t}
-                  key={k}
-                  label={node.label}
-                  icon={node.icon}
-                  onClick={() => handleSelect(k, node)}
-                  active={selKey === k}
-                />
-              );
-            })}
-          </SS>
-          <SS
-            theme={t}
-            playFn={play}
-            label="Saved"
-            open={savedOpen}
-            setOpen={setSavedOpen}
-            tag="#side_bar_saved"
-            onLabelClick={() =>
-              openSidebarSectionPage("sidebar_saved", setSavedOpen)
-            }
-            active={page === "sidebar_saved"}
-          >
-            {bookmarks.length === 0 ? (
-              <p
-                style={{
-                  color: t.muted,
-                  fontSize: 13,
-                  padding: "4px 20px 12px",
-                  fontStyle: "italic",
-                  margin: 0,
-                }}
-              >
-                Nothing saved yet.
-              </p>
-            ) : (
-              allContent
-                .filter((c) => bookmarks.includes(c.key))
-                .map((item) => (
-                  <SL
+              ) : (
+                Object.entries(LIBRARY).map(([k, node]) => (
+                  <TreeNode
+                    key={k}
+                    nodeKey={k}
+                    node={node}
+                    depth={0}
+                    onSelect={handleSelect}
+                    onFolderSelect={handleFolderSelect}
+                    selectedKey={selKey}
+                    defaultOpen={k === "life"}
+                    play={play}
                     theme={t}
-                    key={item.key}
-                    label={item.node.label}
-                    icon={item.node.icon}
-                    onClick={() => {
-                      handleSelect(item.key, item.node);
-                    }}
-                    active={false}
                   />
                 ))
-            )}
-          </SS>
-          <SS
-            theme={t}
-            playFn={play}
-            label="Experience"
-            open={experienceOpen}
-            setOpen={setExperienceOpen}
-            tag="#side_bar_experience"
-            onLabelClick={() =>
-              openSidebarSectionPage("sidebar_experience", setExperienceOpen)
-            }
-            active={page === "sidebar_experience"}
-          >
-            <SL
+              )}
+            </SS>
+            <SS
               theme={t}
-              label="Visualization"
-              icon="eye"
-              onClick={() => {
-                play("tap");
-                setExperienceTopic("visualization");
-                setPage("daily_growth");
-                setSidebarOpen(false);
-              }}
-              active={page === "daily_growth" && experienceTopic === "visualization"}
-            />
-            <SL
+              playFn={play}
+              label="Socials"
+              open={socialsOpen}
+              setOpen={setSocialsOpen}
+              tag="#side_bar_socials"
+              onLabelClick={() =>
+                openSidebarSectionPage("sidebar_socials", setSocialsOpen)
+              }
+              active={page === "sidebar_socials"}
+            >
+              <SL
+                theme={t}
+                label="Post-It"
+                icon="pin"
+                onClick={() => {
+                  play("tap");
+                  setPage("postit");
+                }}
+                active={page === "postit"}
+              />
+              <SL
+                theme={t}
+                label="Networking Group"
+                icon="users"
+                onClick={() => {
+                  play("tap");
+                  setPage("discord_networking");
+                }}
+                active={page === "discord_networking"}
+              />
+              <SL
+                theme={t}
+                label="Investors & Inventors"
+                icon="bolt"
+                onClick={() => {
+                  play("tap");
+                  setPage("networking");
+                }}
+                active={page === "networking"}
+              />
+              <SL
+                theme={t}
+                label="Leaderboard"
+                icon="trending"
+                onClick={() => {
+                  play("tap");
+                  setPage("leaderboard");
+                }}
+                active={page === "leaderboard"}
+              />
+            </SS>
+            <SS
               theme={t}
-              label="Sounds"
-              icon="chat"
-              onClick={() => {
-                play("tap");
-                setExperienceTopic("sounds");
-                setPage("setting_preferences");
-                setSidebarOpen(false);
-              }}
-              active={page === "setting_preferences" && experienceTopic === "sounds"}
-            />
-            <SL
+              playFn={play}
+              label="Guided"
+              open={guidedOpen}
+              setOpen={setGuidedOpen}
+              onLabelClick={() =>
+                openSidebarSectionPage("sidebar_guided", setGuidedOpen)
+              }
+              active={page === "sidebar_guided"}
+            >
+              {GUIDED_ORDER.map((k) => {
+                const node = CONTENT[k];
+                if (!node) return null;
+                return (
+                  <SL
+                    theme={t}
+                    key={k}
+                    label={node.label}
+                    icon={node.icon}
+                    onClick={() => handleSelect(k, node)}
+                    active={selKey === k}
+                  />
+                );
+              })}
+            </SS>
+            <SS
               theme={t}
-              label="Animations"
-              icon="bolt"
-              onClick={() => {
-                play("tap");
-                setExperienceTopic("animations");
-                setPage("setting_preferences");
-                setSidebarOpen(false);
-              }}
-              active={page === "setting_preferences" && experienceTopic === "animations"}
-            />
-            <SL
+              playFn={play}
+              label="Saved"
+              open={savedOpen}
+              setOpen={setSavedOpen}
+              tag="#side_bar_saved"
+              onLabelClick={() =>
+                openSidebarSectionPage("sidebar_saved", setSavedOpen)
+              }
+              active={page === "sidebar_saved"}
+            >
+              {bookmarks.length === 0 ? (
+                <p
+                  style={{
+                    color: t.muted,
+                    fontSize: 13,
+                    padding: "4px 20px 12px",
+                    fontStyle: "italic",
+                    margin: 0,
+                  }}
+                >
+                  Nothing saved yet.
+                </p>
+              ) : (
+                allContent
+                  .filter((c) => bookmarks.includes(c.key))
+                  .map((item) => (
+                    <SL
+                      theme={t}
+                      key={item.key}
+                      label={item.node.label}
+                      icon={item.node.icon}
+                      onClick={() => {
+                        handleSelect(item.key, item.node);
+                      }}
+                      active={false}
+                    />
+                  ))
+              )}
+            </SS>
+            <SS
               theme={t}
-              label="Mobile Integration"
-              icon="globe"
-              onClick={() => {
-                play("tap");
-                setExperienceTopic("mobile_integration");
-                setPage("help");
-                setSidebarOpen(false);
-              }}
-              active={page === "help" && experienceTopic === "mobile_integration"}
-            />
-          </SS>
-          </div>{/* /life-sidebar-body */}
+              playFn={play}
+              label="Experience"
+              open={experienceOpen}
+              setOpen={setExperienceOpen}
+              tag="#side_bar_experience"
+              onLabelClick={() =>
+                openSidebarSectionPage("sidebar_experience", setExperienceOpen)
+              }
+              active={page === "sidebar_experience"}
+            >
+              <SL
+                theme={t}
+                label="Visualization"
+                icon="eye"
+                onClick={() => {
+                  play("tap");
+                  setExperienceTopic("visualization");
+                  setPage("daily_growth");
+                  setSidebarOpen(false);
+                }}
+                active={
+                  page === "daily_growth" && experienceTopic === "visualization"
+                }
+              />
+              <SL
+                theme={t}
+                label="Sounds"
+                icon="chat"
+                onClick={() => {
+                  play("tap");
+                  setExperienceTopic("sounds");
+                  setPage("setting_preferences");
+                  setSidebarOpen(false);
+                }}
+                active={
+                  page === "setting_preferences" && experienceTopic === "sounds"
+                }
+              />
+              <SL
+                theme={t}
+                label="Animations"
+                icon="bolt"
+                onClick={() => {
+                  play("tap");
+                  setExperienceTopic("animations");
+                  setPage("setting_preferences");
+                  setSidebarOpen(false);
+                }}
+                active={
+                  page === "setting_preferences" &&
+                  experienceTopic === "animations"
+                }
+              />
+              <SL
+                theme={t}
+                label="Mobile Integration"
+                icon="globe"
+                onClick={() => {
+                  play("tap");
+                  setExperienceTopic("mobile_integration");
+                  setPage("help");
+                  setSidebarOpen(false);
+                }}
+                active={
+                  page === "help" && experienceTopic === "mobile_integration"
+                }
+              />
+            </SS>
+          </div>
+          {/* /life-sidebar-body */}
           <div
             data-page-tag="#side_bar_sign_out"
             className="life-sidebar-signout"
@@ -3467,11 +3695,21 @@ export default function LifeApp() {
                 }}
               />
             )}
-            {page === "sidebar_library" && <SidebarSectionPage sectionKey="sidebar_library" t={t} />}
-            {page === "sidebar_socials" && <SidebarSectionPage sectionKey="sidebar_socials" t={t} />}
-            {page === "sidebar_guided" && <SidebarSectionPage sectionKey="sidebar_guided" t={t} />}
-            {page === "sidebar_saved" && <SidebarSectionPage sectionKey="sidebar_saved" t={t} />}
-            {page === "sidebar_experience" && <SidebarSectionPage sectionKey="sidebar_experience" t={t} />}
+            {page === "sidebar_library" && (
+              <SidebarSectionPage sectionKey="sidebar_library" t={t} />
+            )}
+            {page === "sidebar_socials" && (
+              <SidebarSectionPage sectionKey="sidebar_socials" t={t} />
+            )}
+            {page === "sidebar_guided" && (
+              <SidebarSectionPage sectionKey="sidebar_guided" t={t} />
+            )}
+            {page === "sidebar_saved" && (
+              <SidebarSectionPage sectionKey="sidebar_saved" t={t} />
+            )}
+            {page === "sidebar_experience" && (
+              <SidebarSectionPage sectionKey="sidebar_experience" t={t} />
+            )}
 
             {page === "category_hub" && categoryPageData && (
               <CategoryHubPage
@@ -3569,35 +3807,136 @@ export default function LifeApp() {
             )}
 
             {page === "discord_networking" && (
-              <div style={{ padding: "36px 24px", maxWidth: 480, margin: "0 auto" }}>
-                <p style={{ margin: "0 0 4px", fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: t.green }}>Community</p>
-                <h2 style={{ margin: "0 0 12px", fontSize: 26, fontWeight: 800, color: t.ink, fontFamily: "Georgia,serif" }}>Networking Group</h2>
-                <p style={{ margin: "0 0 24px", fontSize: 14, color: t.mid, lineHeight: 1.75, fontFamily: "Georgia,serif" }}>
-                  Connect with other Life. members on Discord. Share wins, ask questions, find accountability partners, and network with people who are building, investing, and growing.
+              <div
+                style={{
+                  padding: "36px 24px",
+                  maxWidth: 480,
+                  margin: "0 auto",
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 4px",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: 3,
+                    textTransform: "uppercase",
+                    color: t.green,
+                  }}
+                >
+                  Community
+                </p>
+                <h2
+                  style={{
+                    margin: "0 0 12px",
+                    fontSize: 26,
+                    fontWeight: 800,
+                    color: t.ink,
+                    fontFamily: "Georgia,serif",
+                  }}
+                >
+                  Networking Group
+                </h2>
+                <p
+                  style={{
+                    margin: "0 0 24px",
+                    fontSize: 14,
+                    color: t.mid,
+                    lineHeight: 1.75,
+                    fontFamily: "Georgia,serif",
+                  }}
+                >
+                  Connect with other Life. members on Discord. Share wins, ask
+                  questions, find accountability partners, and network with
+                  people who are building, investing, and growing.
                 </p>
                 <a
                   href="https://discord.gg/d3uFqUxB"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                    width: "100%", padding: "16px 24px",
-                    background: "#5865F2", color: "#fff", border: "none", borderRadius: 14,
-                    fontSize: 16, fontWeight: 700, fontFamily: "Georgia,serif",
-                    textDecoration: "none", cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 10,
+                    width: "100%",
+                    padding: "16px 24px",
+                    background: "#5865F2",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 14,
+                    fontSize: 16,
+                    fontWeight: 700,
+                    fontFamily: "Georgia,serif",
+                    textDecoration: "none",
+                    cursor: "pointer",
                     boxShadow: "0 4px 16px rgba(88,101,242,0.35)",
                     transition: "all 0.2s ease",
                   }}
                 >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z" />
+                  </svg>
                   Join the Discord
                 </a>
-                <div style={{ marginTop: 28, background: t.white, border: `1px solid ${t.border}`, borderRadius: 16, padding: "20px 18px" }}>
-                  <p style={{ margin: "0 0 12px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: t.muted }}>What you'll find</p>
-                  {["Share wins and progress with the community", "Find accountability partners", "Ask questions and get real answers", "Network with investors, builders, and creators"].map(item => (
-                    <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "8px 0", borderBottom: `1px solid ${t.light}` }}>
-                      <span style={{ color: t.green, fontSize: 14, fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
-                      <span style={{ fontSize: 13, color: t.mid, lineHeight: 1.6 }}>{item}</span>
+                <div
+                  style={{
+                    marginTop: 28,
+                    background: t.white,
+                    border: `1px solid ${t.border}`,
+                    borderRadius: 16,
+                    padding: "20px 18px",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: "0 0 12px",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: 2.5,
+                      textTransform: "uppercase",
+                      color: t.muted,
+                    }}
+                  >
+                    What you'll find
+                  </p>
+                  {[
+                    "Share wins and progress with the community",
+                    "Find accountability partners",
+                    "Ask questions and get real answers",
+                    "Network with investors, builders, and creators",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 10,
+                        padding: "8px 0",
+                        borderBottom: `1px solid ${t.light}`,
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: t.green,
+                          fontSize: 14,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                          marginTop: 1,
+                        }}
+                      >
+                        ✓
+                      </span>
+                      <span
+                        style={{ fontSize: 13, color: t.mid, lineHeight: 1.6 }}
+                      >
+                        {item}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -3622,27 +3961,31 @@ export default function LifeApp() {
 
             {/* P6: Progress Dashboard */}
             {page === "progress_dashboard" && (
-                <ProgressDashboardPage
-                  t={t}
-                  momentumSnapshot={momentumSnapshot}
-                  openMomentumHub={openMomentumHub}
-                  readKeys={readKeys}
-                  bookmarks={bookmarks}
-                  completedNotes={completedNotes}
-                  readingStreak={readingStreak}
-                  profile={profile}
-                  totalTopics={allContent.length}
-                  progressPercent={progressPercent}
-                  play={play}
-                  setPage={setPage}
-                  setScreen={setScreen}
-                  openCommunicationQuiz={openCommunicationQuiz}
-                />
-              )}
+              <ProgressDashboardPage
+                t={t}
+                momentumSnapshot={momentumSnapshot}
+                openMomentumHub={openMomentumHub}
+                readKeys={readKeys}
+                bookmarks={bookmarks}
+                completedNotes={completedNotes}
+                readingStreak={readingStreak}
+                profile={profile}
+                totalTopics={allContent.length}
+                progressPercent={progressPercent}
+                play={play}
+                setPage={setPage}
+                setScreen={setScreen}
+                openCommunicationQuiz={openCommunicationQuiz}
+              />
+            )}
 
             {/* P9d: Leaderboard */}
             {page === "leaderboard" && (
-              <LeaderboardPage t={t} readKeys={readKeys} bookmarks={bookmarks} />
+              <LeaderboardPage
+                t={t}
+                readKeys={readKeys}
+                bookmarks={bookmarks}
+              />
             )}
 
             {/* Daily Growth page */}
@@ -3699,7 +4042,9 @@ export default function LifeApp() {
                 readKeys={readKeys}
                 bookmarks={bookmarks}
                 totalTopics={allContent.length}
-                onAvatarChange={(url) => setUser((prev) => prev ? { ...prev, avatarUrl: url } : prev)}
+                onAvatarChange={(url) =>
+                  setUser((prev) => (prev ? { ...prev, avatarUrl: url } : prev))
+                }
               />
             )}
 
@@ -3710,6 +4055,9 @@ export default function LifeApp() {
                 play={play}
                 setPage={setPage}
                 initials={initials}
+                onProfileChange={(patch) =>
+                  setUser((prev) => (prev ? { ...prev, ...patch } : prev))
+                }
               />
             )}
 
@@ -3791,6 +4139,7 @@ export default function LifeApp() {
           setShowNotif={setShowNotif}
           unreadCount={unreadCount}
           initials={initials}
+          userEmail={user?.email || ""}
         />
       )}
 
@@ -3831,7 +4180,15 @@ export default function LifeApp() {
             aria-label="Dismiss install prompt"
             type="button"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>

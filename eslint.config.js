@@ -34,11 +34,10 @@ export default defineConfig([
   globalIgnores(["dist"]),
   {
     files: ["**/*.{js,jsx}"],
-    extends: [
-      js.configs.recommended,
-      nextPlugin.configs.recommended,
-      reactHooks.configs["recommended-latest"],
-    ],
+    plugins: {
+      "@next/next": nextPlugin,
+      "react-hooks": reactHooks,
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: browserGlobals,
@@ -49,6 +48,9 @@ export default defineConfig([
       },
     },
     rules: {
+      ...js.configs.recommended.rules,
+      ...nextPlugin.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
       "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/static-components": "off",

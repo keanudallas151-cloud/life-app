@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isSupabaseConfigured, supabase } from "../supabaseClient";
 
 function countUnread(list) {
   if (!Array.isArray(list)) return 0;
@@ -20,29 +19,18 @@ export function BottomNav({
   setShowNotif,
   unreadCount,
   initials,
+  userEmail,
 }) {
   const [syncedUnreadCount, setSyncedUnreadCount] = useState(unreadCount);
 
   useEffect(() => {
     let active = true;
 
-    const syncNotificationMirror = async () => {
+    const syncNotificationMirror = () => {
       if (typeof window === "undefined") return;
 
       const guestKey = "notif__";
-      let sourceKey = guestKey;
-
-      if (isSupabaseConfigured) {
-        try {
-          const { data } = await supabase.auth.getUser();
-          const email = data?.user?.email;
-          if (email) {
-            sourceKey = `notif_${email}`;
-          }
-        } catch (error) {
-          console.error("Failed to read auth user for notifications", error);
-        }
-      }
+      const sourceKey = userEmail ? `notif_${userEmail}` : guestKey;
 
       const raw = window.localStorage.getItem(sourceKey);
       if (raw !== null && sourceKey !== guestKey) {
@@ -65,10 +53,20 @@ export function BottomNav({
     };
 
     syncNotificationMirror();
+
+    const handleMirrorUpdate = () => {
+      syncNotificationMirror();
+    };
+
+    window.addEventListener("storage", handleMirrorUpdate);
+    window.addEventListener("life_notifications_updated", handleMirrorUpdate);
+
     return () => {
       active = false;
+      window.removeEventListener("storage", handleMirrorUpdate);
+      window.removeEventListener("life_notifications_updated", handleMirrorUpdate);
     };
-  }, [page, showNotif, unreadCount]);
+  }, [page, showNotif, unreadCount, userEmail]);
 
   const badgeCount = Number.isFinite(syncedUnreadCount)
     ? syncedUnreadCount

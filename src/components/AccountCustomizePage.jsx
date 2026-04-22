@@ -1,20 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { supabase, isSupabaseConfigured } from "../supabaseClient";
+import { auth, isFirebaseConfigured, isFirebaseStorageConfigured } from "../firebaseClient";
+import {
+  getFirebaseProfile,
+  saveFirebaseProfileAndAuth,
+  uploadFirebaseAvatar,
+} from "../services/firebaseProfile";
 
-const AVATAR_BUCKET = "profile-avatars";
-
-async function uploadAvatar(userId, file) {
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-  const path = `${userId}/avatar.${ext}`;
-  const { error: upErr } = await supabase.storage
-    .from(AVATAR_BUCKET)
-    .upload(path, file, { upsert: true, cacheControl: "3600" });
-  if (upErr) throw upErr;
-  const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
-  return data.publicUrl;
-}
-
-export function AccountCustomizePage({ t, user, play, setPage, initials }) {
+export function AccountCustomizePage({ t, user, play, setPage, initials, onProfileChange }) {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -33,19 +25,24 @@ export function AccountCustomizePage({ t, user, play, setPage, initials }) {
   useEffect(() => {
     let active = true;
     const load = async () => {
-      if (!isSupabaseConfigured) return;
+      if (!user?.id || !isFirebaseConfigured) return;
       setLoading(true);
       try {
-        const { data } = await supabase.auth.getUser();
-        const authUser = data?.user;
-        if (!authUser || !active) return;
-        const meta = authUser.user_metadata || {};
-        setDisplayName(meta.full_name || meta.name || user?.name || "");
-        setUsername(meta.username || meta.user_name || user?.username || "");
-        setBio(meta.bio || "");
-        setSocialLinks(Array.isArray(meta.social_links) ? meta.social_links.join(", ") : meta.social_links || "");
-        setAvatarPreview(meta.avatar_url || user?.avatarUrl || "");
-        if (authUser.created_at) setMemberSince(String(new Date(authUser.created_at).getFullYear()));
+        const profileDoc = await getFirebaseProfile(user.id);
+        if (!active) return;
+
+        setDisplayName(profileDoc?.full_name || user?.name || auth?.currentUser?.displayName || "");
+        setUsername(profileDoc?.username || user?.username || "");
+        setBio(profileDoc?.bio || "");
+        setSocialLinks(
+          Array.isArray(profileDoc?.social_links)
+            ? profileDoc.social_links.join(", ")
+            : profileDoc?.social_links || "",
+        );
+        setAvatarPreview(profileDoc?.avatar_url || user?.avatarUrl || auth?.currentUser?.photoURL || "");
+
+        const createdAt = auth?.currentUser?.metadata?.creationTime || profileDoc?.created_at;
+        if (createdAt) setMemberSince(String(new Date(createdAt).getFullYear()));
       } finally {
         if (active) setLoading(false);
       }
@@ -54,7 +51,7 @@ export function AccountCustomizePage({ t, user, play, setPage, initials }) {
     return () => {
       active = false;
     };
-  }, [user?.avatarUrl, user?.name, user?.username]);
+  }, [user?.avatarUrl, user?.id, user?.name, user?.username]);
 
   const emailFontSize = useMemo(() => {
     const len = (user?.email || "").length;
@@ -79,7 +76,11 @@ export function AccountCustomizePage({ t, user, play, setPage, initials }) {
 
   const handleAvatarFile = async (e) => {
     const file = e.target.files?.[0];
-    if (!file || !user?.id || !isSupabaseConfigured) return;
+    if (!file || !user?.id || !isFirebaseConfigured) return;
+    if (!isFirebaseStorageConfigured) {
+      setAvatarErr("Profile photo uploads need Firebase Storage configured first.");
+      return;
+    }
     const maxBytes = 5 * 1024 * 1024;
     if (file.size > maxBytes) {
       setAvatarErr("Image must be under 5 MB.");
@@ -93,10 +94,27 @@ export function AccountCustomizePage({ t, user, play, setPage, initials }) {
     setSaveErr("");
     setAvatarUploading(true);
     try {
-      const publicUrl = await uploadAvatar(user.id, file);
-      await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
+      const publicUrl = await uploadFirebaseAvatar(user.id, file);
+      const result = await saveFirebaseProfileAndAuth({
+        userId: user.id,
+        profilePatch: {
+          full_name: displayName.trim() || user?.name || "",
+          username: username.trim().replace(/^@+/, ""),
+          bio: bio.trim(),
+          social_links: socialLinks.split(",").map((item) => item.trim()).filter(Boolean),
+          email: user?.email || "",
+          avatar_url: publicUrl,
+        },
+        authPatch: { photoURL: publicUrl },
+      });
+
+      if (!result.ok && !result.partial) {
+        throw result.errors[0] || new Error("Avatar sync failed.");
+      }
+
       setAvatarPreview(publicUrl);
-      setSaveMsg("Photo updated.");
+      onProfileChange?.({ avatarUrl: publicUrl });
+      setSaveMsg(result.partial ? "Photo saved, but account sync needs a refresh." : "Photo updated.");
     } catch (err) {
       console.error("Avatar upload failed", err);
       setAvatarErr("Upload failed. Try again.");
@@ -108,7 +126,7 @@ export function AccountCustomizePage({ t, user, play, setPage, initials }) {
   };
 
   const handleSave = async () => {
-    if (!isSupabaseConfigured) {
+    if (!user?.id || !isFirebaseConfigured) {
       setSaveErr("Cloud profile editing is not configured.");
       return;
     }
@@ -120,16 +138,32 @@ export function AccountCustomizePage({ t, user, play, setPage, initials }) {
       const cleanUsername = username.trim().replace(/^@+/, "");
       const cleanBio = bio.trim();
       const cleanLinks = socialLinks.split(",").map((item) => item.trim()).filter(Boolean);
-      await supabase.auth.updateUser({
-        data: {
-          name: cleanName,
+      const result = await saveFirebaseProfileAndAuth({
+        userId: user.id,
+        authPatch: {
+          displayName: cleanName,
+          photoURL: avatarPreview || user?.avatarUrl || undefined,
+        },
+        profilePatch: {
           full_name: cleanName,
           username: cleanUsername,
           bio: cleanBio,
           social_links: cleanLinks,
+          email: user?.email || "",
+          avatar_url: avatarPreview || user?.avatarUrl || "",
         },
       });
-      setSaveMsg("Profile updated.");
+
+      if (!result.ok && !result.partial) {
+        throw result.errors[0] || new Error("Profile sync failed.");
+      }
+
+      onProfileChange?.({
+        name: cleanName,
+        username: cleanUsername,
+        avatarUrl: avatarPreview || user?.avatarUrl || "",
+      });
+      setSaveMsg(result.partial ? "Profile saved, but account sync needs a refresh." : "Profile updated.");
     } catch (err) {
       console.error("Profile update failed", err);
       setSaveErr("Could not save profile changes.");
