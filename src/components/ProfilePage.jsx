@@ -14,6 +14,7 @@ export default function ProfilePage({
   bookmarks = [],
   totalTopics = 0,
   onAvatarChange,
+  onSystemNotify,
 }) {
   const fileInputRef = useRef(null);
   const previewUrlRef = useRef("");
@@ -67,6 +68,7 @@ export default function ProfilePage({
       }
       setAvatarError(result.partial ? "Photo saved, but account sync needs a refresh." : "");
       onAvatarChange?.(nextAvatarUrl);
+      onSystemNotify?.({ templateKey: "profileUpdated" });
     } catch (err) {
       console.error("Avatar upload failed", err);
       setAvatarError(err?.message || "Upload failed. Try again.");

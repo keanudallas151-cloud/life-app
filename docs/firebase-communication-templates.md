@@ -32,11 +32,19 @@ Available source templates:
 - `new-message.html`
 - `support-acknowledgement.html`
 
-These will require an app-managed delivery path later, such as:
+These are now wired for a Firestore-backed delivery path using the Firebase Trigger Email extension.
 
-- Firebase Extension for email sending
-- Cloud Function trigger
-- external email provider integrated with Firebase / Firestore events
+Runtime collections used by the app:
+
+- `userPrivate/{uid}` — private identity document keyed by Firebase Auth UID with an `email` field for recipient resolution
+- `mail/{mailId}` — queued outbound email documents for the Trigger Email extension
+- `supportRequests/{requestId}` — in-app support submissions that also trigger acknowledgements
+
+Recommended Firebase Trigger Email extension configuration:
+
+- **Email documents collection**: `mail`
+- **Users collection**: `userPrivate`
+- **Templates collection**: optional (the app currently queues fully rendered HTML + text)
 
 ### In-app notification templates
 
@@ -48,7 +56,11 @@ This gives `v0.7.1` a single place to define reusable message copy for notificat
 
 ## Important behavior note
 
-Firebase Auth can natively send verification, reset, and recovery emails, but it does **not** automatically send a custom post-confirmation "your account is confirmed" welcome email. That template is included in this repo as an app-managed template and should be hooked up later through backend email delivery.
+Firebase Auth still natively sends verification, reset, and recovery emails, but the app now queues custom post-confirmation and communication emails through Firestore for:
+
+- welcome confirmed
+- support acknowledgement
+- new message alerts
 
 ## Placeholder conventions
 
@@ -76,6 +88,7 @@ For app-managed templates, the HTML files use simple placeholders such as:
 ## Recommended rollout order
 
 1. Paste the native auth templates into Firebase Authentication.
-2. Decide how Life. will send app-managed emails.
-3. Wire the support email as the visible reply/contact address.
-4. Reuse the in-app notification template catalog when notification flows move beyond static defaults.
+2. Install the Firebase Trigger Email extension with `mail` as the email collection.
+3. Set the extension's users collection to `userPrivate` so `toUids` resolves through private identity docs.
+4. Configure the SMTP sender and default reply-to address.
+5. Reuse the in-app notification template catalog when notification flows move beyond static defaults.

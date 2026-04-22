@@ -101,31 +101,6 @@ function saveActivityFeed(userId, items) {
   );
 }
 
-function appendShellNotification(userEmail, entry) {
-  if (!userEmail || typeof window === "undefined") return;
-  try {
-    const key = `notif_${userEmail}`;
-    const current = JSON.parse(window.localStorage.getItem(key) || "[]");
-    const next = [
-      {
-        id: entry.id,
-        text:
-          entry.type === "match"
-            ? `New match waiting: ${entry.name}`
-            : `You liked ${entry.name}. Keep building your investor and inventor trail.`,
-        time: "Just now",
-        read: false,
-        targetPage: "networking",
-      },
-      ...current,
-    ].slice(0, 40);
-    window.localStorage.setItem(key, JSON.stringify(next));
-    window.dispatchEvent(new CustomEvent("life_notifications_updated"));
-  } catch {
-    // Ignore local notification persistence failures.
-  }
-}
-
 function ActivitySummaryBar({ t, feed, onOpenMessages, onClear }) {
   if (!feed?.length) return null;
   const matchCount = feed.filter((item) => item.type === "match").length;
@@ -374,16 +349,17 @@ export function InventorsInvestors({ t, user, play, onSystemNotify }) {
   const appendActivity = useCallback(
     (entry) => {
       persistActivityFeed((current) => [entry, ...current].slice(0, 30));
-      appendShellNotification(user?.email, entry);
       onSystemNotify?.({
+        templateKey: entry.type === "match" ? "newMatch" : undefined,
+        title: entry.type === "match" ? undefined : "Interest saved",
         text:
           entry.type === "match"
             ? `New match waiting: ${entry.name}`
-            : `You liked ${entry.name}.`,
+            : `You liked ${entry.name}. Keep building your investor and inventor trail.`,
         targetPage: "networking",
       });
     },
-    [onSystemNotify, persistActivityFeed, user?.email],
+    [onSystemNotify, persistActivityFeed],
   );
 
   useEffect(() => {

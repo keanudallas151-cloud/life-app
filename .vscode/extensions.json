@@ -1,16 +1,18 @@
 {
   "recommendations": [
     "Github.copilot",
+    "github.copilot-chat",
     "GitHub.vscode-pull-request-github",
     "github.vscode-github-actions",
     "dbaeumer.vscode-eslint",
     "eamodio.gitlens",
     "gruntfuggly.todo-tree",
+    "ms-azuretools.vscode-azure-github-copilot",
+    "ms-azuretools.vscode-azure-mcp-server",
     "metabob.metabob",
     "mtxr.sqltools",
     "ms-ossdata.vscode-pgsql",
     "phu1237.vs-browser",
-    "supabase.vscode-supabase-extension",
     "usernamehw.errorlens",
     "google.gemini-cli-vscode-ide-companion",
     "google.geminicodeassist"

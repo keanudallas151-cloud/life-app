@@ -26,7 +26,19 @@ import {
 } from "./data/content";
 import { auth, isFirebaseConfigured } from "./firebaseClient";
 import { Ic } from "./icons/Ic";
+import {
+  queueWelcomeConfirmedEmailOnce,
+  syncPrivateEmailIdentity,
+} from "./services/emailDelivery";
 import { getFirebaseProfile } from "./services/firebaseProfile";
+import { SUPPORT_EMAIL } from "./systems/appConfig";
+import {
+  appendNotification,
+  deleteNotificationById,
+  loadNotificationsFor,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from "./systems/notifications";
 import { getReadingStreak, recordReadingDay } from "./systems/readingStreak";
 import { setResumeTopic } from "./systems/resumeReading";
 import { LS } from "./systems/storage";
@@ -96,6 +108,12 @@ const SECRET_SIENNA_SEARCH_CODE = "160705kc";
 
 // Maps notification type/activity to an emoji icon
 function notifIcon(n) {
+  if (n.templateKey === "newMessage") return "💬";
+  if (n.templateKey === "newMatch") return "🤝";
+  if (n.templateKey === "profileUpdated") return "👤";
+  if (n.templateKey === "streakCelebration") return "🔥";
+  if (n.templateKey === "supportAcknowledged") return "🛟";
+  if (n.templateKey === "welcomeConfirmed") return "👋";
   if (n.activity === "audio") return "🎙️";
   if (n.targetPage === "home") return "👋";
   if (n.targetPage === "where_to_start") return "📚";
@@ -104,43 +122,6 @@ function notifIcon(n) {
   if (n.targetPage === "leaderboard") return "🏆";
   if (n.targetPage === "profile") return "👤";
   return "✨";
-}
-
-function getDefaultNotifications() {
-  return [
-    {
-      id: 1,
-      text: "Welcome to Life. — start your journey today!",
-      time: "Just now",
-      read: false,
-      targetPage: "home",
-    },
-    {
-      id: 2,
-      text: "Complete the tailoring questionnaire to personalize your experience.",
-      time: "5m ago",
-      read: false,
-    },
-    {
-      id: 3,
-      text: "New content available: Advanced Finance strategies.",
-      time: "1h ago",
-      read: false,
-      targetPage: "where_to_start",
-    },
-    {
-      id: 4,
-      text: "Improve Communication with a guided speaking practice.",
-      time: "2h ago",
-      read: false,
-      targetPage: "communication_quiz",
-      activity: "audio",
-    },
-  ];
-}
-
-function loadNotificationsFor(uid) {
-  return LS.get(`notif_${uid || "_"}`, getDefaultNotifications());
 }
 
 function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
@@ -317,6 +298,20 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
 
           {/* Text */}
           <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+            {n.title ? (
+              <p
+                style={{
+                  margin: "0 0 2px",
+                  fontSize: 12,
+                  color: dark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.58)",
+                  lineHeight: 1.35,
+                  fontWeight: 700,
+                  letterSpacing: 0.15,
+                }}
+              >
+                {n.title}
+              </p>
+            ) : null}
             <p
               style={{
                 margin: 0,
@@ -626,6 +621,7 @@ export default function LifeApp() {
   });
   const cloud = useUserData(userIdForData);
 
+  const emailDeliverySyncKeyRef = useRef("");
   const prevUidRef = useRef(uid);
   const migratedRef = useRef(false);
 
@@ -644,6 +640,50 @@ export default function LifeApp() {
   const [localMomentumState, setLocalMomentumStateRaw] = useState(() =>
     LS.get(`mom_${uid}`, null),
   );
+
+  useEffect(() => {
+    if (!user?.id || !user?.email) return;
+
+    const syncKey = [
+      user.id,
+      user.email,
+      user.name || "",
+      user.emailConfirmed ? "verified" : "pending",
+    ].join(":");
+
+    if (emailDeliverySyncKeyRef.current === syncKey) return;
+    emailDeliverySyncKeyRef.current = syncKey;
+
+    let cancelled = false;
+
+    const syncEmailDelivery = async () => {
+      try {
+        await syncPrivateEmailIdentity({
+          userId: user.id,
+          email: user.email,
+          displayName: user.name,
+        });
+
+        if (user.emailConfirmed) {
+          await queueWelcomeConfirmedEmailOnce({
+            userId: user.id,
+            email: user.email,
+            displayName: user.name,
+          });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to sync app email delivery state", error);
+        }
+      }
+    };
+
+    void syncEmailDelivery();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.email, user?.emailConfirmed, user?.id, user?.name]);
 
   const bookmarks = userIdForData ? cloud.bookmarks : localBookmarks;
   const notes = userIdForData ? cloud.notes : localNotes;
@@ -948,6 +988,15 @@ export default function LifeApp() {
   const [showNotif, setShowNotif] = useState(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  const pushSystemNotification = useCallback(
+    (input) => {
+      const next = appendNotification(uid, input);
+      setNotifications(next);
+      return next;
+    },
+    [uid],
+  );
+
   useEffect(() => {
     setNotifications(loadNotificationsFor(uid));
   }, [uid]);
@@ -992,22 +1041,17 @@ export default function LifeApp() {
   }, [sidebarOpen, showNotif]);
 
   const markAllRead = () => {
-    const next = notifications.map((n) => ({ ...n, read: true }));
+    const next = markAllNotificationsRead(uid);
     setNotifications(next);
-    LS.set(`notif_${uid}`, next);
   };
   const deleteNotification = (id) => {
-    const next = notifications.filter((n) => n.id !== id);
+    const next = deleteNotificationById(uid, id);
     setNotifications(next);
-    LS.set(`notif_${uid}`, next);
   };
   const handleNotifTap = (n) => {
     // Mark the individual notification as read
-    const next = notifications.map((item) =>
-      item.id === n.id ? { ...item, read: true } : item,
-    );
+    const next = markNotificationRead(uid, n.id);
     setNotifications(next);
-    LS.set(`notif_${uid}`, next);
     // Redirect to the target if provided, else go to Daily Growth as sensible default
     setShowNotif(false);
     play("tap");
@@ -1887,7 +1931,7 @@ export default function LifeApp() {
             ],
             [
               "Contact",
-              "For privacy-related inquiries, reach out through the app's Help section or contact us at the email provided in the app.",
+              `For privacy-related inquiries, reach out through the app's Help section or contact us at ${SUPPORT_EMAIL}.`,
             ],
           ].map(([title, body]) => (
             <div
@@ -3785,7 +3829,15 @@ export default function LifeApp() {
               </Suspense>
             )}
 
-            {page === "help" && <HelpPage t={t} />}
+            {page === "help" && (
+              <HelpPage
+                t={t}
+                supportEmail={SUPPORT_EMAIL}
+                user={user}
+                play={play}
+                onSystemNotify={pushSystemNotification}
+              />
+            )}
 
             {page === "secret_sienna" && secretSiennaUnlocked && (
               <SecretSiennaPage />
@@ -3944,7 +3996,12 @@ export default function LifeApp() {
             )}
 
             {page === "networking" && (
-              <InventorsInvestors t={t} user={user} play={play} />
+              <InventorsInvestors
+                t={t}
+                user={user}
+                play={play}
+                onSystemNotify={pushSystemNotification}
+              />
             )}
 
             {/* P7: Categories flow */}
@@ -4045,6 +4102,7 @@ export default function LifeApp() {
                 onAvatarChange={(url) =>
                   setUser((prev) => (prev ? { ...prev, avatarUrl: url } : prev))
                 }
+                onSystemNotify={pushSystemNotification}
               />
             )}
 
@@ -4058,6 +4116,7 @@ export default function LifeApp() {
                 onProfileChange={(patch) =>
                   setUser((prev) => (prev ? { ...prev, ...patch } : prev))
                 }
+                onSystemNotify={pushSystemNotification}
               />
             )}
 

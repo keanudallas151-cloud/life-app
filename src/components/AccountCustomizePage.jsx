@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCurrentUserProfile } from "../hooks/useCurrentUserProfile";
 
-export function AccountCustomizePage({ t, user, play, setPage, initials, onProfileChange }) {
+export function AccountCustomizePage({
+  t,
+  user,
+  play,
+  setPage,
+  initials,
+  onProfileChange,
+  onSystemNotify,
+}) {
   const [copied, setCopied] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [saveErr, setSaveErr] = useState("");
@@ -85,6 +93,7 @@ export function AccountCustomizePage({ t, user, play, setPage, initials, onProfi
           result.profile?.username || username.trim().replace(/^@+/, ""),
         avatarUrl: nextAvatarUrl,
       });
+      onSystemNotify?.({ templateKey: "profileUpdated" });
       setSaveMsg(result.partial ? "Photo saved, but account sync needs a refresh." : "Photo updated.");
     } catch (err) {
       console.error("Avatar upload failed", err);
@@ -118,6 +127,7 @@ export function AccountCustomizePage({ t, user, play, setPage, initials, onProfi
         avatarUrl:
           nextProfile.avatar_url || avatarPreview || user?.avatarUrl || "",
       });
+      onSystemNotify?.({ templateKey: "profileUpdated" });
       setSaveMsg(result.partial ? "Profile saved, but account sync needs a refresh." : "Profile updated.");
     } catch (err) {
       console.error("Profile update failed", err);

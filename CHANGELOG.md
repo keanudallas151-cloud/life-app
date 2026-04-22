@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7.2 — notification system cleanup, support contact wiring, and Firebase sync reliability
+
+- Fixed the Firebase `userData` restore path so cloud data now reads both legacy camelCase and current snake_case field shapes correctly.
+- Added a shared notification system with reusable templates, relative timestamps, consistent local persistence, and cross-surface sync events.
+- Replaced duplicated notification logic in the app shell, bottom navigation, and Investors & Inventors flow with shared helpers.
+- Started using live template-driven notifications for profile updates and networking activity instead of only static shell defaults.
+- Surfaced the configured support email in Help and privacy-related contact copy so support guidance is now visible in the running app.
+
 ## v0.7.1 — Firebase hardening, safer profiles, and communication templates
 
 - Added versioned Firebase project security/config files for Firestore rules, Storage rules, and indexes.

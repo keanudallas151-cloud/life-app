@@ -13,6 +13,7 @@ import {
   where,
 } from "firebase/firestore";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { queueNewMessageEmailAlert } from "../services/emailDelivery";
 import { db, isFirebaseConfigured } from "../firebaseClient";
 import {
   mergeFirebaseProfile,
@@ -985,6 +986,30 @@ export function useInventorsInvestorsData(user) {
           { merge: true },
         );
 
+        const recipientUserId = currentConversation?.participant_ids?.find(
+          (participantId) => participantId !== user.id,
+        );
+        if (recipientUserId) {
+          try {
+            const recipientProfile = await readDoc(
+              COLLECTIONS.profiles,
+              recipientUserId,
+            );
+            await queueNewMessageEmailAlert({
+              senderUserId: user.id,
+              senderName:
+                profile?.full_name || user.name || user.email || "Someone on Life.",
+              recipientUserId,
+              recipientDisplayName:
+                recipientProfile?.full_name || recipientProfile?.display_name || "there",
+              messageText: messageText.trim(),
+              conversationId,
+            });
+          } catch (emailError) {
+            console.error("Failed to queue a new-message email alert", emailError);
+          }
+        }
+
         await Promise.all([
           loadConversations(),
           markConversationRead(conversationId),
@@ -997,7 +1022,14 @@ export function useInventorsInvestorsData(user) {
         setMessageSending(false);
       }
     },
-    [loadConversations, markConversationRead, user?.id],
+    [
+      loadConversations,
+      markConversationRead,
+      profile?.full_name,
+      user?.email,
+      user?.id,
+      user?.name,
+    ],
   );
 
   const blockUser = useCallback(

@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-function countUnread(list) {
-  if (!Array.isArray(list)) return 0;
-  return list.filter((item) => item && item.read !== true).length;
-}
+import {
+  countUnreadNotifications,
+  loadNotificationsFor,
+} from "../systems/notifications";
 
 export function BottomNav({
   t,
@@ -27,29 +26,10 @@ export function BottomNav({
     let active = true;
 
     const syncNotificationMirror = () => {
-      if (typeof window === "undefined") return;
-
-      const guestKey = "notif__";
-      const sourceKey = userEmail ? `notif_${userEmail}` : guestKey;
-
-      const raw = window.localStorage.getItem(sourceKey);
-      if (raw !== null && sourceKey !== guestKey) {
-        window.localStorage.setItem(guestKey, raw);
-      }
-
       if (!active) return;
 
-      try {
-        const parsed = raw !== null ? JSON.parse(raw) : null;
-        if (Array.isArray(parsed)) {
-          setSyncedUnreadCount(countUnread(parsed));
-          return;
-        }
-      } catch {
-        // fall through to prop value
-      }
-
-      setSyncedUnreadCount(unreadCount);
+      const notifications = loadNotificationsFor(userEmail || "_");
+      setSyncedUnreadCount(countUnreadNotifications(notifications));
     };
 
     syncNotificationMirror();
