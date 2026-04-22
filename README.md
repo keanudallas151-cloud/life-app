@@ -12,6 +12,12 @@ cp .env.example .env.local
 npm run dev
 ```
 
+Local repository path on Windows: `C:/Users/louie/life-app`
+
+Branch policy:
+- `main` is the working branch for local, cloud, and deployment work.
+- `main_backup` is only a backup copy of `main`.
+
 Without env vars the shell still runs, but auth, cloud-synced library data, quiz stats, profile sync, networking, Storage uploads, and Post-It stay offline.
 
 ## Vercel + Firebase + GitHub setup
