@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  isFirebaseConfigured,
-  isFirebaseStorageConfigured,
-} from "../firebaseClient";
-import {
-  saveFirebaseProfileAndAuth,
-  uploadFirebaseAvatar,
-} from "../services/firebaseProfile";
+import { useCurrentUserProfile } from "../hooks/useCurrentUserProfile";
 import { getReadingStreak } from "../systems/readingStreak";
 import { LS } from "../systems/storage";
 
@@ -24,15 +17,16 @@ export default function ProfilePage({
 }) {
   const fileInputRef = useRef(null);
   const previewUrlRef = useRef("");
+  const { profileView, avatarUploading, uploadAvatar } = useCurrentUserProfile(user);
+  const resolvedAvatarUrl = profileView.avatarUrl || user?.avatarUrl || "";
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || "");
-  const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState("");
 
   useEffect(() => {
     if (!avatarUploading) {
-      setAvatarPreview(user?.avatarUrl || "");
+      setAvatarPreview(resolvedAvatarUrl);
     }
-  }, [avatarUploading, user?.avatarUrl]);
+  }, [avatarUploading, resolvedAvatarUrl]);
 
   useEffect(() => () => {
     if (previewUrlRef.current) {
@@ -48,20 +42,7 @@ export default function ProfilePage({
 
   const handleAvatarFile = async (e) => {
     const file = e.target.files?.[0];
-    if (!file || !user?.id || !isFirebaseConfigured) return;
-    if (!isFirebaseStorageConfigured) {
-      setAvatarError("Profile photo uploads need Firebase Storage configured first.");
-      return;
-    }
-    const maxBytes = 5 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      setAvatarError("Image must be under 5 MB.");
-      return;
-    }
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setAvatarError("JPG, PNG, or WEBP only.");
-      return;
-    }
+    if (!file || !user?.id) return;
     setAvatarError("");
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
@@ -70,36 +51,31 @@ export default function ProfilePage({
     const objectUrl = URL.createObjectURL(file);
     previewUrlRef.current = objectUrl;
     setAvatarPreview(objectUrl);
-    setAvatarUploading(true);
     try {
-      const publicUrl = await uploadFirebaseAvatar(user.id, file);
-      const result = await saveFirebaseProfileAndAuth({
-        userId: user.id,
-        profilePatch: { avatar_url: publicUrl },
-        authPatch: { photoURL: publicUrl },
-      });
-
-      if (!result.ok && !result.partial) {
-        throw result.errors[0] || new Error("Avatar sync failed.");
+      const result = await uploadAvatar(file);
+      if (!result.ok) {
+        throw result.error || new Error(result.message || "Avatar sync failed.");
       }
 
-      setAvatarPreview(publicUrl);
+      const nextAvatarUrl =
+        result.avatarUrl || result.profile?.avatar_url || resolvedAvatarUrl;
+
+      setAvatarPreview(nextAvatarUrl);
       if (previewUrlRef.current) {
         URL.revokeObjectURL(previewUrlRef.current);
         previewUrlRef.current = "";
       }
       setAvatarError(result.partial ? "Photo saved, but account sync needs a refresh." : "");
-      onAvatarChange?.(publicUrl);
+      onAvatarChange?.(nextAvatarUrl);
     } catch (err) {
       console.error("Avatar upload failed", err);
-      setAvatarError("Upload failed. Try again.");
-      setAvatarPreview(user?.avatarUrl || "");
+      setAvatarError(err?.message || "Upload failed. Try again.");
+      setAvatarPreview(resolvedAvatarUrl);
       if (previewUrlRef.current) {
         URL.revokeObjectURL(previewUrlRef.current);
         previewUrlRef.current = "";
       }
     } finally {
-      setAvatarUploading(false);
       e.target.value = "";
     }
   };

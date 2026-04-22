@@ -62,10 +62,7 @@ export async function mergeFirebaseProfile(userId, patch) {
   };
 
   await setDoc(doc(db, PROFILES_COLLECTION, userId), payload, { merge: true });
-  return {
-    ...(existing || {}),
-    ...payload,
-  };
+  return getFirebaseProfile(userId);
 }
 
 export async function syncFirebaseAuthProfile({ displayName, photoURL }) {

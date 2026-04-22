@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.7.1 — Firebase hardening, safer profiles, and communication templates
+
+- Added versioned Firebase project security/config files for Firestore rules, Storage rules, and indexes.
+- Added a shared current-user profile hook so profile loading, saving, and avatar upload logic no longer lives in multiple UI pages.
+- Fixed public profile writes so private contact data no longer rides along in readable networking profile documents.
+- Fixed the Inventors & Investors media upload path so Firebase Storage rules and runtime uploads now agree.
+- Added a source-controlled Firebase communication template pack for auth emails, app-managed emails, and in-app notification copy.
+- Added Firebase template documentation and standardized the support contact around `life.customer.support@gmail.com` for upcoming communication flows.
+
 ## v0.7.0 — Firebase platform migration and release hardening
 
 - Migrated the remaining runtime profile, avatar, and Inventors & Investors flows off Supabase onto Firebase Auth, Firestore, and Firebase Storage.

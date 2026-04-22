@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -94,6 +95,20 @@ function toNumberOrNull(value) {
   if (value === null || value === undefined || value === "") return null;
   const numeric = Number(String(value).replace(/[^\d.-]/g, ""));
   return Number.isFinite(numeric) ? numeric : null;
+}
+
+function buildPublicContactFields(values) {
+  const emailPublic = Boolean(values?.emailPublic);
+  const phonePublic = Boolean(values?.phonePublic);
+  const publicEmail = String(values?.contactEmail || "").trim();
+  const publicPhone = String(values?.phoneNumber || "").trim();
+
+  return {
+    public_email: emailPublic ? publicEmail : "",
+    public_phone: phonePublic ? publicPhone : "",
+    email_public: emailPublic,
+    phone_public: phonePublic,
+  };
 }
 
 export function useInventorsInvestorsData(user) {
@@ -467,7 +482,6 @@ export function useInventorsInvestorsData(user) {
         ...(profile || {}),
         user_id: user.id,
         full_name: profile?.full_name || user.name || user.email || "",
-        email: profile?.email || user.email || "",
         role,
         profile_completed: profile?.profile_completed || false,
         updated_at: nowIso(),
@@ -481,7 +495,8 @@ export function useInventorsInvestorsData(user) {
       try {
         const nextProfile = await mergeFirebaseProfile(user.id, {
           full_name: optimisticProfile.full_name,
-          email: optimisticProfile.email,
+          email: deleteField(),
+          phone: deleteField(),
           role,
           profile_completed: optimisticProfile.profile_completed,
         });
@@ -521,10 +536,12 @@ export function useInventorsInvestorsData(user) {
         if (values.avatarFile) {
           avatarUrl = await uploadFile(
             values.avatarFile,
-            "inventors-investors-media/avatar",
+            "inventors-investors-media",
           );
           setUploadProgress(40);
         }
+
+        const publicContactFields = buildPublicContactFields(values);
 
         const optimisticProfile = {
           ...(profile || {}),
@@ -534,10 +551,7 @@ export function useInventorsInvestorsData(user) {
           avatar_url: avatarUrl,
           location: values.location.trim(),
           bio: values.shortBio.trim(),
-          email: values.contactEmail.trim(),
-          phone: values.phoneNumber.trim(),
-          email_public: values.emailPublic,
-          phone_public: values.phonePublic,
+          ...publicContactFields,
           profile_completed: true,
           updated_at: nowIso(),
         };
@@ -556,7 +570,11 @@ export function useInventorsInvestorsData(user) {
 
         const syncResult = await saveFirebaseProfileAndAuth({
           userId: user.id,
-          profilePatch: optimisticProfile,
+          profilePatch: {
+            ...optimisticProfile,
+            email: deleteField(),
+            phone: deleteField(),
+          },
           authPatch: {
             displayName: optimisticProfile.full_name,
             photoURL: avatarUrl || undefined,
@@ -600,10 +618,7 @@ export function useInventorsInvestorsData(user) {
           avatar_url: avatarUrl,
           location: values.location.trim(),
           bio: values.shortBio.trim(),
-          email: values.contactEmail.trim(),
-          phone: values.phoneNumber.trim(),
-          email_public: values.emailPublic,
-          phone_public: values.phonePublic,
+          ...buildPublicContactFields(values),
           profile_completed: true,
           updated_at: nowIso(),
         };
@@ -670,7 +685,7 @@ export function useInventorsInvestorsData(user) {
         if (values.avatarFile) {
           avatarUrl = await uploadFile(
             values.avatarFile,
-            "inventors-investors-media/avatar",
+            "inventors-investors-media",
           );
           setUploadProgress(25);
         }
@@ -681,7 +696,7 @@ export function useInventorsInvestorsData(user) {
           for (let index = 0; index < values.galleryFiles.length; index += 1) {
             const url = await uploadFile(
               values.galleryFiles[index],
-              "inventors-investors-media/gallery",
+              "inventors-investors-media",
             );
             uploadedGallery.push(url);
             setUploadProgress(
@@ -691,6 +706,8 @@ export function useInventorsInvestorsData(user) {
           galleryUrls = Array.from(new Set([...existingGalleryUrls, ...uploadedGallery]));
         }
 
+        const publicContactFields = buildPublicContactFields(values);
+
         const optimisticProfile = {
           ...(profile || {}),
           user_id: user.id,
@@ -699,10 +716,7 @@ export function useInventorsInvestorsData(user) {
           avatar_url: avatarUrl,
           location: values.location.trim(),
           bio: values.shortPitch.trim(),
-          email: values.contactEmail.trim(),
-          phone: values.phoneNumber.trim(),
-          email_public: values.emailPublic,
-          phone_public: values.phonePublic,
+          ...publicContactFields,
           profile_completed: true,
           updated_at: nowIso(),
         };
@@ -727,7 +741,11 @@ export function useInventorsInvestorsData(user) {
 
         const syncResult = await saveFirebaseProfileAndAuth({
           userId: user.id,
-          profilePatch: optimisticProfile,
+          profilePatch: {
+            ...optimisticProfile,
+            email: deleteField(),
+            phone: deleteField(),
+          },
           authPatch: {
             displayName: optimisticProfile.full_name,
             photoURL: avatarUrl || undefined,
@@ -771,10 +789,7 @@ export function useInventorsInvestorsData(user) {
           avatar_url: avatarUrl,
           location: values.location.trim(),
           bio: values.shortPitch.trim(),
-          email: values.contactEmail.trim(),
-          phone: values.phoneNumber.trim(),
-          email_public: values.emailPublic,
-          phone_public: values.phonePublic,
+          ...buildPublicContactFields(values),
           profile_completed: true,
           updated_at: nowIso(),
         };

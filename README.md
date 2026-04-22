@@ -1,35 +1,57 @@
+<!-- markdownlint-disable MD026 -->
 # Life.
 
-A production-minded web app for curated reading on money, psychology, and philosophy — with quizzes, notes, bookmarks, and a community **Post-It** feed. Built with **Next.js** and **Supabase**, and ready to ship through **Vercel + GitHub**.
+A production-minded web app for curated reading on money, psychology, and philosophy — with quizzes, notes, bookmarks, profile customization, networking, and a community **Post-It** feed. Built with **Next.js** and **Firebase**, and ready to ship through **Vercel + GitHub**.
 
 ## Local development
 
 ```bash
 npm install
 cp .env.example .env.local
-# Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-# from your Supabase project (Settings -> API Keys)
+# Add the NEXT_PUBLIC_FIREBASE_* values from your Firebase project settings
 npm run dev
 ```
 
-Without env vars the shell still runs, but auth, cloud-synced library data, quiz stats, and Post-It stay offline.
+Without env vars the shell still runs, but auth, cloud-synced library data, quiz stats, profile sync, networking, Storage uploads, and Post-It stay offline.
 
-## Vercel + Supabase + GitHub setup
+## Vercel + Firebase + GitHub setup
 
 1. Import the GitHub repository into **Vercel** so pushes and pull requests create deployments automatically.
 2. In **Vercel → Project Settings → Environment Variables**, add:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   - `NEXT_PUBLIC_FIREBASE_API_KEY`
+   - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+   - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+   - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+   - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+   - `NEXT_PUBLIC_FIREBASE_APP_ID`
    - `NEXT_PUBLIC_SITE_URL` (your production origin, for example `https://life.example.com`)
-3. In **Supabase → Authentication → URL Configuration**:
-   - Set **Site URL** to the same production origin used in Vercel.
-   - Add `http://localhost:3000` to **Redirect URLs** for local auth flows.
-   - Add your Vercel production domain and any preview URL wildcard pattern you use for preview deployments.
-4. GitHub Actions now runs lint + build on pushes and pull requests, while Dependabot keeps npm packages and GitHub Actions dependencies moving.
+3. In **Firebase Authentication → Settings → Authorized domains**:
+   - Add your production Vercel domain.
+   - Add `localhost` for local development.
+   - Add any preview domains you want to support for sign-in testing.
+4. If you deploy Firestore / Storage rules from the repo, use the versioned files in the project root:
+   - `firebase.json`
+   - `firestore.rules`
+   - `firestore.indexes.json`
+   - `storage.rules`
+5. GitHub Actions runs lint + build on pushes and pull requests, while Dependabot keeps npm packages and GitHub Actions dependencies moving.
 
-## Supabase schema (expected)
+## Firebase data model (current)
 
-The app assumes tables such as `user_data`, `quiz_stats`, `posts`, `comments`, and `post_votes` with RLS appropriate for your security model. The `user_data` record is expected to hold fields like bookmarks, notes, read progress, momentum state, and saved reader highlights. The repo now includes additive Supabase migrations for those core tables.
+The app currently uses these Firestore collections:
+
+- `profiles` — shared account profile, avatar, role, onboarding/networking flags
+- `userData` — bookmarks, notes, read progress, highlights, momentum state, tailoring profile
+- `quizStats` — per-user quiz history and achievements
+- `posts`, `comments`, `postVotes` — community feed and voting
+- `investorProfiles`, `inventorProfiles`, `swipes`, `conversations`, `blockedUsers`, `reportedProfiles` — networking and messaging
+
+Firebase Storage is used for:
+
+- `profile-avatars/{userId}/...` — account avatars
+- `inventors-investors-media/{userId}/...` — networking media uploads
+
+The repo now includes versioned Firestore indexes and security rules for these collections.
 
 ## Scripts
 

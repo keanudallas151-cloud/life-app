@@ -4,9 +4,9 @@ Life is still in prototype phase. The project uses semantic versioning with a `v
 
 ## Canonical format
 
-- Git tag: `v0.7.0`
-- GitHub release title: `v0.7.0 - Firebase platform migration and release hardening`
-- `package.json` version: `0.7.0`
+- Git tag: `v0.7.1`
+- GitHub release title: `v0.7.1 - Firebase hardening and communication templates`
+- `package.json` version: `0.7.1`
 
 ## Prototype bump rules
 
@@ -17,7 +17,7 @@ Life is still in prototype phase. The project uses semantic versioning with a `v
 
 ## Release naming rules
 
-- Keep tags exact: `v0.7.0`
+- Keep tags exact: `v0.7.1`
 - Keep release titles short and readable.
 - Keep `package.json` aligned with the same numeric version, without the `v`
 - Avoid tiny release commits; prefer one commit per meaningful completed project batch.
@@ -43,7 +43,8 @@ Life is still in prototype phase. The project uses semantic versioning with a `v
 - `v0.6.10`: Mobile geometry and alignment polish
 - `v0.6.11`: Security scripts, secret scanning, and untrack guidance
 - `v0.7.0`: Firebase platform migration and release hardening
+- `v0.7.1`: Firebase hardening and communication templates
 
 ## Current target
 
-The current `main` branch should be treated as the `v0.7.0` prototype baseline, with `main_backup` kept aligned as the backup branch.
+The current `main` branch should be treated as the `v0.7.1` prototype baseline, with `main_backup` kept aligned as the backup branch.

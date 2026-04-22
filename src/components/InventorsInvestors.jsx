@@ -2,35 +2,46 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useInventorsInvestorsData } from "../hooks/useInventorsInvestorsData";
 import {
   clearDraft,
-  investorProfileDefaults,
   inventorProfileDefaults,
+  investorProfileDefaults,
   loadDraft,
   loadFeatureView,
   matchesSearch,
   saveDraft,
   saveFeatureView,
 } from "../utils/inventorsInvestors";
-import { EmptyState, FeatureFrame, PrimaryButton, SecondaryButton } from "./inventorsInvestors/InventorsInvestorsUI";
+import {
+  EmptyState,
+  FeatureFrame,
+  PrimaryButton,
+  SecondaryButton,
+} from "./inventorsInvestors/InventorsInvestorsUI";
+import { InventorProfileSetupPage } from "./inventorsInvestors/pages/InventorProfileSetupPage";
 import { InventorsInvestorsLandingPage } from "./inventorsInvestors/pages/InventorsInvestorsLandingPage";
 import { InventorsInvestorsMessagesPage } from "./inventorsInvestors/pages/InventorsInvestorsMessagesPage";
 import { InventorsInvestorsSwipePage } from "./inventorsInvestors/pages/InventorsInvestorsSwipePage";
-import { InventorProfileSetupPage } from "./inventorsInvestors/pages/InventorProfileSetupPage";
 import { InvestorProfileSetupPage } from "./inventorsInvestors/pages/InvestorProfileSetupPage";
 
-function mapInvestorForm(profile, investorProfile, userId) {
+function mapInvestorForm(profile, investorProfile, user, userId) {
   const base = loadDraft(userId, "investor", investorProfileDefaults);
   return {
     ...base,
     fullName: profile?.full_name || base.fullName,
     avatarPreviewUrl: profile?.avatar_url || base.avatarPreviewUrl,
     location: profile?.location || base.location,
-    contactEmail: profile?.email || base.contactEmail,
-    phoneNumber: profile?.phone || base.phoneNumber,
+    contactEmail: profile?.public_email || user?.email || base.contactEmail,
+    phoneNumber: profile?.public_phone || base.phoneNumber,
     shortBio: profile?.bio || base.shortBio,
-    investmentBudget: investorProfile?.investment_budget?.toString() || base.investmentBudget,
-    investmentRangeMin: investorProfile?.investment_range_min?.toString() || base.investmentRangeMin,
-    investmentRangeMax: investorProfile?.investment_range_max?.toString() || base.investmentRangeMax,
-    lookingToInvestIn: investorProfile?.looking_to_invest_in || base.lookingToInvestIn,
+    investmentBudget:
+      investorProfile?.investment_budget?.toString() || base.investmentBudget,
+    investmentRangeMin:
+      investorProfile?.investment_range_min?.toString() ||
+      base.investmentRangeMin,
+    investmentRangeMax:
+      investorProfile?.investment_range_max?.toString() ||
+      base.investmentRangeMax,
+    lookingToInvestIn:
+      investorProfile?.looking_to_invest_in || base.lookingToInvestIn,
     preferredIndustries: Array.isArray(investorProfile?.preferred_industries)
       ? investorProfile.preferred_industries.join(", ")
       : base.preferredIndustries,
@@ -40,21 +51,23 @@ function mapInvestorForm(profile, investorProfile, userId) {
   };
 }
 
-function mapInventorForm(profile, inventorProfile, userId) {
+function mapInventorForm(profile, inventorProfile, user, userId) {
   const base = loadDraft(userId, "inventor", inventorProfileDefaults);
   return {
     ...base,
     fullName: profile?.full_name || base.fullName,
     avatarPreviewUrl: profile?.avatar_url || base.avatarPreviewUrl,
     location: profile?.location || base.location,
-    contactEmail: profile?.email || base.contactEmail,
-    phoneNumber: profile?.phone || base.phoneNumber,
+    contactEmail: profile?.public_email || user?.email || base.contactEmail,
+    phoneNumber: profile?.public_phone || base.phoneNumber,
     inventionName: inventorProfile?.invention_name || base.inventionName,
     inventionType: inventorProfile?.invention_type || base.inventionType,
     description: inventorProfile?.description || base.description,
     revenue: inventorProfile?.revenue?.toString() || base.revenue,
-    equityAvailable: inventorProfile?.equity_available?.toString() || base.equityAvailable,
-    fundingSought: inventorProfile?.funding_sought?.toString() || base.fundingSought,
+    equityAvailable:
+      inventorProfile?.equity_available?.toString() || base.equityAvailable,
+    fundingSought:
+      inventorProfile?.funding_sought?.toString() || base.fundingSought,
     category: inventorProfile?.category || base.category,
     websiteUrl: inventorProfile?.website_url || base.websiteUrl,
     socialLinks: Array.isArray(inventorProfile?.social_links)
@@ -82,7 +95,10 @@ function loadActivityFeed(userId) {
 
 function saveActivityFeed(userId, items) {
   if (!userId || typeof window === "undefined") return;
-  window.localStorage.setItem(getActivityStorageKey(userId), JSON.stringify(items));
+  window.localStorage.setItem(
+    getActivityStorageKey(userId),
+    JSON.stringify(items),
+  );
 }
 
 function appendShellNotification(userEmail, entry) {
@@ -137,12 +153,34 @@ function ActivitySummaryBar({ t, feed, onOpenMessages, onClear }) {
           gap: 12,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+          }}
+        >
           <div>
-            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.8, textTransform: "uppercase", color: t.green }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: 1.8,
+                textTransform: "uppercase",
+                color: t.green,
+              }}
+            >
               Activity memory
             </div>
-            <div style={{ marginTop: 5, fontSize: 13, lineHeight: 1.55, color: t.mid }}>
+            <div
+              style={{
+                marginTop: 5,
+                fontSize: 13,
+                lineHeight: 1.55,
+                color: t.mid,
+              }}
+            >
               {latest.type === "match"
                 ? `${latest.name} was added as a fresh match.`
                 : `${latest.name} was added to your interest trail.`}
@@ -150,23 +188,49 @@ function ActivitySummaryBar({ t, feed, onOpenMessages, onClear }) {
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             {matchCount > 0 ? (
-              <div style={{ padding: "8px 10px", borderRadius: 999, background: `${t.green}14`, color: t.green, fontSize: 11, fontWeight: 800 }}>
+              <div
+                style={{
+                  padding: "8px 10px",
+                  borderRadius: 999,
+                  background: `${t.green}14`,
+                  color: t.green,
+                  fontSize: 11,
+                  fontWeight: 800,
+                }}
+              >
                 {matchCount} match{matchCount === 1 ? "" : "es"}
               </div>
             ) : null}
             {likedCount > 0 ? (
-              <div style={{ padding: "8px 10px", borderRadius: 999, background: `${t.ink}08`, color: t.ink, fontSize: 11, fontWeight: 800 }}>
+              <div
+                style={{
+                  padding: "8px 10px",
+                  borderRadius: 999,
+                  background: `${t.ink}08`,
+                  color: t.ink,
+                  fontSize: 11,
+                  fontWeight: 800,
+                }}
+              >
                 {likedCount} liked
               </div>
             ) : null}
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 10 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr auto auto",
+            gap: 10,
+          }}
+        >
           <PrimaryButton t={t} onClick={onOpenMessages}>
             Open messages
           </PrimaryButton>
-          <SecondaryButton t={t} onClick={onClear}>Clear</SecondaryButton>
+          <SecondaryButton t={t} onClick={onClear}>
+            Clear
+          </SecondaryButton>
         </div>
       </div>
     </div>
@@ -178,20 +242,71 @@ function MatchOverlay({ t, matchState, onClose, onOpenMessages }) {
   const isMatch = matchState.type === "match";
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1500, background: "rgba(0,0,0,0.68)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div style={{ width: "min(100%, 420px)", borderRadius: 28, background: "linear-gradient(180deg, rgba(7,7,7,0.98) 0%, rgba(18,18,18,0.98) 100%)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 28px 70px rgba(0,0,0,0.45)", padding: "24px 22px 22px", color: "#ffffff", textAlign: "center" }}>
-        <div style={{ fontSize: isMatch ? 38 : 30, lineHeight: 1, marginBottom: 10 }}>{isMatch ? "🔥" : "✓"}</div>
-        <div style={{ fontSize: isMatch ? 30 : 22, fontWeight: 800, letterSpacing: -0.6, lineHeight: 1.05 }}>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1500,
+        background: "rgba(0,0,0,0.68)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+      }}
+    >
+      <div
+        style={{
+          width: "min(100%, 420px)",
+          borderRadius: 28,
+          background:
+            "linear-gradient(180deg, rgba(7,7,7,0.98) 0%, rgba(18,18,18,0.98) 100%)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 28px 70px rgba(0,0,0,0.45)",
+          padding: "24px 22px 22px",
+          color: "#ffffff",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            fontSize: isMatch ? 38 : 30,
+            lineHeight: 1,
+            marginBottom: 10,
+          }}
+        >
+          {isMatch ? "🔥" : "✓"}
+        </div>
+        <div
+          style={{
+            fontSize: isMatch ? 30 : 22,
+            fontWeight: 800,
+            letterSpacing: -0.6,
+            lineHeight: 1.05,
+          }}
+        >
           {isMatch ? "It’s a match" : `You liked ${matchState.name}`}
         </div>
-        <div style={{ marginTop: 12, fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.76)" }}>
+        <div
+          style={{
+            marginTop: 12,
+            fontSize: 14,
+            lineHeight: 1.7,
+            color: "rgba(255,255,255,0.76)",
+          }}
+        >
           {isMatch
             ? `${matchState.name} looks aligned with your direction. Open messages and start the conversation while the interest is fresh.`
             : `${matchState.name} has been added to your interest trail. Keep swiping to build momentum.`}
         </div>
         <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
-          {isMatch ? <PrimaryButton t={t} onClick={onOpenMessages}>Open messages</PrimaryButton> : null}
-          <SecondaryButton t={t} onClick={onClose}>{isMatch ? "Keep browsing" : "Continue swiping"}</SecondaryButton>
+          {isMatch ? (
+            <PrimaryButton t={t} onClick={onOpenMessages}>
+              Open messages
+            </PrimaryButton>
+          ) : null}
+          <SecondaryButton t={t} onClick={onClose}>
+            {isMatch ? "Keep browsing" : "Continue swiping"}
+          </SecondaryButton>
         </div>
       </div>
     </div>
@@ -229,11 +344,17 @@ export function InventorsInvestors({ t, user, play, onSystemNotify }) {
   const [view, setView] = useState(() => loadFeatureView(userId));
   const [roleChoice, setRoleChoice] = useState(selectedRole || "");
   const [searchTerm, setSearchTerm] = useState("");
-  const [investorForm, setInvestorForm] = useState(() => mapInvestorForm(null, null, userId));
-  const [inventorForm, setInventorForm] = useState(() => mapInventorForm(null, null, userId));
+  const [investorForm, setInvestorForm] = useState(() =>
+    mapInvestorForm(null, null, user, userId),
+  );
+  const [inventorForm, setInventorForm] = useState(() =>
+    mapInventorForm(null, null, user, userId),
+  );
   const [roleSubmitting, setRoleSubmitting] = useState(false);
   const [matchState, setMatchState] = useState(null);
-  const [activityFeed, setActivityFeed] = useState(() => loadActivityFeed(userId));
+  const [activityFeed, setActivityFeed] = useState(() =>
+    loadActivityFeed(userId),
+  );
 
   useEffect(() => {
     setActivityFeed(loadActivityFeed(userId));
@@ -272,9 +393,9 @@ export function InventorsInvestors({ t, user, play, onSystemNotify }) {
 
   useEffect(() => {
     if (!userId || userId === "guest") return;
-    setInvestorForm(mapInvestorForm(profile, investorProfile, userId));
-    setInventorForm(mapInventorForm(profile, inventorProfile, userId));
-  }, [profile, investorProfile, inventorProfile, userId]);
+    setInvestorForm(mapInvestorForm(profile, investorProfile, user, userId));
+    setInventorForm(mapInventorForm(profile, inventorProfile, user, userId));
+  }, [profile, investorProfile, inventorProfile, user, userId]);
 
   useEffect(() => {
     if (!userId || userId === "guest") return;
@@ -440,7 +561,9 @@ export function InventorsInvestors({ t, user, play, onSystemNotify }) {
 
   const handleReport = async (targetUserId) => {
     play?.("tap");
-    const reason = window.prompt("Report reason", "Spam or misleading profile") || "User report";
+    const reason =
+      window.prompt("Report reason", "Spam or misleading profile") ||
+      "User report";
     const details = window.prompt("Extra detail (optional)", "") || "";
     await reportUser(targetUserId, reason, details);
   };
@@ -457,7 +580,11 @@ export function InventorsInvestors({ t, user, play, onSystemNotify }) {
     const file = files?.[0];
     if (!file) return;
     const previewUrl = URL.createObjectURL(file);
-    setForm((current) => ({ ...current, avatarFile: file, avatarPreviewUrl: previewUrl }));
+    setForm((current) => ({
+      ...current,
+      avatarFile: file,
+      avatarPreviewUrl: previewUrl,
+    }));
   };
 
   const handleGalleryChange = (files) => {
@@ -519,7 +646,12 @@ export function InventorsInvestors({ t, user, play, onSystemNotify }) {
             onSendMessage={sendMessage}
             sending={messageSending}
           />
-          <MatchOverlay t={t} matchState={matchState} onClose={() => setMatchState(null)} onOpenMessages={openMatchConversation} />
+          <MatchOverlay
+            t={t}
+            matchState={matchState}
+            onClose={() => setMatchState(null)}
+            onOpenMessages={openMatchConversation}
+          />
         </>
       );
 
@@ -527,8 +659,23 @@ export function InventorsInvestors({ t, user, play, onSystemNotify }) {
       return (
         <>
           <div>
-            <div style={{ width: "100%", maxWidth: 720, margin: "0 auto", padding: "12px 18px 0" }}>
-              <SecondaryButton t={t} onClick={() => { play?.("tap"); setView("landing"); }}>← Back</SecondaryButton>
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 720,
+                margin: "0 auto",
+                padding: "12px 18px 0",
+              }}
+            >
+              <SecondaryButton
+                t={t}
+                onClick={() => {
+                  play?.("tap");
+                  setView("landing");
+                }}
+              >
+                ← Back
+              </SecondaryButton>
             </div>
             <ActivitySummaryBar
               t={t}
@@ -552,15 +699,28 @@ export function InventorsInvestors({ t, user, play, onSystemNotify }) {
                 showSwipeFeedback(activeProfile);
                 createSwipe(activeProfile.user_id, "interested");
               }}
-              onPass={() => activeProfile && createSwipe(activeProfile.user_id, "pass")}
-              onStartChat={() => activeProfile && handleStartChat(activeProfile.user_id)}
-              onBlock={() => activeProfile && handleBlock(activeProfile.user_id)}
-              onReport={() => activeProfile && handleReport(activeProfile.user_id)}
+              onPass={() =>
+                activeProfile && createSwipe(activeProfile.user_id, "pass")
+              }
+              onStartChat={() =>
+                activeProfile && handleStartChat(activeProfile.user_id)
+              }
+              onBlock={() =>
+                activeProfile && handleBlock(activeProfile.user_id)
+              }
+              onReport={() =>
+                activeProfile && handleReport(activeProfile.user_id)
+              }
               onResetSearch={() => setSearchTerm("")}
               onCompleteProfile={handleCompleteProfileSetup}
             />
           </div>
-          <MatchOverlay t={t} matchState={matchState} onClose={() => setMatchState(null)} onOpenMessages={openMatchConversation} />
+          <MatchOverlay
+            t={t}
+            matchState={matchState}
+            onClose={() => setMatchState(null)}
+            onOpenMessages={openMatchConversation}
+          />
         </>
       );
 
@@ -575,7 +735,12 @@ export function InventorsInvestors({ t, user, play, onSystemNotify }) {
             onChooseRole={handleRoleContinue}
             onGoMessages={openMessages}
           />
-          <MatchOverlay t={t} matchState={matchState} onClose={() => setMatchState(null)} onOpenMessages={openMatchConversation} />
+          <MatchOverlay
+            t={t}
+            matchState={matchState}
+            onClose={() => setMatchState(null)}
+            onOpenMessages={openMatchConversation}
+          />
         </>
       );
   }
