@@ -293,11 +293,13 @@ export function NotesTab({
       </div>
       {showShare && (
         <>
-          <div
+          <button
+            type="button"
+            className="life-overlay-dismiss"
+            aria-label="Close share sheet"
+            onPointerDown={() => setShowShare(false)}
             onClick={() => setShowShare(false)}
             style={{
-              position: "fixed",
-              inset: 0,
               background: "rgba(0,0,0,0.4)",
               zIndex: 70,
               backdropFilter: "blur(2px)",

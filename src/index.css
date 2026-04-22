@@ -874,6 +874,18 @@ canvas {
   -webkit-overflow-scrolling: touch;
 }
 
+.life-overlay-dismiss {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Page content fade-in */
 [data-page-tag] {
   animation: life-page-in 0.18s ease-out both;

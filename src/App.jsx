@@ -986,6 +986,11 @@ export default function LifeApp() {
     loadNotificationsFor(uid),
   );
   const [showNotif, setShowNotif] = useState(false);
+  const closeTransientOverlays = useCallback(() => {
+    setShowSearch(false);
+    setShowNotif(false);
+    setSidebarOpen(false);
+  }, []);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const pushSystemNotification = useCallback(
@@ -1110,8 +1115,7 @@ export default function LifeApp() {
   }, [setPage]);
 
   useEffect(() => {
-    setShowSearch(false);
-    setShowNotif(false);
+    closeTransientOverlays();
 
     const scroller = mainScrollRef.current;
     if (scroller && typeof scroller.scrollTo === "function") {
@@ -1120,7 +1124,7 @@ export default function LifeApp() {
     }
 
     window.scrollTo({ top: 0, behavior: "auto" });
-  }, [page, screen]);
+  }, [closeTransientOverlays, page, screen]);
 
   useEffect(() => {
     if (page === "secret_sienna" || !secretSiennaUnlocked) return;
@@ -2375,7 +2379,11 @@ export default function LifeApp() {
       {/* P9c: Notification dropdown */}
       {showNotif && (
         <>
-          <div
+          <button
+            type="button"
+            className="life-overlay-dismiss"
+            aria-label="Close notifications"
+            onPointerDown={() => setShowNotif(false)}
             onClick={() => setShowNotif(false)}
             style={{ position: "fixed", inset: 0, zIndex: 69 }}
           />
@@ -2977,8 +2985,14 @@ export default function LifeApp() {
         }}
       >
         {sidebarOpen && (
-          <div
+          <button
+            type="button"
             className="life-sidebar-backdrop"
+            aria-label="Close sidebar"
+            onPointerDown={() => {
+              play("back");
+              setSidebarOpen(false);
+            }}
             onClick={() => {
               play("back");
               setSidebarOpen(false);
