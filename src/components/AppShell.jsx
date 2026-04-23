@@ -63,108 +63,106 @@ export function SS({
   playFn,
   onLabelClick,
   active = false,
+  icon,
 }) {
   const th = theme || C;
+  const iosfont = "-apple-system, SF Pro Display, Helvetica Neue, Arial, sans-serif";
   return (
-    <div
-      data-page-tag={tag}
-      style={{
-        borderTop: `1px solid ${th.border}22`,
-      }}
-    >
-      <div
-        className="life-sidebar-section-header"
+    <div data-page-tag={tag} style={{ margin: "2px 8px" }}>
+      {/* Folder header row */}
+      <button
+        type="button"
+        onClick={() => {
+          playFn("tap");
+          if (onLabelClick) {
+            setOpen(true);
+            onLabelClick();
+            return;
+          }
+          setOpen(!open);
+        }}
         style={{
           display: "flex",
           alignItems: "center",
           width: "100%",
-          padding: "8px 14px",
-          gap: 8,
+          padding: "10px 10px 10px 12px",
+          gap: 10,
+          background: open ? `${th.green}0d` : "transparent",
+          border: "none",
+          borderRadius: 12,
+          cursor: "pointer",
+          WebkitTapHighlightColor: "transparent",
+          transition: "background 0.18s ease",
+          minHeight: 46,
+          userSelect: "none",
         }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = `rgba(255,255,255,0.05)`; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = open ? `${th.green}0d` : "transparent"; }}
       >
-        <button
-          type="button"
-          onClick={() => {
-            playFn("tap");
-            if (onLabelClick) {
-              setOpen(true);
-              onLabelClick();
-              return;
-            }
-            setOpen(!open);
-          }}
+        {/* Folder icon pill */}
+        <span
           style={{
-            color: active ? th.green : th.muted,
-            fontSize: 9,
-            fontWeight: 700,
-            letterSpacing: 2,
-            margin: 0,
-            textTransform: "uppercase",
+            width: 28, height: 28, borderRadius: 7,
+            background: open ? `${th.green}22` : "rgba(255,255,255,0.07)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+            transition: "background 0.18s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1)",
+            transform: open ? "scale(1.08)" : "scale(1)",
+          }}
+          aria-hidden
+        >
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke={open ? th.green : th.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 4.5C2 3.67 2.67 3 3.5 3H6.4l1.2 1.5H12.5C13.33 4.5 14 5.17 14 6v6c0 .83-.67 1.5-1.5 1.5h-9C2.67 13.5 2 12.83 2 12V4.5Z"/>
+          </svg>
+        </span>
+
+        {/* Label */}
+        <span
+          style={{
+            color: open ? th.green : th.muted,
+            fontSize: 12,
+            fontWeight: open ? 700 : 600,
+            letterSpacing: "0.03em",
             flex: 1,
             textAlign: "left",
-            fontFamily: "Georgia,serif",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            minHeight: 44,
-            padding: "0 0 0 6px",
+            fontFamily: iosfont,
+            transition: "color 0.18s ease",
           }}
         >
           {label}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            playFn("tap");
-            setOpen(!open);
-          }}
+        </span>
+
+        {/* Chevron */}
+        <svg
+          width="14" height="14" viewBox="0 0 16 16" fill="none"
+          stroke={open ? th.green : th.muted}
+          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 32,
-            height: 32,
-            minHeight: 32,
-            padding: 0,
-            border: `1px solid ${th.border}44`,
-            borderRadius: 8,
-            background: "transparent",
-            cursor: "pointer",
+            transform: open ? "rotate(90deg)" : "rotate(0deg)",
+            transition: "transform 0.22s cubic-bezier(0.25,1,0.5,1), stroke 0.18s ease",
             flexShrink: 0,
-            marginRight: 4,
           }}
-          aria-label={open ? `Collapse ${label}` : `Expand ${label}`}
         >
-          <svg
-            width="9"
-            height="9"
-            viewBox="0 0 10 10"
-            style={{
-              transform: open ? "rotate(90deg)" : "none",
-              transition: "transform 0.18s ease",
-              flexShrink: 0,
-            }}
-          >
-            <polyline
-              points="2,2 8,5 2,8"
-              fill="none"
-              stroke={th.muted}
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+          <polyline points="5,3 11,8 5,13"/>
+        </svg>
+      </button>
+
+      {/* Animated children */}
+      <div
+        className={`ios-folder-body${open ? " open" : ""}`}
+        style={{ paddingLeft: 8 }}
+      >
+        <div>{open && children}</div>
       </div>
-      {open && children}
     </div>
   );
 }
 
-// Props: label, icon, onClick, active, theme
+
 export function SL({ label, icon, onClick, active, theme }) {
   const th = theme || C;
   const Icon = icon && typeof Ic[icon] === "function" ? Ic[icon] : null;
+  const iosfont = "-apple-system, SF Pro Text, Helvetica Neue, Arial, sans-serif";
   return (
     <button
       className="life-sidebar-link"
@@ -174,16 +172,39 @@ export function SL({ label, icon, onClick, active, theme }) {
         alignItems: "center",
         gap: 10,
         width: "100%",
-        padding: "8px 14px 8px 18px",
-        background: active ? `${th.green}14` : "transparent",
+        padding: "9px 12px 9px 12px",
+        background: active ? `${th.green}16` : "transparent",
         border: "none",
-        borderLeft: active ? `2.5px solid ${th.green}` : "2.5px solid transparent",
+        borderRadius: 10,
         cursor: "pointer",
         textAlign: "left",
-        fontFamily: "Georgia,serif",
-        transition: "background 0.15s",
+        fontFamily: iosfont,
+        transition: "background 0.15s ease, transform 0.12s cubic-bezier(0.34,1.56,0.64,1)",
+        WebkitTapHighlightColor: "transparent",
+        minHeight: 42,
+        position: "relative",
       }}
+      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+      onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}
+      onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.97)"; }}
+      onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
     >
+      {/* Active indicator pill */}
+      {active && (
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: 0,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 3,
+            height: 18,
+            borderRadius: "0 2px 2px 0",
+            background: th.green,
+          }}
+        />
+      )}
       {Icon && (
         <span
           aria-hidden
@@ -191,18 +212,32 @@ export function SL({ label, icon, onClick, active, theme }) {
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 20,
-            height: 20,
+            width: 24,
+            height: 24,
+            borderRadius: 7,
+            background: active ? `${th.green}20` : "rgba(255,255,255,0.06)",
             color: active ? th.green : th.muted,
             flexShrink: 0,
+            transition: "background 0.18s ease",
           }}
         >
-          {Icon("none", active ? th.green : th.muted, 17)}
+          {Icon("none", active ? th.green : th.muted, 15)}
         </span>
       )}
-      <span style={{ fontSize: 13, color: active ? th.green : th.muted, flex: 1, fontWeight: active ? 700 : 500 }}>
+      <span style={{
+        fontSize: 13.5, color: active ? th.green : th.mid || "#c9c9c9",
+        flex: 1, fontWeight: active ? 600 : 400,
+        fontFamily: iosfont,
+        letterSpacing: active ? "-0.01em" : "0",
+        transition: "color 0.18s ease",
+      }}>
         {label}
       </span>
+      {active && (
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke={th.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="2,2 10,6 2,10"/>
+        </svg>
+      )}
     </button>
   );
 }

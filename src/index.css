@@ -2747,57 +2747,64 @@ button:active:not(:disabled),
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 4px;
     border: none;
     background: transparent;
     cursor: pointer;
-    padding: 8px 4px;
-    font-family: var(--life-font);
+    padding: 8px 4px 6px;
+    font-family: -apple-system, SF Pro Text, Helvetica Neue, Arial, sans-serif;
     -webkit-tap-highlight-color: transparent;
-    min-height: 44px;
+    min-height: 48px;
     position: relative;
-    transition: transform 0.14s var(--life-ease-soft);
+    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+    user-select: none;
   }
 
   .life-bottom-nav-item:active {
-    transform: scale(0.92) !important;
+    transform: scale(0.88) !important;
   }
 
   .life-bottom-nav-item svg {
     flex-shrink: 0;
-    transition: transform 0.22s var(--life-ease-soft);
+    transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s ease;
   }
 
   .life-bottom-nav-item--active svg {
-    transform: translateY(-1px) scale(1.05);
+    transform: scale(1.15) translateY(-1px);
   }
 
   .life-bottom-nav-item--active::after {
     content: "";
     position: absolute;
-    top: 6px;
+    top: 5px;
     left: 50%;
     transform: translateX(-50%);
-    width: 20px;
+    width: 24px;
     height: 3px;
     border-radius: 999px;
-    background: linear-gradient(90deg, #4a8c5c, #6FBE77);
-    box-shadow: 0 1px 3px rgba(74, 140, 92, 0.4);
-    animation: life-nav-pill 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    background: linear-gradient(90deg, #38d87a, #50c878);
+    box-shadow: 0 1px 6px rgba(80,200,120,0.5);
+    animation: life-nav-pill 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   @keyframes life-nav-pill {
-    0%   { transform: translateX(-50%) scaleX(0.2); opacity: 0; }
+    0%   { transform: translateX(-50%) scaleX(0.1); opacity: 0; }
+    60%  { transform: translateX(-50%) scaleX(1.15); opacity: 1; }
     100% { transform: translateX(-50%) scaleX(1); opacity: 1; }
   }
 
   .life-bottom-nav-label {
-    font-size: 9.5px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    transition: color 0.2s ease;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    transition: color 0.2s ease, font-weight 0.15s ease;
     line-height: 1;
+    font-family: -apple-system, SF Pro Text, Helvetica Neue, Arial, sans-serif;
+  }
+
+  .life-bottom-nav-item--active .life-bottom-nav-label {
+    font-weight: 600;
   }
 
   .life-bottom-nav-badge {
@@ -4119,3 +4126,813 @@ body.life-organized-active [data-life-topbar],
 body.life-organized-active [data-life-chrome] {
   display: none !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   iOS SYSTEM UPGRADE — Premium feel, refined animations, SF Pro aesthetics
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── iOS Font Stack ─────────────────────────────────────────────────────── */
+:root {
+  --ios-font: -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --ios-font-rounded: -apple-system, "SF Pro Rounded", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  --ios-mono: "SF Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+
+  /* iOS spacing scale */
+  --ios-spacing-xs: 4px;
+  --ios-spacing-sm: 8px;
+  --ios-spacing-md: 16px;
+  --ios-spacing-lg: 24px;
+  --ios-spacing-xl: 32px;
+
+  /* iOS radius scale */
+  --ios-radius-sm: 8px;
+  --ios-radius-md: 12px;
+  --ios-radius-lg: 16px;
+  --ios-radius-xl: 20px;
+  --ios-radius-full: 9999px;
+  --ios-radius-sheet: 22px;
+
+  /* iOS spring easing */
+  --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ios-spring-soft: cubic-bezier(0.25, 1, 0.5, 1);
+  --ios-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ios-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Blur values */
+  --ios-blur-nav: blur(20px) saturate(180%);
+  --ios-blur-card: blur(12px) saturate(160%);
+}
+
+/* ─── Global Button Polish ──────────────────────────────────────────────── */
+button {
+  font-family: var(--ios-font) !important;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ─── iOS Haptic Press Animation ────────────────────────────────────────── */
+@keyframes ios-press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ios-bounce-in {
+  0%   { transform: scale(0.85) translateY(4px); opacity: 0; }
+  60%  { transform: scale(1.04) translateY(-1px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes ios-tick-draw {
+  0%   { stroke-dashoffset: 20; opacity: 0.4; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes ios-check-pop {
+  0%   { transform: scale(0); opacity: 0; }
+  50%  { transform: scale(1.3); opacity: 1; }
+  75%  { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ios-slide-down {
+  from { opacity: 0; transform: translateY(-8px) scaleY(0.96); }
+  to   { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+@keyframes ios-slide-up-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ios-fade-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ios-shimmer-sweep {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes ios-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0px rgba(80,200,120,0.3); }
+  50%       { box-shadow: 0 0 0 6px rgba(80,200,120,0); }
+}
+
+@keyframes ios-row-complete {
+  0%   { background: transparent; }
+  40%  { background: rgba(80,200,120,0.15); }
+  100% { background: transparent; }
+}
+
+@keyframes ios-task-enter {
+  from { opacity: 0; transform: translateX(-12px) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes ios-task-leave {
+  from { opacity: 1; transform: scale(1); max-height: 80px; margin-bottom: 8px; }
+  to   { opacity: 0; transform: scale(0.92) translateX(20px); max-height: 0; margin-bottom: 0; padding: 0; }
+}
+
+@keyframes ios-ripple {
+  from { transform: scale(0); opacity: 0.4; }
+  to   { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes ios-nav-tap {
+  0%   { transform: scale(1) translateY(0); }
+  30%  { transform: scale(0.88) translateY(2px); }
+  70%  { transform: scale(1.08) translateY(-2px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* ─── iOS Card Style ─────────────────────────────────────────────────────── */
+.ios-card {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: var(--ios-blur-card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--ios-radius-xl);
+  transition: transform 0.18s var(--ios-spring-soft), box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+.ios-card:active {
+  transform: scale(0.975);
+}
+
+/* ─── iOS Primary Button ─────────────────────────────────────────────────── */
+.ios-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 13px 22px;
+  background: #50c878;
+  color: #000;
+  border: none;
+  border-radius: var(--ios-radius-full);
+  font-family: var(--ios-font) !important;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  min-height: 50px;
+  transition: 
+    transform 0.15s var(--ios-spring),
+    box-shadow 0.2s ease,
+    background 0.15s ease,
+    filter 0.15s ease;
+  box-shadow: 0 2px 12px rgba(80,200,120,0.35), 0 1px 0 rgba(255,255,255,0.15) inset;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.ios-btn-primary:hover {
+  transform: scale(1.02) translateY(-1px);
+  box-shadow: 0 6px 20px rgba(80,200,120,0.45), 0 1px 0 rgba(255,255,255,0.2) inset;
+}
+
+.ios-btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 1px 6px rgba(80,200,120,0.25);
+}
+
+/* ─── iOS Secondary Button ───────────────────────────────────────────────── */
+.ios-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 20px;
+  background: rgba(255,255,255,0.07);
+  color: #ededed;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--ios-radius-full);
+  font-family: var(--ios-font) !important;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 46px;
+  transition: transform 0.15s var(--ios-spring), background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(8px);
+}
+
+.ios-btn-secondary:active {
+  transform: scale(0.96);
+  background: rgba(255,255,255,0.12);
+}
+
+/* ─── iOS Tinted Pill Button ─────────────────────────────────────────────── */
+.ios-btn-tint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 9px 16px;
+  background: rgba(80,200,120,0.15);
+  color: #50c878;
+  border: 1px solid rgba(80,200,120,0.2);
+  border-radius: var(--ios-radius-full);
+  font-family: var(--ios-font) !important;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 36px;
+  transition: transform 0.14s var(--ios-spring), background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ios-btn-tint:active {
+  transform: scale(0.93);
+  background: rgba(80,200,120,0.25);
+}
+
+/* ─── iOS Checkbox ───────────────────────────────────────────────────────── */
+.ios-checkbox-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.ios-checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.22s var(--ios-spring),
+    border-color 0.22s ease,
+    transform 0.18s var(--ios-spring),
+    box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ios-checkbox.checked {
+  background: #50c878;
+  border-color: #50c878;
+  box-shadow: 0 0 0 3px rgba(80,200,120,0.2);
+  animation: ios-check-pop 0.3s var(--ios-spring) both;
+}
+
+.ios-checkbox .ios-checkmark {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  transition: stroke-dashoffset 0.22s ease 0.05s;
+}
+
+.ios-checkbox.checked .ios-checkmark {
+  stroke-dashoffset: 0;
+  animation: ios-tick-draw 0.25s ease 0.08s both;
+}
+
+/* ─── iOS Todo Row ───────────────────────────────────────────────────────── */
+.ios-todo-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 3px 14px 3px 4px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--ios-radius-lg);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.18s var(--ios-spring-soft),
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+  animation: ios-task-enter 0.28s var(--ios-spring-soft) both;
+  will-change: transform;
+  position: relative;
+  overflow: hidden;
+}
+
+.ios-todo-row:active {
+  transform: scale(0.988);
+}
+
+.ios-todo-row.completed {
+  background: rgba(80,200,120,0.06);
+  border-color: rgba(80,200,120,0.15);
+}
+
+.ios-todo-row.completing {
+  animation: ios-row-complete 0.45s ease both;
+}
+
+.ios-todo-row .ios-swipe-delete {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 72px;
+  background: #e5484d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(100%);
+  transition: transform 0.2s ease;
+  border-radius: 0 var(--ios-radius-lg) var(--ios-radius-lg) 0;
+}
+
+/* ─── iOS Input ──────────────────────────────────────────────────────────── */
+.ios-input {
+  font-family: var(--ios-font) !important;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: var(--ios-radius-lg);
+  color: #ededed;
+  font-size: 16px; /* prevents iOS zoom */
+  padding: 13px 16px;
+  min-height: 50px;
+  width: 100%;
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.ios-input:focus {
+  border-color: #50c878;
+  background: rgba(80,200,120,0.05);
+  box-shadow: 0 0 0 3px rgba(80,200,120,0.12);
+}
+
+.ios-input::placeholder {
+  color: rgba(161,161,161,0.6);
+}
+
+/* ─── iOS Section Header ─────────────────────────────────────────────────── */
+.ios-section-label {
+  font-family: var(--ios-font) !important;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(161,161,161,0.7);
+  padding: 16px 16px 6px;
+}
+
+/* ─── iOS Sidebar Section (folder/accordion) ─────────────────────────────── */
+.ios-sidebar-folder {
+  border-radius: var(--ios-radius-md);
+  margin: 2px 8px;
+  overflow: hidden;
+  transition: background 0.18s ease;
+}
+
+.ios-sidebar-folder-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 11px 12px 11px 14px;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: var(--ios-radius-md);
+  transition: background 0.15s ease;
+  min-height: 46px;
+  position: relative;
+}
+
+.ios-sidebar-folder-header:active {
+  background: rgba(255,255,255,0.06);
+}
+
+.ios-sidebar-folder-header.active-folder {
+  background: rgba(80,200,120,0.1);
+}
+
+.ios-folder-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.07);
+  flex-shrink: 0;
+  transition: background 0.18s ease, transform 0.18s var(--ios-spring);
+}
+
+.ios-sidebar-folder-header.active-folder .ios-folder-icon {
+  background: rgba(80,200,120,0.2);
+}
+
+.ios-folder-chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: rgba(161,161,161,0.5);
+  transition: transform 0.22s var(--ios-spring-soft), color 0.18s ease;
+}
+
+.ios-folder-chevron.open {
+  transform: rotate(90deg);
+  color: #50c878;
+}
+
+.ios-folder-children {
+  overflow: hidden;
+  transition: 
+    max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s ease;
+}
+
+.ios-folder-children.open {
+  animation: ios-slide-down 0.28s var(--ios-spring-soft) both;
+}
+
+/* ─── iOS Progress Bar ───────────────────────────────────────────────────── */
+.ios-progress-track {
+  height: 6px;
+  border-radius: var(--ios-radius-full);
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.ios-progress-fill {
+  height: 100%;
+  border-radius: var(--ios-radius-full);
+  background: linear-gradient(90deg, #50c878 0%, #38d87a 50%, #50c878 100%);
+  background-size: 200% 100%;
+  transition: width 0.4s var(--ios-spring-soft);
+}
+
+.ios-progress-fill.animated {
+  animation: ios-shimmer-sweep 2s linear infinite;
+}
+
+/* ─── iOS Bottom Nav Enhancement ─────────────────────────────────────────── */
+.ios-nav-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #50c878;
+  margin: 0 auto;
+  margin-top: 2px;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.2s ease, transform 0.22s var(--ios-spring);
+}
+
+.life-bottom-nav-item--active .ios-nav-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─── iOS Active Tap State on Nav Items ─────────────────────────────────── */
+.life-bottom-nav-item:active svg,
+.life-bottom-nav-item:active .life-bottom-nav-label {
+  animation: ios-nav-tap 0.32s var(--ios-spring) both;
+}
+
+/* ─── iOS Segmented Control ──────────────────────────────────────────────── */
+.ios-segment-control {
+  display: inline-flex;
+  background: rgba(255,255,255,0.07);
+  border-radius: var(--ios-radius-md);
+  padding: 2px;
+  gap: 0;
+}
+
+.ios-segment-btn {
+  flex: 1;
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-family: var(--ios-font) !important;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(161,161,161,0.8);
+  cursor: pointer;
+  transition: 
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s var(--ios-spring);
+  min-height: 34px;
+  white-space: nowrap;
+}
+
+.ios-segment-btn.active {
+  background: rgba(255,255,255,0.12);
+  color: #ededed;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3), 0 0px 1px rgba(255,255,255,0.1) inset;
+}
+
+.ios-segment-btn:active {
+  transform: scale(0.94);
+}
+
+/* ─── iOS Badge ──────────────────────────────────────────────────────────── */
+.ios-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #e5484d;
+  color: white;
+  border-radius: var(--ios-radius-full);
+  font-family: var(--ios-font) !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  animation: ios-bounce-in 0.35s var(--ios-spring) both;
+}
+
+/* ─── iOS List Separator ─────────────────────────────────────────────────── */
+.ios-list-sep {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin-left: 54px;
+}
+
+/* ─── iOS Sheet / Modal ──────────────────────────────────────────────────── */
+.ios-sheet {
+  border-radius: var(--ios-radius-sheet) var(--ios-radius-sheet) 0 0;
+  background: rgba(22,22,22,0.95);
+  backdrop-filter: var(--ios-blur-nav);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  animation: ios-slide-up-in 0.32s var(--ios-spring-soft) both;
+}
+
+/* ─── iOS Frosted Glass ──────────────────────────────────────────────────── */
+.ios-glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ─── iOS Pull Handle ────────────────────────────────────────────────────── */
+.ios-pull-handle {
+  width: 36px;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  margin: 8px auto 0;
+}
+
+/* ─── iOS Grouped List ───────────────────────────────────────────────────── */
+.ios-grouped-list {
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--ios-radius-xl);
+  border: 1px solid rgba(255,255,255,0.07);
+  overflow: hidden;
+}
+
+.ios-grouped-list-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 16px;
+  gap: 12px;
+  min-height: 52px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.ios-grouped-list-row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 52px; right: 0;
+  height: 0.5px;
+  background: rgba(255,255,255,0.06);
+}
+
+.ios-grouped-list-row:active {
+  background: rgba(255,255,255,0.06);
+}
+
+/* ─── Floating Action Button ─────────────────────────────────────────────── */
+.ios-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #50c878;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(80,200,120,0.45), 0 2px 4px rgba(0,0,0,0.3);
+  transition:
+    transform 0.18s var(--ios-spring),
+    box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ios-fab:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 8px 28px rgba(80,200,120,0.55), 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.ios-fab:active {
+  transform: scale(0.93);
+  box-shadow: 0 2px 10px rgba(80,200,120,0.3);
+  animation: ios-glow-pulse 0.4s ease both;
+}
+
+/* ─── iOS Blur Nav Bar ───────────────────────────────────────────────────── */
+@supports (backdrop-filter: blur(20px)) {
+  .life-bottom-nav {
+    backdrop-filter: var(--ios-blur-nav) !important;
+    -webkit-backdrop-filter: var(--ios-blur-nav) !important;
+    background: rgba(10,10,10,0.75) !important;
+  }
+
+  body.life-dark .life-bottom-nav,
+  .life-bottom-nav-dark {
+    background: rgba(0,0,0,0.8) !important;
+    backdrop-filter: var(--ios-blur-nav) !important;
+    -webkit-backdrop-filter: var(--ios-blur-nav) !important;
+  }
+}
+
+/* ─── iOS nav icon spring ─────────────────────────────────────────────────── */
+.life-bottom-nav-item svg {
+  transition: transform 0.22s var(--ios-spring-soft);
+}
+
+.life-bottom-nav-item--active svg {
+  transform: scale(1.1);
+}
+
+/* ─── iOS Stagger List Animation ─────────────────────────────────────────── */
+@keyframes ios-list-item-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ios-stagger > *:nth-child(1)  { animation: ios-list-item-in 0.26s 0.00s var(--ios-spring-soft) both; }
+.ios-stagger > *:nth-child(2)  { animation: ios-list-item-in 0.26s 0.04s var(--ios-spring-soft) both; }
+.ios-stagger > *:nth-child(3)  { animation: ios-list-item-in 0.26s 0.08s var(--ios-spring-soft) both; }
+.ios-stagger > *:nth-child(4)  { animation: ios-list-item-in 0.26s 0.12s var(--ios-spring-soft) both; }
+.ios-stagger > *:nth-child(5)  { animation: ios-list-item-in 0.26s 0.16s var(--ios-spring-soft) both; }
+.ios-stagger > *:nth-child(6)  { animation: ios-list-item-in 0.26s 0.19s var(--ios-spring-soft) both; }
+.ios-stagger > *:nth-child(n+7){ animation: ios-list-item-in 0.26s 0.22s var(--ios-spring-soft) both; }
+
+/* ─── iOS Color Swatch Selector ──────────────────────────────────────────── */
+.ios-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.18s var(--ios-spring),
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ios-swatch:active { transform: scale(0.88); }
+.ios-swatch.selected {
+  border-color: #50c878;
+  box-shadow: 0 0 0 3px rgba(80,200,120,0.3);
+  transform: scale(1.1);
+}
+
+/* ─── Smooth Sidebar Folder expand/collapse ───────────────────────────────── */
+.ios-folder-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ios-folder-body.open {
+  grid-template-rows: 1fr;
+}
+.ios-folder-body > div {
+  overflow: hidden;
+}
+
+/* ─── iOS Reachability Scroll Hint ───────────────────────────────────────── */
+@keyframes ios-scroll-hint {
+  0%   { opacity: 0; transform: translateY(-4px); }
+  50%  { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(4px); }
+}
+
+/* ─── High quality text rendering ────────────────────────────────────────── */
+.ios-display-text {
+  font-family: var(--ios-font) !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* ─── Notch / Dynamic Island padding ─────────────────────────────────────── */
+.ios-notch-pad {
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL iOS POLISH — applied on top of everything
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Globally improve all buttons to feel iOS-crisp */
+button {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Sidebar section headers — iOS folder style */
+.life-sidebar-section-header > button {
+  font-family: -apple-system, SF Pro Display, Helvetica Neue, Arial, sans-serif !important;
+}
+
+/* Make all sidebar links use SF Pro */
+.life-sidebar-link {
+  font-family: -apple-system, SF Pro Text, Helvetica Neue, Arial, sans-serif !important;
+}
+
+/* iOS-style smooth scrolling */
+.life-main-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Progress bar smooth fill animation */
+@keyframes ios-progress-grow {
+  from { width: 0%; }
+}
+
+/* Smooth expand for ios-folder-body (grid trick) */
+.ios-folder-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ios-folder-body.open {
+  grid-template-rows: 1fr;
+}
+.ios-folder-body > div {
+  overflow: hidden;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(80,200,120,0.28);
+  color: inherit;
+}
+
+/* Scrollbar in sidebar — ultra thin iOS-style */
+.life-sidebar-body::-webkit-scrollbar {
+  width: 3px !important;
+}
+.life-sidebar-body::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.life-sidebar-body::-webkit-scrollbar-thumb {
+  background: rgba(80,200,120,0.25) !important;
+  border-radius: 999px !important;
+}
+
+/* Input focus ring — iOS blue replaced with green */
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(80,200,120,0.5) !important;
+  outline-offset: 1px !important;
+}
+
+/* ── iOS spring for all .life-card-hover ── */
+.life-card-hover {
+  transition:
+    transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.22s ease,
+    border-color 0.2s ease !important;
+}
+
+@media (hover: hover) {
+  .life-card-hover:hover {
+    transform: translateY(-2px) scale(1.005) !important;
+  }
+}
+
+.life-card-hover:active {
+  transform: scale(0.975) !important;
+  transition: transform 0.1s ease !important;
+}
+
