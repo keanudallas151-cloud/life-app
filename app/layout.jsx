@@ -1,7 +1,11 @@
 import '../src/index.css'
+import CanonicalHostRedirect from './CanonicalHostRedirect'
+
+const CANONICAL_SITE_URL = 'https://life-ten-green.vercel.app';
 
 const siteUrlCandidates = [
   process.env.NEXT_PUBLIC_SITE_URL,
+  CANONICAL_SITE_URL,
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
   'http://localhost:3000',
 ].filter(Boolean);
@@ -139,7 +143,10 @@ export default function RootLayout({ children }) {
           }
         `}</style>
       </head>
-      <body>{children}</body>
+      <body>
+        <CanonicalHostRedirect canonicalSiteUrl={siteUrl} />
+        {children}
+      </body>
     </html>
   )
 }
