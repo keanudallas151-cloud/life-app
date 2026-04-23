@@ -847,33 +847,33 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
       {session && (
         <section style={{ display: "grid", gap: 20 }}>
           <style>{`
-            @keyframes llGlow {
+            @keyframes lockInGlow {
               0%, 100% { opacity: 0.45; transform: scale(1); }
               50%       { opacity: 0.85; transform: scale(1.08); }
             }
-            @keyframes llGrain1 {
+            @keyframes lockInGrain1 {
               0%   { transform: translateY(0px);   opacity: 0; }
               8%   { opacity: 1; }
               85%  { opacity: 0.9; }
               100% { transform: translateY(56px);  opacity: 0; }
             }
-            @keyframes llGrain2 {
+            @keyframes lockInGrain2 {
               0%   { transform: translateY(0px);   opacity: 0; }
               12%  { opacity: 0.8; }
               82%  { opacity: 0.7; }
               100% { transform: translateY(52px);  opacity: 0; }
             }
-            @keyframes llGrain3 {
+            @keyframes lockInGrain3 {
               0%   { transform: translateY(0px);   opacity: 0; }
               6%   { opacity: 0.9; }
               88%  { opacity: 0.6; }
               100% { transform: translateY(60px);  opacity: 0; }
             }
-            @keyframes llShimmer {
+            @keyframes lockInShimmer {
               0%, 100% { opacity: 0.10; }
               50%       { opacity: 0.22; }
             }
-            @keyframes llComplete {
+            @keyframes lockInComplete {
               0%   { transform: rotate(0deg); }
               35%  { transform: rotate(185deg); }
               50%  { transform: rotate(176deg); }
@@ -886,7 +886,7 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
               filter: drop-shadow(0 4px 16px rgba(0,0,0,0.10));
             }
             .life-lockin-hourglass.is-complete {
-              animation: llComplete 1.4s cubic-bezier(.4,0,.2,1) forwards;
+              animation: lockInComplete 1.4s cubic-bezier(.4,0,.2,1) forwards;
             }
             @media (prefers-reduced-motion: reduce) {
               .life-lockin-hourglass,
@@ -969,7 +969,7 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
                     borderRadius: "50%",
                     background: `radial-gradient(ellipse 60% 55% at 50% 52%, ${t.green}28 0%, transparent 70%)`,
                     animation: !session.isComplete
-                      ? "llGlow 3.6s ease-in-out infinite"
+                      ? "lockInGlow 3.6s ease-in-out infinite"
                       : "none",
                   }}
                 />
@@ -984,56 +984,56 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
                 >
                   <defs>
                     {/* Top-bulb clip path (matches frame curve) */}
-                    <clipPath id="llTopBulb">
+                    <clipPath id="lockInTopBulb">
                       <polygon points="38,34 162,34 111,122 89,122" />
                     </clipPath>
                     {/* Bottom-bulb clip path */}
-                    <clipPath id="llBottomBulb">
+                    <clipPath id="lockInBottomBulb">
                       <polygon points="89,132 111,132 162,218 38,218" />
                     </clipPath>
 
                     {/* Sand gradient — horizontal depth */}
-                    <linearGradient id="llSandH" x1="0" y1="0" x2="1" y2="0">
+                    <linearGradient id="lockInSandH" x1="0" y1="0" x2="1" y2="0">
                       <stop offset="0%"   stopColor={t.green} stopOpacity="0.75" />
                       <stop offset="35%"  stopColor={t.green} stopOpacity="1" />
                       <stop offset="65%"  stopColor={t.green} stopOpacity="1" />
                       <stop offset="100%" stopColor={t.green} stopOpacity="0.70" />
                     </linearGradient>
                     {/* Sand gradient — vertical shading */}
-                    <linearGradient id="llSandV" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="lockInSandV" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%"   stopColor={t.green} stopOpacity="0.88" />
                       <stop offset="100%" stopColor={t.green} stopOpacity="1" />
                     </linearGradient>
                     {/* Bottom sand glow gradient */}
-                    <radialGradient id="llSandGlow" cx="50%" cy="0%" r="60%">
+                    <radialGradient id="lockInSandGlow" cx="50%" cy="0%" r="60%">
                       <stop offset="0%"   stopColor={t.green} stopOpacity="0.55" />
                       <stop offset="100%" stopColor={t.green} stopOpacity="0" />
                     </radialGradient>
 
                     {/* Glass frame fill gradient */}
-                    <linearGradient id="llGlass" x1="0" y1="0" x2="1" y2="0">
+                    <linearGradient id="lockInGlass" x1="0" y1="0" x2="1" y2="0">
                       <stop offset="0%"   stopColor={t.green} stopOpacity="0.06" />
                       <stop offset="50%"  stopColor={t.green} stopOpacity="0.02" />
                       <stop offset="100%" stopColor={t.green} stopOpacity="0.05" />
                     </linearGradient>
 
                     {/* Top cap gradient */}
-                    <linearGradient id="llCapTop" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="lockInCapTop" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%"   stopColor={t.green} stopOpacity="1" />
                       <stop offset="100%" stopColor={t.green} stopOpacity="0.72" />
                     </linearGradient>
                     {/* Bottom cap gradient */}
-                    <linearGradient id="llCapBot" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="lockInCapBot" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%"   stopColor={t.green} stopOpacity="0.72" />
                       <stop offset="100%" stopColor={t.green} stopOpacity="1" />
                     </linearGradient>
 
                     {/* Drop shadow filter for caps */}
-                    <filter id="llCapShadow" x="-5%" y="-20%" width="110%" height="160%">
+                    <filter id="lockInCapShadow" x="-5%" y="-20%" width="110%" height="160%">
                       <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor={t.green} floodOpacity="0.30" />
                     </filter>
                     {/* Glow filter for active sand */}
-                    <filter id="llSandFilter" x="-10%" y="-10%" width="120%" height="120%">
+                    <filter id="lockInSandFilter" x="-10%" y="-10%" width="120%" height="120%">
                       <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
                       <feMerge>
                         <feMergeNode in="blur" />
@@ -1070,7 +1070,7 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
                         fillOpacity="0.28"
                         style={{
                           transition: "cx 0.25s linear, cy 0.25s linear, rx 0.25s linear",
-                          animation: "llShimmer 2.4s ease-in-out infinite",
+                          animation: "lockInShimmer 2.4s ease-in-out infinite",
                         }}
                       />
                     )}
@@ -1109,7 +1109,7 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
                         fillOpacity="0.20"
                         style={{
                           transition: "cy 0.25s linear, rx 0.25s linear",
-                          animation: "llShimmer 3s ease-in-out infinite 0.6s",
+                          animation: "lockInShimmer 3s ease-in-out infinite 0.6s",
                         }}
                       />
                     )}
@@ -1123,17 +1123,17 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
                         <circle
                           cx="100" cy="124" r="2.2"
                           fill={t.green} fillOpacity="0.95"
-                          style={{ animation: "llGrain1 0.72s ease-in infinite" }}
+                          style={{ animation: "lockInGrain1 0.72s ease-in infinite" }}
                         />
                         <circle
                           cx="99.2" cy="124" r="1.6"
                           fill={t.green} fillOpacity="0.75"
-                          style={{ animation: "llGrain2 0.72s ease-in 0.24s infinite" }}
+                          style={{ animation: "lockInGrain2 0.72s ease-in 0.24s infinite" }}
                         />
                         <circle
                           cx="100.5" cy="124" r="1.9"
                           fill={t.green} fillOpacity="0.85"
-                          style={{ animation: "llGrain3 0.72s ease-in 0.12s infinite" }}
+                          style={{ animation: "lockInGrain3 0.72s ease-in 0.12s infinite" }}
                         />
                       </g>
                     )}
@@ -1155,7 +1155,7 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
                     strokeLinecap="round"
                     strokeOpacity="0.22"
                     fill="none"
-                    style={{ animation: "llShimmer 4s ease-in-out infinite 1s" }}
+                    style={{ animation: "lockInShimmer 4s ease-in-out infinite 1s" }}
                   />
 
                   {/* ── Top cap ───────────────────────────────────────────────── */}
