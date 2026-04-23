@@ -147,7 +147,7 @@ export function AddTaskForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-h-[90vh]">
+      <DialogContent className="sm:max-w-lg max-h-[80dvh] overflow-y-auto sm:max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>Add New Task</DialogTitle>
           <DialogDescription>

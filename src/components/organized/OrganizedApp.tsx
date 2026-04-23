@@ -651,7 +651,7 @@ function App() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="mx-auto max-w-4xl px-4 sm:px-5 pt-20 sm:pt-14 pb-32"
+          className="mx-auto max-w-4xl px-4 sm:px-5 pt-28 sm:pt-20 pb-32"
         >
           <header className="mb-5 sm:mb-6">
             <div className="mb-5 flex items-center justify-between sm:mb-6">
@@ -659,9 +659,9 @@ function App() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4 }}
-                className="flex items-center gap-3 sm:gap-4"
+                className="flex items-center gap-3 sm:gap-4 pl-0 sm:pl-0"
               >
-                <div>
+                <div className="pl-[5.5rem] sm:pl-0">
                   <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground">
                     {viewMode === 'calendar' && 'Calendar'}
                     {viewMode === 'stats' && 'Statistics'}

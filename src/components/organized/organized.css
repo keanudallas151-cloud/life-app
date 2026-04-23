@@ -266,20 +266,24 @@ body.life-organized-active [data-sonner-toaster] {
 
 .organized-back-btn {
   position: fixed;
-  top: max(env(safe-area-inset-top), 0.75rem);
+  top: max(env(safe-area-inset-top, 0px), 0.75rem);
   left: 0.75rem;
-  z-index: 9100;
+  z-index: 9150;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 2.75rem;
-  padding: 0.5rem 0.9rem;
-  background: color-mix(in oklch, var(--card) 88%, transparent);
-  border: 1px solid color-mix(in oklch, var(--border) 85%, transparent);
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+  background: color-mix(in oklch, var(--card) 92%, transparent);
+  border: 1px solid color-mix(in oklch, var(--border) 90%, transparent);
   border-radius: var(--radius-full);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  box-shadow: 0 2px 8px color-mix(in oklch, var(--shadow-color) 10%, transparent);
 }
 
 .organized-back-btn:hover {

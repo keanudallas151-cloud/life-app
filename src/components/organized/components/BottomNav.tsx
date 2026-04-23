@@ -30,7 +30,8 @@ export function BottomNav({
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-      className="organized-bottom-nav fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-lg pb-safe"
+      className="organized-bottom-nav fixed bottom-0 left-0 right-0 border-t border-border bg-card/95 backdrop-blur-lg pb-safe"
+      style={{ zIndex: 9100 }}
       role="navigation"
       aria-label="Main navigation"
     >
