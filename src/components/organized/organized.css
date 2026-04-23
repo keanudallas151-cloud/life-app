@@ -422,8 +422,12 @@ body.life-organized-active [data-slot="dropdown-menu-content"] {
 }
 
 /* ── FIX 2: Dark-mode overhaul — true iOS obsidian palette ──────────────── */
+/* Mirrored to body.life-dark.life-organized-active (and .dark body.life-organized-active)
+   so portaled Radix content inherits the dark palette too. */
 body.life-dark .organized-feature,
-.dark .organized-feature {
+.dark .organized-feature,
+body.life-dark.life-organized-active,
+.dark body.life-organized-active {
   --background: #0a0a0a;
   --foreground: #ededed;
   --card: #111111;
@@ -446,7 +450,13 @@ body.life-dark .organized-feature,
 }
 
 /* ── FIX 3: Light-mode — warmer, iOS-like warm-white surface ─────────────── */
-.organized-feature {
+/* Also mirrored to body.life-organized-active so Radix-portaled content
+   (Dialog, AlertDialog, Popover, Select, Sheet, Sonner toasts, etc.) —
+   which renders into <body> outside .organized-feature — inherits the same
+   theme vars and renders with opaque bg-card / bg-popover / bg-background
+   surfaces instead of bleeding through to the page behind. */
+.organized-feature,
+body.life-organized-active {
   --background: #f5f5f7;
   --foreground: #1d1d1f;
   --card: #ffffff;
