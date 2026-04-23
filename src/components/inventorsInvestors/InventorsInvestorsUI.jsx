@@ -94,24 +94,34 @@ export function SurfaceCard({ t, children, padded = true, style = {}, className 
 }
 
 export function PrimaryButton({ t, children, disabled, onClick, type = "button", style = {} }) {
+  const iosfont = "-apple-system, SF Pro Text, Helvetica Neue, Arial, sans-serif";
   return (
     <button
       type={type}
       disabled={disabled}
       onClick={onClick}
       style={{
-        minHeight: 50,
-        borderRadius: 16,
+        minHeight: 52,
+        borderRadius: 14,
         border: "none",
-        padding: "0 18px",
-        fontSize: 14,
-        fontWeight: 800,
+        padding: "0 22px",
+        fontSize: 16,
+        fontWeight: 600,
+        letterSpacing: "-0.01em",
         cursor: disabled ? "not-allowed" : "pointer",
         background: disabled ? alpha(t.green, 0.25) : t.green,
-        color: disabled ? alpha("#ffffff", 0.65) : "#ffffff",
-        boxShadow: disabled ? "none" : `0 16px 30px ${alpha(t.green, 0.22)}`,
+        color: disabled ? alpha("#000", 0.4) : "#000",
+        boxShadow: disabled ? "none" : `0 4px 16px ${alpha(t.green, 0.35)}, 0 1px 0 rgba(255,255,255,0.15) inset`,
+        fontFamily: iosfont,
+        transition: "transform 0.15s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.15s ease, background 0.15s ease",
+        WebkitTapHighlightColor: "transparent",
+        userSelect: "none",
         ...style,
       }}
+      onMouseDown={disabled ? undefined : (e) => { e.currentTarget.style.transform = "scale(0.95)"; }}
+      onMouseUp={disabled ? undefined : (e) => { e.currentTarget.style.transform = "scale(1)"; }}
+      onTouchStart={disabled ? undefined : (e) => { e.currentTarget.style.transform = "scale(0.95)"; }}
+      onTouchEnd={disabled ? undefined : (e) => { e.currentTarget.style.transform = "scale(1)"; }}
     >
       {children}
     </button>
@@ -119,22 +129,32 @@ export function PrimaryButton({ t, children, disabled, onClick, type = "button",
 }
 
 export function SecondaryButton({ t, children, onClick, type = "button", style = {} }) {
+  const iosfont = "-apple-system, SF Pro Text, Helvetica Neue, Arial, sans-serif";
   return (
     <button
       type={type}
       onClick={onClick}
       style={{
-        minHeight: 48,
-        borderRadius: 16,
-        border: `1px solid ${t.border}`,
-        padding: "0 16px",
-        fontSize: 14,
-        fontWeight: 700,
+        minHeight: 50,
+        borderRadius: 14,
+        border: `1.5px solid ${t.border}`,
+        padding: "0 18px",
+        fontSize: 15,
+        fontWeight: 500,
+        letterSpacing: "-0.01em",
         cursor: "pointer",
-        background: t.skin,
+        background: "rgba(255,255,255,0.06)",
         color: t.ink,
+        fontFamily: iosfont,
+        transition: "transform 0.15s cubic-bezier(0.34,1.56,0.64,1), background 0.15s ease",
+        WebkitTapHighlightColor: "transparent",
+        backdropFilter: "blur(8px)",
         ...style,
       }}
+      onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+      onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+      onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+      onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
     >
       {children}
     </button>
@@ -147,10 +167,11 @@ export function SectionLabel({ children, t }) {
       style={{
         display: "block",
         marginBottom: 8,
-        fontSize: 12,
-        fontWeight: 800,
-        letterSpacing: 0.2,
-        color: t.ink,
+        fontSize: 13,
+        fontWeight: 600,
+        letterSpacing: "-0.01em",
+        color: (t && t.muted) || "#a1a1a1",
+        fontFamily: "-apple-system, SF Pro Text, Helvetica Neue, Arial, sans-serif",
       }}
     >
       {children}
@@ -284,15 +305,20 @@ export function ToggleField({ t, label, checked, onChange, hint }) {
         alignItems: "center",
         gap: 16,
         minHeight: 58,
-        marginBottom: 14,
-        borderRadius: 18,
+        marginBottom: 12,
+        borderRadius: 16,
         border: `1px solid ${t.border}`,
-        background: t.skin,
+        background: "rgba(255,255,255,0.04)",
         color: t.ink,
         cursor: "pointer",
         padding: "0 16px",
         textAlign: "left",
+        fontFamily: "-apple-system, SF Pro Text, Helvetica Neue, Arial, sans-serif",
+        transition: "background 0.15s ease, transform 0.14s cubic-bezier(0.34,1.56,0.64,1)",
+        WebkitTapHighlightColor: "transparent",
       }}
+      onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.98)"; }}
+      onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
     >
       <span>
         <span style={{ display: "block", fontSize: 13, fontWeight: 800 }}>{label}</span>
@@ -597,39 +623,44 @@ export function SwipeGestureCard({
 }
 
 export function Avatar({ src, name, size = 56, t }) {
+  const initials = name
+    ? name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase()
+    : "?";
+  const green = (t && t.green) || "#50c878";
   if (src) {
     return (
-      <img
-        src={src}
-        alt={name || "Avatar"}
+      <div
+        className="ii-avatar"
         style={{
-          width: size,
-          height: size,
-          borderRadius: "50%",
-          objectFit: "cover",
-          border: `1px solid ${t.border}`,
-          flexShrink: 0,
+          width: size, height: size, borderRadius: "50%",
+          overflow: "hidden", flexShrink: 0,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+          border: "2px solid rgba(255,255,255,0.15)",
         }}
-      />
+      >
+        <img src={src} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </div>
     );
   }
-
   return (
     <div
+      className="ii-avatar"
       style={{
-        width: size,
-        height: size,
-        borderRadius: "50%",
-        display: "grid",
-        placeItems: "center",
-        background: alpha(t.green, 0.12),
-        color: t.green,
-        fontWeight: 800,
-        border: `1px solid ${alpha(t.green, 0.2)}`,
+        width: size, height: size, borderRadius: "50%",
+        background: `linear-gradient(135deg, ${green} 0%, ${alpha(green, 0.6)} 100%)`,
+        display: "flex", alignItems: "center", justifyContent: "center",
         flexShrink: 0,
+        boxShadow: `0 2px 10px ${alpha(green, 0.3)}`,
+        border: "2px solid rgba(255,255,255,0.12)",
       }}
     >
-      {(name || "?").slice(0, 1).toUpperCase()}
+      <span style={{
+        fontSize: size * 0.36, fontWeight: 700, color: "#000",
+        fontFamily: "-apple-system, SF Pro Display, Helvetica Neue, Arial, sans-serif",
+        letterSpacing: "-0.02em", lineHeight: 1,
+      }}>
+        {initials}
+      </span>
     </div>
   );
 }

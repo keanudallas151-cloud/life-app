@@ -175,3 +175,287 @@ body,
     font-size: clamp(1.85rem, 9.6vw, 2.2rem) !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INVENTORS & INVESTORS — iOS PREMIUM SYSTEM (20+ fixes)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── FIX 1: SF Pro font across all II pages ──────────────────────────────── */
+[class^="ii-"], [class*=" ii-"],
+.ii-feature-frame, .ii-role-card,
+.ii-swipe-card, .ii-profile-card,
+.ii-messages-page, .ii-landing-page {
+  font-family: -apple-system, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* ── FIX 2: Feature frame header — SF Pro large title ───────────────────── */
+.ii-feature-frame-title {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: clamp(26px, 7vw, 34px) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1.08 !important;
+}
+
+.ii-feature-frame-eyebrow {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.07em !important;
+}
+
+/* ── FIX 3: Role cards — iOS card spring press ──────────────────────────── */
+.ii-role-card {
+  transition:
+    transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.22s ease,
+    opacity 0.18s ease,
+    border-color 0.18s ease !important;
+  -webkit-tap-highlight-color: transparent !important;
+  border-radius: 24px !important;
+}
+
+.ii-role-card:active {
+  transform: scale(0.97) !important;
+  transition-duration: 0.1s !important;
+}
+
+.ii-role-card-title {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  letter-spacing: -0.03em !important;
+}
+
+/* ── FIX 4: Points inside role card — iOS grouped list row ─────────────── */
+.ii-role-card-points > div {
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  transition: background 0.15s ease !important;
+}
+
+/* ── FIX 5: PrimaryButton — iOS green pill with spring ──────────────────── */
+button[class=""] /* PrimaryButton inline-styled */,
+.ii-primary-btn {
+  border-radius: 14px !important;
+  min-height: 52px !important;
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.15s ease,
+    background 0.15s ease !important;
+  -webkit-tap-highlight-color: transparent !important;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* ── FIX 6: Metric chips on swipe cards — iOS chip style ────────────────── */
+[class^="MetricChip"], .ii-metric-chip {
+  border-radius: 14px !important;
+  transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+/* ── FIX 7: Swipe card — bigger radius, deeper shadow ───────────────────── */
+.ii-swipe-card-body,
+[style*="borderRadius: 28"] {
+  border-radius: 24px !important;
+}
+
+/* ── FIX 8: Avatar circles — iOS profile ring style ────────────────────── */
+.ii-avatar {
+  border-radius: 50% !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  border: 2px solid rgba(255,255,255,0.15) !important;
+  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+/* ── FIX 9: Search bar — iOS search field ───────────────────────────────── */
+.ii-search-bar input,
+[placeholder="Search…"],
+[placeholder="Search..."] {
+  border-radius: 12px !important;
+  font-size: 16px !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+
+/* ── FIX 10: Messages page — iOS message bubble style ───────────────────── */
+.ii-message-bubble,
+[class*="message"] {
+  border-radius: 18px !important;
+}
+
+/* ── FIX 11: Profile setup steps — iOS pill progress bar ───────────────── */
+.ii-step-indicator {
+  height: 4px !important;
+  border-radius: 999px !important;
+}
+
+/* ── FIX 12: TextField inputs — consistent with iOS ─────────────────────── */
+.ii-feature-frame input,
+.ii-feature-frame textarea,
+.ii-feature-frame select {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 16px !important;
+  border-radius: 14px !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease !important;
+  min-height: 52px !important;
+}
+
+.ii-feature-frame input:focus,
+.ii-feature-frame textarea:focus,
+.ii-feature-frame select:focus {
+  outline: none !important;
+  border-color: #50c878 !important;
+  box-shadow: 0 0 0 3px rgba(80,200,120,0.15) !important;
+}
+
+/* ── FIX 13: SurfaceCard — iOS frosted card ─────────────────────────────── */
+.ii-feature-frame .ii-surface-card,
+.ii-feature-frame [style*="borderRadius: 24"] {
+  border-radius: 20px !important;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.04),
+    0 8px 24px rgba(0,0,0,0.08) !important;
+  transition:
+    transform 0.2s cubic-bezier(0.34,1.56,0.64,1),
+    box-shadow 0.2s ease !important;
+}
+
+/* ── FIX 14: Swipe action labels — iOS readable text ────────────────────── */
+.ii-swipe-accept-label,
+.ii-swipe-skip-label {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* ── FIX 15: Toggle field (ToggleField) — iOS toggle row ────────────────── */
+.ii-feature-frame button[style*="justifyContent: space-between"] {
+  border-radius: 16px !important;
+  transition: background 0.15s ease, transform 0.14s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+.ii-feature-frame button[style*="justifyContent: space-between"]:active {
+  transform: scale(0.975) !important;
+}
+
+/* ── FIX 16: Toggle track — iOS green switch ────────────────────────────── */
+.ii-toggle-track {
+  width: 52px !important;
+  height: 30px !important;
+  border-radius: 999px !important;
+  transition: background 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+.ii-toggle-thumb {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25) !important;
+  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+/* ── FIX 17: Page entrance animation ────────────────────────────────────── */
+.ii-feature-frame {
+  animation: ii-page-in 0.3s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+}
+
+@keyframes ii-page-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── FIX 18: SecondaryButton — iOS tinted button ────────────────────────── */
+.ii-feature-frame button[style*="border: 1px solid"] {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  border-radius: 14px !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  transition:
+    transform 0.15s cubic-bezier(0.34,1.56,0.64,1),
+    background 0.15s ease,
+    opacity 0.15s ease !important;
+  min-height: 48px !important;
+}
+
+/* ── FIX 19: Card stagger animation on list pages ───────────────────────── */
+.ii-feature-frame > * {
+  animation: ii-stagger-in 0.3s cubic-bezier(0.25,1,0.5,1) both;
+}
+.ii-feature-frame > *:nth-child(1) { animation-delay: 0ms; }
+.ii-feature-frame > *:nth-child(2) { animation-delay: 40ms; }
+.ii-feature-frame > *:nth-child(3) { animation-delay: 80ms; }
+.ii-feature-frame > *:nth-child(4) { animation-delay: 110ms; }
+.ii-feature-frame > *:nth-child(n+5) { animation-delay: 130ms; }
+
+@keyframes ii-stagger-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── FIX 20: Profile detail sheet — iOS full-screen sheet ──────────────── */
+.ii-profile-detail-sheet {
+  border-radius: 22px 22px 0 0 !important;
+  animation: ii-sheet-up 0.35s cubic-bezier(0.25,1,0.5,1) both !important;
+}
+
+@keyframes ii-sheet-up {
+  from { transform: translateY(100%); opacity: 0.6; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* ── FIX 21: Match/Like indicator badges ────────────────────────────────── */
+.ii-badge-match, .ii-badge-new {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+  padding: 3px 10px !important;
+  letter-spacing: 0.01em !important;
+  animation: ios-bounce-in 0.32s cubic-bezier(0.34,1.56,0.64,1) both !important;
+}
+
+/* ── FIX 22: isTrending/isNew chips in swipe cards ──────────────────────── */
+.ii-feature-frame [style*="letterSpacing: 1"] {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em !important;
+  border-radius: 999px !important;
+}
+
+/* ── FIX 23: Empty state in II ──────────────────────────────────────────── */
+.ii-empty-state {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* ── FIX 24: Scrollbar — iOS invisible thin ─────────────────────────────── */
+.ii-feature-frame ::-webkit-scrollbar {
+  width: 3px !important;
+}
+.ii-feature-frame ::-webkit-scrollbar-thumb {
+  background: rgba(161,161,161,0.2) !important;
+  border-radius: 999px !important;
+}
+
+/* ── FIX 25: SectionLabel — iOS form label ──────────────────────────────── */
+.ii-feature-frame label,
+.ii-feature-frame [style*="fontSize: 12"][style*="fontWeight: 800"] {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  color: inherit !important;
+}
+
+/* ── FIX 26: Role selection confirmation button area ────────────────────── */
+.ii-feature-frame [style*="marginTop: 24"],
+.ii-feature-frame [style*="marginTop: 28"] {
+  animation: ii-page-in 0.28s 0.12s cubic-bezier(0.25,1,0.5,1) both !important;
+}
+

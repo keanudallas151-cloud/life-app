@@ -405,3 +405,461 @@ body.life-organized-active [data-slot="dropdown-menu-content"] {
     scroll-behavior: auto !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ORGANIZED — iOS PREMIUM SYSTEM UPGRADE  (20+ targeted fixes)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── FIX 1: SF Pro font stack across the entire feature ──────────────────── */
+.organized-feature,
+.organized-feature * {
+  font-family: -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue",
+    Arial, sans-serif !important;
+}
+.organized-feature code,
+.organized-feature pre {
+  font-family: "SF Mono", ui-monospace, Menlo, monospace !important;
+}
+
+/* ── FIX 2: Dark-mode overhaul — true iOS obsidian palette ──────────────── */
+body.life-dark .organized-feature,
+.dark .organized-feature {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #111111;
+  --card-foreground: #ededed;
+  --popover: #161616;
+  --popover-foreground: #ededed;
+  --primary: #50c878;
+  --primary-foreground: #000;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ededed;
+  --muted: #1a1a1a;
+  --muted-foreground: #a1a1a1;
+  --accent: #50c878;
+  --accent-foreground: #000;
+  --destructive: #e5484d;
+  --destructive-foreground: #fff;
+  --border: #2e2e2e;
+  --input: #1a1a1a;
+  --ring: #50c878;
+}
+
+/* ── FIX 3: Light-mode — warmer, iOS-like warm-white surface ─────────────── */
+.organized-feature {
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --card: #ffffff;
+  --card-foreground: #1d1d1f;
+  --popover: #ffffff;
+  --popover-foreground: #1d1d1f;
+  --primary: #0071e3;
+  --primary-foreground: #fff;
+  --secondary: #f0f0f0;
+  --secondary-foreground: #1d1d1f;
+  --muted: #f0f0f0;
+  --muted-foreground: #6e6e73;
+  --accent: #0071e3;
+  --accent-foreground: #fff;
+  --destructive: #ff3b30;
+  --destructive-foreground: #fff;
+  --border: rgba(0,0,0,0.1);
+  --input: #f5f5f7;
+  --ring: #0071e3;
+}
+
+/* ── FIX 4: Back button — iOS "< Life" style with SF Pro ─────────────────── */
+.organized-back-btn {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 400 !important;
+  color: #0071e3 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 8px 12px !important;
+  gap: 4px !important;
+  min-height: 44px !important;
+  letter-spacing: -0.01em;
+}
+
+body.life-dark .organized-back-btn {
+  color: #50c878 !important;
+}
+
+.organized-back-btn:hover {
+  transform: none !important;
+  opacity: 0.75 !important;
+  box-shadow: none !important;
+}
+
+.organized-back-btn:active {
+  opacity: 0.5 !important;
+  transform: scale(0.97) !important;
+}
+
+.organized-back-arrow {
+  font-size: 20px !important;
+  margin-right: 2px;
+  line-height: 1 !important;
+  color: inherit !important;
+}
+
+/* ── FIX 5: iOS-standard task card shadows and borders ──────────────────── */
+.organized-feature .bg-card,
+.organized-feature [data-slot="card"] {
+  border: 1px solid var(--border) !important;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.04),
+    0 4px 12px rgba(0,0,0,0.06) !important;
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease !important;
+}
+
+body.life-dark .organized-feature .bg-card,
+body.life-dark .organized-feature [data-slot="card"] {
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.3),
+    0 4px 16px rgba(0,0,0,0.4) !important;
+}
+
+.organized-feature .bg-card:hover,
+.organized-feature [data-slot="card"]:hover {
+  transform: translateY(-1px) scale(1.002) !important;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.06),
+    0 12px 28px rgba(0,0,0,0.1) !important;
+}
+
+/* ── FIX 6: Checkbox — circular iOS style with spring animation ─────────── */
+.organized-feature [data-slot="checkbox"] {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  border-width: 2px !important;
+  transition:
+    background-color 0.22s cubic-bezier(0.34,1.56,0.64,1),
+    border-color 0.22s ease,
+    transform 0.2s cubic-bezier(0.34,1.56,0.64,1),
+    box-shadow 0.2s ease !important;
+}
+
+.organized-feature [data-slot="checkbox"][data-state="checked"] {
+  box-shadow: 0 0 0 3px rgba(0,113,227,0.2) !important;
+  transform: scale(1.05) !important;
+}
+
+body.life-dark .organized-feature [data-slot="checkbox"][data-state="checked"] {
+  box-shadow: 0 0 0 3px rgba(80,200,120,0.25) !important;
+}
+
+/* ── FIX 7: Buttons — pill shape, iOS spring press ───────────────────────── */
+.organized-feature button:not(.organized-fab):not(.organized-back-btn) {
+  transition:
+    transform 0.15s cubic-bezier(0.34,1.56,0.64,1),
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.organized-feature button:not(.organized-fab):not(.organized-back-btn):active {
+  transform: scale(0.94) !important;
+  transition-duration: 0.08s !important;
+}
+
+/* ── FIX 8: FAB — enlarged, glowing, iOS proportions ─────────────────────── */
+.organized-fab {
+  width: 58px !important;
+  height: 58px !important;
+  box-shadow:
+    0 4px 20px color-mix(in oklch, var(--primary) 40%, transparent),
+    0 2px 6px rgba(0,0,0,0.2),
+    0 0 0 1px color-mix(in oklch, var(--primary) 25%, transparent) inset !important;
+  transition:
+    transform 0.2s cubic-bezier(0.34,1.56,0.64,1),
+    box-shadow 0.2s ease !important;
+}
+
+.organized-fab:hover {
+  transform: scale(1.08) translateY(-2px) !important;
+  box-shadow:
+    0 10px 30px color-mix(in oklch, var(--primary) 45%, transparent),
+    0 4px 10px rgba(0,0,0,0.2),
+    0 0 0 1px color-mix(in oklch, var(--primary) 30%, transparent) inset !important;
+}
+
+.organized-fab:active {
+  transform: scale(0.93) !important;
+}
+
+/* ── FIX 9: Bottom nav — frosted glass, SF Pro labels ────────────────────── */
+.organized-bottom-nav {
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  background: rgba(255,255,255,0.85) !important;
+  border-top: 0.5px solid rgba(0,0,0,0.12) !important;
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.08) !important;
+}
+
+body.life-dark .organized-bottom-nav {
+  background: rgba(10,10,10,0.82) !important;
+  border-top-color: rgba(255,255,255,0.08) !important;
+}
+
+.organized-nav-item {
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+.organized-nav-item:active {
+  transform: scale(0.88) !important;
+}
+
+.organized-nav-item span[class*="text-"] {
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+  font-size: 10px !important;
+}
+
+.organized-nav-item.is-active span[class*="text-"] {
+  font-weight: 600 !important;
+}
+
+/* Nav pill: spring animation */
+.organized-nav-pill {
+  transition: none !important;
+}
+
+/* ── FIX 10: Inputs — iOS rounded, focus ring ─────────────────────────────── */
+.organized-feature input,
+.organized-feature textarea,
+.organized-feature [data-slot="input"],
+.organized-feature [data-slot="textarea"] {
+  border-radius: 12px !important;
+  font-size: 16px !important; /* prevent iOS zoom */
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.organized-feature input:focus,
+.organized-feature textarea:focus,
+.organized-feature [data-slot="input"]:focus,
+.organized-feature [data-slot="textarea"]:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 20%, transparent) !important;
+  outline: none !important;
+}
+
+/* ── FIX 11: Dialog/Sheet — iOS bottom sheet feel ───────────────────────── */
+body.life-organized-active [data-slot="dialog-content"],
+body.life-organized-active [data-slot="sheet-content"],
+body.life-organized-active [data-slot="alert-dialog-content"] {
+  border-radius: 22px !important;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.18),
+    0 24px 60px rgba(0,0,0,0.22) !important;
+}
+
+/* iOS pull handle on sheets */
+body.life-organized-active [data-slot="sheet-content"]::before {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 4px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 2px;
+  margin: 8px auto 4px;
+}
+
+body.life-dark body.life-organized-active [data-slot="sheet-content"]::before {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ── FIX 12: Category color dot — larger, iOS-proportioned ──────────────── */
+.organized-feature .rounded-full.border-2.border-white {
+  width: 14px !important;
+  height: 14px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2) !important;
+  border-width: 1.5px !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── FIX 13: Badge chips — iOS pill style ────────────────────────────────── */
+.organized-feature [data-slot="badge"] {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  padding: 3px 8px !important;
+  border-radius: 999px !important;
+}
+
+/* ── FIX 14: Task title typography — iOS large text style ────────────────── */
+.organized-feature .text-base.font-medium {
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.4 !important;
+}
+
+.organized-feature .text-base.font-medium.line-through {
+  opacity: 0.45 !important;
+  text-decoration-color: currentColor !important;
+}
+
+/* ── FIX 15: Category section header — iOS section heading ───────────────── */
+.organized-feature h2.text-sm,
+.organized-feature .text-sm.font-semibold {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* ── FIX 16: Task expand/collapse chevron — smooth spring ─────────────────── */
+.organized-feature [aria-label="Expand task"],
+.organized-feature [aria-label="Collapse task"] {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  transition: background 0.15s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+.organized-feature [aria-label="Expand task"]:active,
+.organized-feature [aria-label="Collapse task"]:active {
+  background: rgba(0,0,0,0.06) !important;
+}
+
+/* ── FIX 17: Edit pencil button — iOS circular icon button ──────────────── */
+.organized-feature [aria-label="Edit task"] {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  opacity: 0.6 !important;
+  transition: opacity 0.15s ease, background 0.15s ease, transform 0.15s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+.organized-feature [aria-label="Edit task"]:hover {
+  opacity: 1 !important;
+  background: rgba(0,0,0,0.05) !important;
+}
+
+.organized-feature [aria-label="Edit task"]:active {
+  transform: scale(0.88) !important;
+}
+
+/* ── FIX 18: Stats chips — iOS frosted chip style ───────────────────────── */
+.organized-feature .organized-stat-chip {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), background 0.15s ease !important;
+}
+
+/* ── FIX 19: Scrollbar — iOS ultra-thin ─────────────────────────────────── */
+.organized-feature ::-webkit-scrollbar {
+  width: 3px !important;
+  height: 3px !important;
+}
+.organized-feature ::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklch, var(--muted-foreground) 25%, transparent) !important;
+  border-radius: 999px !important;
+  border: none !important;
+}
+
+/* ── FIX 20: Swipe action reveal — more vibrant iOS colors ──────────────── */
+.organized-feature .text-accent {
+  color: #34c759 !important; /* iOS green */
+}
+.organized-feature .text-destructive {
+  color: #ff3b30 !important; /* iOS red */
+}
+
+body.life-dark .organized-feature .text-accent {
+  color: #50c878 !important;
+}
+
+/* ── FIX 21: Priority badge colors — iOS semantic colors ─────────────────── */
+.organized-feature [class*="priority-high"],
+.organized-feature [data-priority="high"] {
+  color: #ff3b30 !important;
+}
+.organized-feature [class*="priority-medium"],
+.organized-feature [data-priority="medium"] {
+  color: #ff9500 !important;
+}
+.organized-feature [class*="priority-low"],
+.organized-feature [data-priority="low"] {
+  color: #34c759 !important;
+}
+
+/* ── FIX 22: Select trigger — iOS styled dropdown ────────────────────────── */
+.organized-feature [data-slot="select-trigger"] {
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  height: 44px !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+
+.organized-feature [data-slot="select-trigger"]:focus {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 20%, transparent) !important;
+}
+
+/* ── FIX 23: Stat view progress bars — smooth fill ───────────────────────── */
+.organized-feature .h-1\.5.bg-muted {
+  height: 6px !important;
+  border-radius: 999px !important;
+}
+
+.organized-feature .h-full.bg-accent {
+  border-radius: 999px !important;
+}
+
+/* ── FIX 24: Overdue task border — iOS warning style ─────────────────────── */
+.organized-feature .border-destructive\/50 {
+  border-color: rgba(255,59,48,0.3) !important;
+}
+.organized-feature .bg-destructive\/5 {
+  background: rgba(255,59,48,0.04) !important;
+}
+
+/* ── FIX 25: TaskList category header — iOS grouped list header ──────────── */
+.organized-feature .flex.cursor-pointer.select-none {
+  padding: 10px 0 6px !important;
+  transition: opacity 0.15s ease !important;
+}
+
+.organized-feature .flex.cursor-pointer.select-none:active {
+  opacity: 0.65 !important;
+}
+
+/* ── FIX 26: Task completed opacity — softer iOS style ──────────────────── */
+.organized-feature .opacity-60 {
+  opacity: 0.4 !important;
+}
+
+/* ── FIX 27: "Add task" bottom padding above nav ─────────────────────────── */
+.organized-feature .pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 12px) !important;
+}
+
+/* ── FIX 28: Smooth page fade-in ─────────────────────────────────────────── */
+.organized-feature {
+  animation: org-page-in 0.32s cubic-bezier(0.25,1,0.5,1) both;
+}
+
+@keyframes org-page-in {
+  from { opacity: 0; transform: scale(0.99) translateY(4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── FIX 29: Task item gap refinement ────────────────────────────────────── */
+.organized-feature .gap-3\.5 {
+  gap: 14px !important;
+}
+
+/* ── FIX 30: Focus ring — iOS green in dark, blue in light ──────────────── */
+body.life-dark .organized-feature :focus-visible {
+  outline-color: rgba(80,200,120,0.7) !important;
+}
+
