@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: debug full stack (local)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev"
+    },
+    {
+      "name": "Open app in Chrome (local)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Open app in Chrome (production)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "https://life-ten-green.vercel.app",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}

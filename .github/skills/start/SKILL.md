@@ -89,3 +89,8 @@ If `git pull --ff-only` fails, do not force. Report the divergence, list the con
 
 - [pre-commit-check](../pre-commit-check/SKILL.md) — run before committing changes.
 - [mobile-audit](../mobile-audit/SKILL.md) — mobile/iOS/theme compliance sweep for UI work.
+
+## VS Code debug URL note
+
+- Keep VS Code app-debug configs pointed at local dev (`http://localhost:3000`) so breakpoints and source maps work correctly.
+- If you want fast access to production, add a separate non-debug browser launch entry for `https://life-ten-green.vercel.app` instead of replacing the local debug URL.
