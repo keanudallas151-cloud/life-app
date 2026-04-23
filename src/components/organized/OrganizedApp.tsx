@@ -651,25 +651,25 @@ function App() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="mx-auto max-w-4xl px-4 pt-20 sm:pt-14 pb-32"
+          className="mx-auto max-w-4xl px-4 sm:px-5 pt-20 sm:pt-14 pb-32"
         >
-          <header className="mb-6">
-            <div className="flex items-center justify-between mb-6">
+          <header className="mb-5 sm:mb-6">
+            <div className="mb-5 flex items-center justify-between sm:mb-6">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4 }}
-                className="flex items-center gap-4"
+                className="flex items-center gap-3 sm:gap-4"
               >
                 <div>
-                  <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
+                  <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground">
                     {viewMode === 'calendar' && 'Calendar'}
                     {viewMode === 'stats' && 'Statistics'}
                     {viewMode === 'settings' && 'Settings'}
                     {viewMode === 'list' && 'To-Do List'}
                   </h1>
                   {viewMode === 'list' && (
-                    <div className="flex items-center gap-3 mt-3 text-sm text-muted-foreground">
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                       {/* Triple "active" breakdown by priority (high / medium / low) to match
                           the Spark task-manager reference page. Each span filters when clicked. */}
                       <motion.span
@@ -680,7 +680,7 @@ function App() {
                           setFilter('priority')
                           setViewMode('list')
                         }}
-                        className="font-medium cursor-pointer hover:text-primary transition-colors"
+                        className="organized-stat-chip font-medium cursor-pointer hover:text-primary transition-colors"
                       >
                         {highPriorityActive} high
                       </motion.span>
@@ -692,7 +692,7 @@ function App() {
                           setFilter('active')
                           setViewMode('list')
                         }}
-                        className="font-medium cursor-pointer hover:text-primary transition-colors"
+                        className="organized-stat-chip font-medium cursor-pointer hover:text-primary transition-colors"
                       >
                         {mediumPriorityActive} medium
                       </motion.span>
@@ -704,11 +704,10 @@ function App() {
                           setFilter('active')
                           setViewMode('list')
                         }}
-                        className="font-medium cursor-pointer hover:text-primary transition-colors"
+                        className="organized-stat-chip font-medium cursor-pointer hover:text-primary transition-colors"
                       >
                         {lowPriorityActive} low
                       </motion.span>
-                      <span className="opacity-50">·</span>
                       <motion.span
                         key={completedTasks}
                         initial={{ scale: 1.2, color: 'var(--accent)' }}
@@ -717,11 +716,10 @@ function App() {
                           setFilter('completed')
                           setViewMode('list')
                         }}
-                        className="font-medium cursor-pointer hover:text-accent transition-colors"
+                        className="organized-stat-chip font-medium cursor-pointer hover:text-accent transition-colors"
                       >
                         {completedTasks} done
                       </motion.span>
-                      <span className="opacity-50">·</span>
                       <motion.span
                         initial={{ scale: 1.2 }}
                         animate={{ scale: 1 }}
@@ -729,7 +727,7 @@ function App() {
                           setFilter('overdue')
                           setViewMode('list')
                         }}
-                        className="text-destructive font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+                        className="organized-stat-chip text-destructive font-semibold cursor-pointer hover:opacity-80 transition-opacity"
                       >
                         {overdueTasks} overdue
                       </motion.span>
@@ -751,7 +749,7 @@ function App() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 flex flex-wrap items-center gap-2 rounded-lg bg-primary/10 p-3"
+                className="mt-4 flex flex-wrap items-center gap-2.5 rounded-2xl bg-primary/10 p-3.5"
               >
                 <span className="flex-1 text-sm font-medium">
                   {selectedTasks.size} selected

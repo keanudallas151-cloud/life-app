@@ -34,11 +34,11 @@ export function BottomNav({
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="mx-auto flex max-w-lg items-center justify-around px-4 py-2">
+      <div className="mx-auto flex max-w-lg items-center justify-around px-3 py-2.5 sm:px-4">
         <motion.button
           onClick={() => onViewModeChange('list')}
           className={cn(
-            'organized-nav-item flex flex-1 flex-col items-center gap-1 rounded-lg py-2 transition-colors min-h-[44px]',
+            'organized-nav-item flex flex-1 flex-col items-center gap-1.5 rounded-lg py-2.5 transition-colors min-h-[48px]',
             viewMode === 'list'
               ? 'is-active text-primary'
               : 'text-muted-foreground hover:text-foreground'
@@ -60,13 +60,13 @@ export function BottomNav({
               aria-hidden="true"
             />
           </motion.div>
-          <span className="text-xs font-medium">List</span>
+          <span className="text-[11px] font-medium leading-none">List</span>
         </motion.button>
 
         <motion.button
           onClick={() => onViewModeChange('calendar')}
           className={cn(
-            'organized-nav-item flex flex-1 flex-col items-center gap-1 rounded-lg py-2 transition-colors min-h-[44px]',
+            'organized-nav-item flex flex-1 flex-col items-center gap-1.5 rounded-lg py-2.5 transition-colors min-h-[48px]',
             viewMode === 'calendar'
               ? 'is-active text-primary'
               : 'text-muted-foreground hover:text-foreground'
@@ -88,7 +88,7 @@ export function BottomNav({
               aria-hidden="true"
             />
           </motion.div>
-          <span className="text-xs font-medium">Calendar</span>
+          <span className="text-[11px] font-medium leading-none">Calendar</span>
         </motion.button>
 
         <div className="flex flex-1 justify-center">
@@ -108,7 +108,7 @@ export function BottomNav({
         <motion.button
           onClick={() => onViewModeChange('stats')}
           className={cn(
-            'organized-nav-item flex flex-1 flex-col items-center gap-1 rounded-lg py-2 transition-colors min-h-[44px]',
+            'organized-nav-item flex flex-1 flex-col items-center gap-1.5 rounded-lg py-2.5 transition-colors min-h-[48px]',
             viewMode === 'stats'
               ? 'is-active text-primary'
               : 'text-muted-foreground hover:text-foreground'
@@ -130,13 +130,13 @@ export function BottomNav({
               aria-hidden="true"
             />
           </motion.div>
-          <span className="text-xs font-medium">Stats</span>
+          <span className="text-[11px] font-medium leading-none">Stats</span>
         </motion.button>
 
         <motion.button
           onClick={() => onViewModeChange('settings')}
           className={cn(
-            'organized-nav-item flex flex-1 flex-col items-center gap-1 rounded-lg py-2 transition-colors min-h-[44px]',
+            'organized-nav-item flex flex-1 flex-col items-center gap-1.5 rounded-lg py-2.5 transition-colors min-h-[48px]',
             viewMode === 'settings'
               ? 'is-active text-primary'
               : 'text-muted-foreground hover:text-foreground'
@@ -158,7 +158,7 @@ export function BottomNav({
               aria-hidden="true"
             />
           </motion.div>
-          <span className="text-xs font-medium">Settings</span>
+          <span className="text-[11px] font-medium leading-none">Settings</span>
         </motion.button>
       </div>
     </motion.nav>

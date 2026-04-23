@@ -202,6 +202,23 @@ body.life-organized-active [data-sonner-toaster] {
     0 16px 38px color-mix(in oklch, var(--shadow-color) 16%, transparent);
 }
 
+.organized-feature {
+  --organized-space-1: 0.5rem;
+  --organized-space-2: 0.75rem;
+  --organized-space-3: 1rem;
+  --organized-space-4: 1.25rem;
+}
+
+.organized-feature .organized-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.875rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklch, var(--muted) 58%, transparent);
+  border: 1px solid color-mix(in oklch, var(--border) 82%, transparent);
+}
+
 .organized-bottom-nav {
   box-shadow: 0 -10px 30px color-mix(in oklch, var(--shadow-color) 12%, transparent);
 }
@@ -248,13 +265,50 @@ body.life-organized-active [data-sonner-toaster] {
 }
 
 .organized-back-btn {
+  position: fixed;
+  top: max(env(safe-area-inset-top), 0.75rem);
+  left: 0.75rem;
+  z-index: 9100;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.9rem;
+  background: color-mix(in oklch, var(--card) 88%, transparent);
+  border: 1px solid color-mix(in oklch, var(--border) 85%, transparent);
   border-radius: var(--radius-full);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
 
 .organized-back-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px color-mix(in oklch, var(--shadow-color) 16%, transparent);
+}
+
+.organized-back-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+@media (max-width: 430px) {
+  .organized-feature .organized-stat-chip {
+    min-height: 1.75rem;
+    padding-inline: 0.55rem;
+  }
+
+  .organized-back-btn {
+    top: max(env(safe-area-inset-top), 0.6rem);
+    left: 0.65rem;
+    min-height: 2.625rem;
+    padding: 0.45rem 0.8rem;
+  }
 }
 
 /* ─── Maximally-rounded corners across the feature ──────────────────────

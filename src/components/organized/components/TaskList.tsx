@@ -64,7 +64,7 @@ export function TaskList({
     <Card className="overflow-hidden shadow-sm">
       <button
         onClick={handleToggleExpand}
-        className="w-full p-4 md:p-5 flex items-center gap-3 hover:bg-muted/50 transition-colors"
+        className="flex w-full min-h-[52px] items-center gap-3 px-4 py-3.5 sm:px-5 sm:py-4 hover:bg-muted/50 transition-colors"
       >
         <div
           className="h-4 w-4 rounded-full flex-shrink-0"
@@ -96,7 +96,7 @@ export function TaskList({
           axis="y"
           values={localTasks}
           onReorder={handleReorder}
-          className="px-4 md:px-5 pb-4 md:pb-5 space-y-3"
+          className="space-y-3 px-4 pb-4 sm:px-5 sm:pb-5"
         >
           {localTasks.map((task) => {
             const taskCategory = categories.find((c) => c.id === task.categoryId)

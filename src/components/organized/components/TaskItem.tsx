@@ -172,7 +172,7 @@ export function TaskItem({
   const hasExpandableContent = !!(task.notes || hasSubtasks)
 
   return (
-    <div className="relative overflow-hidden rounded-lg">
+    <div className="relative overflow-hidden rounded-xl">
       <div className="absolute inset-0 flex items-center justify-between px-6">
         <motion.div
           style={{ opacity: leftActionOpacity }}
@@ -208,7 +208,7 @@ export function TaskItem({
         }}
         layout
         className={cn(
-          'relative flex items-start gap-3 rounded-lg border bg-card p-4 transition-all',
+          'relative flex items-start gap-3.5 rounded-xl border bg-card px-4 py-3.5 sm:px-5 sm:py-4 transition-all',
           'touch-pan-y active:cursor-grabbing',
           task.completed && 'opacity-60',
           isSelected && 'ring-2 ring-primary ring-offset-2',
@@ -226,8 +226,8 @@ export function TaskItem({
           style={{ backgroundColor: categoryColor }}
         />
 
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex items-start gap-3">
+        <div className="flex-1 min-w-0 space-y-2.5">
+          <div className="flex items-start gap-2.5 sm:gap-3">
             <Checkbox
               checked={task.completed}
               onCheckedChange={handleCheckboxChange}
@@ -251,7 +251,7 @@ export function TaskItem({
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}
                 transition={{ duration: 0.2, ease: 'easeInOut' }}
-                className="flex-shrink-0 rounded-md p-1.5 text-muted-foreground"
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-muted-foreground"
                 aria-label={isExpanded ? 'Collapse task' : 'Expand task'}
               >
                 <CaretDown className="h-4 w-4" weight="bold" />
@@ -262,7 +262,7 @@ export function TaskItem({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleEditClick}
-              className="flex-shrink-0 rounded-md p-1.5 hover:bg-accent/20 transition-colors"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full hover:bg-accent/20 transition-colors"
               aria-label="Edit task"
             >
               <PencilSimple className="h-4 w-4 text-muted-foreground" weight="bold" />
@@ -281,15 +281,15 @@ export function TaskItem({
             }}
             style={{ overflow: 'hidden' }}
           >
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2.5 pt-2">
               {task.notes && (
-                <p className="text-sm text-muted-foreground pl-8">
+                <p className="pl-7 text-sm text-muted-foreground sm:pl-8">
                   {task.notes}
                 </p>
               )}
 
               {hasSubtasks && (
-                <div className="pl-8 space-y-2">
+                <div className="pl-7 space-y-2.5 sm:pl-8">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                       <motion.div
@@ -303,9 +303,9 @@ export function TaskItem({
                       {completedSubtasks}/{totalSubtasks}
                     </span>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {task.subtasks?.map((subtask) => (
-                      <div key={subtask.id} className="flex items-center gap-2">
+                      <div key={subtask.id} className="flex min-h-[32px] items-center gap-2.5">
                         <Checkbox
                           checked={subtask.completed}
                           onCheckedChange={(checked) => {
@@ -314,7 +314,7 @@ export function TaskItem({
                             )
                             onEdit({ ...task, subtasks: updatedSubtasks })
                           }}
-                          className="h-3.5 w-3.5"
+                          className="h-4 w-4"
                           onClick={(e) => e.stopPropagation()}
                         />
                         <span className={cn(
@@ -331,7 +331,7 @@ export function TaskItem({
             </div>
           </motion.div>
 
-          <div className="flex flex-wrap items-center gap-2 pl-8">
+          <div className="flex flex-wrap items-center gap-2.5 pl-7 sm:pl-8">
             {task.blockerNote && (
               <motion.button
                 initial={{ scale: 0, rotate: -180 }}
@@ -343,7 +343,7 @@ export function TaskItem({
                   if (soundEnabled) playButtonSound()
                   onShowBlocker?.(task)
                 }}
-                className="flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive border border-destructive/30 hover:bg-destructive/20 transition-colors"
+                className="flex min-h-[28px] items-center gap-1 rounded-full border border-destructive/30 bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive hover:bg-destructive/20 transition-colors"
               >
                 <Warning weight="fill" className="h-3 w-3" />
                 Blocked
@@ -352,7 +352,7 @@ export function TaskItem({
 
             <Badge
               variant="secondary"
-              className="text-xs px-2 py-0.5 font-medium"
+              className="px-2.5 py-1 text-xs font-medium"
               style={{
                 backgroundColor: priorityColors[task.priority],
                 color: 'white',
@@ -365,7 +365,7 @@ export function TaskItem({
               <Badge
                 variant="outline"
                 className={cn(
-                  'text-xs px-2 py-0.5 font-medium flex items-center gap-1',
+                  'flex min-h-[28px] items-center gap-1 px-2.5 py-1 text-xs font-medium',
                   isOverdue && 'border-destructive text-destructive',
                   isDueToday && 'border-accent text-accent'
                 )}
@@ -376,7 +376,7 @@ export function TaskItem({
             )}
 
             {task.recurring && (
-              <Badge variant="outline" className="text-xs px-2 py-0.5 font-medium flex items-center gap-1">
+              <Badge variant="outline" className="flex min-h-[28px] items-center gap-1 px-2.5 py-1 text-xs font-medium">
                 <Repeat weight="bold" className="h-3 w-3" />
                 {task.recurring}
               </Badge>
@@ -392,13 +392,13 @@ export function TaskItem({
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ delay: idx * 0.05 }}
                   >
-                    <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                    <Badge variant="secondary" className="px-2.5 py-1 text-xs">
                       {tag}
                     </Badge>
                   </motion.div>
                 ))}
                 {task.tags.length > 3 && (
-                  <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                  <Badge variant="secondary" className="px-2.5 py-1 text-xs">
                     +{task.tags.length - 3}
                   </Badge>
                 )}
