@@ -365,6 +365,38 @@ body.life-organized-active [data-slot="dropdown-menu-content"] {
   border-radius: 1.5rem;
 }
 
+/* ── Fix: portaled dialog must have opaque background (bg-card may not resolve
+   correctly outside .organized-feature scope). Explicit override guarantees
+   the dialog is never transparent. */
+body.life-organized-active [data-slot="dialog-content"],
+body.life-organized-active [data-slot="alert-dialog-content"] {
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border: 1px solid var(--border) !important;
+}
+
+body.life-dark.life-organized-active [data-slot="dialog-content"],
+body.life-dark.life-organized-active [data-slot="alert-dialog-content"],
+.dark body.life-organized-active [data-slot="dialog-content"],
+.dark body.life-organized-active [data-slot="alert-dialog-content"] {
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+}
+
+/* ── Fix: dialog sizing on mobile — don't take full viewport height.
+   Cap height so the bottom nav remains visible and usable. */
+@media (max-width: 639px) {
+  body.life-organized-active [data-slot="dialog-content"] {
+    max-height: 72dvh !important;
+    overflow-y: auto !important;
+    /* Keep it centered in the usable area above the bottom nav */
+    top: 44% !important;
+    transform: translate(-50%, -50%) !important;
+    width: calc(100% - 2rem) !important;
+    padding: 1.25rem 1rem 1rem !important;
+  }
+}
+
 .organized-feature :is(button, [role="button"], a, input, textarea, select, [tabindex]):focus-visible {
   outline: 2px solid color-mix(in oklch, var(--ring) 70%, white 10%);
   outline-offset: 2px;

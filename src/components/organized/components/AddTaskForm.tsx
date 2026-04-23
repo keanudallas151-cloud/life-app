@@ -147,7 +147,7 @@ export function AddTaskForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[80dvh] overflow-y-auto sm:max-h-[85vh]">
+      <DialogContent className="sm:max-w-lg max-h-[68dvh] overflow-y-auto sm:max-h-[82vh]">
         <DialogHeader>
           <DialogTitle>Add New Task</DialogTitle>
           <DialogDescription>
@@ -164,7 +164,7 @@ export function AddTaskForm({
           </div>
         ) : (
           <>
-            <div className="space-y-4 py-4">
+            <div className="space-y-3 py-2">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="task-title">Task Title</Label>
@@ -319,7 +319,7 @@ export function AddTaskForm({
                   placeholder="Add any additional details..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
+                  rows={2}
                   className="resize-none"
                 />
               </div>

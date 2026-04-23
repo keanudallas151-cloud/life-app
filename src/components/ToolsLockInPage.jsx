@@ -847,25 +847,46 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
       {session && (
         <section style={{ display: "grid", gap: 20 }}>
           <style>{`
-            @keyframes lifeLockinGlow {
-              0%, 100% { opacity: 0.55; transform: scale(1); }
-              50%      { opacity: 0.9;  transform: scale(1.04); }
+            @keyframes llGlow {
+              0%, 100% { opacity: 0.45; transform: scale(1); }
+              50%       { opacity: 0.85; transform: scale(1.08); }
             }
-            @keyframes lifeLockinGrain {
-              0%   { transform: translateY(0);    opacity: 0; }
-              10%  { opacity: 1; }
-              100% { transform: translateY(42px); opacity: 0; }
+            @keyframes llGrain1 {
+              0%   { transform: translateY(0px);   opacity: 0; }
+              8%   { opacity: 1; }
+              85%  { opacity: 0.9; }
+              100% { transform: translateY(56px);  opacity: 0; }
             }
-            @keyframes lifeLockinComplete {
+            @keyframes llGrain2 {
+              0%   { transform: translateY(0px);   opacity: 0; }
+              12%  { opacity: 0.8; }
+              82%  { opacity: 0.7; }
+              100% { transform: translateY(52px);  opacity: 0; }
+            }
+            @keyframes llGrain3 {
+              0%   { transform: translateY(0px);   opacity: 0; }
+              6%   { opacity: 0.9; }
+              88%  { opacity: 0.6; }
+              100% { transform: translateY(60px);  opacity: 0; }
+            }
+            @keyframes llShimmer {
+              0%, 100% { opacity: 0.10; }
+              50%       { opacity: 0.22; }
+            }
+            @keyframes llComplete {
               0%   { transform: rotate(0deg); }
-              40%  { transform: rotate(182deg); }
+              35%  { transform: rotate(185deg); }
+              50%  { transform: rotate(176deg); }
+              65%  { transform: rotate(182deg); }
+              80%  { transform: rotate(178deg); }
               100% { transform: rotate(180deg); }
             }
             .life-lockin-hourglass {
               transition: transform 0.6s cubic-bezier(.2,.8,.2,1);
+              filter: drop-shadow(0 4px 16px rgba(0,0,0,0.10));
             }
             .life-lockin-hourglass.is-complete {
-              animation: lifeLockinComplete 1.1s cubic-bezier(.4,0,.2,1) forwards;
+              animation: llComplete 1.4s cubic-bezier(.4,0,.2,1) forwards;
             }
             @media (prefers-reduced-motion: reduce) {
               .life-lockin-hourglass,
@@ -933,90 +954,233 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
                 style={{
                   position: "relative",
                   width: 200,
-                  height: 240,
+                  height: 260,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
+                {/* Ambient glow behind hourglass */}
                 <div
                   aria-hidden
                   style={{
                     position: "absolute",
-                    inset: 12,
+                    inset: 0,
                     borderRadius: "50%",
-                    background: `radial-gradient(circle, ${t.green}1f 0%, transparent 70%)`,
+                    background: `radial-gradient(ellipse 60% 55% at 50% 52%, ${t.green}28 0%, transparent 70%)`,
                     animation: !session.isComplete
-                      ? "lifeLockinGlow 3.2s ease-in-out infinite"
+                      ? "llGlow 3.6s ease-in-out infinite"
                       : "none",
                   }}
                 />
                 <svg
                   className={`life-lockin-hourglass${session.isComplete ? " is-complete" : ""}`}
                   width="200"
-                  height="240"
-                  viewBox="0 0 200 240"
+                  height="260"
+                  viewBox="0 0 200 260"
                   fill="none"
                   style={{ position: "relative", zIndex: 1 }}
                   aria-hidden
                 >
                   <defs>
-                    <clipPath id="lifeLockinTopBulb">
-                      <polygon points="40,30 160,30 108,116 92,116" />
+                    {/* Top-bulb clip path (matches frame curve) */}
+                    <clipPath id="llTopBulb">
+                      <polygon points="38,34 162,34 111,122 89,122" />
                     </clipPath>
-                    <clipPath id="lifeLockinBottomBulb">
-                      <polygon points="92,124 108,124 160,210 40,210" />
+                    {/* Bottom-bulb clip path */}
+                    <clipPath id="llBottomBulb">
+                      <polygon points="89,132 111,132 162,218 38,218" />
                     </clipPath>
-                    <linearGradient id="lifeLockinSand" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={t.green} stopOpacity="0.95" />
-                      <stop offset="100%" stopColor={t.greenAlt || t.green} stopOpacity="1" />
+
+                    {/* Sand gradient — horizontal depth */}
+                    <linearGradient id="llSandH" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%"   stopColor={t.green} stopOpacity="0.75" />
+                      <stop offset="35%"  stopColor={t.green} stopOpacity="1" />
+                      <stop offset="65%"  stopColor={t.green} stopOpacity="1" />
+                      <stop offset="100%" stopColor={t.green} stopOpacity="0.70" />
                     </linearGradient>
+                    {/* Sand gradient — vertical shading */}
+                    <linearGradient id="llSandV" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stopColor={t.green} stopOpacity="0.88" />
+                      <stop offset="100%" stopColor={t.green} stopOpacity="1" />
+                    </linearGradient>
+                    {/* Bottom sand glow gradient */}
+                    <radialGradient id="llSandGlow" cx="50%" cy="0%" r="60%">
+                      <stop offset="0%"   stopColor={t.green} stopOpacity="0.55" />
+                      <stop offset="100%" stopColor={t.green} stopOpacity="0" />
+                    </radialGradient>
+
+                    {/* Glass frame fill gradient */}
+                    <linearGradient id="llGlass" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%"   stopColor={t.green} stopOpacity="0.06" />
+                      <stop offset="50%"  stopColor={t.green} stopOpacity="0.02" />
+                      <stop offset="100%" stopColor={t.green} stopOpacity="0.05" />
+                    </linearGradient>
+
+                    {/* Top cap gradient */}
+                    <linearGradient id="llCapTop" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stopColor={t.green} stopOpacity="1" />
+                      <stop offset="100%" stopColor={t.green} stopOpacity="0.72" />
+                    </linearGradient>
+                    {/* Bottom cap gradient */}
+                    <linearGradient id="llCapBot" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stopColor={t.green} stopOpacity="0.72" />
+                      <stop offset="100%" stopColor={t.green} stopOpacity="1" />
+                    </linearGradient>
+
+                    {/* Drop shadow filter for caps */}
+                    <filter id="llCapShadow" x="-5%" y="-20%" width="110%" height="160%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor={t.green} floodOpacity="0.30" />
+                    </filter>
+                    {/* Glow filter for active sand */}
+                    <filter id="llSandFilter" x="-10%" y="-10%" width="120%" height="120%">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
                   </defs>
-                  <g clipPath="url(#lifeLockinTopBulb)">
+
+                  {/* ── Glass body fill ─────────────────────────────────────── */}
+                  <path
+                    d="M44 34 C44 60 50 80 68 102 C80 116 89 122 89 128 C89 134 80 140 68 154 C50 176 44 196 44 222 H156 C156 196 150 176 132 154 C120 140 111 134 111 128 C111 122 120 116 132 102 C150 80 156 60 156 34 Z"
+                    fill="url(#llGlass)"
+                  />
+
+                  {/* ── Top bulb sand ────────────────────────────────────────── */}
+                  <g clipPath="url(#llTopBulb)">
                     <rect
-                      x="30"
-                      y={30 + (86 * (100 - hourglassTopFill)) / 100}
-                      width="140"
-                      height={Math.max(0, (86 * hourglassTopFill) / 100)}
-                      fill="url(#lifeLockinSand)"
-                      style={{ transition: "y 0.2s linear, height 0.2s linear" }}
+                      x="28"
+                      y={34 + (88 * (100 - hourglassTopFill)) / 100}
+                      width="144"
+                      height={Math.max(0, (88 * hourglassTopFill) / 100)}
+                      fill="url(#llSandH)"
+                      filter="url(#llSandFilter)"
+                      style={{ transition: "y 0.25s linear, height 0.25s linear" }}
                     />
-                  </g>
-                  <g clipPath="url(#lifeLockinBottomBulb)">
-                    <rect
-                      x="30"
-                      y={210 - (86 * hourglassBottomFill) / 100}
-                      width="140"
-                      height={Math.max(0, (86 * hourglassBottomFill) / 100)}
-                      fill="url(#lifeLockinSand)"
-                      style={{ transition: "y 0.2s linear, height 0.2s linear" }}
-                    />
-                  </g>
-                  {!session.isComplete &&
-                    hourglassTopFill > 1 &&
-                    hourglassBottomFill < 99 && (
-                      <line
-                        x1="100"
-                        y1="118"
-                        x2="100"
-                        y2="160"
-                        stroke={t.green}
-                        strokeWidth="2"
-                        strokeLinecap="round"
+                    {/* Sand surface highlight (shimmer line at top of sand) */}
+                    {hourglassTopFill > 3 && (
+                      <ellipse
+                        cx="100"
+                        cy={34 + (88 * (100 - hourglassTopFill)) / 100 + 2}
+                        rx={Math.max(5, 38 * (hourglassTopFill / 100))}
+                        ry="3"
+                        fill="white"
+                        fillOpacity="0.28"
                         style={{
-                          transformOrigin: "100px 118px",
-                          animation: "lifeLockinGrain 0.9s linear infinite",
+                          transition: "cx 0.25s linear, cy 0.25s linear, rx 0.25s linear",
+                          animation: "llShimmer 2.4s ease-in-out infinite",
                         }}
                       />
                     )}
+                  </g>
+
+                  {/* ── Bottom bulb sand ─────────────────────────────────────── */}
+                  <g clipPath="url(#llBottomBulb)">
+                    {/* Glow under sand surface */}
+                    {hourglassBottomFill > 3 && (
+                      <ellipse
+                        cx="100"
+                        cy={218 - (88 * hourglassBottomFill) / 100 + 6}
+                        rx={Math.max(5, 40 * (hourglassBottomFill / 100))}
+                        ry="6"
+                        fill="url(#llSandGlow)"
+                        style={{ transition: "cy 0.25s linear, rx 0.25s linear" }}
+                      />
+                    )}
+                    <rect
+                      x="28"
+                      y={218 - (88 * hourglassBottomFill) / 100}
+                      width="144"
+                      height={Math.max(0, (88 * hourglassBottomFill) / 100)}
+                      fill="url(#llSandV)"
+                      filter="url(#llSandFilter)"
+                      style={{ transition: "y 0.25s linear, height 0.25s linear" }}
+                    />
+                    {/* Bottom sand surface shimmer */}
+                    {hourglassBottomFill > 3 && (
+                      <ellipse
+                        cx="100"
+                        cy={218 - (88 * hourglassBottomFill) / 100 + 3}
+                        rx={Math.max(5, 36 * (hourglassBottomFill / 100))}
+                        ry="2.5"
+                        fill="white"
+                        fillOpacity="0.20"
+                        style={{
+                          transition: "cy 0.25s linear, rx 0.25s linear",
+                          animation: "llShimmer 3s ease-in-out infinite 0.6s",
+                        }}
+                      />
+                    )}
+                  </g>
+
+                  {/* ── Falling sand particles through neck ─────────────────── */}
+                  {!session.isComplete &&
+                    hourglassTopFill > 1 &&
+                    hourglassBottomFill < 99 && (
+                      <g style={{ transformOrigin: "100px 127px" }}>
+                        <circle
+                          cx="100" cy="124" r="2.2"
+                          fill={t.green} fillOpacity="0.95"
+                          style={{ animation: "llGrain1 0.72s ease-in infinite" }}
+                        />
+                        <circle
+                          cx="99.2" cy="124" r="1.6"
+                          fill={t.green} fillOpacity="0.75"
+                          style={{ animation: "llGrain2 0.72s ease-in 0.24s infinite" }}
+                        />
+                        <circle
+                          cx="100.5" cy="124" r="1.9"
+                          fill={t.green} fillOpacity="0.85"
+                          style={{ animation: "llGrain3 0.72s ease-in 0.12s infinite" }}
+                        />
+                      </g>
+                    )}
+
+                  {/* ── Frame outline ─────────────────────────────────────────── */}
                   <path
-                    d="M44 24 H156 C156 52 138 70 124 90 C116 102 114 110 114 120 C114 130 118 138 126 150 C140 168 156 184 156 216 H44 C44 184 60 168 74 150 C82 138 86 130 86 120 C86 110 84 102 76 90 C62 70 44 52 44 24 Z"
+                    d="M44 34 C44 60 50 80 68 102 C80 116 89 122 89 128 C89 134 80 140 68 154 C50 176 44 196 44 222 H156 C156 196 150 176 132 154 C120 140 111 134 111 128 C111 122 120 116 132 102 C150 80 156 60 156 34 Z"
                     stroke={t.green}
-                    strokeWidth="3.5"
+                    strokeWidth="3"
                     strokeLinejoin="round"
+                    fill="none"
                   />
-                  <path d="M52 30 H148" stroke={t.green} strokeWidth="4" strokeLinecap="round" />
-                  <path d="M52 210 H148" stroke={t.green} strokeWidth="4" strokeLinecap="round" />
+
+                  {/* ── Glass highlight — left-side reflection ───────────────── */}
+                  <path
+                    d="M56 42 C56 62 62 78 76 98 C84 110 88 118 88 128"
+                    stroke="white"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeOpacity="0.22"
+                    fill="none"
+                    style={{ animation: "llShimmer 4s ease-in-out infinite 1s" }}
+                  />
+
+                  {/* ── Top cap ───────────────────────────────────────────────── */}
+                  <rect
+                    x="30" y="22" width="140" height="14" rx="7"
+                    fill="url(#llCapTop)"
+                    filter="url(#llCapShadow)"
+                  />
+                  {/* Cap highlight */}
+                  <rect x="40" y="23" width="72" height="5" rx="2.5"
+                    fill="white" fillOpacity="0.30" />
+
+                  {/* ── Bottom cap ────────────────────────────────────────────── */}
+                  <rect
+                    x="30" y="220" width="140" height="14" rx="7"
+                    fill="url(#llCapBot)"
+                    filter="url(#llCapShadow)"
+                  />
+                  {/* Cap highlight */}
+                  <rect x="40" y="221" width="72" height="5" rx="2.5"
+                    fill="white" fillOpacity="0.18" />
+
+                  {/* ── Neck ring accent ──────────────────────────────────────── */}
+                  <ellipse cx="100" cy="128" rx="11" ry="3.5"
+                    stroke={t.green} strokeWidth="2" strokeOpacity="0.50" fill="none" />
                 </svg>
               </div>
 
