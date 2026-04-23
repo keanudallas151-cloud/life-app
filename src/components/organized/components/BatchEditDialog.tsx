@@ -26,13 +26,17 @@ import { cn } from '../lib/utils'
 import { triggerHaptic } from '../lib/haptics'
 import { playButtonSound } from '../lib/sounds'
 
+type TaskChanges = {
+  [K in keyof Task]?: Task[K]
+}
+
 interface BatchEditDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   selectedTasks: Task[]
   categories: Category[]
   availableTags: string[]
-  onApplyChanges: (changes: Partial<Task>) => void
+  onApplyChanges: (changes: TaskChanges) => void
   hapticEnabled?: boolean
   soundEnabled?: boolean
 }
@@ -47,13 +51,13 @@ export function BatchEditDialog({
   hapticEnabled = true,
   soundEnabled = true,
 }: BatchEditDialogProps) {
-  const [categoryId, setCategoryId] = useState<string>('')
-  const [priority, setPriority] = useState<Priority | ''>('')
-  const [dueDate, setDueDate] = useState<Date>()
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [categoryId, setCategoryId] = useState('')
+  const [priority, setPriority] = useState('' as Priority | '')
+  const [dueDate, setDueDate] = useState(undefined as Date | undefined)
+  const [selectedTags, setSelectedTags] = useState([] as string[])
 
   const handleApply = () => {
-    const changes: Partial<Task> = {}
+    const changes: TaskChanges = {}
 
     if (categoryId) changes.categoryId = categoryId
     if (priority) changes.priority = priority as Priority

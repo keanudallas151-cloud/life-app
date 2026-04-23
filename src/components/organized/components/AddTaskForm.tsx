@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Dialog,
@@ -42,6 +42,10 @@ interface AddTaskFormProps {
     tags?: string[],
     subtasks?: Subtask[]
   ) => void
+}
+
+type KeyDownLikeEvent = {
+  key: string
 }
 
 export function AddTaskForm({
@@ -129,13 +133,13 @@ export function AddTaskForm({
     toast.success('Task added successfully')
   }
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyDownLikeEvent) => {
     if (e.key === 'Enter') {
       handleSubmit()
     }
   }
 
-  const handleSubtaskKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleSubtaskKeyDown = (e: KeyDownLikeEvent) => {
     if (e.key === 'Enter') {
       addSubtask()
     }

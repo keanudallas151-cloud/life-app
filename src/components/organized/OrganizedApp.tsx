@@ -47,6 +47,10 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: 'health', name: 'Health', color: 'oklch(0.50 0.10 200)' },
 ]
 
+type TaskUpdates = {
+  [K in keyof Task]?: Task[K]
+}
+
 function App() {
   const isMobile = useIsMobile()
   const [tasks, setTasks] = useKV<Task[]>('tasks-v2', [])
@@ -80,7 +84,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [addTaskFormOpen, setAddTaskFormOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
-  const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set())
+  const [selectedTasks, setSelectedTasks] = useState(() => new Set<string>())
   const [selectionMode, setSelectionMode] = useState(false)
   const [batchEditDialogOpen, setBatchEditDialogOpen] = useState(false)
   const [blockerTask, setBlockerTask] = useState<Task | null>(null)
@@ -160,7 +164,7 @@ function App() {
     }
   }
 
-  const updateTask = (taskId: string, updates: Partial<Task>) => {
+  const updateTask = (taskId: string, updates: TaskUpdates) => {
     setTasks((current) =>
       (current || []).map((task) =>
         task.id === taskId ? { ...task, ...updates } : task
@@ -292,7 +296,7 @@ function App() {
     setSelectionMode(false)
   }
 
-  const handleBatchEdit = (changes: Partial<Task>) => {
+  const handleBatchEdit = (changes: TaskUpdates) => {
     setTasks((current) =>
       (current || []).map(task =>
         selectedTasks.has(task.id)

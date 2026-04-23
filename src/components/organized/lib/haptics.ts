@@ -1,7 +1,13 @@
-export const triggerHaptic = (type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' = 'light') => {
-  if (!('vibrate' in navigator)) return
+type HapticType = 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error'
 
-  const patterns: Record<string, number | number[]> = {
+type HapticPatternMap = {
+  [key in HapticType]: number | number[]
+}
+
+export const triggerHaptic = (type: HapticType = 'light') => {
+  if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return
+
+  const patterns: HapticPatternMap = {
     light: 10,
     medium: 20,
     heavy: 30,

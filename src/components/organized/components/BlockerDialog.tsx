@@ -27,11 +27,15 @@ import { playButtonSound } from "../lib/sounds";
 import { toast } from "sonner";
 import { addDays } from "date-fns";
 
+type TaskUpdates = {
+  [K in keyof Task]?: Task[K]
+};
+
 interface BlockerDialogProps {
   task: Task | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
+  onUpdateTask: (taskId: string, updates: TaskUpdates) => void;
   onBreakIntoSubtasks: (taskId: string) => void;
   hapticEnabled?: boolean;
   soundEnabled?: boolean;
