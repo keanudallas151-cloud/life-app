@@ -68,7 +68,7 @@ const SECTIONS = {
   },
   sidebar_tools: {
     title: "Tools",
-    desc: "Tools help you stay productive and focused. Right now this section centers on Lock In, a focused work session tool with task planning, a timer, and optional short breaks.",
+    desc: "Tools are small utilities that help you put what you learn into action. Instead of one long page, each tool lives as its own item in the sidebar so you can jump straight to the one you need. Lock In is the first tool available — a focused work session with task planning, a timer, and optional short breaks. More tools will be added here over time.",
   },
   sidebar_socials: {
     title: "Socials",

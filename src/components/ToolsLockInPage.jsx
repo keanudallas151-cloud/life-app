@@ -700,56 +700,99 @@ export function ToolsLockInPage({
 
       {session && (
         <section style={{ display: "grid", gap: 20 }}>
+          <style>{`
+            @keyframes lifeLockinSandFall {
+              0%   { transform: translateY(-2px) scaleY(0.92); opacity: 0.85; }
+              50%  { transform: translateY(6px)  scaleY(1.08); opacity: 1; }
+              100% { transform: translateY(-2px) scaleY(0.92); opacity: 0.85; }
+            }
+            @keyframes lifeLockinGlow {
+              0%, 100% { opacity: 0.55; transform: scale(1); }
+              50%      { opacity: 0.9;  transform: scale(1.04); }
+            }
+            @keyframes lifeLockinGrain {
+              0%   { transform: translateY(0);     opacity: 0; }
+              10%  { opacity: 1; }
+              100% { transform: translateY(42px);  opacity: 0; }
+            }
+            @keyframes lifeLockinComplete {
+              0%   { transform: rotate(0deg); }
+              40%  { transform: rotate(182deg); }
+              100% { transform: rotate(180deg); }
+            }
+            .life-lockin-hourglass {
+              transition: transform 0.6s cubic-bezier(.2,.8,.2,1);
+            }
+            .life-lockin-hourglass.is-complete {
+              animation: lifeLockinComplete 1.1s cubic-bezier(.4,0,.2,1) forwards;
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .life-lockin-hourglass,
+              .life-lockin-hourglass * {
+                animation: none !important;
+                transition: none !important;
+              }
+            }
+          `}</style>
+
           <section
             className="life-card-hover"
             style={{
-              padding: "18px 18px 16px",
+              padding: "22px 20px 20px",
               borderRadius: 22,
               border: `1px solid ${t.border}`,
-              background: `linear-gradient(135deg, ${t.white} 0%, ${t.greenLt} 150%)`,
+              background: `linear-gradient(160deg, ${t.white} 0%, ${t.greenLt} 160%)`,
               boxShadow: session.isComplete
-                ? `0 18px 36px ${t.green}14`
-                : `0 14px 30px ${t.green}10`,
+                ? `0 20px 40px ${t.green}18`
+                : `0 14px 32px ${t.green}10`,
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
-              <div>
-                <p style={{ margin: "0 0 4px", color: t.ink, fontSize: 16, fontWeight: 700 }}>
-                  {session.isComplete
-                    ? "Session complete"
-                    : activePhase?.type === "break"
-                      ? "Break time"
-                      : "Locked in"}
-                </p>
-                <p style={{ margin: 0, color: t.mid, fontSize: 13, lineHeight: 1.7 }}>
-                  {session.isComplete
-                    ? "The hourglass is finished. You can move on now."
-                    : activePhase?.type === "break"
-                      ? "Take a short break, then come back when the timer returns to focus mode."
-                      : "Stay with your work until the timer is finished."}
-                </p>
-              </div>
-              <div
+            <div style={{ textAlign: "center", marginBottom: 18 }}>
+              <p
                 style={{
-                  minHeight: 34,
-                  padding: "8px 12px",
-                  borderRadius: 999,
-                  background: session.isComplete ? `${t.green}18` : t.light,
-                  color: session.isComplete ? t.green : t.muted,
-                  fontSize: 12,
-                  fontWeight: 700,
+                  margin: "0 0 6px",
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: 2.5,
+                  textTransform: "uppercase",
+                  color: session.isComplete
+                    ? t.green
+                    : activePhase?.type === "break"
+                      ? t.muted
+                      : t.green,
                 }}
               >
                 {session.isComplete
                   ? "Finished"
-                  : `${Math.round(progressPercent)}% complete`}
-              </div>
+                  : activePhase?.type === "break"
+                    ? "Break"
+                    : "Locked in"}
+              </p>
+              <p
+                style={{
+                  margin: 0,
+                  color: t.mid,
+                  fontSize: 13,
+                  lineHeight: 1.65,
+                  maxWidth: 340,
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                }}
+              >
+                {session.isComplete
+                  ? "The hourglass is finished. You can move on now."
+                  : session.isPaused
+                    ? "Session paused. Resume when you are ready."
+                    : activePhase?.type === "break"
+                      ? "Short break. Stretch, breathe, come back."
+                      : "Stay with your work until the timer is finished."}
+              </p>
             </div>
 
             <div
               style={{
                 display: "grid",
-                gap: 18,
+                gap: 22,
                 justifyItems: "center",
                 textAlign: "center",
               }}
@@ -757,8 +800,8 @@ export function ToolsLockInPage({
               <div
                 style={{
                   position: "relative",
-                  width: 220,
-                  height: 260,
+                  width: 200,
+                  height: 240,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -768,92 +811,150 @@ export function ToolsLockInPage({
                   aria-hidden
                   style={{
                     position: "absolute",
-                    inset: 20,
+                    inset: 12,
                     borderRadius: "50%",
-                    background: `radial-gradient(circle, ${t.green}12 0%, transparent 70%)`,
-                    opacity: session.isPaused || session.isComplete ? 0.6 : 1,
+                    background: `radial-gradient(circle, ${t.green}1f 0%, transparent 70%)`,
+                    animation:
+                      !session.isPaused && !session.isComplete
+                        ? "lifeLockinGlow 3.2s ease-in-out infinite"
+                        : "none",
+                    opacity: session.isPaused ? 0.35 : 1,
                   }}
                 />
+
                 <svg
-                  style={{ position: "absolute", inset: 0 }}
-                  viewBox="0 0 220 260"
+                  className={`life-lockin-hourglass${session.isComplete ? " is-complete" : ""}`}
+                  width="200"
+                  height="240"
+                  viewBox="0 0 200 240"
                   fill="none"
+                  style={{ position: "relative", zIndex: 1 }}
+                  aria-hidden
                 >
+                  <defs>
+                    <clipPath id="lifeLockinTopBulb">
+                      <polygon points="40,30 160,30 108,116 92,116" />
+                    </clipPath>
+                    <clipPath id="lifeLockinBottomBulb">
+                      <polygon points="92,124 108,124 160,210 40,210" />
+                    </clipPath>
+                    <linearGradient id="lifeLockinSand" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={t.green} stopOpacity="0.95" />
+                      <stop offset="100%" stopColor={t.greenAlt || t.green} stopOpacity="1" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Top bulb sand (depletes downward) */}
+                  <g clipPath="url(#lifeLockinTopBulb)">
+                    <rect
+                      x="30"
+                      y={30 + (86 * (100 - hourglassTopFill)) / 100}
+                      width="140"
+                      height={Math.max(0, (86 * hourglassTopFill) / 100)}
+                      fill="url(#lifeLockinSand)"
+                      style={{ transition: "y 0.2s linear, height 0.2s linear" }}
+                    />
+                  </g>
+
+                  {/* Bottom bulb sand (fills upward) */}
+                  <g clipPath="url(#lifeLockinBottomBulb)">
+                    <rect
+                      x="30"
+                      y={210 - (86 * hourglassBottomFill) / 100}
+                      width="140"
+                      height={Math.max(0, (86 * hourglassBottomFill) / 100)}
+                      fill="url(#lifeLockinSand)"
+                      style={{ transition: "y 0.2s linear, height 0.2s linear" }}
+                    />
+                  </g>
+
+                  {/* Falling grain stream */}
+                  {!session.isPaused && !session.isComplete && hourglassTopFill > 1 && hourglassBottomFill < 99 && (
+                    <line
+                      x1="100"
+                      y1="118"
+                      x2="100"
+                      y2="160"
+                      stroke={t.green}
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      style={{
+                        transformOrigin: "100px 118px",
+                        animation: "lifeLockinGrain 0.9s linear infinite",
+                      }}
+                    />
+                  )}
+
+                  {/* Frame */}
                   <path
-                    d="M55 20 H165 C165 48 146 66 132 85 C123 97 122 105 122 116 C122 128 126 136 135 148 C147 165 165 181 165 210 H55 C55 181 73 165 85 148 C94 136 98 128 98 116 C98 105 97 97 88 85 C74 66 55 48 55 20 Z"
+                    d="M44 24 H156 C156 52 138 70 124 90 C116 102 114 110 114 120 C114 130 118 138 126 150 C140 168 156 184 156 216 H44 C44 184 60 168 74 150 C82 138 86 130 86 120 C86 110 84 102 76 90 C62 70 44 52 44 24 Z"
                     stroke={t.green}
-                    strokeWidth="4"
+                    strokeWidth="3.5"
+                    strokeLinejoin="round"
                   />
-                  <path d="M65 28 H155" stroke={t.green} strokeWidth="4" strokeLinecap="round" />
-                  <path d="M65 202 H155" stroke={t.green} strokeWidth="4" strokeLinecap="round" />
+                  <path d="M52 30 H148" stroke={t.green} strokeWidth="4" strokeLinecap="round" />
+                  <path d="M52 210 H148" stroke={t.green} strokeWidth="4" strokeLinecap="round" />
                 </svg>
+              </div>
 
+              <div style={{ display: "grid", gap: 4 }}>
                 <div
-                  aria-hidden
                   style={{
-                    position: "absolute",
-                    top: 38,
-                    width: 88,
-                    height: `${Math.max(16, hourglassTopFill * 0.72)}px`,
-                    background: `linear-gradient(180deg, ${t.green} 0%, ${t.greenAlt || t.green} 100%)`,
-                    clipPath: "polygon(0 0, 100% 0, 62% 100%, 38% 100%)",
-                    opacity: hourglassTopFill > 2 ? 1 : 0.15,
-                    transition: "height 0.08s linear, opacity 0.12s linear",
+                    fontSize: "clamp(32px, 9vw, 44px)",
+                    fontWeight: 800,
+                    letterSpacing: 1.5,
+                    fontFamily: "'SF Mono','JetBrains Mono',Menlo,monospace",
+                    color: t.ink,
+                    fontVariantNumeric: "tabular-nums",
+                    lineHeight: 1.05,
+                    opacity: session.isPaused ? 0.55 : 1,
+                    transition: "opacity 0.25s ease",
                   }}
-                />
+                >
+                  {formatCountdown(activePhaseRemainingMs)}
+                </div>
                 <div
-                  aria-hidden
                   style={{
-                    position: "absolute",
-                    bottom: 44,
-                    width: 88,
-                    height: `${Math.max(16, hourglassBottomFill * 0.72)}px`,
-                    background: `linear-gradient(180deg, ${t.green} 0%, ${t.greenAlt || t.green} 100%)`,
-                    clipPath: "polygon(38% 0, 62% 0, 100% 100%, 0 100%)",
-                    opacity: hourglassBottomFill > 2 ? 1 : 0.15,
-                    transition: "height 0.08s linear, opacity 0.12s linear",
+                    color: t.muted,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: 2,
+                    textTransform: "uppercase",
                   }}
-                />
-                {!session.isPaused && !session.isComplete && (
-                  <div
-                    aria-hidden
-                    style={{
-                      position: "absolute",
-                      top: 118,
-                      width: 4,
-                      height: 26,
-                      borderRadius: 999,
-                      background: t.green,
-                    }}
-                  />
-                )}
-
-                <div style={{ position: "relative", zIndex: 1, marginTop: 168 }}>
-                  <div
-                    style={{
-                      fontSize: 36,
-                      fontWeight: 800,
-                      letterSpacing: 1,
-                      fontFamily: "monospace",
-                      color: t.ink,
-                    }}
-                  >
-                    {formatCountdown(activePhaseRemainingMs)}
-                  </div>
-                  <div style={{ marginTop: 6, color: t.muted, fontSize: 12.5, fontWeight: 700 }}>
-                    {session.isComplete ? "Done" : activePhase?.label || "Preparing"}
-                  </div>
+                >
+                  {session.isComplete
+                    ? "Done"
+                    : session.isPaused
+                      ? "Paused"
+                      : activePhase?.label || "Preparing"}
                 </div>
               </div>
 
-              <div style={{ width: "100%", display: "grid", gap: 10 }}>
-                <div style={{ color: t.mid, fontSize: 13.5, lineHeight: 1.75 }}>
-                  Total remaining: <strong style={{ color: t.ink }}>{formatCountdown(totalRemainingMs)}</strong>
+              <div style={{ width: "100%", display: "grid", gap: 8 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    color: t.mid,
+                    fontSize: 12.5,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  <span>
+                    Total remaining{" "}
+                    <strong style={{ color: t.ink, fontVariantNumeric: "tabular-nums" }}>
+                      {formatCountdown(totalRemainingMs)}
+                    </strong>
+                  </span>
+                  <span style={{ color: t.muted, fontWeight: 700 }}>
+                    {Math.round(progressPercent)}%
+                  </span>
                 </div>
                 <div
                   aria-hidden
                   style={{
-                    height: 10,
+                    height: 8,
                     borderRadius: 999,
                     background: t.light,
                     overflow: "hidden",
@@ -865,7 +966,7 @@ export function ToolsLockInPage({
                       height: "100%",
                       borderRadius: 999,
                       background: `linear-gradient(90deg, ${t.green} 0%, ${t.greenAlt || t.green} 100%)`,
-                      transition: "width 0.08s linear",
+                      transition: "width 0.25s ease",
                     }}
                   />
                 </div>

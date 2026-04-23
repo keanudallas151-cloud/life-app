@@ -85,7 +85,6 @@ import { SidebarSectionPage } from "./components/SidebarSectionPage";
 import { SignInPage } from "./components/SignInPage";
 import { ThemePickerPage } from "./components/ThemePickerPage";
 import { ToolsLockInPage } from "./components/ToolsLockInPage";
-import { ToolsPage } from "./components/ToolsPage";
 import { VerifyEmailPage } from "./components/VerifyEmailPage";
 import { WhereToStartPage } from "./components/WhereToStartPage";
 import { signInWithGoogle } from "./services/firebaseAuth";
@@ -3511,12 +3510,13 @@ export default function LifeApp() {
             >
               <SL
                 theme={t}
-                label="Browse Tools"
-                icon="box"
+                label="Lock In"
+                icon="candle"
                 onClick={() => {
-                  openSidebarSectionPage("sidebar_tools", setToolsOpen);
+                  play("tap");
+                  setPage("tools_lockin");
                 }}
-                active={page === "sidebar_tools"}
+                active={page === "tools_lockin"}
               />
             </SS>
             <SS
@@ -3934,11 +3934,7 @@ export default function LifeApp() {
             )}
 
             {page === "sidebar_tools" && (
-              <ToolsPage
-                t={t}
-                play={play}
-                setPage={setPage}
-              />
+              <SidebarSectionPage sectionKey="sidebar_tools" t={t} />
             )}
 
             {page === "tools_lockin" && (
