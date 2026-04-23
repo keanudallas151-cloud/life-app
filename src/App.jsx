@@ -83,6 +83,9 @@ import SettingsPage from "./components/SettingsPage";
 import { SidebarSectionPage } from "./components/SidebarSectionPage";
 import { SignInPage } from "./components/SignInPage";
 import { ThemePickerPage } from "./components/ThemePickerPage";
+import { ToolsLockInPage } from "./components/ToolsLockInPage";
+import { ToolsPage } from "./components/ToolsPage";
+import { ToolsTodoPage } from "./components/ToolsTodoPage";
 import { VerifyEmailPage } from "./components/VerifyEmailPage";
 import { WhereToStartPage } from "./components/WhereToStartPage";
 import { signInWithGoogle } from "./services/firebaseAuth";
@@ -640,6 +643,12 @@ export default function LifeApp() {
   const [localMomentumState, setLocalMomentumStateRaw] = useState(() =>
     LS.get(`mom_${uid}`, null),
   );
+  const [localToolsTodos, setLocalToolsTodosRaw] = useState(() =>
+    LS.get(`tools_todos_${uid}`, []),
+  );
+  const [localToolsSession, setLocalToolsSessionRaw] = useState(() =>
+    LS.get(`tools_lockin_${uid}`, null),
+  );
 
   useEffect(() => {
     if (!user?.id || !user?.email) return;
@@ -692,6 +701,8 @@ export default function LifeApp() {
   const momentumState = userIdForData
     ? cloud.momentumState
     : localMomentumState;
+  const toolsTodos = userIdForData ? cloud.toolsTodos : localToolsTodos;
+  const toolsSession = userIdForData ? cloud.toolsSession : localToolsSession;
 
   const setBookmarks = (v) => {
     const next = typeof v === "function" ? v(bookmarks) : v;
@@ -723,6 +734,22 @@ export default function LifeApp() {
     else {
       setLocalMomentumStateRaw(next);
       LS.set(`mom_${uid}`, next);
+    }
+  };
+  const setToolsTodos = (v) => {
+    const next = typeof v === "function" ? v(toolsTodos) : v;
+    if (userIdForData) cloud.setToolsTodos(next);
+    else {
+      setLocalToolsTodosRaw(next);
+      LS.set(`tools_todos_${uid}`, next);
+    }
+  };
+  const setToolsSession = (v) => {
+    const next = typeof v === "function" ? v(toolsSession) : v;
+    if (userIdForData) cloud.setToolsSession(next);
+    else {
+      setLocalToolsSessionRaw(next);
+      LS.set(`tools_lockin_${uid}`, next);
     }
   };
 
@@ -839,10 +866,13 @@ export default function LifeApp() {
       momentum_hub: "Momentum Hub — Life.",
       sidebar_life: "Life — Life.",
       sidebar_library: "Library — Life.",
+      sidebar_tools: "Tools — Life.",
       sidebar_socials: "Socials — Life.",
       sidebar_guided: "Guided — Life.",
       sidebar_saved: "Saved — Life.",
       sidebar_experience: "Experience — Life.",
+      tools_todo: "To-Do — Life.",
+      tools_lockin: "Lock-In — Life.",
       premium: "Premium — Life.",
       discord_networking: "Networking Group — Life.",
       account_customize: "Account — Life.",
@@ -885,6 +915,7 @@ export default function LifeApp() {
   }, [showSearch, search]);
   const [lifeOpen, setLifeOpen] = useState(true);
   const [libOpen, setLibOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [socialsOpen, setSocialsOpen] = useState(false);
   const [guidedOpen, setGuidedOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
@@ -1221,7 +1252,9 @@ export default function LifeApp() {
       (cloud.readKeys?.length ?? 0) > 0 ||
       (cloud.highlights?.length ?? 0) > 0 ||
       cloud.tsdProfile != null ||
-      cloud.momentumState != null;
+      cloud.momentumState != null ||
+      (cloud.toolsTodos?.length ?? 0) > 0 ||
+      cloud.toolsSession != null;
     if (hasCloud) {
       migratedRef.current = true;
       return;
@@ -1231,11 +1264,15 @@ export default function LifeApp() {
     const ln = LS.get(`nt_${email}`, {});
     const lr = LS.get(`rd_${email}`, []);
     const lp = LS.get(`tsd_${email}`, null);
+    const lt = LS.get(`tools_todos_${email}`, []);
+    const ls = LS.get(`tools_lockin_${email}`, null);
     const hasLocal =
       lb.length > 0 ||
       Object.keys(ln).some((k) => ln[k]) ||
       lr.length > 0 ||
-      lp != null;
+      lp != null ||
+      lt.length > 0 ||
+      ls != null;
     migratedRef.current = true;
     if (hasLocal) {
       cloud.replaceAllData({
@@ -1245,6 +1282,8 @@ export default function LifeApp() {
         highlights: cloud.highlights,
         tsd_profile: lp,
         momentum_state: cloud.momentumState,
+        tools_todos: lt,
+        tools_session: ls,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- see block comment above
@@ -1258,6 +1297,8 @@ export default function LifeApp() {
     user?.email,
     cloud.highlights,
     cloud.momentumState,
+    cloud.toolsSession,
+    cloud.toolsTodos,
     cloud.replaceAllData,
   ]);
 
@@ -1270,6 +1311,8 @@ export default function LifeApp() {
       setLocalNotesRaw(LS.get(`nt_${uid}`, {}));
       setLocalReadKeysRaw(LS.get(`rd_${uid}`, []));
       setLocalProfileRaw(LS.get(`tsd_${uid}`, null));
+      setLocalToolsTodosRaw(LS.get(`tools_todos_${uid}`, []));
+      setLocalToolsSessionRaw(LS.get(`tools_lockin_${uid}`, null));
     }
   }, [uid, userIdForData]);
 
@@ -3443,6 +3486,28 @@ export default function LifeApp() {
             <SS
               theme={t}
               playFn={play}
+              label="Tools"
+              open={toolsOpen}
+              setOpen={setToolsOpen}
+              tag="#tools"
+              onLabelClick={() =>
+                openSidebarSectionPage("sidebar_tools", setToolsOpen)
+              }
+              active={page === "sidebar_tools"}
+            >
+              <SL
+                theme={t}
+                label="Browse Tools"
+                icon="box"
+                onClick={() => {
+                  openSidebarSectionPage("sidebar_tools", setToolsOpen);
+                }}
+                active={page === "sidebar_tools"}
+              />
+            </SS>
+            <SS
+              theme={t}
+              playFn={play}
               label="Socials"
               open={socialsOpen}
               setOpen={setSocialsOpen}
@@ -3851,6 +3916,32 @@ export default function LifeApp() {
                 user={user}
                 play={play}
                 onSystemNotify={pushSystemNotification}
+              />
+            )}
+
+            {page === "sidebar_tools" && (
+              <ToolsPage
+                t={t}
+                play={play}
+                setPage={setPage}
+              />
+            )}
+
+            {page === "tools_todo" && (
+              <ToolsTodoPage
+                t={t}
+                play={play}
+                todos={toolsTodos}
+                setTodos={setToolsTodos}
+              />
+            )}
+
+            {page === "tools_lockin" && (
+              <ToolsLockInPage
+                t={t}
+                play={play}
+                session={toolsSession}
+                setSession={setToolsSession}
               />
             )}
 

@@ -66,6 +66,10 @@ const SECTIONS = {
     title: "Library",
     desc: "The Library is the knowledge base of Life. It organizes the reading material into categories and branches so users can explore the app by topic instead of only following one fixed path.",
   },
+  sidebar_tools: {
+    title: "Tools",
+    desc: "Tools help you stay productive and focused. Use To-Do for task management and Lock-In for focused work sessions.",
+  },
   sidebar_socials: {
     title: "Socials",
     desc: "Socials is where learning connects with people. This section holds the community feed, networking, and competitive views so users can move from private learning into public conversation and connection.",

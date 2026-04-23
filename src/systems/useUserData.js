@@ -10,6 +10,8 @@ const EMPTY_USER_DATA = {
   highlights: [],
   tsd_profile: null,
   momentum_state: null,
+  tools_todos: [],
+  tools_session: null,
 };
 
 function getUserDataCacheKey(userId) {
@@ -59,6 +61,8 @@ function normalizeCloudUserData(data = {}) {
       data.momentumState,
       null,
     ),
+    tools_todos: pickFirstDefined(data.tools_todos, data.toolsTodos, []),
+    tools_session: pickFirstDefined(data.tools_session, data.toolsSession, null),
   };
 }
 
@@ -69,7 +73,9 @@ function hasAnyUserData(data = {}) {
       || (data.read_keys?.length ?? 0) > 0
       || (data.highlights?.length ?? 0) > 0
       || data.tsd_profile != null
-      || data.momentum_state != null,
+      || data.momentum_state != null
+      || (data.tools_todos?.length ?? 0) > 0
+      || data.tools_session != null
   );
 }
 
@@ -90,6 +96,8 @@ export function useUserData(userId) {
   const [highlights,  setHighlightsState] = useState([]);
   const [tsdProfile,  setTsdProfileState] = useState(null);
   const [momentumState, setMomentumStateRaw] = useState(null);
+  const [toolsTodos, setToolsTodosState] = useState([]);
+  const [toolsSession, setToolsSessionState] = useState(null);
   const [loading,     setLoading]         = useState(false);
   const [error,       setError]           = useState("");
 
@@ -113,6 +121,8 @@ export function useUserData(userId) {
     setHighlightsState(normalized.highlights ?? []);
     setTsdProfileState(normalized.tsd_profile ?? null);
     setMomentumStateRaw(normalized.momentum_state ?? null);
+    setToolsTodosState(normalized.tools_todos ?? []);
+    setToolsSessionState(normalized.tools_session ?? null);
     saveCachedUserData(userId, normalized);
   }, [userId]);
 
@@ -201,6 +211,8 @@ export function useUserData(userId) {
       setHighlightsState([]);
       setTsdProfileState(null);
       setMomentumStateRaw(null);
+      setToolsTodosState([]);
+      setToolsSessionState(null);
       setError("");
       return;
     }
@@ -265,9 +277,11 @@ export function useUserData(userId) {
       highlights,
       tsd_profile: tsdProfile,
       momentum_state: momentumState,
+      tools_todos: toolsTodos,
+      tools_session: toolsSession,
     });
     schedulePersist({ bookmarks: next }, 180);
-  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, tsdProfile, userId]);
+  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, toolsSession, toolsTodos, tsdProfile, userId]);
 
   const setNotes = useCallback((v) => {
     const next = typeof v === "function" ? v(notes) : v;
@@ -279,9 +293,11 @@ export function useUserData(userId) {
       highlights,
       tsd_profile: tsdProfile,
       momentum_state: momentumState,
+      tools_todos: toolsTodos,
+      tools_session: toolsSession,
     });
     schedulePersist({ notes: next }, 700);
-  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, tsdProfile, userId]);
+  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, toolsSession, toolsTodos, tsdProfile, userId]);
 
   const setReadKeys = useCallback((v) => {
     const next = typeof v === "function" ? v(readKeys) : v;
@@ -293,9 +309,11 @@ export function useUserData(userId) {
       highlights,
       tsd_profile: tsdProfile,
       momentum_state: momentumState,
+      tools_todos: toolsTodos,
+      tools_session: toolsSession,
     });
     schedulePersist({ read_keys: next }, 180);
-  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, tsdProfile, userId]);
+  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, toolsSession, toolsTodos, tsdProfile, userId]);
 
   const setHighlights = useCallback((v) => {
     const next = typeof v === "function" ? v(highlights) : v;
@@ -307,9 +325,11 @@ export function useUserData(userId) {
       highlights: next,
       tsd_profile: tsdProfile,
       momentum_state: momentumState,
+      tools_todos: toolsTodos,
+      tools_session: toolsSession,
     });
     schedulePersist({ highlights: next }, 220);
-  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, tsdProfile, userId]);
+  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, toolsSession, toolsTodos, tsdProfile, userId]);
 
   const setTsdProfile = useCallback((v) => {
     const next = typeof v === "function" ? v(tsdProfile) : v;
@@ -321,9 +341,11 @@ export function useUserData(userId) {
       highlights,
       tsd_profile: next,
       momentum_state: momentumState,
+      tools_todos: toolsTodos,
+      tools_session: toolsSession,
     });
     schedulePersist({ tsd_profile: next }, 220);
-  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, tsdProfile, userId]);
+  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, toolsSession, toolsTodos, tsdProfile, userId]);
 
   const setMomentumState = useCallback((v) => {
     const next = typeof v === "function" ? v(momentumState) : v;
@@ -335,9 +357,43 @@ export function useUserData(userId) {
       highlights,
       tsd_profile: tsdProfile,
       momentum_state: next,
+      tools_todos: toolsTodos,
+      tools_session: toolsSession,
     });
     schedulePersist({ momentum_state: next }, 260);
-  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, tsdProfile, userId]);
+  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, tsdProfile, toolsSession, toolsTodos, userId]);
+
+  const setToolsTodos = useCallback((v) => {
+    const next = typeof v === "function" ? v(toolsTodos) : v;
+    setToolsTodosState(next);
+    saveCachedUserData(userId, {
+      bookmarks,
+      notes,
+      read_keys: readKeys,
+      highlights,
+      tsd_profile: tsdProfile,
+      momentum_state: momentumState,
+      tools_todos: next,
+      tools_session: toolsSession,
+    });
+    schedulePersist({ tools_todos: next }, 220);
+  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, toolsSession, toolsTodos, tsdProfile, userId]);
+
+  const setToolsSession = useCallback((v) => {
+    const next = typeof v === "function" ? v(toolsSession) : v;
+    setToolsSessionState(next);
+    saveCachedUserData(userId, {
+      bookmarks,
+      notes,
+      read_keys: readKeys,
+      highlights,
+      tsd_profile: tsdProfile,
+      momentum_state: momentumState,
+      tools_todos: toolsTodos,
+      tools_session: next,
+    });
+    schedulePersist({ tools_session: next }, 180);
+  }, [bookmarks, highlights, momentumState, notes, readKeys, schedulePersist, toolsSession, toolsTodos, tsdProfile, userId]);
 
   const replaceAllData = useCallback((next) => {
     const merged = {
@@ -347,6 +403,8 @@ export function useUserData(userId) {
       highlights: next?.highlights ?? [],
       tsd_profile: next?.tsd_profile ?? null,
       momentum_state: next?.momentum_state ?? null,
+      tools_todos: next?.tools_todos ?? [],
+      tools_session: next?.tools_session ?? null,
     };
     applyFetchedData(merged);
     schedulePersist(merged, 120);
@@ -359,6 +417,8 @@ export function useUserData(userId) {
     highlights, setHighlights,
     tsdProfile, setTsdProfile,
     momentumState, setMomentumState,
+    toolsTodos, setToolsTodos,
+    toolsSession, setToolsSession,
     replaceAllData,
     loading,
     error,
