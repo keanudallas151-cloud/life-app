@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 
 const BREAK_OPTIONS = [1, 2, 3];
-const SHORT_BREAK_MS = 3 * 60 * 1000;
+const BREAK_LENGTH_OPTIONS_MINUTES = [2, 3, 5];
+const DEFAULT_SHORT_BREAK_MS = 3 * 60 * 1000;
 
 function onlyDigits(value) {
   return String(value || "").replace(/\D/g, "").slice(0, 2);
@@ -11,7 +12,28 @@ function pad2(value) {
   return String(value || "").padStart(2, "0").slice(-2);
 }
 
-function buildFocusAndBreakPhases(totalFocusMs, breakCount) {
+function clampInt(value, min, max) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return min;
+  return Math.max(min, Math.min(max, Math.floor(num)));
+}
+
+function sanitizeTimePart(key, rawValue) {
+  const digits = onlyDigits(rawValue);
+  if (!digits) return "";
+
+  const limits = {
+    hours: 99,
+    minutes: 59,
+    seconds: 59,
+    hundredths: 99,
+  };
+
+  const max = limits[key] ?? 99;
+  return String(clampInt(digits, 0, max));
+}
+
+function buildFocusAndBreakPhases(totalFocusMs, breakCount, shortBreakMs) {
   const focusSegmentCount = breakCount + 1;
   const baseFocusMs = Math.floor(totalFocusMs / focusSegmentCount);
   let remainder = totalFocusMs - baseFocusMs * focusSegmentCount;
@@ -30,7 +52,7 @@ function buildFocusAndBreakPhases(totalFocusMs, breakCount) {
       phases.push({
         type: "break",
         label: `Break ${index + 1}`,
-        durationMs: SHORT_BREAK_MS,
+        durationMs: shortBreakMs,
       });
     }
   }
@@ -58,10 +80,10 @@ function formatMinutesLabel(totalMs) {
   return `${hours} hr ${minutes} min`;
 }
 
-function getBreakOffsets(totalFocusMs, breakCount) {
+function getBreakOffsets(totalFocusMs, breakCount, shortBreakMs) {
   if (!breakCount || !totalFocusMs) return [];
 
-  const phases = buildFocusAndBreakPhases(totalFocusMs, breakCount);
+  const phases = buildFocusAndBreakPhases(totalFocusMs, breakCount, shortBreakMs);
   let focusElapsedMs = 0;
   const offsets = [];
 
@@ -101,7 +123,7 @@ function getTotalRemainingMs(session, now = Date.now()) {
   return current + upcoming;
 }
 
-function createLockInSession({ tasks, timeParts, breakCount }) {
+function createLockInSession({ tasks, timeParts, breakCount, shortBreakMs }) {
   const hours = Number(timeParts.hours || 0);
   const minutes = Number(timeParts.minutes || 0);
   const seconds = Number(timeParts.seconds || 0);
@@ -112,8 +134,8 @@ function createLockInSession({ tasks, timeParts, breakCount }) {
     seconds * 1000 +
     hundredths * 10;
 
-  const phases = buildFocusAndBreakPhases(totalFocusMs, breakCount);
-  const totalBreakMs = breakCount * SHORT_BREAK_MS;
+  const phases = buildFocusAndBreakPhases(totalFocusMs, breakCount, shortBreakMs);
+  const totalBreakMs = breakCount * shortBreakMs;
 
   return {
     id: `lockin_${Date.now()}`,
@@ -122,11 +144,12 @@ function createLockInSession({ tasks, timeParts, breakCount }) {
       tasks,
       breakCount,
       timeParts,
+      shortBreakMs,
     },
     breakCount,
     totalFocusMs,
     totalPlannedMs: totalFocusMs + totalBreakMs,
-    shortBreakMs: SHORT_BREAK_MS,
+    shortBreakMs,
     phases,
     currentPhaseIndex: 0,
     currentPhaseRemainingMs: phases[0]?.durationMs || 0,
@@ -177,6 +200,7 @@ export function ToolsLockInPage({
   });
   const [breaksEnabled, setBreaksEnabled] = useState(false);
   const [breakCount, setBreakCount] = useState(1);
+  const [shortBreakMinutes, setShortBreakMinutes] = useState(3);
   const [formError, setFormError] = useState("");
   const [tick, setTick] = useState(() => Date.now());
 
@@ -192,6 +216,8 @@ export function ToolsLockInPage({
     });
     setBreaksEnabled((session.config.breakCount || 0) > 0);
     setBreakCount(Math.max(1, Number(session.config.breakCount || 1)));
+    const persistedBreakMs = Number(session.config.shortBreakMs || DEFAULT_SHORT_BREAK_MS);
+    setShortBreakMinutes(clampInt(Math.round(persistedBreakMs / 60000), 1, 15));
   }, [session?.config]);
 
   useEffect(() => {
@@ -233,7 +259,7 @@ export function ToolsLockInPage({
   };
 
   const updateTimePart = (key, value) => {
-    setTimeParts((prev) => ({ ...prev, [key]: onlyDigits(value) }));
+    setTimeParts((prev) => ({ ...prev, [key]: sanitizeTimePart(key, value) }));
     if (formError) setFormError("");
   };
 
@@ -266,6 +292,7 @@ export function ToolsLockInPage({
     }
 
     const chosenBreakCount = breaksEnabled ? breakCount : 0;
+    const chosenShortBreakMs = clampInt(shortBreakMinutes, 1, 15) * 60000;
     const shortestFocusBlock = totalFocusMs / (chosenBreakCount + 1);
     if (chosenBreakCount > 0 && shortestFocusBlock < 60000) {
       setFormError("Choose more time or fewer breaks so each focus block lasts at least one minute.");
@@ -283,6 +310,7 @@ export function ToolsLockInPage({
         hundredths: pad2(timeParts.hundredths),
       },
       breakCount: chosenBreakCount,
+      shortBreakMs: chosenShortBreakMs,
     });
   };
 
@@ -321,10 +349,11 @@ export function ToolsLockInPage({
     setTick(Date.now());
   };
 
+  const shortBreakMs = clampInt(shortBreakMinutes, 1, 15) * 60000;
   const breakSummary = breaksEnabled
-    ? `${breakCount} short ${breakCount === 1 ? "break" : "breaks"} of ${formatMinutesLabel(SHORT_BREAK_MS)} each.`
+    ? `${breakCount} short ${breakCount === 1 ? "break" : "breaks"} of ${formatMinutesLabel(shortBreakMs)} each.`
     : "No breaks in this session.";
-  const breakOffsets = breaksEnabled ? getBreakOffsets(totalFocusMs, breakCount) : [];
+  const breakOffsets = breaksEnabled ? getBreakOffsets(totalFocusMs, breakCount, shortBreakMs) : [];
 
   return (
     <div
@@ -563,34 +592,71 @@ export function ToolsLockInPage({
             </div>
 
             {breaksEnabled && (
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                {BREAK_OPTIONS.map((option) => {
-                  const active = breakCount === option;
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => {
-                        play("tap");
-                        setBreakCount(option);
-                      }}
-                      style={{
-                        minHeight: 44,
-                        minWidth: 52,
-                        padding: "10px 16px",
-                        borderRadius: 12,
-                        border: `1px solid ${active ? t.green : t.border}`,
-                        background: active ? t.green : t.white,
-                        color: active ? t.skin : t.ink,
-                        fontSize: 13,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                      }}
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
+              <div style={{ display: "grid", gap: 10 }}>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  {BREAK_OPTIONS.map((option) => {
+                    const active = breakCount === option;
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => {
+                          play("tap");
+                          setBreakCount(option);
+                        }}
+                        style={{
+                          minHeight: 44,
+                          minWidth: 52,
+                          padding: "10px 16px",
+                          borderRadius: 12,
+                          border: `1px solid ${active ? t.green : t.border}`,
+                          background: active ? t.green : t.white,
+                          color: active ? t.skin : t.ink,
+                          fontSize: 13,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div>
+                  <p style={{ margin: "2px 0 8px", color: t.mid, fontSize: 12.5, lineHeight: 1.6 }}>
+                    Short break length
+                  </p>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    {BREAK_LENGTH_OPTIONS_MINUTES.map((mins) => {
+                      const active = shortBreakMinutes === mins;
+                      return (
+                        <button
+                          key={mins}
+                          type="button"
+                          onClick={() => {
+                            play("tap");
+                            setShortBreakMinutes(mins);
+                          }}
+                          style={{
+                            minHeight: 44,
+                            minWidth: 80,
+                            padding: "10px 14px",
+                            borderRadius: 12,
+                            border: `1px solid ${active ? t.green : t.border}`,
+                            background: active ? t.greenLt : t.white,
+                            color: active ? t.green : t.ink,
+                            fontSize: 12.5,
+                            fontWeight: 700,
+                            cursor: "pointer",
+                          }}
+                        >
+                          {mins} min
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
             <p style={{ margin: "12px 0 0", color: t.muted, fontSize: 12.5, lineHeight: 1.7 }}>
@@ -600,7 +666,7 @@ export function ToolsLockInPage({
               <p style={{ margin: "8px 0 0", color: t.mid, fontSize: 12.5, lineHeight: 1.7 }}>
                 Breaks are spaced evenly through your focus time. {breakOffsets.length === 1
                   ? `Your break starts after ${formatCountdown(breakOffsets[0])} of focus.`
-                  : `Your breaks start after ${breakOffsets.map((offset) => formatCountdown(offset)).join(", ")} of focus.`} Each break lasts {formatCountdown(SHORT_BREAK_MS)}.
+                  : `Your breaks start after ${breakOffsets.map((offset) => formatCountdown(offset)).join(", ")} of focus.`} Each break lasts {formatCountdown(shortBreakMs)}.
               </p>
             )}
           </div>

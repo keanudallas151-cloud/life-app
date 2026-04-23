@@ -85,7 +85,6 @@ import { SignInPage } from "./components/SignInPage";
 import { ThemePickerPage } from "./components/ThemePickerPage";
 import { ToolsLockInPage } from "./components/ToolsLockInPage";
 import { ToolsPage } from "./components/ToolsPage";
-import { ToolsTodoPage } from "./components/ToolsTodoPage";
 import { VerifyEmailPage } from "./components/VerifyEmailPage";
 import { WhereToStartPage } from "./components/WhereToStartPage";
 import { signInWithGoogle } from "./services/firebaseAuth";
@@ -643,7 +642,7 @@ export default function LifeApp() {
   const [localMomentumState, setLocalMomentumStateRaw] = useState(() =>
     LS.get(`mom_${uid}`, null),
   );
-  const [localToolsTodos, setLocalToolsTodosRaw] = useState(() =>
+  const [, setLocalToolsTodosRaw] = useState(() =>
     LS.get(`tools_todos_${uid}`, []),
   );
   const [localToolsSession, setLocalToolsSessionRaw] = useState(() =>
@@ -701,7 +700,6 @@ export default function LifeApp() {
   const momentumState = userIdForData
     ? cloud.momentumState
     : localMomentumState;
-  const toolsTodos = userIdForData ? cloud.toolsTodos : localToolsTodos;
   const toolsSession = userIdForData ? cloud.toolsSession : localToolsSession;
 
   const setBookmarks = (v) => {
@@ -734,14 +732,6 @@ export default function LifeApp() {
     else {
       setLocalMomentumStateRaw(next);
       LS.set(`mom_${uid}`, next);
-    }
-  };
-  const setToolsTodos = (v) => {
-    const next = typeof v === "function" ? v(toolsTodos) : v;
-    if (userIdForData) cloud.setToolsTodos(next);
-    else {
-      setLocalToolsTodosRaw(next);
-      LS.set(`tools_todos_${uid}`, next);
     }
   };
   const setToolsSession = (v) => {
@@ -820,6 +810,13 @@ export default function LifeApp() {
   );
 
   const [categoryPageData, setCategoryPageData] = useState(null);
+
+  useEffect(() => {
+    if (page === "tools_todo") {
+      setPage("tools_lockin");
+    }
+  }, [page, setPage]);
+
   const handleFolderSelect = useCallback(
     (key, node) => {
       setCategoryPageData({ key, node });
@@ -871,7 +868,6 @@ export default function LifeApp() {
       sidebar_guided: "Guided — Life.",
       sidebar_saved: "Saved — Life.",
       sidebar_experience: "Experience — Life.",
-      tools_todo: "To-Do — Life.",
       tools_lockin: "Lock In — Life.",
       premium: "Premium — Life.",
       discord_networking: "Networking Group — Life.",
@@ -3924,15 +3920,6 @@ export default function LifeApp() {
                 t={t}
                 play={play}
                 setPage={setPage}
-              />
-            )}
-
-            {page === "tools_todo" && (
-              <ToolsTodoPage
-                t={t}
-                play={play}
-                todos={toolsTodos}
-                setTodos={setToolsTodos}
               />
             )}
 
