@@ -873,3 +873,293 @@ body.life-dark .organized-feature :focus-visible {
   outline-color: rgba(80,200,120,0.7) !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   ORGANIZED — CALENDAR / STATS / SETTINGS iOS PREMIUM PASS (FIX 31–55)
+   Targets the "next" Organized pages (the views reached from the bottom nav
+   beyond List: Calendar, Stats, Settings). Ships 25 scoped polish rules for
+   an Apple-clean, tactile feel with no JSX churn.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── FIX 31: Calendar month header — iOS navigation bar typography ─────── */
+.organized-feature h2.text-2xl.font-bold {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.022em !important;
+  line-height: 1.12 !important;
+}
+
+/* ── FIX 32: Calendar prev/next chevrons — iOS round nav buttons ───────── */
+.organized-feature .grid.grid-cols-7 ~ * button[data-slot="button"],
+.organized-feature .flex.items-center.justify-between > .flex.items-center.gap-2 > button[data-slot="button"] {
+  border-radius: 999px !important;
+  min-height: 36px !important;
+  min-width: 36px !important;
+  padding: 0 10px !important;
+  transition: background-color 0.18s ease, transform 0.18s ease !important;
+}
+.organized-feature .flex.items-center.gap-2 > button[data-slot="button"]:active {
+  transform: scale(0.92) !important;
+}
+
+/* ── FIX 33: Calendar weekday row — SF caption style ────────────────────── */
+.organized-feature .grid.grid-cols-7 > .p-2.text-center.text-sm.font-semibold {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  opacity: 0.7 !important;
+  padding: 8px 0 !important;
+}
+
+/* ── FIX 34: Calendar day cell — perfect iOS calendar circle ────────────── */
+.organized-feature .grid.grid-cols-7 > button {
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 14px !important;
+  transition: background-color 0.18s ease, transform 0.18s ease !important;
+  position: relative !important;
+}
+.organized-feature .grid.grid-cols-7 > button:active {
+  transform: scale(0.94) !important;
+  background: color-mix(in oklch, var(--primary) 10%, transparent) !important;
+}
+
+/* ── FIX 35: Today indicator — iOS-style filled accent pill ─────────────── */
+.organized-feature .grid.grid-cols-7 > button [class*="bg-accent"] {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  box-shadow:
+    0 2px 6px color-mix(in oklch, var(--primary) 35%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--primary) 40%, transparent) inset !important;
+}
+
+/* ── FIX 36: Calendar task dots — crisper, brighter ─────────────────────── */
+.organized-feature .h-1\.5.w-1\.5.rounded-full {
+  height: 5px !important;
+  width: 5px !important;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.08) !important;
+}
+
+/* ── FIX 37: Calendar selected-day card — iOS grouped card ─────────────── */
+.organized-feature .rounded-lg.border.bg-card.p-6 {
+  border-radius: 18px !important;
+  padding: 18px !important;
+  border: 1px solid color-mix(in oklch, var(--border) 90%, transparent) !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 8px 28px rgba(0,0,0,0.06) !important;
+}
+
+/* ── FIX 38: Empty-state icon circle — iOS subtle chrome ────────────────── */
+.organized-feature .flex.h-16.w-16.items-center.justify-center.rounded-full.bg-muted {
+  background: color-mix(in oklch, var(--muted) 70%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--border) 70%, transparent) !important;
+}
+
+/* ── FIX 39: Stats cards — iOS tile lift ────────────────────────────────── */
+.organized-feature [data-slot="card"] {
+  border-radius: 18px !important;
+  border: 1px solid color-mix(in oklch, var(--border) 90%, transparent) !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 8px 24px rgba(0,0,0,0.05) !important;
+  transition: transform 0.22s ease, box-shadow 0.22s ease !important;
+}
+.organized-feature [data-slot="card"]:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.05),
+    0 12px 32px rgba(0,0,0,0.08) !important;
+}
+body.life-dark .organized-feature [data-slot="card"] {
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.6),
+    0 8px 24px rgba(0,0,0,0.4) !important;
+}
+
+/* ── FIX 40: Stats card titles — iOS section header ─────────────────────── */
+.organized-feature [data-slot="card-title"] {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+.organized-feature [data-slot="card-description"] {
+  font-size: 13px !important;
+  color: var(--muted-foreground) !important;
+}
+
+/* ── FIX 41: Progress bar — tall + rounded like iOS ─────────────────────── */
+.organized-feature [data-slot="progress"],
+.organized-feature [data-slot="progress-indicator"] {
+  height: 8px !important;
+  border-radius: 999px !important;
+}
+.organized-feature [data-slot="progress"] {
+  background: color-mix(in oklch, var(--muted) 80%, transparent) !important;
+  overflow: hidden !important;
+}
+.organized-feature [data-slot="progress-indicator"] {
+  background: linear-gradient(90deg, var(--primary), var(--accent)) !important;
+  transition: transform 0.5s cubic-bezier(0.25,1,0.5,1) !important;
+}
+
+/* ── FIX 42: Big stat numbers — SF display numerals ─────────────────────── */
+.organized-feature .text-3xl.font-bold,
+.organized-feature .text-4xl.font-bold,
+.organized-feature .text-5xl.font-bold {
+  font-feature-settings: "tnum" 1, "cv11" 1 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em !important;
+}
+
+/* ── FIX 43: Icon accent circles in Stats — subtle tint ─────────────────── */
+.organized-feature .rounded-full.bg-primary\/10,
+.organized-feature .rounded-full.bg-accent\/10,
+.organized-feature .rounded-full.bg-destructive\/10 {
+  background: color-mix(in oklch, currentColor 12%, transparent) !important;
+  box-shadow: inset 0 0 0 0.5px color-mix(in oklch, currentColor 18%, transparent) !important;
+}
+
+/* ── FIX 44: Settings group rows — iOS grouped-list rows ────────────────── */
+.organized-feature [data-slot="card"] [data-slot="label"],
+.organized-feature [data-slot="card"] .flex.items-center.justify-between {
+  min-height: 44px !important;
+}
+.organized-feature [data-slot="card-content"] > .space-y-4 > * + *,
+.organized-feature [data-slot="card-content"] > .space-y-3 > * + *,
+.organized-feature [data-slot="card-content"] > .space-y-2 > * + * {
+  border-top: 0.5px solid color-mix(in oklch, var(--border) 70%, transparent);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+/* ── FIX 45: Settings switch — iOS capsule toggle ───────────────────────── */
+.organized-feature [data-slot="switch"] {
+  height: 31px !important;
+  width: 51px !important;
+  border-radius: 999px !important;
+  transition: background-color 0.22s ease !important;
+}
+.organized-feature [data-slot="switch"][data-state="checked"] {
+  background: #34c759 !important;
+}
+.organized-feature [data-slot="switch-thumb"] {
+  height: 27px !important;
+  width: 27px !important;
+  box-shadow:
+    0 3px 8px rgba(0,0,0,0.16),
+    0 0 0 0.5px rgba(0,0,0,0.04) !important;
+}
+
+/* ── FIX 46: Settings labels — iOS body text ───────────────────────────── */
+.organized-feature [data-slot="label"] {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* ── FIX 47: Slider (if present in settings) — iOS thumb ────────────────── */
+.organized-feature [data-slot="slider-track"] {
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: color-mix(in oklch, var(--muted) 80%, transparent) !important;
+}
+.organized-feature [data-slot="slider-range"] {
+  background: var(--primary) !important;
+}
+.organized-feature [data-slot="slider-thumb"] {
+  height: 28px !important;
+  width: 28px !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  box-shadow:
+    0 3px 8px rgba(0,0,0,0.18),
+    0 0 0 0.5px rgba(0,0,0,0.05) !important;
+}
+
+/* ── FIX 48: Tab triggers — iOS segmented control ───────────────────────── */
+.organized-feature [data-slot="tabs-list"] {
+  background: color-mix(in oklch, var(--muted) 90%, transparent) !important;
+  border-radius: 10px !important;
+  padding: 2px !important;
+  gap: 0 !important;
+}
+.organized-feature [data-slot="tabs-trigger"] {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: -0.01em !important;
+  transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+.organized-feature [data-slot="tabs-trigger"][data-state="active"] {
+  background: var(--card) !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 0 0 0.5px rgba(0,0,0,0.06) !important;
+}
+
+/* ── FIX 49: Stats navigate buttons — iOS link row chevron target ───────── */
+.organized-feature [data-slot="card"] button[data-slot="button"][class*="ghost"],
+.organized-feature [data-slot="card"] button[data-slot="button"][class*="outline"] {
+  border-radius: 12px !important;
+  min-height: 40px !important;
+  transition: background-color 0.18s ease, transform 0.18s ease !important;
+}
+.organized-feature [data-slot="card"] button[data-slot="button"]:active {
+  transform: scale(0.97) !important;
+}
+
+/* ── FIX 50: Category legend chips — iOS capsule ────────────────────────── */
+.organized-feature [data-slot="badge"][class*="rounded-full"],
+.organized-feature [data-slot="badge"] {
+  border-radius: 999px !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* ── FIX 51: Scroll momentum on Stats/Settings/Calendar ─────────────────── */
+.organized-feature [data-slot="card-content"],
+.organized-feature .space-y-6,
+.organized-feature .space-y-4 {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ── FIX 52: Heading row spacing — Apple grouped list breathing room ────── */
+.organized-feature .space-y-6 > * + * {
+  margin-top: 22px !important;
+}
+.organized-feature [data-slot="card-header"] {
+  padding-bottom: 10px !important;
+}
+
+/* ── FIX 53: Streak/Fire icon — warm accent in stats ────────────────────── */
+.organized-feature svg[data-icon*="Fire"],
+.organized-feature .text-orange-500,
+.organized-feature [class*="text-amber"] {
+  color: #ff9500 !important;
+  filter: drop-shadow(0 1px 2px rgba(255,149,0,0.22)) !important;
+}
+
+/* ── FIX 54: Stats/Settings card entrance — staggered iOS-style pop ─────── */
+@keyframes org-card-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.organized-feature [data-slot="card"] {
+  animation: org-card-in 0.34s cubic-bezier(0.25,1,0.5,1) both !important;
+}
+.organized-feature .grid > [data-slot="card"]:nth-child(1) { animation-delay: 0ms !important; }
+.organized-feature .grid > [data-slot="card"]:nth-child(2) { animation-delay: 35ms !important; }
+.organized-feature .grid > [data-slot="card"]:nth-child(3) { animation-delay: 70ms !important; }
+.organized-feature .grid > [data-slot="card"]:nth-child(4) { animation-delay: 105ms !important; }
+.organized-feature .grid > [data-slot="card"]:nth-child(n+5) { animation-delay: 140ms !important; }
+
+/* ── FIX 55: Active nav tab haptic — stronger scale + pill glow ─────────── */
+.organized-feature .organized-nav-item.is-active {
+  color: var(--primary) !important;
+}
+.organized-feature .organized-nav-item.is-active .organized-nav-pill {
+  background: color-mix(in oklch, var(--primary) 18%, transparent) !important;
+  box-shadow:
+    0 8px 22px color-mix(in oklch, var(--primary) 28%, transparent) !important;
+}
+
