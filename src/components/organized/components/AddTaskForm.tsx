@@ -80,13 +80,13 @@ export function AddTaskForm({
 
   const addSubtask = () => {
     if (!newSubtaskTitle.trim()) return
-    
+
     const newSubtask: Subtask = {
       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
       title: newSubtaskTitle.trim(),
       completed: false
     }
-    
+
     setSubtasks([...subtasks, newSubtask])
     setNewSubtaskTitle('')
   }
@@ -116,7 +116,7 @@ export function AddTaskForm({
       undefined,
       subtasks.length > 0 ? subtasks : undefined
     )
-    
+
     setTitle('')
     setCategoryId(categories[0]?.id || '')
     setPriority('medium')
@@ -143,7 +143,7 @@ export function AddTaskForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Add New Task</DialogTitle>
           <DialogDescription>
@@ -156,9 +156,7 @@ export function AddTaskForm({
             <p className="text-muted-foreground mb-4">
               You need to create at least one category before adding tasks
             </p>
-            <Button onClick={() => onOpenChange(false)}>
-              Close
-            </Button>
+            <Button onClick={() => onOpenChange(false)}>Close</Button>
           </div>
         ) : (
           <>
@@ -166,7 +164,7 @@ export function AddTaskForm({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="task-title">Task Title</Label>
-                  <VoiceInputButton 
+                  <VoiceInputButton
                     onTranscript={handleVoiceTranscript}
                     hapticEnabled={settings?.hapticFeedback}
                     soundEnabled={settings?.buttonSounds}
@@ -190,24 +188,29 @@ export function AddTaskForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.filter(cat => cat && cat.id && cat.name && cat.color).map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-2.5 h-2.5 rounded-full"
-                              style={{ backgroundColor: category.color }}
-                            />
-                            {category.name}
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {categories
+                        .filter((cat) => cat && cat.id && cat.name && cat.color)
+                        .map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-2.5 h-2.5 rounded-full"
+                                style={{ backgroundColor: category.color }}
+                              />
+                              {category.name}
+                            </div>
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="task-priority">Priority</Label>
-                  <Select value={priority} onValueChange={(v) => setPriority(v as Priority)}>
+                  <Select
+                    value={priority}
+                    onValueChange={(v) => setPriority(v as Priority)}
+                  >
                     <SelectTrigger id="task-priority">
                       <SelectValue />
                     </SelectTrigger>
@@ -238,17 +241,20 @@ export function AddTaskForm({
               <div className="space-y-2">
                 <Label htmlFor="task-due-date">Due Date (optional)</Label>
                 <div className="flex gap-2">
-                  <Popover open={dueDatePopoverOpen} onOpenChange={setDueDatePopoverOpen}>
+                  <Popover
+                    open={dueDatePopoverOpen}
+                    onOpenChange={setDueDatePopoverOpen}
+                  >
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
-                          'flex-1 justify-start text-left font-normal',
-                          !dueDate && 'text-muted-foreground'
+                          "flex-1 justify-start text-left font-normal",
+                          !dueDate && "text-muted-foreground",
                         )}
                       >
                         <CalendarBlank className="mr-2 h-4 w-4" />
-                        {dueDate ? format(dueDate, 'PPP') : 'Pick a date'}
+                        {dueDate ? format(dueDate, "PPP") : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -256,9 +262,9 @@ export function AddTaskForm({
                         mode="single"
                         selected={dueDate}
                         onSelect={(date) => {
-                          setDueDate(date)
+                          setDueDate(date);
                           if (date) {
-                            setDueDatePopoverOpen(false)
+                            setDueDatePopoverOpen(false);
                           }
                         }}
                         initialFocus
@@ -280,7 +286,14 @@ export function AddTaskForm({
               {dueDate && (
                 <div className="space-y-2">
                   <Label htmlFor="task-recurring">Recurring (optional)</Label>
-                  <Select value={recurring || 'none'} onValueChange={(v) => setRecurring(v === 'none' ? undefined : v as RecurringType)}>
+                  <Select
+                    value={recurring || "none"}
+                    onValueChange={(v) =>
+                      setRecurring(
+                        v === "none" ? undefined : (v as RecurringType),
+                      )
+                    }
+                  >
                     <SelectTrigger id="task-recurring">
                       <SelectValue />
                     </SelectTrigger>
@@ -320,7 +333,9 @@ export function AddTaskForm({
                           exit={{ opacity: 0, x: 10 }}
                           className="flex items-center justify-between gap-2 rounded-md bg-background p-2"
                         >
-                          <span className="text-sm flex-1">{subtask.title}</span>
+                          <span className="text-sm flex-1">
+                            {subtask.title}
+                          </span>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -369,5 +384,5 @@ export function AddTaskForm({
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

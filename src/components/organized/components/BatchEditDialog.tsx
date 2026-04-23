@@ -54,7 +54,7 @@ export function BatchEditDialog({
 
   const handleApply = () => {
     const changes: Partial<Task> = {}
-    
+
     if (categoryId) changes.categoryId = categoryId
     if (priority) changes.priority = priority as Priority
     if (dueDate) changes.dueDate = dueDate.getTime()
@@ -65,7 +65,7 @@ export function BatchEditDialog({
       if (hapticEnabled) triggerHaptic('success')
       if (soundEnabled) playButtonSound()
       onOpenChange(false)
-      
+
       setCategoryId('')
       setPriority('')
       setDueDate(undefined)
@@ -74,22 +74,21 @@ export function BatchEditDialog({
   }
 
   const handleTagToggle = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
-    )
-    if (hapticEnabled) triggerHaptic('light')
-    if (soundEnabled) playButtonSound()
-  }
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+    );
+    if (hapticEnabled) triggerHaptic("light");
+    if (soundEnabled) playButtonSound();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl">Batch Edit Tasks</DialogTitle>
           <DialogDescription>
-            Edit {selectedTasks.length} selected task{selectedTasks.length !== 1 ? 's' : ''} at once
+            Edit {selectedTasks.length} selected task
+            {selectedTasks.length !== 1 ? "s" : ""} at once
           </DialogDescription>
         </DialogHeader>
 
@@ -128,19 +127,28 @@ export function BatchEditDialog({
               <Flag weight="bold" className="h-4 w-4" />
               Priority
             </Label>
-            <Select value={priority} onValueChange={(val) => setPriority(val as Priority | '')}>
+            <Select
+              value={priority}
+              onValueChange={(val) => setPriority(val as Priority | "")}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Keep existing priorities" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="low">
-                  <Badge className="bg-[oklch(0.55_0.18_230)] text-white">Low</Badge>
+                  <Badge className="bg-[oklch(0.55_0.18_230)] text-white">
+                    Low
+                  </Badge>
                 </SelectItem>
                 <SelectItem value="medium">
-                  <Badge className="bg-[oklch(0.70_0.18_90)] text-white">Medium</Badge>
+                  <Badge className="bg-[oklch(0.70_0.18_90)] text-white">
+                    Medium
+                  </Badge>
                 </SelectItem>
                 <SelectItem value="high">
-                  <Badge className="bg-[oklch(0.60_0.22_15)] text-white">High</Badge>
+                  <Badge className="bg-[oklch(0.60_0.22_15)] text-white">
+                    High
+                  </Badge>
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -156,12 +164,12 @@ export function BatchEditDialog({
                 <Button
                   variant="outline"
                   className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !dueDate && 'text-muted-foreground'
+                    "w-full justify-start text-left font-normal",
+                    !dueDate && "text-muted-foreground",
                   )}
                 >
                   <Calendar weight="bold" className="mr-2 h-4 w-4" />
-                  {dueDate ? format(dueDate, 'PPP') : 'Keep existing due dates'}
+                  {dueDate ? format(dueDate, "PPP") : "Keep existing due dates"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -189,10 +197,10 @@ export function BatchEditDialog({
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleTagToggle(tag)}
                     className={cn(
-                      'rounded-full px-3 py-1 text-xs font-medium transition-colors',
+                      "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                       selectedTags.includes(tag)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground'
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-secondary-foreground",
                     )}
                   >
                     {tag}
@@ -217,12 +225,14 @@ export function BatchEditDialog({
           <Button
             onClick={handleApply}
             className="flex-1"
-            disabled={!categoryId && !priority && !dueDate && selectedTags.length === 0}
+            disabled={
+              !categoryId && !priority && !dueDate && selectedTags.length === 0
+            }
           >
             Apply Changes
           </Button>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

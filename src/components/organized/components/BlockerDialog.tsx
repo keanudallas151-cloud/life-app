@@ -12,29 +12,29 @@ import { Button } from './ui/button'
 import { Textarea } from './ui/textarea'
 import { Label } from './ui/label'
 import { Badge } from './ui/badge'
-import { 
-  Warning, 
-  Lightbulb, 
-  CheckCircle, 
+import {
+  Warning,
+  Lightbulb,
+  CheckCircle,
   X,
   ListChecks,
   CalendarBlank,
-  ArrowsClockwise
-} from '@phosphor-icons/react'
-import { Task, Priority } from '../types'
-import { triggerHaptic } from '../lib/haptics'
-import { playButtonSound } from '../lib/sounds'
-import { toast } from 'sonner'
-import { addDays } from 'date-fns'
+  ArrowsClockwise,
+} from "@phosphor-icons/react";
+import { Task, Priority } from "../types";
+import { triggerHaptic } from "../lib/haptics";
+import { playButtonSound } from "../lib/sounds";
+import { toast } from "sonner";
+import { addDays } from "date-fns";
 
 interface BlockerDialogProps {
-  task: Task | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onUpdateTask: (taskId: string, updates: Partial<Task>) => void
-  onBreakIntoSubtasks: (taskId: string) => void
-  hapticEnabled?: boolean
-  soundEnabled?: boolean
+  task: Task | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
+  onBreakIntoSubtasks: (taskId: string) => void;
+  hapticEnabled?: boolean;
+  soundEnabled?: boolean;
 }
 
 export function BlockerDialog({
@@ -46,124 +46,137 @@ export function BlockerDialog({
   hapticEnabled = true,
   soundEnabled = true,
 }: BlockerDialogProps) {
-  const [blockerNote, setBlockerNote] = useState('')
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false)
+  const [blockerNote, setBlockerNote] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
 
   useEffect(() => {
     if (task && open) {
-      setBlockerNote(task.blockerNote || '')
-      generateSuggestions(task)
+      setBlockerNote(task.blockerNote || "");
+      generateSuggestions(task);
     }
-  }, [task, open])
+  }, [task, open]);
 
   const generateSuggestions = async (currentTask: Task) => {
-    setIsGeneratingSuggestions(true)
-    
+    setIsGeneratingSuggestions(true);
+
     try {
       const promptText = `You are a productivity coach helping someone overcome a task blocker.
 
 Task: "${currentTask.title}"
 Priority: ${currentTask.priority}
-Notes: ${currentTask.notes || 'None'}
-Due date: ${currentTask.dueDate ? new Date(currentTask.dueDate).toLocaleDateString() : 'Not set'}
-Existing blocker note: ${currentTask.blockerNote || 'Not specified'}
+Notes: ${currentTask.notes || "None"}
+Due date: ${currentTask.dueDate ? new Date(currentTask.dueDate).toLocaleDateString() : "Not set"}
+Existing blocker note: ${currentTask.blockerNote || "Not specified"}
 
 Generate exactly 3 brief, actionable suggestions to help overcome this blocker. Each suggestion should be:
 - Specific and practical
 - Under 60 characters
 - Action-oriented
 
-Return as JSON with format: { "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"] }`
+Return as JSON with format: { "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"] }`;
 
-      const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
-      const data = JSON.parse(response)
-      
+      const response = await window.spark.llm(promptText, "gpt-4o-mini", true);
+      const data = JSON.parse(response);
+
       if (data.suggestions && Array.isArray(data.suggestions)) {
-        setSuggestions(data.suggestions.slice(0, 3))
+        setSuggestions(data.suggestions.slice(0, 3));
       }
     } catch (error) {
       setSuggestions([
-        'Break this task into smaller steps',
-        'Set a shorter deadline to build momentum',
-        'Lower priority and tackle easier tasks first'
-      ])
+        "Break this task into smaller steps",
+        "Set a shorter deadline to build momentum",
+        "Lower priority and tackle easier tasks first",
+      ]);
     } finally {
-      setIsGeneratingSuggestions(false)
+      setIsGeneratingSuggestions(false);
     }
-  }
+  };
 
   const handleSaveBlocker = async () => {
-    if (!task) return
+    if (!task) return;
 
-    if (hapticEnabled) triggerHaptic('medium')
-    if (soundEnabled) playButtonSound()
+    if (hapticEnabled) triggerHaptic("medium");
+    if (soundEnabled) playButtonSound();
 
-    onUpdateTask(task.id, { 
-      blockerNote: blockerNote.trim() || undefined
-    })
+    onUpdateTask(task.id, {
+      blockerNote: blockerNote.trim() || undefined,
+    });
 
-    toast.success('Blocker noted. You got this!')
-    onOpenChange(false)
-  }
+    toast.success("Blocker noted. You got this!");
+    onOpenChange(false);
+  };
 
   const handleApplySuggestion = async (suggestion: string) => {
-    if (!task) return
+    if (!task) return;
 
-    if (hapticEnabled) triggerHaptic('light')
-    if (soundEnabled) playButtonSound()
+    if (hapticEnabled) triggerHaptic("light");
+    if (soundEnabled) playButtonSound();
 
-    if (suggestion.toLowerCase().includes('smaller') || suggestion.toLowerCase().includes('break')) {
-      onBreakIntoSubtasks(task.id)
-      toast.success('Ready to break it down!')
-      onOpenChange(false)
-    } else if (suggestion.toLowerCase().includes('deadline') || suggestion.toLowerCase().includes('date')) {
-      const newDueDate = addDays(new Date(), 2).getTime()
-      onUpdateTask(task.id, { dueDate: newDueDate })
-      toast.success('New deadline set for momentum!')
-      onOpenChange(false)
-    } else if (suggestion.toLowerCase().includes('priority') || suggestion.toLowerCase().includes('easier')) {
-      const newPriority: Priority = task.priority === 'high' ? 'medium' : 'low'
-      onUpdateTask(task.id, { priority: newPriority })
-      toast.success('Priority adjusted!')
-      onOpenChange(false)
+    if (
+      suggestion.toLowerCase().includes("smaller") ||
+      suggestion.toLowerCase().includes("break")
+    ) {
+      onBreakIntoSubtasks(task.id);
+      toast.success("Ready to break it down!");
+      onOpenChange(false);
+    } else if (
+      suggestion.toLowerCase().includes("deadline") ||
+      suggestion.toLowerCase().includes("date")
+    ) {
+      const newDueDate = addDays(new Date(), 2).getTime();
+      onUpdateTask(task.id, { dueDate: newDueDate });
+      toast.success("New deadline set for momentum!");
+      onOpenChange(false);
+    } else if (
+      suggestion.toLowerCase().includes("priority") ||
+      suggestion.toLowerCase().includes("easier")
+    ) {
+      const newPriority: Priority = task.priority === "high" ? "medium" : "low";
+      onUpdateTask(task.id, { priority: newPriority });
+      toast.success("Priority adjusted!");
+      onOpenChange(false);
     } else {
-      setBlockerNote(prev => prev ? `${prev}\n\n${suggestion}` : suggestion)
-      toast.success('Added to blocker notes')
+      setBlockerNote((prev) =>
+        prev ? `${prev}\n\n${suggestion}` : suggestion,
+      );
+      toast.success("Added to blocker notes");
     }
-  }
+  };
 
   const handleResolveBlocker = () => {
-    if (!task) return
+    if (!task) return;
 
-    if (hapticEnabled) triggerHaptic('success')
-    if (soundEnabled) playButtonSound()
+    if (hapticEnabled) triggerHaptic("success");
+    if (soundEnabled) playButtonSound();
 
-    onUpdateTask(task.id, { 
-      blockerNote: undefined
-    })
+    onUpdateTask(task.id, {
+      blockerNote: undefined,
+    });
 
-    toast.success('Blocker resolved! Keep going! 🎉')
-    onOpenChange(false)
-  }
+    toast.success("Blocker resolved! Keep going! 🎉");
+    onOpenChange(false);
+  };
 
-  if (!task) return null
+  if (!task) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-h-[90vh]">
         <DialogHeader>
           <div className="flex items-start gap-3">
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
               className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
             >
               <Warning weight="bold" className="h-6 w-6 text-destructive" />
             </motion.div>
             <div className="flex-1">
-              <DialogTitle className="text-left">What's blocking you?</DialogTitle>
+              <DialogTitle className="text-left">
+                What's blocking you?
+              </DialogTitle>
               <DialogDescription className="text-left mt-1">
                 Let's identify the obstacle and find a way forward.
               </DialogDescription>
@@ -175,7 +188,9 @@ Return as JSON with format: { "suggestions": ["suggestion 1", "suggestion 2", "s
           <div className="rounded-lg bg-muted/50 p-3">
             <p className="text-sm font-medium text-foreground">{task.title}</p>
             {task.notes && (
-              <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{task.notes}</p>
+              <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                {task.notes}
+              </p>
             )}
           </div>
 
@@ -196,7 +211,7 @@ Return as JSON with format: { "suggestions": ["suggestion 1", "suggestion 2", "s
               <Lightbulb weight="fill" className="h-4 w-4 text-accent" />
               <Label>Suggested Actions</Label>
             </div>
-            
+
             <AnimatePresence mode="wait">
               {isGeneratingSuggestions ? (
                 <motion.div
@@ -208,7 +223,11 @@ Return as JSON with format: { "suggestions": ["suggestion 1", "suggestion 2", "s
                 >
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                   >
                     <ArrowsClockwise className="h-6 w-6 text-muted-foreground" />
                   </motion.div>
@@ -223,7 +242,7 @@ Return as JSON with format: { "suggestions": ["suggestion 1", "suggestion 2", "s
                 >
                   {suggestions.map((suggestion, index) => (
                     <motion.button
-                      key={index}
+                      key={`${suggestion}-${index}`}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
@@ -231,7 +250,10 @@ Return as JSON with format: { "suggestions": ["suggestion 1", "suggestion 2", "s
                       className="w-full rounded-lg border border-border bg-card p-3 text-left text-sm transition-all hover:bg-accent/10 hover:border-accent active:scale-[0.98]"
                     >
                       <div className="flex items-start gap-2">
-                        <CheckCircle weight="bold" className="h-4 w-4 mt-0.5 text-accent flex-shrink-0" />
+                        <CheckCircle
+                          weight="bold"
+                          className="h-4 w-4 mt-0.5 text-accent flex-shrink-0"
+                        />
                         <span className="flex-1">{suggestion}</span>
                       </div>
                     </motion.button>
@@ -254,7 +276,8 @@ Return as JSON with format: { "suggestions": ["suggestion 1", "suggestion 2", "s
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                You've already noted a blocker. Update it above or mark it resolved when you're ready to proceed.
+                You've already noted a blocker. Update it above or mark it
+                resolved when you're ready to proceed.
               </p>
             </motion.div>
           )}
@@ -282,5 +305,5 @@ Return as JSON with format: { "suggestions": ["suggestion 1", "suggestion 2", "s
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

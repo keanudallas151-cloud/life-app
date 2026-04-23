@@ -39,6 +39,22 @@
   "workbench.externalBrowser": "chrome",
   "github.copilot.chat.claudeAgent.allowDangerouslySkipPermissions": true,
   "cSpell.words": ["Firestore"],
+  "css.lint.unknownAtRules": "ignore",
+  "css.lint.vendorPrefix": "ignore",
+  "css.lint.propertyIgnoredDueToDisplay": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "vscode-edge-devtools.webhint": false,
+  "webhint.enableTelemetry": false,
+  "webhint.configuration": {
+    "extends": ["development"],
+    "hints": {
+      "compat-api/css": "off",
+      "compat-api/html": "off",
+      "no-inline-styles": "off",
+      "css-prefix-order": "off"
+    }
+  },
   "editor.tokenColorCustomizations": {
     "comments": "#00000000",
     "textMateRules": [

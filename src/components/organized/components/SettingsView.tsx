@@ -925,7 +925,7 @@ export function SettingsView({
             open={!!editingCategory}
             onOpenChange={(open) => !open && setEditingCategory(null)}
           >
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-h-[90vh]">
               <DialogHeader>
                 <DialogTitle>Edit Category</DialogTitle>
                 <DialogDescription>

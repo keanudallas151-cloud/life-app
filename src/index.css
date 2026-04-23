@@ -453,8 +453,8 @@ html {
 
 /* Top bar glass + iOS safe area (notch / status bar) */
 .life-topbar {
-  backdrop-filter: saturate(1.2) blur(12px);
   -webkit-backdrop-filter: saturate(1.2) blur(12px);
+  backdrop-filter: saturate(1.2) blur(12px);
   padding-top: var(--safe-top);
   padding-left: max(16px, var(--safe-left));
   padding-right: max(16px, var(--safe-right));
@@ -502,15 +502,14 @@ html {
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 }
 
 .life-auth-card {
   width: min(100%, 420px);
   box-shadow: 0 16px 36px rgba(20, 20, 20, 0.08);
-  backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
   transition: box-shadow 0.2s ease;
 }
 
@@ -618,8 +617,8 @@ html {
   font-weight: 600;
   letter-spacing: 0.01em;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 .life-cloud-banner {
@@ -637,8 +636,8 @@ html {
   font-weight: 600;
   letter-spacing: 0.01em;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 @media (max-width: 640px) {
@@ -667,7 +666,6 @@ html {
 
 .life-auth-card p,
 .life-auth-card span {
-  text-wrap: pretty;
 }
 
 /* Unified password show/hide toggle */
@@ -695,8 +693,8 @@ html {
 .life-auth-card div[style*="position:relative"] > input + button,
 .life-auth-card div[style*="position: relative"] > input + button {
   position: absolute !important;
-  appearance: none !important;
   -webkit-appearance: none !important;
+  appearance: none !important;
   right: 10px !important;
   top: 50% !important;
   /* translate3d forces own compositing layer → no flicker, no re-paint jumps */
@@ -874,7 +872,6 @@ canvas {
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
 }
 
 .life-main-scroll[data-overlay-lock] {
@@ -890,8 +887,8 @@ canvas {
   padding: 0;
   border: none;
   background: transparent;
-  appearance: none;
   -webkit-appearance: none;
+  appearance: none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -1033,7 +1030,6 @@ body.life-dark .life-main-scroll {
     );
     overflow-y: auto;
     overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
   }
 
   .life-auth-card
@@ -1665,8 +1661,8 @@ select {
 /* Glass Card Effect  */
 .life-glass-card {
   background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
@@ -1674,7 +1670,6 @@ select {
 .life-sidebar,
 .life-search-dropdown {
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 
@@ -1835,8 +1830,8 @@ button:active:not(:disabled) {
     rgba(20, 28, 24, 0.72),
     rgba(10, 14, 12, 0.88)
   );
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 .life-constellation-panel {
@@ -1943,7 +1938,6 @@ button:active:not(:disabled) {
   flex: 1;
   min-height: min(58vh, 520px);
   overflow: auto;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 
@@ -2304,7 +2298,6 @@ button:active:not(:disabled),
   max-width: 44ch;
   margin-left: auto;
   margin-right: auto;
-  text-wrap: pretty;
 }
 
 .life-home-stats > div {
@@ -2719,8 +2712,8 @@ button:active:not(:disabled),
     right: 0;
     z-index: 60;
     background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: saturate(1.4) blur(20px);
     -webkit-backdrop-filter: saturate(1.4) blur(20px);
+    backdrop-filter: saturate(1.4) blur(20px);
     border-top: 1px solid var(--life-border);
     /* Safe area padding so nav buttons sit above home indicator */
     padding-bottom: max(var(--safe-bottom), 8px);
@@ -3045,7 +3038,6 @@ button:active:not(:disabled),
 .life-main-scroll,
 .life-search-dropdown {
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
 }
 
 /*
@@ -3172,8 +3164,8 @@ button:active:not(:disabled),
 .life-bottom-nav,
 .life-topbar,
 .life-sidebar {
-  user-select: none;
   -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Momentum System — cards, hub, missions, quick actions  */
@@ -3802,8 +3794,8 @@ button:active .life-card-inner,
   inset: 0;
   background: rgba(0,0,0,0.28);
   z-index: 49;
-  backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
   animation: life-fade-in 0.18s ease;
 }
 
@@ -3866,7 +3858,6 @@ button {
 .life-sidebar,
 [data-scroll],
 .life-reader-body {
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 
@@ -4042,14 +4033,12 @@ button {
 /* ── 10. Scroll container momentum & over-scroll polish ─────────────────── */
 @media (max-width: 640px) {
   .life-main-scroll {
-    -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
     overscroll-behavior-y: contain;
   }
 
   /* Prevent the sidebar scroll from propagating to the page */
   .life-sidebar {
-    -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
   }
 }

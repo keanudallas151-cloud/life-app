@@ -44,7 +44,7 @@ export function CategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[calc(100dvh-1rem)] overflow-y-auto sm:max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Create Category</DialogTitle>
           <DialogDescription>
@@ -62,9 +62,9 @@ export function CategoryDialog({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    handleSubmit()
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSubmit();
                   }
                 }}
                 autoFocus
@@ -79,7 +79,11 @@ export function CategoryDialog({
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" className="bg-primary hover:bg-primary/90">
@@ -89,5 +93,5 @@ export function CategoryDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -52,7 +52,7 @@ export function ToolsOrganizedPage({ uid, setPage, setScreen }) {
           position: "fixed",
           top: "max(12px, env(safe-area-inset-top))",
           left: "max(12px, env(safe-area-inset-left))",
-          zIndex: 10000,
+          zIndex: 60,
           height: 44,
           minWidth: 44,
           padding: "0 16px",
@@ -65,7 +65,8 @@ export function ToolsOrganizedPage({ uid, setPage, setScreen }) {
           fontSize: 14,
           fontWeight: 600,
           cursor: "pointer",
-          boxShadow: "0 6px 18px color-mix(in oklab, var(--foreground) 12%, transparent)",
+          boxShadow:
+            "0 6px 18px color-mix(in oklab, var(--foreground) 12%, transparent)",
         }}
       >
         ← Life
