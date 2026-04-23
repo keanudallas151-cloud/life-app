@@ -3,6 +3,17 @@ import { CalendarBlank, ChartBar, Gear, ListBullets, Plus } from '@phosphor-icon
 import { ViewMode } from '../types'
 import { cn } from '../lib/utils'
 
+function NavPill() {
+  return (
+    <motion.span
+      layoutId="organized-nav-pill"
+      className="organized-nav-pill"
+      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+      aria-hidden="true"
+    />
+  )
+}
+
 interface BottomNavProps {
   viewMode: ViewMode
   onViewModeChange: (mode: ViewMode) => void
@@ -36,6 +47,7 @@ export function BottomNav({
           aria-label="View task list"
           aria-current={viewMode === 'list' ? 'page' : undefined}
         >
+          {viewMode === 'list' && <NavPill />}
           <motion.div
             animate={{
               scale: viewMode === 'list' ? [1, 1.2, 1] : 1,
@@ -63,6 +75,7 @@ export function BottomNav({
           aria-label="View calendar"
           aria-current={viewMode === 'calendar' ? 'page' : undefined}
         >
+          {viewMode === 'calendar' && <NavPill />}
           <motion.div
             animate={{
               scale: viewMode === 'calendar' ? [1, 1.2, 1] : 1,
@@ -82,10 +95,12 @@ export function BottomNav({
           <motion.button
             onClick={onAddTask}
             whileTap={{ scale: 0.92, y: 1 }}
-            whileHover={{ scale: 1.05 }}
-            className="organized-fab flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg"
+            whileHover={{ scale: 1.06, rotate: 90 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+            className="organized-fab flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground"
             aria-label="Add new task"
           >
+            <span className="organized-fab-glow" aria-hidden="true" />
             <Plus weight="bold" className="h-6 w-6" aria-hidden="true" />
           </motion.button>
         </div>
@@ -102,6 +117,7 @@ export function BottomNav({
           aria-label="View statistics"
           aria-current={viewMode === 'stats' ? 'page' : undefined}
         >
+          {viewMode === 'stats' && <NavPill />}
           <motion.div
             animate={{
               scale: viewMode === 'stats' ? [1, 1.2, 1] : 1,
@@ -129,6 +145,7 @@ export function BottomNav({
           aria-label="Open settings"
           aria-current={viewMode === 'settings' ? 'page' : undefined}
         >
+          {viewMode === 'settings' && <NavPill />}
           <motion.div
             animate={{
               scale: viewMode === 'settings' ? [1, 1.2, 1] : 1,

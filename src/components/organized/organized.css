@@ -43,7 +43,8 @@
   --input: oklch(0.90 0.006 240);
   --ring: oklch(0.35 0.08 240);
 
-  --radius: 1rem;
+  /* Maximally rounded — Spark-style "as round as possible" design choice. */
+  --radius: 1.5rem;
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
@@ -207,13 +208,23 @@ body.life-organized-active [data-sonner-toaster] {
 
 .organized-nav-item {
   position: relative;
+  isolation: isolate;
+  border-radius: var(--radius-full);
 }
 
-.organized-nav-item.is-active {
-  background: color-mix(in oklch, var(--primary) 14%, transparent);
+.organized-nav-pill {
+  position: absolute;
+  inset: 4px 8px;
+  z-index: -1;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklch, var(--primary) 16%, transparent);
+  box-shadow: 0 6px 18px color-mix(in oklch, var(--primary) 22%, transparent);
 }
 
 .organized-fab {
+  position: relative;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
   box-shadow:
     0 10px 24px color-mix(in oklch, var(--primary) 34%, transparent),
     0 0 0 1px color-mix(in oklch, var(--primary) 20%, transparent) inset;
@@ -223,6 +234,77 @@ body.life-organized-active [data-sonner-toaster] {
   box-shadow:
     0 14px 30px color-mix(in oklch, var(--primary) 40%, transparent),
     0 0 0 1px color-mix(in oklch, var(--primary) 24%, transparent) inset;
+}
+
+.organized-fab-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(closest-side, color-mix(in oklch, var(--primary) 40%, transparent), transparent 70%);
+  filter: blur(10px);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.organized-back-btn {
+  border-radius: var(--radius-full);
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.organized-back-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px color-mix(in oklch, var(--shadow-color) 16%, transparent);
+}
+
+/* ─── Maximally-rounded corners across the feature ──────────────────────
+   Mirror Spark's "as round as possible" design choice. Scoped strictly to
+   .organized-feature so life-app's other surfaces are unaffected. */
+.organized-feature [data-slot="card"],
+.organized-feature .bg-card,
+.organized-feature [data-slot="dialog-content"],
+.organized-feature [data-slot="alert-dialog-content"],
+.organized-feature [data-slot="popover-content"],
+.organized-feature [data-slot="select-content"],
+.organized-feature [data-slot="dropdown-menu-content"],
+.organized-feature [data-slot="sheet-content"],
+.organized-feature [data-slot="drawer-content"] {
+  border-radius: var(--radius-xl);
+}
+
+.organized-feature button:not(.organized-fab):not([data-slot="select-trigger"]):not([role="tab"]) {
+  border-radius: var(--radius-full);
+}
+
+.organized-feature input,
+.organized-feature textarea,
+.organized-feature select,
+.organized-feature [data-slot="select-trigger"],
+.organized-feature [data-slot="input"],
+.organized-feature [data-slot="textarea"] {
+  border-radius: var(--radius-lg);
+}
+
+.organized-feature [data-slot="badge"],
+.organized-feature [data-slot="avatar"],
+.organized-feature [data-slot="chip"] {
+  border-radius: var(--radius-full);
+}
+
+.organized-feature [data-slot="checkbox"],
+.organized-feature [data-slot="switch"] {
+  border-radius: var(--radius-full);
+}
+
+/* Scoped portals (rendered outside .organized-feature via Radix Portal) */
+body.life-organized-active [data-slot="dialog-content"],
+body.life-organized-active [data-slot="alert-dialog-content"],
+body.life-organized-active [data-slot="drawer-content"],
+body.life-organized-active [data-slot="sheet-content"],
+body.life-organized-active [data-slot="popover-content"],
+body.life-organized-active [data-slot="select-content"],
+body.life-organized-active [data-slot="dropdown-menu-content"] {
+  border-radius: 1.5rem;
 }
 
 .organized-feature :is(button, [role="button"], a, input, textarea, select, [tabindex]):focus-visible {
