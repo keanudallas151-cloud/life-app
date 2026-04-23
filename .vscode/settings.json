@@ -13,19 +13,14 @@
     "mtxr.sqltools",
     "ms-ossdata.vscode-pgsql",
     "phu1237.vs-browser",
-<<<<<<< HEAD
-    "supabase.vscode-supabase-extension",
     "usernamehw.errorlens"
-=======
-    "usernamehw.errorlens",
->>>>>>> fa58ebae4bd1d378c53a6228d7f4678474da7224
   ],
   "github.copilot.chat.agent.autoFix": true,
   "github.copilot.chat.copilotMemory.enabled": true,
   "github.copilot.chat.gpt54ConcisePrompt.enabled": true,
   "github.copilot.chat.agent.omitFileAttachmentContents": true,
   "github.copilot.chat.githubMcpServer.enabled": true,
-  "chat.mcp.autostart": true,
+  "chat.mcp.autostart": "newAndOutdated",
   "chat.mcp.apps.enabled": true,
   "terminal.integrated.initialHint.copilotCli": true,
   "terminal.integrated.defaultProfile.linux": "bash",
@@ -86,6 +81,5 @@
     "cursor-global": true,
     "cursor-workspace": true
   },
-  "github.copilot.chat.githubMcpServer.enabled": true,
   "chat.mcp.assisted.nuget.enabled": true
 }
