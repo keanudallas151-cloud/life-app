@@ -4118,3 +4118,15 @@ button {
     border-top-width: 0.5px;
   }
 }
+
+/* ─── Organized feature full-screen takeover ─── */
+body.life-organized-active {
+  overflow: hidden !important;
+}
+body.life-organized-active .life-bottom-nav,
+body.life-organized-active .life-sidebar,
+body.life-organized-active .life-sidebar-overlay,
+body.life-organized-active [data-life-topbar],
+body.life-organized-active [data-life-chrome] {
+  display: none !important;
+}

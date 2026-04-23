@@ -85,6 +85,7 @@ import { SidebarSectionPage } from "./components/SidebarSectionPage";
 import { SignInPage } from "./components/SignInPage";
 import { ThemePickerPage } from "./components/ThemePickerPage";
 import { ToolsLockInPage } from "./components/ToolsLockInPage";
+import { ToolsOrganizedPage } from "./components/ToolsOrganizedPage";
 import { VerifyEmailPage } from "./components/VerifyEmailPage";
 import { WhereToStartPage } from "./components/WhereToStartPage";
 import { signInWithGoogle } from "./services/firebaseAuth";
@@ -869,6 +870,7 @@ export default function LifeApp() {
       sidebar_saved: "Saved — Life.",
       sidebar_experience: "Experience — Life.",
       tools_lockin: "Lock In — Life.",
+      tools_organized: "Organized — Life.",
       premium: "Premium — Life.",
       discord_networking: "Networking Group — Life.",
       account_customize: "Account — Life.",
@@ -2577,7 +2579,8 @@ export default function LifeApp() {
             {notifications.length > 0 && (
               <div
                 style={{
-                  padding: "9px 16px calc(9px + max(var(--safe-bottom, 0px), 2px))",
+                  padding:
+                    "9px 16px calc(9px + max(var(--safe-bottom, 0px), 2px))",
                   borderTop: `1px solid ${alpha(t.border, 0.75)}`,
                   flexShrink: 0,
                   textAlign: "center",
@@ -3518,6 +3521,16 @@ export default function LifeApp() {
                 }}
                 active={page === "tools_lockin"}
               />
+              <SL
+                theme={t}
+                label="Organized"
+                icon="puzzle"
+                onClick={() => {
+                  play("tap");
+                  setPage("tools_organized");
+                }}
+                active={page === "tools_organized"}
+              />
             </SS>
             <SS
               theme={t}
@@ -3944,6 +3957,10 @@ export default function LifeApp() {
                 session={toolsSession}
                 setSession={setToolsSession}
               />
+            )}
+
+            {page === "tools_organized" && (
+              <ToolsOrganizedPage t={t} uid={uid} setPage={setPage} />
             )}
 
             {page === "secret_sienna" && secretSiennaUnlocked && (

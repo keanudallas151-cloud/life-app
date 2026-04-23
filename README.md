@@ -67,3 +67,6 @@ The repo now includes versioned Firestore indexes and security rules for these c
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build locally |
 | `npm run lint` | ESLint |
+| `npm run firebase` | Run the Firebase CLI via `npx` |
+| `npm run firebase:login` | Authenticate the Firebase CLI |
+| `npm run firebase:emulators` | Start Firebase emulators via `npx` |

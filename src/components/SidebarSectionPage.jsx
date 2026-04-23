@@ -86,11 +86,26 @@ const SECTIONS = {
     title: "Experience",
     desc: "Experience focuses on how Life feels across devices: cleaner visualization, responsive mobile layout, thoughtful sounds, and smoother animations without overwhelming motion.",
     items: [
-      ["Visualization", "Improve readability and information clarity with better visual hierarchy and layout balance."],
-      ["Sounds", "Tune sound behavior with practical defaults and settings that work in both focused and full modes."],
-      ["Animations", "Use subtle motion to communicate state changes and navigation without harming performance."],
-      ["Mobile Integration", "Keep touch targets, safe-area spacing, and navigation reliable across modern phone sizes."],
-      ["Sidebar Quality", "Keep the sidebar scannable with clear grouping, meaningful labels, and consistent interaction patterns."],
+      [
+        "Visualization",
+        "Improve readability and information clarity with better visual hierarchy and layout balance.",
+      ],
+      [
+        "Sounds",
+        "Tune sound behavior with practical defaults and settings that work in both focused and full modes.",
+      ],
+      [
+        "Animations",
+        "Use subtle motion to communicate state changes and navigation without harming performance.",
+      ],
+      [
+        "Mobile Integration",
+        "Keep touch targets, safe-area spacing, and navigation reliable across modern phone sizes.",
+      ],
+      [
+        "Sidebar Quality",
+        "Keep the sidebar scannable with clear grouping, meaningful labels, and consistent interaction patterns.",
+      ],
     ],
   },
 };
