@@ -1,6 +1,7 @@
 // v1.0.1 - auth fixes: DOB validation, 3s loading, Firebase migration follow-up
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
   onAuthStateChanged,
   sendEmailVerification,
   sendPasswordResetEmail,
@@ -1599,6 +1600,54 @@ export default function LifeApp() {
     setUser(null);
     setScreen("landing");
     setSiSocialErr("");
+  };
+
+  const doDeleteAccount = async () => {
+    if (typeof window !== "undefined") {
+      const confirmed = window.confirm(
+        "Delete your account? This permanently removes your sign-in and cannot be undone.",
+      );
+      if (!confirmed) return;
+    }
+    try {
+      const currentUser = auth?.currentUser;
+      // Best-effort: wipe local-only keys for this user first so a partial failure
+      // still clears client-side data.
+      try {
+        LS.del(`tsd_${uid}`);
+        LS.del(`bk_${uid}`);
+        LS.del(`nt_${uid}`);
+        LS.del(`rd_${uid}`);
+        LS.del(`tools_todos_${uid}`);
+        LS.del(`tools_lockin_${uid}`);
+        LS.del(`prefs_${uid}`);
+        LS.del(`onboarded_${uid}`);
+      } catch {
+        /* ignore LS wipe errors */
+      }
+      if (currentUser) {
+        await deleteUser(currentUser);
+      }
+      play("ok");
+      await doSignOut();
+    } catch (error) {
+      const code = String(error?.code || "");
+      if (code === "auth/requires-recent-login") {
+        if (typeof window !== "undefined") {
+          window.alert(
+            "For security, please sign in again and then retry deleting your account.",
+          );
+        }
+        await doSignOut();
+        return;
+      }
+      play("err");
+      if (typeof window !== "undefined") {
+        window.alert(
+          String(error?.message || "Could not delete your account. Please try again."),
+        );
+      }
+    }
   };
 
   const handleSelect = (key, node) => {
@@ -4286,6 +4335,7 @@ export default function LifeApp() {
                 uid={uid}
                 LS={LS}
                 trackMomentumEvent={trackMomentumEvent}
+                onDeleteAccount={doDeleteAccount}
               />
             )}
 
