@@ -3797,6 +3797,17 @@ export default function LifeApp() {
                 }}
                 active={page === "tools_organized"}
               />
+              <SL
+                theme={t}
+                label="Focus Timer"
+                icon="clock"
+                onClick={() => {
+                  play("tap");
+                  setSidebarOpen(false);
+                  setPage("focus_timer");
+                }}
+                active={page === "focus_timer"}
+              />
               <SS
                 theme={t}
                 playFn={play}
@@ -4251,6 +4262,13 @@ export default function LifeApp() {
 
             {page === "tools_organized" && (
               <ToolsOrganizedPage t={t} uid={uid} setPage={setPage} />
+            )}
+
+            {page === "focus_timer" && (
+              <FocusTimerPage
+                t={t}
+                play={play}
+              />
             )}
 
             {page === "learn_it" && (
