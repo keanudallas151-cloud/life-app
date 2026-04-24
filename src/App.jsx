@@ -781,7 +781,8 @@ export default function LifeApp() {
     [uid],
   );
 
-  // Go back one page in history (like UINavigationController.popViewController)
+  // Go back one page in history (like UINavigationController.popViewController).
+  // Intentionally kept for upcoming swipe-back gesture and hardware back-button wiring.
   // eslint-disable-next-line no-unused-vars
   const goBack = useCallback(() => {
     const hist = pageHistoryRef.current;
