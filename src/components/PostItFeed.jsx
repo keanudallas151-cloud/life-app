@@ -218,8 +218,9 @@ function SkeletonCard() {
   );
 }
 
-export function PostItFeed({ play, user, onMomentumEvent }) {
+export function PostItFeed({ play, user, onMomentumEvent, t: theme }) {
   // #postit_feed
+  const t = theme || C;
   const { posts, addPost, addComment, vote, myVotes, loading, error, reload } =
     usePostIt(user);
 
@@ -372,7 +373,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
             padding: "14px 16px 0",
             position: "sticky",
             top: 0,
-            background: C.skin,
+            background: t.skin,
             zIndex: 10,
           }}
         >
@@ -386,7 +387,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: C.muted,
+              color: t.muted,
               fontSize: 13,
               display: "inline-flex",
               alignItems: "center",
@@ -403,8 +404,8 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
         <div
           style={{
             margin: "10px 12px 0",
-            background: C.white,
-            border: `1px solid ${C.border}`,
+            background: t.white,
+            border: `1px solid ${t.border}`,
             borderRadius: 14,
             overflow: "hidden",
             boxShadow: S.sm,
@@ -415,7 +416,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
             <div
               style={{
                 width: 50,
-                background: C.skin,
+                background: t.skin,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -434,7 +435,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                   border: "none",
                   cursor: "pointer",
                   fontSize: 18,
-                  color: upvoted ? C.green : C.muted,
+                  color: upvoted ? t.green : t.muted,
                   padding: "4px 8px",
                   minHeight: 44,
                   transition: "color 140ms",
@@ -446,7 +447,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 style={{
                   fontSize: 13,
                   fontWeight: 800,
-                  color: upvoted ? C.green : downvoted ? C.red : C.ink,
+                  color: upvoted ? t.green : downvoted ? t.red : t.ink,
                   lineHeight: 1,
                 }}
               >
@@ -461,7 +462,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                   border: "none",
                   cursor: "pointer",
                   fontSize: 18,
-                  color: downvoted ? C.red : C.muted,
+                  color: downvoted ? t.red : t.muted,
                   padding: "4px 8px",
                   minHeight: 44,
                   transition: "color 140ms",
@@ -487,10 +488,10 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                   size={22}
                   fontSize={8}
                 />
-                <span style={{ fontSize: 12, fontWeight: 700, color: C.ink }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: t.ink }}>
                   {vp.author || "Anonymous"}
                 </span>
-                <span style={{ fontSize: 11, color: C.muted }}>
+                <span style={{ fontSize: 11, color: t.muted }}>
                   {timeAgo(vp.created_at) || vp.time}
                 </span>
                 <FlairBadge flair={vp.flair} />
@@ -499,7 +500,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 style={{
                   fontSize: 17,
                   fontWeight: 700,
-                  color: C.ink,
+                  color: t.ink,
                   margin: "0 0 10px",
                   lineHeight: 1.4,
                 }}
@@ -511,7 +512,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                   style={{
                     margin: "0 0 14px",
                     fontSize: 14,
-                    color: C.mid,
+                    color: t.mid,
                     lineHeight: 1.8,
                     fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   }}
@@ -524,7 +525,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 style={{
                   display: "flex",
                   gap: 4,
-                  borderTop: `1px solid ${C.border}`,
+                  borderTop: `1px solid ${t.border}`,
                   paddingTop: 10,
                   marginTop: 4,
                   flexWrap: "wrap",
@@ -540,7 +541,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     border: "none",
                     cursor: "pointer",
                     fontSize: 12,
-                    color: C.muted,
+                    color: t.muted,
                     padding: "6px 10px",
                     borderRadius: 8,
                     display: "inline-flex",
@@ -550,7 +551,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     transition: "background 120ms",
                   }}
                 >
-                  {Ic.chat("none", C.muted, 13)} {vp.comments.length} Comments
+                  {Ic.chat("none", t.muted, 13)} {vp.comments.length} Comments
                 </button>
                 <button
                   type="button"
@@ -560,7 +561,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     border: "none",
                     cursor: "pointer",
                     fontSize: 12,
-                    color: shareCopied === vp.id ? C.green : C.muted,
+                    color: shareCopied === vp.id ? t.green : t.muted,
                     padding: "6px 10px",
                     borderRadius: 8,
                     display: "inline-flex",
@@ -582,7 +583,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     border: "none",
                     cursor: "pointer",
                     fontSize: 12,
-                    color: savedPosts.includes(vp.id) ? C.green : C.muted,
+                    color: savedPosts.includes(vp.id) ? t.green : t.muted,
                     padding: "6px 10px",
                     borderRadius: 8,
                     display: "inline-flex",
@@ -607,7 +608,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               fontWeight: 800,
               letterSpacing: 2,
               textTransform: "uppercase",
-              color: C.muted,
+              color: t.muted,
               margin: "0 0 14px",
             }}
           >
@@ -620,7 +621,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               style={{
                 textAlign: "center",
                 padding: "32px 20px",
-                color: C.muted,
+                color: t.muted,
                 fontSize: 13,
                 fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 fontStyle: "italic",
@@ -654,7 +655,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                   style={{
                     flex: 1,
                     width: 2,
-                    background: C.border,
+                    background: t.border,
                     borderRadius: 1,
                     margin: "6px 0 0",
                     minHeight: 12,
@@ -671,10 +672,10 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     flexWrap: "wrap",
                   }}
                 >
-                  <span style={{ fontSize: 12, fontWeight: 700, color: C.ink }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: t.ink }}>
                     {c.author || "Anonymous"}
                   </span>
-                  <span style={{ fontSize: 11, color: C.muted }}>
+                  <span style={{ fontSize: 11, color: t.muted }}>
                     {timeAgo(c.created_at) || c.time}
                   </span>
                 </div>
@@ -682,7 +683,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                   style={{
                     margin: "0 0 6px",
                     fontSize: 14,
-                    color: C.mid,
+                    color: t.mid,
                     lineHeight: 1.65,
                     fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   }}
@@ -701,7 +702,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     border: "none",
                     cursor: "pointer",
                     fontSize: 11,
-                    color: C.muted,
+                    color: t.muted,
                     padding: "4px 0",
                     fontWeight: 600,
                     letterSpacing: 0.3,
@@ -717,8 +718,8 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
           <div
             style={{
               marginTop: 16,
-              background: C.white,
-              border: `1px solid ${C.border}`,
+              background: t.white,
+              border: `1px solid ${t.border}`,
               borderRadius: 12,
               padding: "12px 14px",
               boxSizing: "border-box",
@@ -734,7 +735,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 }}
               >
                 <span
-                  style={{ fontSize: 11, color: C.muted, fontStyle: "italic" }}
+                  style={{ fontSize: 11, color: t.muted, fontStyle: "italic" }}
                 >
                   Replying to a comment
                 </span>
@@ -749,7 +750,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     border: "none",
                     cursor: "pointer",
                     fontSize: 11,
-                    color: C.muted,
+                    color: t.muted,
                   }}
                 >
                   ✕ Cancel
@@ -768,7 +769,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 border: "none",
                 outline: "none",
                 fontSize: 16,
-                color: C.ink,
+                color: t.ink,
                 fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 resize: "none",
                 lineHeight: 1.6,
@@ -791,12 +792,12 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 }}
                 style={{
                   background: "none",
-                  border: `1px solid ${C.border}`,
+                  border: `1px solid ${t.border}`,
                   borderRadius: 8,
                   padding: "8px 14px",
                   cursor: "pointer",
                   fontSize: 13,
-                  color: C.muted,
+                  color: t.muted,
                 }}
               >
                 Clear
@@ -805,7 +806,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 type="button"
                 onClick={handleAddComment}
                 style={{
-                  background: commentText.trim() ? C.green : C.border,
+                  background: commentText.trim() ? t.green : t.border,
                   border: "none",
                   borderRadius: 8,
                   padding: "8px 18px",
@@ -846,7 +847,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
       <div
         style={{
           background: `linear-gradient(135deg, rgba(80,200,120,0.12) 0%, rgba(80,200,120,0.04) 100%)`,
-          borderBottom: `1px solid ${C.border}`,
+          borderBottom: `1px solid ${t.border}`,
           padding: "16px 16px 14px",
         }}
       >
@@ -856,7 +857,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               width: 42,
               height: 42,
               borderRadius: "50%",
-              background: `linear-gradient(135deg, ${C.green} 0%, #3a9e60 100%)`,
+              background: `linear-gradient(135deg, ${t.green} 0%, #3a9e60 100%)`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -870,13 +871,13 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               style={{
                 fontSize: 15,
                 fontWeight: 800,
-                color: C.ink,
+                color: t.ink,
                 letterSpacing: -0.2,
               }}
             >
               r/life
             </div>
-            <div style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>
+            <div style={{ fontSize: 11, color: t.muted, marginTop: 1 }}>
               12.4k members · Your daily growth community
             </div>
           </div>
@@ -885,7 +886,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
             aria-label="New post"
             onClick={() => setShowCompose((v) => !v)}
             style={{
-              background: C.green,
+              background: t.green,
               border: "none",
               borderRadius: 20,
               padding: "9px 18px",
@@ -908,26 +909,26 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
         <div
           style={{
             background: "rgba(229,72,77,0.08)",
-            border: `1px solid ${C.red}`,
+            border: `1px solid ${t.red}`,
             borderRadius: 12,
             padding: "12px 16px",
             margin: "12px 12px 0",
             fontSize: 13,
-            color: C.ink,
+            color: t.ink,
           }}
         >
           <strong style={{ display: "block", marginBottom: 3 }}>
             Could not load the feed
           </strong>
-          <span style={{ color: C.mid, fontSize: 12 }}>{error}</span>
+          <span style={{ color: t.mid, fontSize: 12 }}>{error}</span>
           <button
             type="button"
             onClick={() => reload()}
             style={{
               display: "block",
               marginTop: 10,
-              background: C.white,
-              border: `1px solid ${C.border}`,
+              background: t.white,
+              border: `1px solid ${t.border}`,
               borderRadius: 8,
               padding: "8px 14px",
               cursor: "pointer",
@@ -943,8 +944,8 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
       {showCompose && (
         <div
           style={{
-            background: C.white,
-            border: `1px solid ${C.border}`,
+            background: t.white,
+            border: `1px solid ${t.border}`,
             borderRadius: 14,
             margin: "12px 12px 0",
             padding: "18px 16px",
@@ -964,7 +965,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               style={{
                 fontSize: 13,
                 fontWeight: 800,
-                color: C.ink,
+                color: t.ink,
                 letterSpacing: -0.1,
               }}
             >
@@ -978,7 +979,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 border: "none",
                 cursor: "pointer",
                 fontSize: 18,
-                color: C.muted,
+                color: t.muted,
                 lineHeight: 1,
                 minHeight: 44,
                 minWidth: 44,
@@ -1010,12 +1011,12 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                   onClick={() => setNewFlair(f)}
                   style={{
                     background: active ? fc.bg : "none",
-                    border: `1.5px solid ${active ? fc.color : C.border}`,
+                    border: `1.5px solid ${active ? fc.color : t.border}`,
                     borderRadius: 20,
                     padding: "5px 13px",
                     fontSize: 12,
                     fontWeight: active ? 800 : 500,
-                    color: active ? fc.color : C.muted,
+                    color: active ? fc.color : t.muted,
                     cursor: "pointer",
                     transition: "all 150ms",
                   }}
@@ -1035,13 +1036,13 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               maxLength={150}
               style={{
                 width: "100%",
-                background: C.skin,
-                border: `1px solid ${newTitle.length > 130 ? C.red : C.border}`,
+                background: t.skin,
+                border: `1px solid ${newTitle.length > 130 ? t.red : t.border}`,
                 borderRadius: 10,
                 padding: "13px 14px",
                 fontSize: 16,
                 fontWeight: 600,
-                color: C.ink,
+                color: t.ink,
                 outline: "none",
                 fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 boxSizing: "border-box",
@@ -1053,7 +1054,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 bottom: 8,
                 right: 10,
                 fontSize: 10,
-                color: newTitle.length > 130 ? C.red : C.muted,
+                color: newTitle.length > 130 ? t.red : t.muted,
               }}
             >
               {newTitle.length}/150
@@ -1069,12 +1070,12 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               rows={4}
               style={{
                 width: "100%",
-                background: C.skin,
-                border: `1px solid ${C.border}`,
+                background: t.skin,
+                border: `1px solid ${t.border}`,
                 borderRadius: 10,
                 padding: "12px 14px",
                 fontSize: 16,
-                color: C.mid,
+                color: t.mid,
                 outline: "none",
                 fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 resize: "vertical",
@@ -1089,7 +1090,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               onClick={handleSubmitPost}
               style={{
                 flex: "1 1 auto",
-                background: newTitle.trim() ? C.green : C.border,
+                background: newTitle.trim() ? t.green : t.border,
                 border: "none",
                 borderRadius: 10,
                 padding: "13px",
@@ -1107,10 +1108,10 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               onClick={() => setShowCompose(false)}
               style={{
                 background: "none",
-                border: `1px solid ${C.border}`,
+                border: `1px solid ${t.border}`,
                 borderRadius: 10,
                 padding: "13px 18px",
-                color: C.muted,
+                color: t.muted,
                 fontSize: 14,
                 cursor: "pointer",
               }}
@@ -1129,13 +1130,13 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
             type="button"
             onClick={() => setSort(tab.key)}
             style={{
-              background: sort === tab.key ? C.green : C.white,
-              border: `1.5px solid ${sort === tab.key ? C.green : C.border}`,
+              background: sort === tab.key ? t.green : t.white,
+              border: `1.5px solid ${sort === tab.key ? t.green : t.border}`,
               borderRadius: 20,
               padding: "7px 15px",
               fontSize: 12,
               fontWeight: sort === tab.key ? 800 : 500,
-              color: sort === tab.key ? "#fff" : C.muted,
+              color: sort === tab.key ? "#fff" : t.muted,
               cursor: "pointer",
               transition: "all 160ms",
               flexShrink: 0,
@@ -1148,7 +1149,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
           <span
             style={{
               fontSize: 11,
-              color: C.muted,
+              color: t.muted,
               fontStyle: "italic",
               marginLeft: "auto",
               display: "flex",
@@ -1177,7 +1178,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
             style={{
               fontSize: 17,
               fontWeight: 700,
-              color: C.ink,
+              color: t.ink,
               margin: "0 0 8px",
             }}
           >
@@ -1186,7 +1187,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
           <p
             style={{
               fontSize: 13,
-              color: C.muted,
+              color: t.muted,
               margin: "0 0 24px",
               fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               lineHeight: 1.6,
@@ -1198,7 +1199,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
             type="button"
             onClick={() => setShowCompose(true)}
             style={{
-              background: C.green,
+              background: t.green,
               border: "none",
               borderRadius: 20,
               padding: "12px 28px",
@@ -1224,8 +1225,8 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               key={post.id}
               className="life-card-hover"
               style={{
-                background: C.white,
-                border: `1px solid ${C.border}`,
+                background: t.white,
+                border: `1px solid ${t.border}`,
                 borderRadius: 14,
                 marginBottom: 10,
                 display: "flex",
@@ -1238,7 +1239,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               <div
                 style={{
                   width: 50,
-                  background: C.skin,
+                  background: t.skin,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -1257,7 +1258,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     border: "none",
                     cursor: "pointer",
                     fontSize: 16,
-                    color: up ? C.green : C.muted,
+                    color: up ? t.green : t.muted,
                     padding: "6px 4px",
                     minHeight: 36,
                     transition: "color 140ms, transform 120ms",
@@ -1270,7 +1271,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                   style={{
                     fontSize: 12,
                     fontWeight: 800,
-                    color: up ? C.green : down ? C.red : C.ink,
+                    color: up ? t.green : down ? t.red : t.ink,
                     lineHeight: 1,
                   }}
                 >
@@ -1285,7 +1286,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     border: "none",
                     cursor: "pointer",
                     fontSize: 16,
-                    color: down ? C.red : C.muted,
+                    color: down ? t.red : t.muted,
                     padding: "6px 4px",
                     minHeight: 36,
                     transition: "color 140ms, transform 120ms",
@@ -1314,10 +1315,10 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     size={20}
                     fontSize={7}
                   />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: C.ink }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: t.ink }}>
                     {post.author || "Anonymous"}
                   </span>
-                  <span style={{ fontSize: 10, color: C.muted }}>
+                  <span style={{ fontSize: 10, color: t.muted }}>
                     {timeAgo(post.created_at) || post.time}
                   </span>
                   <FlairBadge flair={post.flair} />
@@ -1329,7 +1330,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     margin: "0 0 6px",
                     fontSize: 14,
                     fontWeight: 700,
-                    color: C.ink,
+                    color: t.ink,
                     lineHeight: 1.4,
                     cursor: "pointer",
                   }}
@@ -1347,7 +1348,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     style={{
                       margin: "0 0 10px",
                       fontSize: 12,
-                      color: C.mid,
+                      color: t.mid,
                       lineHeight: 1.6,
                       fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                     }}
@@ -1378,7 +1379,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                       border: "none",
                       cursor: "pointer",
                       fontSize: 11,
-                      color: C.muted,
+                      color: t.muted,
                       padding: "5px 8px",
                       borderRadius: 8,
                       display: "inline-flex",
@@ -1388,7 +1389,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                       transition: "background 120ms",
                     }}
                   >
-                    {Ic.chat("none", C.muted, 12)} {post.comments.length}
+                    {Ic.chat("none", t.muted, 12)} {post.comments.length}
                   </button>
                   <button
                     type="button"
@@ -1398,7 +1399,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                       border: "none",
                       cursor: "pointer",
                       fontSize: 11,
-                      color: shareCopied === post.id ? C.green : C.muted,
+                      color: shareCopied === post.id ? t.green : t.muted,
                       padding: "5px 8px",
                       borderRadius: 8,
                       minHeight: 32,
@@ -1415,7 +1416,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                       border: "none",
                       cursor: "pointer",
                       fontSize: 11,
-                      color: saved ? C.green : C.muted,
+                      color: saved ? t.green : t.muted,
                       padding: "5px 8px",
                       borderRadius: 8,
                       minHeight: 32,

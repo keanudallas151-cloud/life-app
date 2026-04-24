@@ -879,12 +879,6 @@ export default function LifeApp() {
 
   const [categoryPageData, setCategoryPageData] = useState(null);
 
-  useEffect(() => {
-    if (page === "tools_todo") {
-      setPage("tools_lockin");
-    }
-  }, [page, setPage]);
-
   const handleFolderSelect = useCallback(
     (key, node) => {
       setCategoryPageData({ key, node });
@@ -1962,9 +1956,9 @@ export default function LifeApp() {
         }}
       >
         <style>{`
-        @keyframes life-pulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.08); opacity: 0.9; }
+        @keyframes life-pulse-bounce {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+          50%      { transform: translateY(-6px) scale(1.08); opacity: 0.95; }
         }
         @keyframes life-fade-in {
           from { opacity: 0; transform: translateY(12px); }
@@ -1997,7 +1991,7 @@ export default function LifeApp() {
               margin: "0 auto 20px",
               boxShadow: `0 8px 32px ${C.green}44`,
               animation:
-                "life-pulse 2s ease-in-out infinite, life-bounce 3s ease-in-out infinite",
+                "life-pulse-bounce 2.4s cubic-bezier(0.34,1.1,0.64,1) infinite",
               position: "relative",
             }}
           >
@@ -3038,7 +3032,43 @@ export default function LifeApp() {
             flexShrink: 0,
           }}
         >
-          <span style={{ fontSize: 16 }}>{dark ? "☀️" : "🌙"}</span>
+          {dark ? (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={t.ink}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <line x1="12" y1="2" x2="12" y2="4" />
+              <line x1="12" y1="20" x2="12" y2="22" />
+              <line x1="4.93" y1="4.93" x2="6.34" y2="6.34" />
+              <line x1="17.66" y1="17.66" x2="19.07" y2="19.07" />
+              <line x1="2" y1="12" x2="4" y2="12" />
+              <line x1="20" y1="12" x2="22" y2="12" />
+              <line x1="4.93" y1="19.07" x2="6.34" y2="17.66" />
+              <line x1="17.66" y1="6.34" x2="19.07" y2="4.93" />
+            </svg>
+          ) : (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={t.ink}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
         </button>
         {/* P9c: Notification Bell — hidden on mobile (shown in bottom nav) */}
         <button
@@ -4198,6 +4228,7 @@ export default function LifeApp() {
               <div data-page-tag="#post_it">
                 <Suspense fallback={<RouteFallback />}>
                   <PostItFeed
+                    t={t}
                     play={play}
                     user={user}
                     onMomentumEvent={(event) => {
