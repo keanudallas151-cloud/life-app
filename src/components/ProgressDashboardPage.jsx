@@ -248,7 +248,7 @@ export function ProgressDashboardPage({
               fontSize: 13,
               fontWeight: 700,
               cursor: "pointer",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             {nextAction.cta}
@@ -274,7 +274,7 @@ export function ProgressDashboardPage({
                 fontSize: 13,
                 fontWeight: 700,
                 cursor: "pointer",
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               }}
             >
               {label}
@@ -379,7 +379,7 @@ export function ProgressDashboardPage({
                 borderBottomColor: t.light,
                 cursor: "pointer",
                 textAlign: "left",
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 transition: "background 0.15s ease",
               }}
               onMouseEnter={(e) => {

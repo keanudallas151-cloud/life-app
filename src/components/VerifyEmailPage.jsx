@@ -19,7 +19,7 @@ export function VerifyEmailPage({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily: "Georgia,serif",
+        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         padding: "40px 24px calc(40px + var(--safe-bottom, 0px))",
         position: "relative",
       }}
@@ -88,7 +88,7 @@ export function VerifyEmailPage({
           fontWeight: 700,
           margin: "0 0 8px",
           color: C.ink,
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           textAlign: "center",
         }}
       >
@@ -141,7 +141,7 @@ export function VerifyEmailPage({
             fontSize: 14,
             fontWeight: 600,
             cursor: "pointer",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             transition: "all 0.2s ease",
           }}
           onMouseEnter={(e) => {
@@ -178,7 +178,7 @@ export function VerifyEmailPage({
             color: C.muted,
             fontSize: 13,
             cursor: "pointer",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             width: "100%",
             padding: "12px 14px",
             display: "flex",

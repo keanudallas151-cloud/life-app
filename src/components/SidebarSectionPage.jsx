@@ -132,10 +132,10 @@ export function SidebarSectionPage({
       <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: t.green }}>
         Sidebar category
       </p>
-      <h2 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 700, color: t.ink, fontFamily: "Georgia,serif" }}>
+      <h2 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 700, color: t.ink, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
         {section.title}
       </h2>
-      <p style={{ margin: section.items ? "0 0 22px" : 0, color: t.mid, fontSize: 15, lineHeight: 1.85, fontFamily: "Georgia,serif" }}>
+      <p style={{ margin: section.items ? "0 0 22px" : 0, color: t.mid, fontSize: 15, lineHeight: 1.85, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
         {section.desc}
       </p>
       {section.groups && sectionKey === "sidebar_life" && (

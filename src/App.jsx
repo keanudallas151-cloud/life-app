@@ -42,7 +42,7 @@ import {
 import { getReadingStreak, recordReadingDay } from "./systems/readingStreak";
 import { setResumeTopic } from "./systems/resumeReading";
 import { LS } from "./systems/storage";
-import { C, S, useTheme } from "./systems/theme";
+import { C, S, useTheme, THEME_MODES } from "./systems/theme";
 import { useMomentum } from "./systems/useMomentum";
 import { useQuizStats } from "./systems/useQuizStats";
 import { useSound } from "./systems/useSound";
@@ -367,7 +367,10 @@ export default function LifeApp() {
 
   useEffect(() => {
     document.body.classList.toggle("life-dark", dark);
-  }, [dark]);
+    // life-light signals organized + other portaled content that the user
+    // has explicitly chosen light mode (which is now just slightly lighter dark).
+    document.body.classList.toggle("life-light", !dark && themeMode === THEME_MODES.light);
+  }, [dark, themeMode]);
 
   const [screen, setScreen] = useState("loading"); // start loading until session resolved
   const [user, setUser] = useState(null); // { id, email, name, username }
@@ -766,35 +769,31 @@ export default function LifeApp() {
   const [quizPreset, setQuizPreset] = useState(() =>
     LS.get(`life_quiz_preset_${uid}`, { topic: "finance", activity: "quiz" }),
   );
-  // iOS-style page history stack for back navigation
-  const [pageHistory, setPageHistory] = useState([]);
+  // iOS-style page history stack — useRef so history changes don't cause re-renders
+  const pageHistoryRef = useRef([]);
 
   const setPage = useCallback(
     (p) => {
       setPageRaw(prev => {
         // Track history for back navigation (max 20 deep)
-        setPageHistory(hist => {
-          const next = [...hist.slice(-19), prev];
-          return next;
-        });
+        pageHistoryRef.current = [...pageHistoryRef.current.slice(-19), prev];
         return p;
       });
-      setPageRaw(p);
       LS.set(`life_last_page_${uid}`, p);
     },
     [uid],
   );
 
-  // Go back one page in history (like UINavigationController.popViewController)
+  // Go back one page in history (like UINavigationController.popViewController).
+  // Intentionally kept for upcoming swipe-back gesture and hardware back-button wiring.
+  // eslint-disable-next-line no-unused-vars
   const goBack = useCallback(() => {
-    setPageHistory(hist => {
-      if (!hist.length) return hist;
-      const prev = hist[hist.length - 1];
-      const next = hist.slice(0, -1);
-      setPageRaw(prev);
-      LS.set(`life_last_page_${uid}`, prev);
-      return next;
-    });
+    const hist = pageHistoryRef.current;
+    if (!hist.length) return;
+    const prev = hist[hist.length - 1];
+    pageHistoryRef.current = hist.slice(0, -1);
+    setPageRaw(prev);
+    LS.set(`life_last_page_${uid}`, prev);
   }, [uid]);
   const setQuizContext = useCallback(
     (next) => {
@@ -1812,7 +1811,7 @@ export default function LifeApp() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         }}
       >
         <style>{`
@@ -1883,7 +1882,7 @@ export default function LifeApp() {
               fontSize: 28,
               fontWeight: 700,
               color: C.ink,
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             Life
@@ -2443,7 +2442,7 @@ export default function LifeApp() {
         background: t.skin,
         display: "flex",
         flexDirection: "column",
-        fontFamily: "Georgia,serif",
+        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         color: t.ink,
         overflow: "hidden",
       }}
@@ -2759,7 +2758,7 @@ export default function LifeApp() {
                   color: "#fff",
                   fontSize: 16,
                   fontWeight: 800,
-                  fontFamily: "Georgia,serif",
+                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   letterSpacing: "-0.5px",
                   lineHeight: 1,
                 }}
@@ -2820,7 +2819,7 @@ export default function LifeApp() {
               color: t.ink,
               fontSize: 13,
               outline: "none",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               boxSizing: "border-box",
               transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
@@ -3039,7 +3038,7 @@ export default function LifeApp() {
                   borderBottom: `1px solid ${t.light}`,
                   padding: "14px 24px",
                   cursor: "pointer",
-                  fontFamily: "Georgia,serif",
+                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.background = t.light)
@@ -3271,7 +3270,7 @@ export default function LifeApp() {
                   color: t.ink,
                   padding: "0 12px",
                   fontSize: 13,
-                  fontFamily: "Georgia,serif",
+                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   boxSizing: "border-box",
                 }}
               />
@@ -3304,7 +3303,7 @@ export default function LifeApp() {
                       fontWeight: 700,
                       letterSpacing: 0.3,
                       cursor: "pointer",
-                      fontFamily: "Georgia,serif",
+                      fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                     }}
                   >
                     {label}
@@ -3373,7 +3372,7 @@ export default function LifeApp() {
                           borderRadius: 12,
                           padding: "10px 12px",
                           cursor: "pointer",
-                          fontFamily: "Georgia,serif",
+                          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                         }}
                       >
                         <div
@@ -3470,7 +3469,7 @@ export default function LifeApp() {
                         borderRadius: 14,
                         padding: "12px 12px",
                         cursor: "pointer",
-                        fontFamily: "Georgia,serif",
+                        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                       }}
                     >
                       <div
@@ -3806,7 +3805,7 @@ export default function LifeApp() {
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: "pointer",
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -4089,7 +4088,7 @@ export default function LifeApp() {
                     fontSize: 26,
                     fontWeight: 800,
                     color: t.ink,
-                    fontFamily: "Georgia,serif",
+                    fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   }}
                 >
                   Networking Group
@@ -4100,7 +4099,7 @@ export default function LifeApp() {
                     fontSize: 14,
                     color: t.mid,
                     lineHeight: 1.75,
-                    fontFamily: "Georgia,serif",
+                    fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   }}
                 >
                   Connect with other Life. members on Discord. Share wins, ask
@@ -4124,7 +4123,7 @@ export default function LifeApp() {
                     borderRadius: 14,
                     fontSize: 16,
                     fontWeight: 700,
-                    fontFamily: "Georgia,serif",
+                    fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                     textDecoration: "none",
                     cursor: "pointer",
                     boxShadow: "0 4px 16px rgba(88,101,242,0.35)",
@@ -4419,7 +4418,7 @@ export default function LifeApp() {
                 color: "#fff",
                 fontSize: 18,
                 fontWeight: 800,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               }}
             >
               l.

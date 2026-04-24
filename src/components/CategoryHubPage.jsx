@@ -82,7 +82,7 @@ function TopicCard({ topic, t, isRead, onSelect, play }) {
         borderRadius: 16,
         padding: 18,
         cursor: "pointer",
-        fontFamily: "Georgia,serif",
+        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         position: "relative",
         transition: "background .15s",
       }}
@@ -127,11 +127,11 @@ export function CategoryHubPage({ t, categoryKey, categoryNode, onSelect, play, 
   const readSet = useMemo(() => new Set(readKeys), [readKeys]);
 
   return (
-    <div style={{ padding: "48px 28px", maxWidth: 620, margin: "0 auto", fontFamily: "Georgia,serif" }}>
+    <div style={{ padding: "48px 28px", maxWidth: 620, margin: "0 auto", fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 36 }}>
         <div style={{ fontSize: 48, marginBottom: 8 }}>{meta.emoji}</div>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: t.ink, margin: "0 0 8px", fontFamily: "Georgia,serif" }}>
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: t.ink, margin: "0 0 8px", fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
           {categoryNode?.label || categoryKey}
         </h1>
         {meta.desc && (

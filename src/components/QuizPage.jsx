@@ -454,7 +454,7 @@ function SwipeBadgeDeck({ badges, stats, readKeys, totalTopics, t }) {
         <p style={{ margin: "0 0 4px", fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: t.muted }}>
           Life Badges
         </p>
-        <h2 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 800, color: t.ink, fontFamily: "Georgia,serif" }}>
+        <h2 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 800, color: t.ink, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
           Earned, not given.
         </h2>
         {/* Progress pills */}
@@ -549,7 +549,7 @@ function SwipeBadgeDeck({ badges, stats, readKeys, totalTopics, t }) {
           </p>
 
           {/* Title */}
-          <h3 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 800, color: t.ink, fontFamily: "Georgia,serif", lineHeight: 1.1 }}>
+          <h3 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 800, color: t.ink, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", lineHeight: 1.1 }}>
             {badge.label}
           </h3>
 
@@ -688,7 +688,7 @@ function CommunicationPracticePage({ activity, t, play, onBack }) {
           color: t.muted,
           fontSize: 13,
           cursor: "pointer",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           marginBottom: 18,
           padding: 0,
         }}
@@ -722,7 +722,7 @@ function CommunicationPracticePage({ activity, t, play, onBack }) {
             fontSize: 26,
             fontWeight: 800,
             color: t.ink,
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           {COMMUNICATION_ACTIVITIES[activity]?.label || "Communication"}
@@ -838,7 +838,7 @@ function CommunicationPracticePage({ activity, t, play, onBack }) {
                     fontSize: 13,
                     fontWeight: 700,
                     cursor: "pointer",
-                    fontFamily: "Georgia,serif",
+                    fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   }}
                 >
                   {label}
@@ -1195,7 +1195,7 @@ export function QuizPage({
                            padding: "15px 14px",
                            cursor: "pointer",
                            textAlign: "left",
-                           fontFamily: "Georgia,serif",
+                           fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                          }}
                        >
                          <div style={{ fontSize: 22, marginBottom: 8 }}>{meta.icon}</div>

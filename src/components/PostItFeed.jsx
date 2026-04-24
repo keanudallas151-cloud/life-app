@@ -513,7 +513,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     fontSize: 14,
                     color: C.mid,
                     lineHeight: 1.8,
-                    fontFamily: "Georgia,serif",
+                    fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   }}
                 >
                   {vp.body}
@@ -622,7 +622,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 padding: "32px 20px",
                 color: C.muted,
                 fontSize: 13,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 fontStyle: "italic",
               }}
             >
@@ -684,7 +684,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                     fontSize: 14,
                     color: C.mid,
                     lineHeight: 1.65,
-                    fontFamily: "Georgia,serif",
+                    fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   }}
                 >
                   {c.text}
@@ -769,7 +769,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 outline: "none",
                 fontSize: 16,
                 color: C.ink,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 resize: "none",
                 lineHeight: 1.6,
                 boxSizing: "border-box",
@@ -1043,7 +1043,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 fontWeight: 600,
                 color: C.ink,
                 outline: "none",
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 boxSizing: "border-box",
               }}
             />
@@ -1076,7 +1076,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                 fontSize: 16,
                 color: C.mid,
                 outline: "none",
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 resize: "vertical",
                 boxSizing: "border-box",
               }}
@@ -1188,7 +1188,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
               fontSize: 13,
               color: C.muted,
               margin: "0 0 24px",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               lineHeight: 1.6,
             }}
           >
@@ -1349,7 +1349,7 @@ export function PostItFeed({ play, user, onMomentumEvent }) {
                       fontSize: 12,
                       color: C.mid,
                       lineHeight: 1.6,
-                      fontFamily: "Georgia,serif",
+                      fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                     }}
                   >
                     {post.body.length > 140

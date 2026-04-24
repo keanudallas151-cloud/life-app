@@ -45,7 +45,7 @@ function PreviewBox({ colors }) {
     >
       <span
         style={{
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           fontSize: 18,
           fontWeight: 700,
           color: colors.ink,
@@ -78,7 +78,7 @@ function SystemPreviewBox() {
       >
         <span
           style={{
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             fontSize: 16,
             fontWeight: 700,
             color: C.ink,
@@ -105,7 +105,7 @@ function SystemPreviewBox() {
       >
         <span
           style={{
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             fontSize: 16,
             fontWeight: 700,
             color: DARK.ink,
@@ -141,7 +141,7 @@ export function ThemePickerPage({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily: "Georgia,serif",
+        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         padding: "max(40px, calc(20px + var(--safe-top, 0px))) 24px max(40px, calc(20px + var(--safe-bottom, 0px)))",
         position: "relative",
         transition: "background 0.4s ease",
@@ -282,7 +282,7 @@ export function ThemePickerPage({
                       ? _S.md
                       : _S.sm,
                   cursor: "pointer",
-                  fontFamily: "Georgia,serif",
+                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   textAlign: "left",
                   outline: "none",
                   transition:
@@ -373,7 +373,7 @@ export function ThemePickerPage({
             padding: "18px 0",
             fontWeight: 700,
             fontSize: 17,
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             border: "none",
             cursor: "pointer",
             boxShadow: _S.md,

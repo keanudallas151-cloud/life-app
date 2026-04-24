@@ -14,7 +14,7 @@ export function SecretSiennaPage() {
         style={{
           color: "#fff",
           fontSize: 22,
-          fontFamily: "Georgia, serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           fontStyle: "italic",
           textAlign: "center",
           lineHeight: 1.6,

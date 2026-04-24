@@ -187,7 +187,7 @@ export function HelpPage({ t, supportEmail, user, play, onSystemNotify }) {
               fontSize: 14,
               color: t.mid,
               lineHeight: 1.7,
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             {a}
@@ -221,7 +221,7 @@ export function HelpPage({ t, supportEmail, user, play, onSystemNotify }) {
             fontSize: 14,
             color: t.mid,
             lineHeight: 1.7,
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           Need help with access, privacy, or account issues? Reach out at {" "}
@@ -261,7 +261,7 @@ export function HelpPage({ t, supportEmail, user, play, onSystemNotify }) {
             fontSize: 14,
             color: t.mid,
             lineHeight: 1.7,
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           Send your issue from inside Life. and we&apos;ll store the request, then send an acknowledgement email to {" "}
@@ -288,7 +288,7 @@ export function HelpPage({ t, supportEmail, user, play, onSystemNotify }) {
                 color: t.ink,
                 padding: "0 14px",
                 fontSize: 16,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               }}
             >
               {SUPPORT_TOPICS.map((topic) => (
@@ -319,7 +319,7 @@ export function HelpPage({ t, supportEmail, user, play, onSystemNotify }) {
                 color: t.ink,
                 padding: "0 14px",
                 fontSize: 16,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 boxSizing: "border-box",
               }}
             />
@@ -345,7 +345,7 @@ export function HelpPage({ t, supportEmail, user, play, onSystemNotify }) {
                 padding: "12px 14px",
                 fontSize: 16,
                 lineHeight: 1.6,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 resize: "vertical",
                 boxSizing: "border-box",
               }}
@@ -395,7 +395,7 @@ export function HelpPage({ t, supportEmail, user, play, onSystemNotify }) {
               color: "#fff",
               fontSize: 15,
               fontWeight: 700,
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               cursor: submitting ? "progress" : "pointer",
               opacity: submitting ? 0.75 : 1,
             }}

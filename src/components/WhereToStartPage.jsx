@@ -46,7 +46,7 @@ export function WhereToStartPage({ t, play, setPage, onSelect, onOpenQuiz }) {
           fontWeight: 700,
           color: t.ink,
           margin: "0 0 10px",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         }}
       >
         Where To Start?
@@ -82,7 +82,7 @@ export function WhereToStartPage({ t, play, setPage, onSelect, onOpenQuiz }) {
             cursor: "pointer",
             marginBottom: 12,
             textAlign: "left",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
           onMouseEnter={(e) => (e.currentTarget.style.background = t.light)}
           onMouseLeave={(e) => (e.currentTarget.style.background = t.white)}
@@ -148,7 +148,7 @@ export function WhereToStartPage({ t, play, setPage, onSelect, onOpenQuiz }) {
             margin: "0 0 14px",
             fontSize: 15,
             color: t.ink,
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           Once you have read a few topics, test your knowledge with a timed
@@ -169,7 +169,7 @@ export function WhereToStartPage({ t, play, setPage, onSelect, onOpenQuiz }) {
             fontSize: 14,
             fontWeight: 700,
             cursor: "pointer",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           <span

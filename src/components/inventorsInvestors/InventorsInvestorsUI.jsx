@@ -48,7 +48,7 @@ export function FeatureFrame({ t, eyebrow, title, subtitle, actions, children })
               lineHeight: 1.05,
               fontWeight: 800,
               color: t.ink,
-              fontFamily: "Georgia, serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             {title}

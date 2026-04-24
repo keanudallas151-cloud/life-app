@@ -457,7 +457,7 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
           fontSize: 30,
           fontWeight: 700,
           color: t.ink,
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         }}
       >
         Lock In
@@ -471,7 +471,7 @@ export function ToolsLockInPage({ t, play, session, setSession }) {
               color: t.mid,
               fontSize: 15,
               lineHeight: 1.85,
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             A focus session for finishing real work. Pick your tasks, set a

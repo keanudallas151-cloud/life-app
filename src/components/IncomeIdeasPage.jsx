@@ -188,7 +188,7 @@ export function IncomeIdeasPage({ t }) {
             fontSize: "clamp(1.9rem, 5vw, 2.6rem)",
             fontWeight: 800,
             color: t.ink,
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           100+ Ways To Generate Income
@@ -241,7 +241,7 @@ export function IncomeIdeasPage({ t }) {
                 fontSize: 18,
                 fontWeight: 700,
                 color: t.ink,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               }}
             >
               {section.title}

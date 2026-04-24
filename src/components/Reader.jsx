@@ -29,7 +29,7 @@ export function FinanceDisclaimer({ t: theme } = {}) {
           fontSize: 12,
           color: t.muted,
           lineHeight: 1.8,
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           fontStyle: "italic",
         }}
       >
@@ -158,7 +158,7 @@ export function NotesTab({
             fontSize: "clamp(1.35rem, 5vw, 2rem)",
             fontWeight: 800,
             color: t.ink,
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             lineHeight: 1.15,
           }}
         >
@@ -178,7 +178,7 @@ export function NotesTab({
             fontSize: 12,
             fontWeight: 600,
             cursor: "pointer",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             flexShrink: 0,
             marginTop: 8,
             transition: "all 0.2s",
@@ -206,7 +206,7 @@ export function NotesTab({
           fontSize: 13,
           color: t.muted,
           fontStyle: "italic",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           lineHeight: 1.55,
           paddingLeft: 12,
           borderLeft: `3px solid ${t.border}`,
@@ -234,7 +234,7 @@ export function NotesTab({
           lineHeight: 1.9,
           outline: "none",
           resize: "vertical",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           boxSizing: "border-box",
         }}
       />
@@ -260,7 +260,7 @@ export function NotesTab({
               fontSize: 14,
               fontWeight: 700,
               cursor: "pointer",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             Save Note
@@ -285,7 +285,7 @@ export function NotesTab({
             fontSize: 13,
             fontWeight: 600,
             cursor: "pointer",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           <ShareIcon /> Share My Notes
@@ -333,7 +333,7 @@ export function NotesTab({
                 textAlign: "center",
                 fontSize: 13,
                 color: t.muted,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 fontStyle: "italic",
                 paddingBottom: 14,
                 borderBottom: `1px solid ${t.light}`,
@@ -483,7 +483,7 @@ export function NotesTab({
                     style={{
                       fontSize: 11,
                       color: t.mid,
-                      fontFamily: "Georgia,serif",
+                      fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                       textAlign: "center",
                       lineHeight: 1.3,
                     }}
@@ -506,7 +506,7 @@ export function NotesTab({
                   fontSize: 15,
                   fontWeight: 600,
                   cursor: "pointer",
-                  fontFamily: "Georgia,serif",
+                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 }}
               >
                 Cancel
@@ -624,7 +624,7 @@ function ReaderInlineVisual({ selKey, title, t, visualKey = "auto" }) {
           letterSpacing: 2.2,
           textTransform: "uppercase",
           color: t.green,
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         }}
       >
         Inline visual
@@ -634,7 +634,7 @@ function ReaderInlineVisual({ selKey, title, t, visualKey = "auto" }) {
           margin: "0 0 8px",
           fontSize: 18,
           color: t.ink,
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         }}
       >
         {card.title}
@@ -645,7 +645,7 @@ function ReaderInlineVisual({ selKey, title, t, visualKey = "auto" }) {
           color: t.mid,
           fontSize: 14,
           lineHeight: 1.75,
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         }}
       >
         {card.body}
@@ -668,7 +668,7 @@ function ReaderInlineVisual({ selKey, title, t, visualKey = "auto" }) {
               fontSize: 13,
               fontWeight: 700,
               lineHeight: 1.4,
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             {point}
@@ -683,7 +683,7 @@ function ReaderInlineVisual({ selKey, title, t, visualKey = "auto" }) {
           fontStyle: "italic",
           lineHeight: 1.6,
           textAlign: "center",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         }}
       >
         {title}
@@ -871,7 +871,7 @@ export function EbookReader({
               fontSize: 13,
               fontWeight: tab === item.id ? 700 : 400,
               cursor: "pointer",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               whiteSpace: "nowrap",
             }}
           >
@@ -1070,7 +1070,7 @@ export function EbookReader({
                   fontSize: 11,
                   fontWeight: 700,
                   color: t.green,
-                  fontFamily: "Georgia,serif",
+                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   letterSpacing: 0.5,
                   lineHeight: 1,
                 }}
@@ -1139,7 +1139,7 @@ export function EbookReader({
                       textTransform: "uppercase",
                       color: t.muted,
                       fontWeight: 700,
-                      fontFamily: "Georgia,serif",
+                      fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                     }}
                   >
                     {selContent.title}
@@ -1151,7 +1151,7 @@ export function EbookReader({
                       lineHeight: 1.08,
                       color: t.ink,
                       fontWeight: 700,
-                      fontFamily: "Georgia,serif",
+                      fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                       textWrap: "balance",
                     }}
                   >
@@ -1247,7 +1247,7 @@ export function EbookReader({
                                   fontSize: 11,
                                   fontWeight: 700,
                                   color: col,
-                                  fontFamily: "Georgia,serif",
+                                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                                   letterSpacing: 0.4,
                                 }}
                               >
@@ -1264,7 +1264,7 @@ export function EbookReader({
                           letterSpacing: -0.6,
                           color: t.ink,
                           lineHeight: 1.25,
-                          fontFamily: "Georgia,serif",
+                          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                           borderBottom: `2px solid ${t.border}`,
                           paddingBottom: 24,
                           textWrap: "balance",
@@ -1284,7 +1284,7 @@ export function EbookReader({
                         fontWeight: 700,
                         letterSpacing: 2.5,
                         textTransform: "uppercase",
-                        fontFamily: "Georgia,serif",
+                        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                       }}
                     >
                       {selContent.title}
@@ -1328,7 +1328,7 @@ export function EbookReader({
                                   color: t.mid,
                                   fontSize: 17,
                                   lineHeight: 2,
-                                  fontFamily: "Georgia,serif",
+                                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                                 }}
                                 dangerouslySetInnerHTML={{
                                   __html: segment.value.replaceAll(
@@ -1385,7 +1385,7 @@ export function EbookReader({
                     cursor: pageNum === 0 ? "default" : "pointer",
                     color: pageNum === 0 ? t.light : t.green,
                     fontSize: 13,
-                    fontFamily: "Georgia,serif",
+                    fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   }}
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12">
@@ -1443,7 +1443,7 @@ export function EbookReader({
                     cursor: isLast ? "default" : "pointer",
                     color: isLast ? t.light : t.white,
                     fontSize: 13,
-                    fontFamily: "Georgia,serif",
+                    fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                     fontWeight: isLast ? 400 : 700,
                   }}
                 >
@@ -1467,7 +1467,7 @@ export function EbookReader({
                   fontSize: 11,
                   color: t.muted,
                   fontStyle: "italic",
-                  fontFamily: "Georgia,serif",
+                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 }}
               >
                 {showTitlePage && isFirst
@@ -1527,7 +1527,7 @@ export function EbookReader({
                   cursor: "pointer",
                   marginBottom: 12,
                   textAlign: "left",
-                  fontFamily: "Georgia,serif",
+                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 }}
               >
                 <div
@@ -1574,7 +1574,7 @@ export function EbookReader({
               margin: "0 0 18px",
               fontSize: 14,
               color: t.muted,
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               lineHeight: 1.7,
             }}
           >
@@ -1608,7 +1608,7 @@ export function EbookReader({
                         cursor: "pointer",
                         marginBottom: 10,
                         textAlign: "left",
-                        fontFamily: "Georgia,serif",
+                        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                       }}
                     >
                       <div

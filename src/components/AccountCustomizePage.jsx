@@ -149,7 +149,7 @@ export function AccountCustomizePage({
         maxWidth: 480,
         margin: "0 auto",
         boxSizing: "border-box",
-        fontFamily: "Georgia,serif",
+        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
       }}
     >
       <button
@@ -160,7 +160,7 @@ export function AccountCustomizePage({
           color: t.muted,
           fontSize: 13,
           cursor: "pointer",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           marginBottom: 20,
           display: "flex",
           alignItems: "center",
@@ -258,28 +258,28 @@ export function AccountCustomizePage({
         <div style={{ display: "grid", gap: 12 }}>
           <div style={{ display: "grid", gap: 6 }}>
             <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: t.muted }}>Display Name</label>
-            <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Display name" style={{ background: t.skin, border: `1px solid ${t.border}`, borderRadius: 12, padding: "12px 14px", fontSize: 15, color: t.ink, outline: "none", fontFamily: "Georgia,serif", boxSizing: "border-box", width: "100%" }} />
+            <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Display name" style={{ background: t.skin, border: `1px solid ${t.border}`, borderRadius: 12, padding: "12px 14px", fontSize: 15, color: t.ink, outline: "none", fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", boxSizing: "border-box", width: "100%" }} />
           </div>
 
           <div style={{ display: "grid", gap: 6 }}>
             <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: t.muted }}>Username / Handle</label>
-            <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username" style={{ background: t.skin, border: `1px solid ${t.border}`, borderRadius: 12, padding: "12px 14px", fontSize: 15, color: t.ink, outline: "none", fontFamily: "Georgia,serif", boxSizing: "border-box", width: "100%" }} />
+            <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username" style={{ background: t.skin, border: `1px solid ${t.border}`, borderRadius: 12, padding: "12px 14px", fontSize: 15, color: t.ink, outline: "none", fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", boxSizing: "border-box", width: "100%" }} />
           </div>
 
           <div style={{ display: "grid", gap: 6 }}>
             <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: t.muted }}>Bio</label>
-            <textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Write a short bio" rows={4} style={{ background: t.skin, border: `1px solid ${t.border}`, borderRadius: 12, padding: "12px 14px", fontSize: 15, color: t.ink, outline: "none", fontFamily: "Georgia,serif", boxSizing: "border-box", width: "100%", resize: "vertical" }} />
+            <textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Write a short bio" rows={4} style={{ background: t.skin, border: `1px solid ${t.border}`, borderRadius: 12, padding: "12px 14px", fontSize: 15, color: t.ink, outline: "none", fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", boxSizing: "border-box", width: "100%", resize: "vertical" }} />
           </div>
 
           <div style={{ display: "grid", gap: 6 }}>
             <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: t.muted }}>Social Links</label>
-            <textarea value={socialLinks} onChange={(e) => setSocialLinks(e.target.value)} placeholder="Add links separated by commas" rows={3} style={{ background: t.skin, border: `1px solid ${t.border}`, borderRadius: 12, padding: "12px 14px", fontSize: 15, color: t.ink, outline: "none", fontFamily: "Georgia,serif", boxSizing: "border-box", width: "100%", resize: "vertical" }} />
+            <textarea value={socialLinks} onChange={(e) => setSocialLinks(e.target.value)} placeholder="Add links separated by commas" rows={3} style={{ background: t.skin, border: `1px solid ${t.border}`, borderRadius: 12, padding: "12px 14px", fontSize: 15, color: t.ink, outline: "none", fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", boxSizing: "border-box", width: "100%", resize: "vertical" }} />
           </div>
         </div>
 
         {(saveMsg || saveErr || loading) && <p style={{ margin: "12px 0 0", fontSize: 12, color: saveErr ? t.red : t.green, lineHeight: 1.5 }}>{loading ? "Loading profile…" : saveErr || saveMsg}</p>}
 
-        <button type="button" onClick={handleSave} disabled={saving} style={{ width: "100%", marginTop: 14, background: t.green, border: "none", borderRadius: 12, padding: "14px 16px", color: "#fff", fontSize: 15, fontWeight: 700, cursor: saving ? "default" : "pointer", fontFamily: "Georgia,serif", opacity: saving ? 0.7 : 1 }}>
+        <button type="button" onClick={handleSave} disabled={saving} style={{ width: "100%", marginTop: 14, background: t.green, border: "none", borderRadius: 12, padding: "14px 16px", color: "#fff", fontSize: 15, fontWeight: 700, cursor: saving ? "default" : "pointer", fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", opacity: saving ? 0.7 : 1 }}>
           {saving ? "Saving…" : "Save Changes"}
         </button>
       </div>

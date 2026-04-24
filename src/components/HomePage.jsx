@@ -159,7 +159,7 @@ export function HomePage({
               lineHeight: 1.6,
               margin: "0 auto 32px",
               maxWidth: 480,
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               fontStyle: "italic",
               position: "relative",
               padding: "0 22px",
@@ -175,7 +175,7 @@ export function HomePage({
                 color: t.green,
                 opacity: 0.45,
                 lineHeight: 1,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               }}
             >
               &ldquo;
@@ -191,7 +191,7 @@ export function HomePage({
                 opacity: 0.45,
                 verticalAlign: "sub",
                 lineHeight: 0.5,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               }}
             >
               &rdquo;
@@ -226,7 +226,7 @@ export function HomePage({
                 fontSize: 16,
                 fontWeight: 700,
                 letterSpacing: 0.3,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 cursor: "pointer",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
                 minHeight: 52,
@@ -258,7 +258,7 @@ export function HomePage({
                 fontSize: 16,
                 fontWeight: 700,
                 letterSpacing: 0.3,
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 cursor: "pointer",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
                 minHeight: 52,
@@ -425,7 +425,7 @@ export function HomePage({
               lineHeight: 1,
               color: "rgb(80, 200, 120)",
               opacity: 0.12,
-              fontFamily: "Georgia, serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               fontWeight: 100,
               pointerEvents: "none",
               userSelect: "none",
@@ -454,7 +454,7 @@ export function HomePage({
               color: "rgb(250, 250, 250)",
               fontSize: 17,
               lineHeight: 1.55,
-              fontFamily: "Georgia, serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               fontWeight: 500,
               fontStyle: "italic",
               position: "relative",
@@ -468,7 +468,7 @@ export function HomePage({
               color: "rgb(212, 212, 212)",
               fontSize: 14.5,
               lineHeight: 1.75,
-              fontFamily: "Georgia, serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               position: "relative",
             }}
           >
@@ -493,7 +493,7 @@ export function HomePage({
                 letterSpacing: 1.6,
                 textTransform: "uppercase",
                 color: "rgb(80, 200, 120)",
-                fontFamily: "Georgia, serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               }}
             >
               K.C.
@@ -577,7 +577,7 @@ export function HomePage({
             textAlign: "center",
             fontSize: 11,
             color: t.muted,
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             fontStyle: "italic",
             opacity: 0.8,
           }}

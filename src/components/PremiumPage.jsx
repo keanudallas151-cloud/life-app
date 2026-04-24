@@ -127,7 +127,7 @@ export function PremiumPage({ t, play }) {
                 fontSize: 13,
                 fontWeight: 700,
                 cursor: "pointer",
-                fontFamily: "Georgia,serif",
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               }}
             >
               {plan.tier === "Premium" ? "Subscribe" : "Current Plan"}

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { SystemStatusNotice } from "./SystemStatusNotice";
 
+const SF = "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif";
+
 const PROVIDER_ICONS = {
   google: (
     <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -24,6 +26,7 @@ const PROVIDER_ICONS = {
 const VALUE_PROPS = [
   {
     icon: "users",
+    emoji: "🌐",
     label: "Networking",
     sub: "Connect with driven people",
     title: "Networking",
@@ -37,6 +40,7 @@ const VALUE_PROPS = [
   },
   {
     icon: "lock",
+    emoji: "🔒",
     label: "Secret Knowledge",
     sub: "What they don't teach you",
     title: "Secret Knowledge",
@@ -50,6 +54,7 @@ const VALUE_PROPS = [
   },
   {
     icon: "star",
+    emoji: "⭐",
     label: "Tailored Growth",
     sub: "Personalised to your goals",
     title: "Tailored Growth",
@@ -63,6 +68,7 @@ const VALUE_PROPS = [
   },
   {
     icon: "compass",
+    emoji: "🧭",
     label: "Structured Path",
     sub: "Your friend to success",
     title: "Structured Path",
@@ -77,7 +83,6 @@ const VALUE_PROPS = [
 ];
 
 export function LandingPage({
-  Ic,
   play,
   setScreen,
   AUTH_PROVIDERS,
@@ -93,12 +98,12 @@ export function LandingPage({
       data-page-tag="#landing_page"
       className="life-grain life-landing-shell"
       style={{
-        background: "linear-gradient(165deg, #000000 0%, #0a0a0a 45%, #000000 100%)",
+        background: "linear-gradient(180deg, #050505 0%, #0a0a0a 60%, #050505 100%)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "space-between",
-        fontFamily: "Georgia,serif",
+        fontFamily: SF,
         padding: "max(36px, calc(22px + var(--safe-top, 0px))) 20px max(38px, calc(24px + var(--safe-bottom, 0px)))",
         position: "relative",
         minHeight: "100dvh",
@@ -106,215 +111,250 @@ export function LandingPage({
       }}
     >
       <style>{`
-        @keyframes life-logo-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        @keyframes life-glow-pulse { 0%,100%{box-shadow:0 8px 32px rgba(255,255,255,0.08)} 50%{box-shadow:0 12px 48px rgba(255,255,255,0.14)} }
-        @keyframes life-tag-fade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes life-shine { 0%{background-position:200% center} 100%{background-position:-200% center} }
+        @keyframes landing-icon-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        @keyframes landing-fade-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes landing-sheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        .landing-row-btn { -webkit-tap-highlight-color:transparent; }
+        .landing-row-btn:active { opacity:0.6; }
+        .landing-cta-primary:active { transform:scale(0.97)!important; opacity:0.92; }
+        .landing-cta-secondary:active { transform:scale(0.97)!important; opacity:0.8; }
+        .landing-social-btn:active { transform:scale(0.93)!important; }
       `}</style>
-      <div style={{ position: "absolute", top: -80, right: -80, width: 240, height: 240, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,0.06)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: "14%", right: "9%", width: 72, height: 72, borderRadius: "50%", background: "rgba(255,255,255,0.04)", filter: "blur(1px)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: -60, left: -60, width: 180, height: 180, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,0.04)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: "30%", left: -40, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.02)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: "18%", right: "12%", width: 132, height: 132, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 70%, transparent 100%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: "56%", left: "8%", width: 44, height: 44, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,0.06)", pointerEvents: "none" }} />
 
+      {/* ── HERO ─────────────────────────────────────────── */}
       <div
         style={{
           width: "100%",
-          maxWidth: 360,
+          maxWidth: 390,
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
           alignItems: "center",
+          justifyContent: "center",
+          gap: 0,
         }}
       >
-        <div style={{ marginBottom: 18, textAlign: "center" }}>
-          <div
-            style={{
-              width: 96,
-              height: 96,
-              borderRadius: "22%",
-              background: "linear-gradient(145deg, #2d2d2d, #3a3a3a)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 14px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.08)",
-              animation: "life-logo-float 4s ease-in-out infinite, life-glow-pulse 3s ease-in-out infinite",
-            }}
-          >
-            <span style={{ color: "#fff", fontSize: 42, fontWeight: 800, fontFamily: "Georgia,serif", letterSpacing: -2 }}>l.</span>
-          </div>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "clamp(2.6rem, 9vw, 3.6rem)",
-              fontWeight: 800,
-              color: "#ffffff",
-              fontFamily: "Georgia,serif",
-              letterSpacing: -1,
-            }}
-          >
-            Life.
-          </h1>
-          <p style={{ margin: "8px 0 0", fontSize: 14, color: "rgba(255,255,255,0.5)", fontStyle: "italic" }}>
-            Knowledge, Growth, Community
-          </p>
+        {/* App icon — iOS squircle */}
+        <div
+          style={{
+            width: 96,
+            height: 96,
+            borderRadius: "22%",
+            background: "linear-gradient(145deg, #1c1c1e, #2c2c2e)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 18,
+            boxShadow: "0 12px 40px rgba(0,0,0,0.55), 0 0 0 0.5px rgba(255,255,255,0.1)",
+            animation: "landing-icon-float 4s ease-in-out infinite",
+          }}
+        >
+          {/* Keep Georgia only for the brand logotype letter */}
+          <span style={{ color: "#fff", fontSize: 44, fontWeight: 800, fontFamily: "Georgia,serif", letterSpacing: -2, lineHeight: 1 }}>l.</span>
         </div>
+
+        {/* App name */}
+        <h1
+          style={{
+            margin: "0 0 8px",
+            fontSize: 34,
+            fontWeight: 700,
+            color: "#ffffff",
+            fontFamily: SF,
+            letterSpacing: "-0.025em",
+            lineHeight: 1.05,
+            textAlign: "center",
+            animation: "landing-fade-up 0.5s ease-out 0.1s both",
+          }}
+        >
+          Life.
+        </h1>
+        <p
+          style={{
+            margin: "0 0 28px",
+            fontSize: 15,
+            color: "rgba(255,255,255,0.5)",
+            fontFamily: SF,
+            fontWeight: 400,
+            letterSpacing: "0.01em",
+            textAlign: "center",
+            animation: "landing-fade-up 0.5s ease-out 0.18s both",
+          }}
+        >
+          Knowledge · Growth · Community
+        </p>
 
         <SystemStatusNotice notice={systemNotice} dark />
 
-        <div style={{ width: "100%", maxWidth: 360, marginBottom: 22 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            {VALUE_PROPS.map((v, i) => (
-              <button
-                key={v.label}
-                type="button"
-                onClick={() => {
-                  play("tap");
-                  setActiveValueProp(v.label);
-                }}
-                data-page-tag={`#landing_value_prop_${v.label.toLowerCase().replace(/\s+/g, "_")}`}
+        {/* ── VALUE PROPS — iOS inset-grouped list ──────── */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 390,
+            background: "rgba(255,255,255,0.06)",
+            borderRadius: 18,
+            border: "0.5px solid rgba(255,255,255,0.12)",
+            overflow: "hidden",
+            marginBottom: 28,
+            animation: "landing-fade-up 0.5s ease-out 0.25s both",
+          }}
+        >
+          {VALUE_PROPS.map((v, i) => (
+            <button
+              key={v.label}
+              type="button"
+              className="landing-row-btn"
+              onClick={() => { play("tap"); setActiveValueProp(v.label); }}
+              data-page-tag={`#landing_value_prop_${v.label.toLowerCase().replace(/\s+/g, "_")}`}
+              aria-label={`Open ${v.label} overview`}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                padding: "13px 16px",
+                background: "transparent",
+                border: "none",
+                borderBottom: i < VALUE_PROPS.length - 1 ? "0.5px solid rgba(255,255,255,0.1)" : "none",
+                borderLeft: "none",
+                borderRight: "none",
+                borderTop: "none",
+                cursor: "pointer",
+                textAlign: "left",
+                WebkitTapHighlightColor: "transparent",
+                transition: "background 0.12s ease",
+              }}
+            >
+              {/* Emoji icon pill */}
+              <div
                 style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 12,
-                  padding: "12px 10px",
-                  textAlign: "center",
-                  cursor: "pointer",
-                  animation: `life-tag-fade 0.5s ease-out ${0.2 + i * 0.1}s both`,
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                  minHeight: 92,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  flexShrink: 0,
                 }}
-                aria-label={`Open ${v.label} overview`}
               >
-                <div style={{ marginBottom: 6 }}>{Ic[v.icon]?.("none", "#a0a0a0", 20)}</div>
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#ffffff" }}>{v.label}</p>
-                <p style={{ margin: "2px 0 0", fontSize: 10, color: "rgba(255,255,255,0.45)", fontStyle: "italic" }}>{v.sub}</p>
-              </button>
-            ))}
-          </div>
+                {v.emoji}
+              </div>
+              {/* Labels */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#ffffff", fontFamily: SF, letterSpacing: "-0.01em", lineHeight: 1.2 }}>
+                  {v.label}
+                </p>
+                <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.45)", fontFamily: SF, fontWeight: 400, lineHeight: 1.3 }}>
+                  {v.sub}
+                </p>
+              </div>
+              {/* Chevron */}
+              <svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 1 7 7 1 13" />
+              </svg>
+            </button>
+          ))}
         </div>
 
-        {activeValuePropData && (
-          <div data-page-tag="#landing_value_prop_overlay" style={{ position: "fixed", inset: 0, zIndex: 90, display: "flex", alignItems: "stretch", justifyContent: "center", background: "rgba(0,0,0,0.58)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
-            <button type="button" aria-label="Close overview" onClick={() => setActiveValueProp(null)} style={{ position: "absolute", inset: 0, border: "none", background: "transparent", cursor: "pointer" }} />
-            <div role="dialog" aria-modal="true" aria-labelledby="landing-value-prop-title" style={{ position: "relative", zIndex: 1, width: "min(100vw, 520px)", minHeight: "100dvh", padding: "max(26px, calc(18px + var(--safe-top, 0px))) 22px max(26px, calc(22px + var(--safe-bottom, 0px)))", background: "linear-gradient(180deg, rgba(8,8,8,0.98) 0%, rgba(14,14,14,0.98) 100%)", color: "#ffffff", boxSizing: "border-box", overflowY: "auto" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 22 }}>
-                <div>
-                  <h2 id="landing-value-prop-title" style={{ margin: 0, fontSize: "clamp(2rem, 8vw, 2.8rem)", fontWeight: 800, color: "#ffffff", fontFamily: "Georgia,serif", letterSpacing: -0.8 }}>
-                    {activeValuePropData.title}
-                  </h2>
-                </div>
-                <button type="button" onClick={() => setActiveValueProp(null)} aria-label={`Close ${activeValuePropData.title} overview`} style={{ width: 44, height: 44, minWidth: 44, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.05)", color: "#ffffff", cursor: "pointer", fontSize: 22, lineHeight: 1 }}>
-                  ×
-                </button>
-              </div>
-              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: 18, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 18 }}>
-                {Ic[activeValuePropData.icon]?.("none", "#d5d5d5", 28)}
-              </div>
-              <p style={{ margin: "0 0 22px", color: "rgba(255,255,255,0.76)", fontSize: 16, lineHeight: 1.8, fontFamily: "Georgia,serif" }}>{activeValuePropData.summary}</p>
-              <div style={{ display: "grid", gap: 12 }}>
-                {activeValuePropData.bullets.map((item) => (
-                  <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 14px", borderRadius: 16, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                    <span aria-hidden style={{ width: 24, height: 24, borderRadius: "50%", background: "rgba(90,125,106,0.24)", color: "#b9d7c7", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 13, fontWeight: 700 }}>+
-                    </span>
-                    <span style={{ color: "rgba(255,255,255,0.82)", fontSize: 14, lineHeight: 1.7 }}>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: 12 }}>
+        {/* ── CTA BUTTONS ──────────────────────────────── */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 390,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            animation: "landing-fade-up 0.5s ease-out 0.32s both",
+          }}
+        >
+          {/* Primary — Get Started / Register */}
           <button
-            className="life-card-hover life-signin-btn"
-            onClick={() => {
-              play("tap");
-              setScreen("signin");
-            }}
+            type="button"
+            className="landing-cta-primary"
+            onClick={() => { play("tap"); setScreen("register"); }}
             style={{
-              background: "rgba(255,255,255,0.08)",
-              backdropFilter: "blur(14px) saturate(1.4)",
-              WebkitBackdropFilter: "blur(14px) saturate(1.4)",
-              border: "1.5px solid rgba(255,255,255,0.35)",
+              width: "100%",
+              height: 52,
+              background: "#50c878",
+              border: "none",
               borderRadius: 14,
-              padding: "17px 18px",
+              color: "#000000",
+              fontSize: 17,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: SF,
+              letterSpacing: "-0.01em",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              transition: "transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            Get Started
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+
+          {/* Secondary — Sign In */}
+          <button
+            type="button"
+            className="landing-cta-secondary"
+            onClick={() => { play("tap"); setScreen("signin"); }}
+            style={{
+              width: "100%",
+              height: 52,
+              background: "rgba(255,255,255,0.09)",
+              border: "0.5px solid rgba(255,255,255,0.18)",
+              borderRadius: 14,
               color: "#ffffff",
               fontSize: 17,
               fontWeight: 600,
               cursor: "pointer",
-              fontFamily: "Georgia,serif",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.25)",
+              fontFamily: SF,
+              letterSpacing: "-0.01em",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 10,
-              transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+              gap: 8,
+              transition: "transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease",
+              WebkitTapHighlightColor: "transparent",
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-              <polyline points="10 17 15 12 10 7" />
-              <line x1="15" y1="12" x2="3" y2="12" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
             </svg>
             Sign In
           </button>
-          <button
-            className="life-card-hover"
-            onClick={() => {
-              play("tap");
-              setScreen("register");
-            }}
-            style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1.5px solid rgba(255,255,255,0.28)",
-              borderRadius: 14,
-              padding: "17px 18px",
-              color: "#fff",
-              fontSize: 17,
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: "Georgia,serif",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-              transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-              <circle cx="8.5" cy="7" r="4" />
-              <line x1="20" y1="8" x2="20" y2="14" />
-              <line x1="23" y1="11" x2="17" y2="11" />
-            </svg>
-            Register
-          </button>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "2px 16px" }}>
-            <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15))" }} />
-            <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, fontStyle: "italic", whiteSpace: "nowrap" }}>
-              or continue with
-            </span>
-            <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, rgba(255,255,255,0.15), transparent)" }} />
+
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "2px 4px" }}>
+            <div style={{ flex: 1, height: "0.5px", background: "rgba(255,255,255,0.14)" }} />
+            <span style={{ color: "rgba(255,255,255,0.38)", fontSize: 13, fontFamily: SF, fontWeight: 400, whiteSpace: "nowrap" }}>or continue with</span>
+            <div style={{ flex: 1, height: "0.5px", background: "rgba(255,255,255,0.14)" }} />
           </div>
+
+          {/* Social sign-in */}
           <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
             {AUTH_PROVIDERS.map((item) => (
               <button
                 key={item.key}
+                type="button"
+                className="landing-social-btn"
                 onClick={() => doProviderSignIn(item)}
                 title={item.live ? `Continue with ${item.label}` : `${item.label} coming soon`}
                 aria-label={`Continue with ${item.label}`}
-                className="social-btn"
                 style={{
                   width: 58,
                   height: 58,
                   background: "rgba(255,255,255,0.08)",
-                  border: "1.5px solid rgba(255,255,255,0.12)",
+                  border: "0.5px solid rgba(255,255,255,0.14)",
                   borderRadius: 16,
                   display: "flex",
                   alignItems: "center",
@@ -323,56 +363,190 @@ export function LandingPage({
                   padding: 14,
                   boxSizing: "border-box",
                   opacity: item.live ? 1 : 0.4,
-                  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
-                  transform: "scale(1)",
+                  transition: "transform 0.16s cubic-bezier(0.34,1.56,0.64,1)",
+                  WebkitTapHighlightColor: "transparent",
                   position: "relative",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "scale(1.08)";
-                  e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.3)";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "scale(1)";
-                  e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.2)";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
-                }}
               >
-                {PROVIDER_ICONS[item.key] ?? <span style={{ color: "#fff", fontSize: 13, fontWeight: 700 }}>{item.label[0]}</span>}
-                {!item.live && <span style={{ position: "absolute", bottom: 4, fontSize: 7, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: 0.5, textTransform: "uppercase" }}>Soon</span>}
+                {PROVIDER_ICONS[item.key] ?? <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, fontFamily: SF }}>{item.label[0]}</span>}
+                {!item.live && (
+                  <span style={{ position: "absolute", bottom: 4, fontSize: 7, fontWeight: 600, color: "rgba(255,255,255,0.35)", letterSpacing: 0.5, textTransform: "uppercase", fontFamily: SF }}>
+                    Soon
+                  </span>
+                )}
               </button>
             ))}
           </div>
-          {siSocialErr && <p style={{ margin: "-4px 0 0", fontSize: 12, color: "#d25545", textAlign: "center", fontStyle: "italic", lineHeight: 1.5 }}>{siSocialErr}</p>}
+          {siSocialErr && (
+            <p style={{ margin: "0", fontSize: 12, color: "#e5484d", textAlign: "center", fontFamily: SF, lineHeight: 1.5 }}>
+              {siSocialErr}
+            </p>
+          )}
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
-        <div style={{ display: "flex", gap: 16, marginTop: 14 }}>
+      {/* ── FOOTER LINKS ──────────────────────────────────── */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, paddingTop: 12 }}>
+        <div style={{ display: "flex", gap: 24 }}>
           <button
-            onClick={() => {
-              play("tap");
-              setScreen("privacy_policy");
+            type="button"
+            onClick={() => { play("tap"); setScreen("privacy_policy"); }}
+            style={{
+              background: "none",
+              border: "none",
+              color: "rgba(255,255,255,0.32)",
+              fontSize: 12,
+              cursor: "pointer",
+              fontFamily: SF,
+              padding: "8px 4px",
+              WebkitTapHighlightColor: "transparent",
             }}
-            style={{ background: "none", border: "none", outline: "none", boxShadow: "none", color: "rgba(255,255,255,0.35)", fontSize: 10, cursor: "pointer", fontFamily: "Georgia,serif", textDecoration: "none", padding: 0 }}
           >
             Privacy Policy
           </button>
           <button
-            onClick={() => {
-              play("tap");
-              setScreen("terms_conditions");
+            type="button"
+            onClick={() => { play("tap"); setScreen("terms_conditions"); }}
+            style={{
+              background: "none",
+              border: "none",
+              color: "rgba(255,255,255,0.32)",
+              fontSize: 12,
+              cursor: "pointer",
+              fontFamily: SF,
+              padding: "8px 4px",
+              WebkitTapHighlightColor: "transparent",
             }}
-            style={{ background: "none", border: "none", outline: "none", boxShadow: "none", color: "rgba(255,255,255,0.35)", fontSize: 10, cursor: "pointer", fontFamily: "Georgia,serif", textDecoration: "none", padding: 0 }}
           >
-            Terms & Conditions
+            Terms &amp; Conditions
           </button>
         </div>
-        <p className="life-footer" style={{ margin: "16px 0 0", color: "rgba(255,255,255,0.3)", fontSize: 10, fontStyle: "italic", textAlign: "center" }}>
+        <p style={{ margin: 0, color: "rgba(255,255,255,0.2)", fontSize: 11, fontFamily: SF, textAlign: "center" }}>
           © 2026 Life. All rights reserved.
         </p>
       </div>
+
+      {/* ── VALUE PROP BOTTOM SHEET ───────────────────────── */}
+      {activeValuePropData && (
+        <>
+          {/* Scrim */}
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => { play("tap"); setActiveValueProp(null); }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.55)",
+              backdropFilter: "blur(6px)",
+              WebkitBackdropFilter: "blur(6px)",
+              border: "none",
+              cursor: "pointer",
+              zIndex: 80,
+            }}
+          />
+          {/* Sheet */}
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="vp-sheet-title"
+            style={{
+              position: "fixed",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 81,
+              background: "rgba(28,28,30,0.96)",
+              backdropFilter: "blur(24px) saturate(180%)",
+              WebkitBackdropFilter: "blur(24px) saturate(180%)",
+              borderRadius: "22px 22px 0 0",
+              padding: "12px 22px calc(max(28px, env(safe-area-inset-bottom)) + 10px)",
+              maxHeight: "82dvh",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+              animation: "landing-sheet-up 0.36s cubic-bezier(0.34,1.1,0.64,1) both",
+              boxShadow: "0 -4px 40px rgba(0,0,0,0.4)",
+            }}
+          >
+            {/* Handle bar */}
+            <div style={{ width: 36, height: 4, borderRadius: 999, background: "rgba(255,255,255,0.2)", margin: "0 auto 20px" }} />
+
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 18 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "0.5px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
+                  {activeValuePropData.emoji}
+                </div>
+                <h2
+                  id="vp-sheet-title"
+                  style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#ffffff", fontFamily: SF, letterSpacing: "-0.025em", lineHeight: 1.1 }}
+                >
+                  {activeValuePropData.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => { play("tap"); setActiveValueProp(null); }}
+                aria-label="Close"
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  border: "none",
+                  background: "rgba(255,255,255,0.12)",
+                  color: "#ffffff",
+                  fontSize: 18,
+                  lineHeight: 1,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Summary */}
+            <p style={{ margin: "0 0 20px", color: "rgba(255,255,255,0.72)", fontSize: 15, lineHeight: 1.75, fontFamily: SF, fontWeight: 400 }}>
+              {activeValuePropData.summary}
+            </p>
+
+            {/* Bullets — iOS grouped list style */}
+            <div
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                borderRadius: 14,
+                border: "0.5px solid rgba(255,255,255,0.1)",
+                overflow: "hidden",
+              }}
+            >
+              {activeValuePropData.bullets.map((item, bi) => (
+                <div
+                  key={item}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 12,
+                    padding: "13px 16px",
+                    borderBottom: bi < activeValuePropData.bullets.length - 1 ? "0.5px solid rgba(255,255,255,0.08)" : "none",
+                  }}
+                >
+                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: "rgba(80,200,120,0.18)", color: "#50c878", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 12, fontWeight: 700, fontFamily: SF, marginTop: 1 }}>
+                    ✓
+                  </div>
+                  <span style={{ color: "rgba(255,255,255,0.82)", fontSize: 14, lineHeight: 1.65, fontFamily: SF }}>
+                    {item}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
+

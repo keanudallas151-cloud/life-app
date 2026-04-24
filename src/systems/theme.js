@@ -36,6 +36,26 @@ export const C = {
   orange:   "#e58b2a",  // chart accent used by Charts.jsx and other warning-strength UI states
 };
 
+// Light mode — "just a touch lighter than dark mode" as requested.
+// This is NOT white; it's a near-dark surface that sits just above the default
+// dark (C) palette. Text colors remain light, so the same rgba() overlay
+// patterns in game components continue to work without changes.
+export const LIGHT = {
+  skin:     "#141414",  // page bg: one step up from C.skin (#0a0a0a)
+  white:    "#1e1e1e",  // card surface: one step up from C.white (#111111)
+  green:    "#50c878",  // same brand accent — still pops on near-black
+  greenAlt: "#2f9e63",  // secondary green
+  greenLt:  "#0f2818",  // green tint (works on dark bg)
+  ink:      "#eeeeee",  // primary text: matches dark mode readability
+  mid:      "#c9c9c9",  // body text: same as C
+  muted:    "#a1a1a1",  // subtle text: same as C
+  border:   "#363636",  // hairline border: slightly lighter than C.border (#2e2e2e)
+  light:    "#282828",  // elevated tint: slightly lighter than C.light (#1a1a1a)
+  gold:     "#f5a623",  // warning accent (unchanged)
+  red:      "#e5484d",  // error (unchanged)
+  orange:   "#e58b2a",  // chart accent (unchanged)
+};
+
 // Deeper variant for users who pick "dark" explicitly in theme picker.
 // Since default IS already dark, this goes even darker / more contrasty.
 export const DARK = {
@@ -139,7 +159,11 @@ export function useTheme() {
     });
   }, [dark]);
 
-  const t = useMemo(() => (dark ? DARK : C), [dark]);
+  const t = useMemo(() => {
+    if (dark) return DARK;
+    if (themeMode === THEME_MODES.light) return LIGHT;
+    return C;
+  }, [dark, themeMode]);
 
   return { dark, t, themeMode, setThemeMode, toggleTheme, systemDark };
 }

@@ -17,7 +17,7 @@
   --life-white: #111111;
   --life-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --life-ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
-  --life-font: Georgia, "Times New Roman", "Iowan Old Style", serif;
+  --life-font: -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   --life-hover-lift: 1px;
   --life-press-scale: 0.965;
   --life-sidebar-duration: 520ms;

@@ -205,7 +205,7 @@ export function AudioPlayer({
         background: t.white,
         border: `1px solid ${t.border}`,
         borderRadius: 16,
-        fontFamily: "Georgia, serif",
+        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
       }}
     >
       {/* Header */}

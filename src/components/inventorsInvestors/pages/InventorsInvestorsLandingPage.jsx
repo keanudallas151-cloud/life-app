@@ -79,7 +79,7 @@ function RoleCard({ t, title, kicker, body, points, accent, fading, selected, on
           {kicker}
         </div>
 
-        <div className="ii-role-card-title" style={{ marginTop: 16, fontSize: "clamp(28px, 7vw, 32px)", lineHeight: 0.96, fontWeight: 800, color: t.ink, fontFamily: "Georgia, serif", letterSpacing: -0.8 }}>
+        <div className="ii-role-card-title" style={{ marginTop: 16, fontSize: "clamp(28px, 7vw, 32px)", lineHeight: 0.96, fontWeight: 800, color: t.ink, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", letterSpacing: -0.8 }}>
           {title}
         </div>
         <div className="ii-role-card-body" style={{ marginTop: 12, fontSize: 13, lineHeight: 1.7, color: t.mid }}>

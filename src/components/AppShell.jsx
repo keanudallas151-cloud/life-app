@@ -44,7 +44,7 @@ export function RouteFallback() {
         color: C.muted,
         fontSize: 13,
         fontStyle: "italic",
-        fontFamily: "Georgia,serif",
+        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
       }}
     >
       Loading…
@@ -62,8 +62,6 @@ export function SS({
   theme,
   playFn,
   onLabelClick,
-  active = false,
-  icon,
 }) {
   const th = theme || C;
   const iosfont = "-apple-system, SF Pro Display, Helvetica Neue, Arial, sans-serif";

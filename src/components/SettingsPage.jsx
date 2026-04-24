@@ -69,7 +69,7 @@ export default function SettingsPage({
           color: t.muted,
           fontSize: 13,
           cursor: "pointer",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           marginBottom: 16,
           display: "flex",
           alignItems: "center",
@@ -432,7 +432,7 @@ export default function SettingsPage({
                           color: selected ? "#fff" : t.ink,
                           fontSize: 12,
                           fontWeight: 700,
-                          fontFamily: "Georgia,serif",
+                          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                           cursor: "pointer",
                           textAlign: "center",
                           transition: "all 0.2s ease",
@@ -493,7 +493,7 @@ export default function SettingsPage({
                           fontSize: 12,
                           fontWeight: 700,
                           color: t.ink,
-                          fontFamily: "Georgia,serif",
+                          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                         }}
                       >
                         {group.title}
@@ -552,7 +552,7 @@ export default function SettingsPage({
                                 fontSize: 12,
                                 fontWeight: 700,
                                 cursor: isDisabled ? "default" : "pointer",
-                                fontFamily: "Georgia,serif",
+                                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                                 textAlign: "left",
                                 opacity: isDisabled ? 0.82 : 1,
                               }}

@@ -465,7 +465,7 @@ export default function ProfilePage({
                 i < quickLinks.length - 1 ? `1px solid ${t.border}` : "none",
               cursor: "pointer",
               textAlign: "left",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               WebkitTapHighlightColor: "transparent",
             }}
           >
@@ -536,7 +536,7 @@ export default function ProfilePage({
           fontSize: 15,
           fontWeight: 700,
           cursor: "pointer",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

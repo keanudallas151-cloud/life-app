@@ -124,7 +124,7 @@ export function CategoriesPage({ t, play, catStep, setCatStep, setPage, userName
                       fontSize: 15,
                       fontWeight: 600,
                       cursor: "pointer",
-                      fontFamily: "Georgia,serif",
+                      fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                       boxShadow: "none",
                       outline: "none",
                     }}
@@ -146,7 +146,7 @@ export function CategoriesPage({ t, play, catStep, setCatStep, setPage, userName
                     fontSize: 15,
                     fontWeight: 700,
                     cursor: "pointer",
-                    fontFamily: "Georgia,serif",
+                    fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                     boxShadow: S.glow,
                   }}
                 >
@@ -295,7 +295,7 @@ export function CategoriesPage({ t, play, catStep, setCatStep, setPage, userName
               fontSize: 15,
               fontWeight: 700,
               cursor: "pointer",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             Back to Home

@@ -178,7 +178,7 @@ export function GoalSettingPage({ t, play }) {
             fontSize: 14,
             color: t.ink,
             outline: "none",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             boxSizing: "border-box",
             marginBottom: 14,
           }}
@@ -208,7 +208,7 @@ export function GoalSettingPage({ t, play }) {
             fontSize: 14,
             fontWeight: 700,
             cursor: title.trim() && !deadlineError ? "pointer" : "not-allowed",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           + Add Goal

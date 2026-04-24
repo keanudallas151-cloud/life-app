@@ -321,7 +321,7 @@ export function DailyGrowthPage({ t, play, setPage, onMomentumEvent }) {
               fontSize: 13,
               fontWeight: 700,
               cursor: "pointer",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             Continue today&apos;s growth
@@ -348,7 +348,7 @@ export function DailyGrowthPage({ t, play, setPage, onMomentumEvent }) {
               alignItems: "flex-start",
               gap: 14,
               cursor: "pointer",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               transition: "transform 0.12s ease, box-shadow 0.2s ease",
             }}
           >
@@ -508,7 +508,7 @@ function DailyGrowthModal({ item, t, play, onClose, onComplete }) {
           padding: "24px 24px 20px",
           zIndex: 71,
           boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           overflowY: "auto",
           color: t.ink,
         }}
@@ -620,7 +620,7 @@ function JournalTool({ item, t, play, onComplete }) {
           color: t.ink,
           outline: "none",
           resize: "vertical",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           boxSizing: "border-box",
           marginBottom: 14,
         }}
@@ -641,7 +641,7 @@ function JournalTool({ item, t, play, onComplete }) {
           fontSize: 14,
           fontWeight: 700,
           cursor: canSubmit ? "pointer" : "not-allowed",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         }}
       >
         Mark as done
@@ -690,7 +690,7 @@ function TimerTool({ item, t, play, onComplete }) {
           fontSize: 64,
           fontWeight: 800,
           color: remaining === 0 ? t.green : t.ink,
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           letterSpacing: -1,
           padding: "20px 0",
         }}
@@ -715,7 +715,7 @@ function TimerTool({ item, t, play, onComplete }) {
             fontSize: 14,
             fontWeight: 700,
             cursor: remaining === 0 ? "not-allowed" : "pointer",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           {running ? "Pause" : remaining === 0 ? "Complete!" : "Start"}
@@ -735,7 +735,7 @@ function TimerTool({ item, t, play, onComplete }) {
             fontSize: 14,
             fontWeight: 700,
             cursor: "pointer",
-            fontFamily: "Georgia,serif",
+            fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
         >
           Mark done
@@ -792,7 +792,7 @@ function ChecklistTool({ item, t, play, onComplete }) {
               borderRadius: 12,
               cursor: "pointer",
               textAlign: "left",
-              fontFamily: "Georgia,serif",
+              fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
             }}
           >
             <div
@@ -853,7 +853,7 @@ function ChecklistTool({ item, t, play, onComplete }) {
           fontSize: 14,
           fontWeight: 700,
           cursor: allDone ? "pointer" : "not-allowed",
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
         }}
       >
         {allDone
