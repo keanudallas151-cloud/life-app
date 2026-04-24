@@ -29,7 +29,7 @@ const GAMES = {
     { id: "fin_trivia",   icon: "🧠", title: "Finance Trivia",   desc: "Quiz yourself on real money concepts.",         type: "game" },
     { id: "invest_save",  icon: "📈", title: "Invest or Save?",  desc: "Make smart decisions in live scenarios.",       type: "game" },
     { id: "money_math",   icon: "🔢", title: "Money Math",       desc: "Quick mental maths — beat the clock.",          type: "game" },
-    { id: "fin_match",    icon: "🃏", title: "Term Match",       desc: "Match finance terms to their definitions.",     type: "game" },
+    { id: "compound",     icon: "📈", title: "Compound Growth",  desc: "Estimate compound interest — beat the clock.",   type: "game" },
   ],
   demeanor: [
     { id: "speak_it",     icon: "🗣️", title: "Speak It",        desc: "Pick the most confident response.",             type: "game" },
@@ -349,7 +349,7 @@ function FlipCard({ game, color, lightColor, borderColor, index, onPlay }) {
 /* ──────────────────────────────────────────────────────────────
    GAME MODAL WRAPPER
 ────────────────────────────────────────────────────────────── */
-function GameModal({ children, onClose, color, title, t }) {
+function GameModal({ children, onClose, color, title, t, play }) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
@@ -374,15 +374,18 @@ function GameModal({ children, onClose, color, title, t }) {
         overflow: "hidden",
         animation: "gameSheetUp 0.38s cubic-bezier(0.34,1.1,0.64,1) both",
       }}>
-        <style>{`@keyframes gameSheetUp { from { transform: translateY(100%); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }`}</style>
+        <style>{`@keyframes gameSheetUp { from { transform: translateY(100%); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } } @keyframes questionIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         {/* Pull handle */}
         <div style={{ width: 40, height: 5, background: t?.border || "rgba(255,255,255,0.18)", borderRadius: 999, margin: "12px auto 0" }} />
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px 12px", borderBottom: `1px solid ${t?.border || "rgba(255,255,255,0.07)"}` }}>
-          <span style={{ fontSize: 17, fontWeight: 700, color: t?.ink || "#ededed", fontFamily: FONT, letterSpacing: "-0.02em" }}>{title}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 3, height: 20, borderRadius: 999, background: color, marginRight: 2, flexShrink: 0 }} />
+            <span style={{ fontSize: 17, fontWeight: 700, color: t?.ink || "#ededed", fontFamily: FONT, letterSpacing: "-0.02em" }}>{title}</span>
+          </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => { play?.("back"); onClose(); }}
             style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "none", cursor: "pointer", color: t?.muted || "#a1a1a1", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT, fontSize: 16, WebkitTapHighlightColor: "transparent" }}
           >✕</button>
         </div>
@@ -399,7 +402,7 @@ function GameModal({ children, onClose, color, title, t }) {
    INDIVIDUAL GAMES
 ────────────────────────────────────────────────────────────── */
 
-function FillGapGame({ color, onClose, t }) {
+function FillGapGame({ color, onClose, t, play }) {
   const [qi, setQi] = useState(0);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
@@ -409,19 +412,20 @@ function FillGapGame({ color, onClose, t }) {
   const pick = (opt) => {
     if (selected) return;
     setSelected(opt);
-    if (opt === q.answer) setScore(s => s + 1);
+    if (opt === q.answer) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
     setTimeout(() => {
       if (qi + 1 >= FILL_GAP_QS.length) setDone(true);
       else { setQi(qi + 1); setSelected(null); }
     }, 900);
   };
 
-  if (done) return <ScoreScreen score={score} total={FILL_GAP_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} />;
+  if (done) return <ScoreScreen score={score} total={FILL_GAP_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
       <Progress current={qi} total={FILL_GAP_QS.length} color={color} t={t} />
-      <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "22px 18px", marginBottom: 22, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "22px 18px", marginBottom: 22, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
         <p style={{ fontSize: 16, color: t?.ink || "#ededed", lineHeight: 1.65, margin: 0, fontWeight: 500, letterSpacing: "-0.01em" }}>
           {q.sentence.replace("___", "______")}
         </p>
@@ -452,7 +456,7 @@ function FillGapGame({ color, onClose, t }) {
   );
 }
 
-function WordGuessGame({ color, t }) {
+function WordGuessGame({ color, t, play }) {
   const [target] = useState(() => WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)]);
   const [guesses, setGuesses] = useState([]);
   const [current, setCurrent] = useState("");
@@ -466,8 +470,9 @@ function WordGuessGame({ color, t }) {
     const next = [...guesses, g];
     setGuesses(next);
     setCurrent("");
-    if (g === target) setWon(true);
-    else if (next.length >= maxGuesses) setLost(true);
+    play?.("tap");
+    if (g === target) { setWon(true); play?.("correct"); }
+    else if (next.length >= maxGuesses) { setLost(true); play?.("wrong"); }
   };
 
   const getLetterState = (letter, pos, word) => {
@@ -537,7 +542,7 @@ function WordGuessGame({ color, t }) {
   );
 }
 
-function VocabMatchGame({ color, onClose, t }) {
+function VocabMatchGame({ color, onClose, t, play }) {
   const [selected, setSelected] = useState({ word: null, def: null });
   const [matched, setMatched] = useState([]);
   const [wrong, setWrong] = useState(false);
@@ -547,24 +552,27 @@ function VocabMatchGame({ color, onClose, t }) {
   const defs = [...VOCAB_PAIRS.map(p => p.def)].sort(() => Math.random() - 0.5);
 
   const pick = (type, val) => {
+    play?.("tap");
     const next = { ...selected, [type]: val };
     setSelected(next);
     if (next.word && next.def) {
       setMoves(m => m + 1);
       const pair = VOCAB_PAIRS.find(p => p.word === next.word);
       if (pair?.def === next.def) {
+        play?.("correct");
         const newMatched = [...matched, next.word];
         setMatched(newMatched);
         setSelected({ word: null, def: null });
         if (newMatched.length === VOCAB_PAIRS.length) setTimeout(() => setDone(true), 400);
       } else {
+        play?.("wrong");
         setWrong(true);
         setTimeout(() => { setWrong(false); setSelected({ word: null, def: null }); }, 700);
       }
     }
   };
 
-  if (done) return <ScoreScreen score={VOCAB_PAIRS.length} total={VOCAB_PAIRS.length} color={color} customMsg={`Matched all in ${moves} moves!`} onReplay={() => { setSelected({ word: null, def: null }); setMatched([]); setWrong(false); setDone(false); setMoves(0); }} onClose={onClose} t={t} />;
+  if (done) return <ScoreScreen score={VOCAB_PAIRS.length} total={VOCAB_PAIRS.length} color={color} customMsg={`Matched all in ${moves} moves!`} onReplay={() => { setSelected({ word: null, def: null }); setMatched([]); setWrong(false); setDone(false); setMoves(0); }} onClose={onClose} t={t} play={play} />;
 
   const btnStyle = (active, isMatched) => ({
     padding: "11px 12px", borderRadius: 12, border: `1.5px solid ${isMatched ? `${color}40` : active ? color : "rgba(255,255,255,0.1)"}`,
@@ -600,7 +608,7 @@ function VocabMatchGame({ color, onClose, t }) {
   );
 }
 
-function SentenceBuilderGame({ color, onClose, t }) {
+function SentenceBuilderGame({ color, onClose, t, play }) {
   const [qi, setQi] = useState(0);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
@@ -612,6 +620,7 @@ function SentenceBuilderGame({ color, onClose, t }) {
 
   const addWord = (word, idx) => {
     if (result) return;
+    play?.("tap");
     setBuilt(b => [...b, word]);
     setRemaining(r => r.filter((_, i) => i !== idx));
   };
@@ -626,7 +635,8 @@ function SentenceBuilderGame({ color, onClose, t }) {
   const check = () => {
     const correct = JSON.stringify(built) === JSON.stringify(q.answer);
     setResult(correct ? "correct" : "wrong");
-    if (correct) setScore(s => s + 1);
+    if (correct) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
     setTimeout(() => {
       if (qi + 1 >= SENTENCE_QS.length) setDone(true);
       else {
@@ -638,7 +648,7 @@ function SentenceBuilderGame({ color, onClose, t }) {
     }, 1000);
   };
 
-  if (done) return <ScoreScreen score={score} total={SENTENCE_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setDone(false); setBuilt([]); setRemaining(shuffled[0]); setResult(null); }} onClose={onClose} t={t} />;
+  if (done) return <ScoreScreen score={score} total={SENTENCE_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setDone(false); setBuilt([]); setRemaining(shuffled[0]); setResult(null); }} onClose={onClose} t={t} play={play} />;
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
@@ -663,7 +673,7 @@ function SentenceBuilderGame({ color, onClose, t }) {
   );
 }
 
-function MultiChoiceGame({ questions, color, onClose, t }) {
+function MultiChoiceGame({ questions, color, onClose, t, play }) {
   const [qi, setQi] = useState(0);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
@@ -673,19 +683,20 @@ function MultiChoiceGame({ questions, color, onClose, t }) {
   const pick = (opt) => {
     if (selected) return;
     setSelected(opt);
-    if (opt === q.ans) setScore(s => s + 1);
+    if (opt === q.ans) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
     setTimeout(() => {
       if (qi + 1 >= questions.length) setDone(true);
       else { setQi(qi + 1); setSelected(null); }
     }, 900);
   };
 
-  if (done) return <ScoreScreen score={score} total={questions.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} />;
+  if (done) return <ScoreScreen score={score} total={questions.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
       <Progress current={qi} total={questions.length} color={color} t={t} />
-      <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px 18px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px 18px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
         <p style={{ fontSize: 16, color: t?.ink || "#ededed", lineHeight: 1.55, margin: 0, fontWeight: 500 }}>{q.q}</p>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -712,13 +723,14 @@ function MultiChoiceGame({ questions, color, onClose, t }) {
   );
 }
 
-function FlashcardGame({ cards, color, t }) {
+function FlashcardGame({ cards, color, t, play }) {
   const [i, setI] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [seen, setSeen] = useState(new Set());
   const card = cards[i];
 
   const next = () => {
+    play?.("ok");
     setSeen(s => new Set([...s, i]));
     setFlipped(false);
     setTimeout(() => setI(n => (n + 1) % cards.length), 150);
@@ -729,7 +741,7 @@ function FlashcardGame({ cards, color, t }) {
       <p style={{ fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 20 }}>Tap to flip · {seen.size}/{cards.length} seen</p>
       <div style={{ perspective: "1200px", marginBottom: 20 }}>
         <div
-          onClick={() => setFlipped(!flipped)}
+          onClick={() => { play?.("tap"); setFlipped(!flipped); }}
           style={{
             height: 220, position: "relative",
             transformStyle: "preserve-3d",
@@ -773,7 +785,7 @@ function FlashcardGame({ cards, color, t }) {
   );
 }
 
-function BudgetGame({ color, t }) {
+function BudgetGame({ color, t, play }) {
   const categories = ["Housing","Food","Transport","Entertainment","Savings","Healthcare"];
   const [budget] = useState(3000);
   const [alloc, setAlloc] = useState({ Housing: 900, Food: 450, Transport: 300, Entertainment: 150, Savings: 600, Healthcare: 150 });
@@ -806,7 +818,16 @@ function BudgetGame({ color, t }) {
               <span style={{ fontSize: 13, color: ok ? color : "#f59e0b", fontWeight: 600 }}>${alloc[cat]} ({pct}%) {ok ? "✓" : "⚠"}</span>
             </div>
             <input type="range" min={0} max={budget} step={50} value={alloc[cat]}
-              onChange={e => setAlloc(a => ({ ...a, [cat]: +e.target.value }))}
+              onChange={e => {
+                const v = +e.target.value;
+                setAlloc(a => {
+                  const [mi, ma] = ideal[cat];
+                  const pctNew = Math.round((v / budget) * 100);
+                  const pctOld = Math.round((a[cat] / budget) * 100);
+                  if (pctNew >= mi && pctNew <= ma && !(pctOld >= mi && pctOld <= ma)) play?.("star");
+                  return { ...a, [cat]: v };
+                });
+              }}
               style={{ width: "100%", accentColor: ok ? color : "#f59e0b" }}
             />
             <p style={{ fontSize: 10, color: "rgba(161,161,161,0.5)", margin: "3px 0 0" }}>Ideal: {min}–{max}% of income</p>
@@ -817,7 +838,7 @@ function BudgetGame({ color, t }) {
   );
 }
 
-function InvestSaveGame({ color, onClose, t }) {
+function InvestSaveGame({ color, onClose, t, play }) {
   const [qi, setQi] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -827,19 +848,20 @@ function InvestSaveGame({ color, onClose, t }) {
   const pick = (idx) => {
     if (selected !== null) return;
     setSelected(idx);
-    if (idx === q.best) setScore(s => s + 1);
+    if (idx === q.best) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
     setTimeout(() => {
       if (qi + 1 >= INVEST_QS.length) setDone(true);
       else { setQi(qi + 1); setSelected(null); }
     }, 1400);
   };
 
-  if (done) return <ScoreScreen score={score} total={INVEST_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} />;
+  if (done) return <ScoreScreen score={score} total={INVEST_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
       <Progress current={qi} total={INVEST_QS.length} color={color} t={t} />
-      <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
         <p style={{ fontSize: 11, fontWeight: 600, color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Scenario</p>
         <p style={{ fontSize: 15, color: t?.ink || "#ededed", lineHeight: 1.6, margin: 0 }}>{q.scenario}</p>
       </div>
@@ -867,7 +889,7 @@ function InvestSaveGame({ color, onClose, t }) {
   );
 }
 
-function MoneyMathGame({ color, onClose, t }) {
+function MoneyMathGame({ color, onClose, t, play }) {
   const [qi, setQi] = useState(0);
   const [input, setInput] = useState("");
   const [result, setResult] = useState(null);
@@ -878,14 +900,15 @@ function MoneyMathGame({ color, onClose, t }) {
   const check = () => {
     const correct = input.replace(/[^0-9]/g, "") === q.ans;
     setResult(correct ? "correct" : "wrong");
-    if (correct) setScore(s => s + 1);
+    if (correct) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
     setTimeout(() => {
       if (qi + 1 >= MONEY_QS.length) setDone(true);
       else { setQi(qi + 1); setInput(""); setResult(null); }
     }, 1200);
   };
 
-  if (done) return <ScoreScreen score={score} total={MONEY_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setInput(""); setResult(null); setDone(false); }} onClose={onClose} t={t} />;
+  if (done) return <ScoreScreen score={score} total={MONEY_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setInput(""); setResult(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
@@ -905,7 +928,119 @@ function MoneyMathGame({ color, onClose, t }) {
   );
 }
 
-function SpeakItGame({ color, onClose, t }) {
+// ── Finance: Compound Growth ───────────────────────────────────
+const COMPOUND_QS = [
+  { principal: 1000, rate: 10, years: 2, ans: "$1,210", display: "$1,210", opts: ["$1,100", "$1,210", "$1,200", "$1,020"] },
+  { principal: 5000, rate: 8,  years: 3, ans: "$6,298", display: "$6,298", opts: ["$6,200", "$6,298", "$5,800", "$6,500"] },
+  { principal: 2000, rate: 6,  years: 5, ans: "$2,676", display: "$2,676", opts: ["$2,600", "$2,800", "$2,676", "$2,300"] },
+  { principal: 10000, rate: 7, years: 4, ans: "$13,108", display: "$13,108", opts: ["$12,800", "$13,400", "$13,108", "$14,000"] },
+  { principal: 500,  rate: 12, years: 3, ans: "$702",   display: "$702",   opts: ["$680", "$720", "$702", "$660"] },
+];
+
+function CompoundGrowthGame({ color, onClose, t, play }) {
+  const [qi, setQi] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15);
+
+  const q = COMPOUND_QS[qi];
+
+  useEffect(() => {
+    if (selected !== null || done) return;
+    if (timeLeft <= 0) {
+      setSelected("__timeout__");
+      play?.("wrong");
+      setTimeout(() => {
+        if (qi + 1 >= COMPOUND_QS.length) setDone(true);
+        else { setQi(qi + 1); setSelected(null); setTimeLeft(15); }
+      }, 1200);
+      return;
+    }
+    const id = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
+    return () => clearTimeout(id);
+  }, [timeLeft, selected, done, qi, play]);
+
+  const pick = (opt) => {
+    if (selected !== null) return;
+    setSelected(opt);
+    const correct = opt === q.ans;
+    if (correct) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
+    setTimeout(() => {
+      if (qi + 1 >= COMPOUND_QS.length) setDone(true);
+      else { setQi(qi + 1); setSelected(null); setTimeLeft(15); }
+    }, 1200);
+  };
+
+  if (done) return <ScoreScreen score={score} total={COMPOUND_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); setTimeLeft(15); }} onClose={onClose} t={t} play={play} />;
+
+  const urgentColor = timeLeft <= 5 ? "#e5484d" : timeLeft <= 8 ? "#f59e0b" : color;
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={qi} total={COMPOUND_QS.length} color={color} t={t} />
+      {/* Timer */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <span style={{ fontSize: 12, color: t?.muted || "#a1a1a1", fontFamily: FONT }}>Compound Interest</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: urgentColor, boxShadow: `0 0 8px ${urgentColor}`, transition: "all 0.3s ease" }} />
+          <span style={{ fontSize: 15, fontWeight: 700, color: urgentColor, fontFamily: FONT, transition: "color 0.3s ease", minWidth: 24, textAlign: "right" }}>{timeLeft}s</span>
+        </div>
+      </div>
+      {/* Question card */}
+      <div style={{ background: t?.light || "#1a1a1a", borderRadius: 20, padding: "22px 18px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 14, textAlign: "center" }}>
+          {[
+            { label: "Principal", val: `$${q.principal.toLocaleString()}` },
+            { label: "Rate / yr", val: `${q.rate}%` },
+            { label: "Years", val: `${q.years}y` },
+          ].map(({ label, val }) => (
+            <div key={label} style={{ background: `${color}12`, borderRadius: 12, padding: "10px 6px", border: `1px solid ${color}30` }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 4 }}>{label}</div>
+              <div style={{ fontSize: 17, fontWeight: 800, color: t?.ink || "#ededed", letterSpacing: "-0.02em" }}>{val}</div>
+            </div>
+          ))}
+        </div>
+        <p style={{ margin: 0, fontSize: 13, color: t?.muted || "#a1a1a1", textAlign: "center", fontFamily: FONT }}>What is the final value? (compound interest)</p>
+      </div>
+      {/* Options */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        {q.opts.map(opt => {
+          const isCorrect = opt === q.ans;
+          const isWrong = selected === opt && !isCorrect;
+          return (
+            <button key={opt} type="button" onClick={() => pick(opt)}
+              onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+              onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+              style={{
+                padding: "16px 10px", borderRadius: 16, fontFamily: FONT,
+                border: `1.5px solid ${selected ? isCorrect ? color : isWrong ? "#e5484d" : t?.border || "rgba(255,255,255,0.07)" : t?.border || "rgba(255,255,255,0.1)"}`,
+                background: selected ? isCorrect ? `${color}20` : isWrong ? "rgba(229,72,77,0.15)" : t?.light || "rgba(255,255,255,0.03)" : t?.light || "rgba(255,255,255,0.05)",
+                color: selected ? isCorrect ? color : isWrong ? "#e5484d" : t?.muted || "#a1a1a1" : t?.ink || "#ededed",
+                fontSize: 17, fontWeight: 700, cursor: "pointer", letterSpacing: "-0.01em",
+                transition: "all 0.15s cubic-bezier(0.34,1.56,0.64,1)",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >{opt.startsWith("$") ? opt : `$${opt}`}</button>
+          );
+        })}
+      </div>
+      {selected && selected !== "__timeout__" && (
+        <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 14, background: `${color}10`, border: `1px solid ${color}30`, fontSize: 12.5, color, lineHeight: 1.55, fontFamily: FONT }}>
+          💡 Formula: Principal × (1 + rate)^years = {q.display}
+        </div>
+      )}
+      {selected === "__timeout__" && (
+        <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 14, background: "rgba(229,72,77,0.12)", border: "1px solid #e5484d40", fontSize: 12.5, color: "#e5484d", lineHeight: 1.55, fontFamily: FONT }}>
+          ⏱ Time&apos;s up! Answer: {q.display}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SpeakItGame({ color, onClose, t, play }) {
   const [qi, setQi] = useState(0);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
@@ -915,19 +1050,20 @@ function SpeakItGame({ color, onClose, t }) {
   const pick = (idx) => {
     if (selected !== null) return;
     setSelected(idx);
-    if (idx === q.best) setScore(s => s + 1);
+    if (idx === q.best) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
     setTimeout(() => {
       if (qi + 1 >= SPEAK_QS.length) setDone(true);
       else { setQi(qi + 1); setSelected(null); }
     }, 1400);
   };
 
-  if (done) return <ScoreScreen score={score} total={SPEAK_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} />;
+  if (done) return <ScoreScreen score={score} total={SPEAK_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
       <Progress current={qi} total={SPEAK_QS.length} color={color} t={t} />
-      <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
         <p style={{ fontSize: 11, fontWeight: 600, color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Situation</p>
         <p style={{ fontSize: 15, color: t?.ink || "#ededed", lineHeight: 1.6, margin: 0 }}>{q.scenario}</p>
       </div>
@@ -956,7 +1092,7 @@ function SpeakItGame({ color, onClose, t }) {
   );
 }
 
-function FillerCatcherGame({ color, onClose, t }) {
+function FillerCatcherGame({ color, onClose, t, play }) {
   const [ti, setTi] = useState(0);
   const [tapped, setTapped] = useState(new Set());
   const [score, setScore] = useState(0);
@@ -967,6 +1103,7 @@ function FillerCatcherGame({ color, onClose, t }) {
 
   const toggle = (word) => {
     if (checked) return;
+    play?.("tap");
     setTapped(prev => {
       const next = new Set(prev);
       if (next.has(word)) next.delete(word);
@@ -977,6 +1114,7 @@ function FillerCatcherGame({ color, onClose, t }) {
 
   const checkAnswers = () => {
     setChecked(true);
+    play?.("ok");
     const correct = filler.fillers.filter(f => tapped.has(f)).length;
     const wrong = [...tapped].filter(w => !filler.fillers.includes(w)).length;
     setScore(s => s + Math.max(0, correct - wrong));
@@ -986,7 +1124,7 @@ function FillerCatcherGame({ color, onClose, t }) {
     }, 1800);
   };
 
-  if (done) return <ScoreScreen score={score} total={FILLER_TEXTS.reduce((a, f) => a + f.fillers.length, 0)} color={color} customMsg="Filler words found!" onReplay={() => { setTi(0); setTapped(new Set()); setScore(0); setChecked(false); setDone(false); }} onClose={onClose} t={t} />;
+  if (done) return <ScoreScreen score={score} total={FILLER_TEXTS.reduce((a, f) => a + f.fillers.length, 0)} color={color} customMsg="Filler words found!" onReplay={() => { setTi(0); setTapped(new Set()); setScore(0); setChecked(false); setDone(false); }} onClose={onClose} t={t} play={play} />;
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
@@ -1017,7 +1155,7 @@ function FillerCatcherGame({ color, onClose, t }) {
   );
 }
 
-function ConfidenceQuiz({ color, t }) {
+function ConfidenceQuiz({ color, t, play }) {
   const [qi, setQi] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -1027,6 +1165,7 @@ function ConfidenceQuiz({ color, t }) {
 
   const pick = (idx) => {
     if (selected !== null) return;
+    play?.("ok");
     setSelected(idx);
     setScore(s => s + q.scores[idx]);
     setTimeout(() => {
@@ -1080,7 +1219,7 @@ function ConfidenceQuiz({ color, t }) {
   );
 }
 
-function DailyDemChallenge({ color, onClose, t }) {
+function DailyDemChallenge({ color, onClose, t, play }) {
   const challenges = [
     { emoji: "🗣️", title: "The Cold Introduction", task: "Introduce yourself to one stranger or new colleague today. Use your name, what you do, and one interesting fact about yourself. Be first.", tip: "Being first to speak shows confidence and sets the social frame." },
     { emoji: "📱", title: "No Filler Day", task: "For the next conversation you have — no 'um', 'like', 'basically', or 'you know'. Pause instead. Silence is more powerful than filler.", tip: "Strategic pauses make you appear more composed and authoritative." },
@@ -1118,12 +1257,12 @@ function DailyDemChallenge({ color, onClose, t }) {
         <p style={{ fontSize: 12, fontWeight: 700, color, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Why This Works</p>
         <p style={{ fontSize: 13.5, color: t?.ink || "#ededed", lineHeight: 1.6, margin: 0 }}>{challenge.tip}</p>
       </div>
-      <button type="button" onClick={() => setAccepted(true)} style={{ width: "100%", marginTop: 24, padding: "14px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>I Accept the Challenge ✓</button>
+      <button type="button" onClick={() => { play?.("star"); setAccepted(true); }} style={{ width: "100%", marginTop: 24, padding: "14px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>I Accept the Challenge ✓</button>
     </div>
   );
 }
 
-function WordLadderGame({ color, t }) {
+function WordLadderGame({ color, t, play }) {
   const [pi, setPi] = useState(0);
   const [revealed, setRevealed] = useState(1);
   const p = WORD_LADDER_PUZZLES[pi];
@@ -1157,7 +1296,12 @@ function WordLadderGame({ color, t }) {
       </div>
       <div style={{ display: "flex", gap: 10 }}>
         {revealed < p.steps.length && (
-          <button type="button" onClick={() => setRevealed(r => r + 1)} style={{ flex: 1, padding: "13px", background: `${color}18`, color, border: `1px solid ${color}40`, borderRadius: 14, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Reveal Next Step</button>
+          <button type="button" onClick={() => {
+            const next = revealed + 1;
+            play?.("correct");
+            setRevealed(next);
+            if (next >= p.steps.length) setTimeout(() => play?.("correct"), 350);
+          }} style={{ flex: 1, padding: "13px", background: `${color}18`, color, border: `1px solid ${color}40`, borderRadius: 14, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Reveal Next Step</button>
         )}
         {pi + 1 < WORD_LADDER_PUZZLES.length && revealed >= p.steps.length && (
           <button type="button" onClick={() => { setPi(pi + 1); setRevealed(1); }} style={{ flex: 1, padding: "13px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Next Puzzle →</button>
@@ -1184,12 +1328,38 @@ function Progress({ current, total, color, t }) {
   );
 }
 
-function ScoreScreen({ score, total, color, customMsg, onReplay, onClose, t }) {
+function ScoreScreen({ score, total, color, customMsg, onReplay, onClose, t, play }) {
   const pct = Math.round((score / total) * 100);
   const emoji = pct === 100 ? "🏆" : pct >= 70 ? "🌟" : pct >= 50 ? "💪" : "📖";
+  useEffect(() => {
+    if (pct === 100) play?.("star");
+    else if (pct >= 60) play?.("correct");
+    else play?.("ok");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const confettiColors = ["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#FF6FF2","#FF9E4F","#A0F0A0","#B388FF","#FFB347","#4FC3F7","#FF80AB","#69F0AE"];
   return (
     <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT }}>
-      <style>{`@keyframes scoreRing { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.12);opacity:0} }`}</style>
+      <style>{`
+        @keyframes scoreRing { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.12);opacity:0} }
+        @keyframes confettiFall { 0%{transform:translateY(-40px) rotate(0deg);opacity:1} 100%{transform:translateY(220px) rotate(720deg);opacity:0} }
+      `}</style>
+      {pct === 100 && (
+        <div style={{ position: "relative", height: 0, overflow: "visible" }}>
+          {confettiColors.map((c, i) => (
+            <div key={i} style={{
+              position: "absolute",
+              left: `${8 + (i * 7.5)}%`,
+              top: 0,
+              width: 10,
+              height: 10,
+              borderRadius: i % 2 === 0 ? "50%" : 2,
+              background: c,
+              animation: `confettiFall ${1.2 + (i % 4) * 0.2}s ease-in ${(i % 5) * 0.12}s both`,
+              pointerEvents: "none",
+            }} />
+          ))}
+        </div>
+      )}
       <div style={{ position: "relative", width: 120, height: 120, margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: `3px solid ${color}`, animation: "scoreRing 2s ease-in-out infinite" }} />
         <div style={{ width: 100, height: 100, borderRadius: "50%", background: t?.white || "#111111", border: `3px solid ${color}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48 }}>
@@ -1214,26 +1384,26 @@ function ScoreScreen({ score, total, color, customMsg, onReplay, onClose, t }) {
 /* ──────────────────────────────────────────────────────────────
    GAME ROUTER
 ────────────────────────────────────────────────────────────── */
-function GameRouter({ gameId, color, onClose, t }) {
+function GameRouter({ gameId, color, onClose, t, play }) {
   const games = {
-    fill_gap:     () => <FillGapGame color={color} onClose={onClose} t={t} />,
-    word_guess:   () => <WordGuessGame color={color} onClose={onClose} t={t} />,
-    vocab_match:  () => <VocabMatchGame color={color} onClose={onClose} t={t} />,
-    sentence:     () => <SentenceBuilderGame color={color} onClose={onClose} t={t} />,
-    word_trivia:  () => <MultiChoiceGame questions={WORD_TRIVIA} color={color} onClose={onClose} t={t} />,
-    word_ladder:  () => <WordLadderGame color={color} onClose={onClose} t={t} />,
-    fin_terms:    () => <FlashcardGame cards={FIN_TERMS} color={color} onClose={onClose} t={t} />,
-    budget:       () => <BudgetGame color={color} onClose={onClose} t={t} />,
-    fin_trivia:   () => <MultiChoiceGame questions={FIN_TRIVIA} color={color} onClose={onClose} t={t} />,
-    invest_save:  () => <InvestSaveGame color={color} onClose={onClose} t={t} />,
-    money_math:   () => <MoneyMathGame color={color} onClose={onClose} t={t} />,
-    fin_match:    () => <VocabMatchGame color={color} onClose={onClose} t={t} />,
-    speak_it:     () => <SpeakItGame color={color} onClose={onClose} t={t} />,
-    filler_catch: () => <FillerCatcherGame color={color} onClose={onClose} t={t} />,
-    tone_detect:  () => <MultiChoiceGame questions={TONE_QS.map(q => ({ q: `Tone of: "${q.message}"`, opts: q.tones, ans: q.ans, tip: q.tip }))} color={color} onClose={onClose} t={t} />,
-    conf_quiz:    () => <ConfidenceQuiz color={color} onClose={onClose} t={t} />,
-    daily_dem:    () => <DailyDemChallenge color={color} onClose={onClose} t={t} />,
-    body_lang:    () => <MultiChoiceGame questions={BODY_QS.map(q => ({ q: q.q, opts: q.opts, ans: q.ans, tip: q.tip }))} color={color} onClose={onClose} t={t} />,
+    fill_gap:     () => <FillGapGame color={color} onClose={onClose} t={t} play={play} />,
+    word_guess:   () => <WordGuessGame color={color} onClose={onClose} t={t} play={play} />,
+    vocab_match:  () => <VocabMatchGame color={color} onClose={onClose} t={t} play={play} />,
+    sentence:     () => <SentenceBuilderGame color={color} onClose={onClose} t={t} play={play} />,
+    word_trivia:  () => <MultiChoiceGame questions={WORD_TRIVIA} color={color} onClose={onClose} t={t} play={play} />,
+    word_ladder:  () => <WordLadderGame color={color} onClose={onClose} t={t} play={play} />,
+    fin_terms:    () => <FlashcardGame cards={FIN_TERMS} color={color} onClose={onClose} t={t} play={play} />,
+    budget:       () => <BudgetGame color={color} onClose={onClose} t={t} play={play} />,
+    fin_trivia:   () => <MultiChoiceGame questions={FIN_TRIVIA} color={color} onClose={onClose} t={t} play={play} />,
+    invest_save:  () => <InvestSaveGame color={color} onClose={onClose} t={t} play={play} />,
+    money_math:   () => <MoneyMathGame color={color} onClose={onClose} t={t} play={play} />,
+    compound:     () => <CompoundGrowthGame color={color} onClose={onClose} t={t} play={play} />,
+    speak_it:     () => <SpeakItGame color={color} onClose={onClose} t={t} play={play} />,
+    filler_catch: () => <FillerCatcherGame color={color} onClose={onClose} t={t} play={play} />,
+    tone_detect:  () => <MultiChoiceGame questions={TONE_QS.map(q => ({ q: `Tone of: "${q.message}"`, opts: q.tones, ans: q.ans, tip: q.tip }))} color={color} onClose={onClose} t={t} play={play} />,
+    conf_quiz:    () => <ConfidenceQuiz color={color} onClose={onClose} t={t} play={play} />,
+    daily_dem:    () => <DailyDemChallenge color={color} onClose={onClose} t={t} play={play} />,
+    body_lang:    () => <MultiChoiceGame questions={BODY_QS.map(q => ({ q: q.q, opts: q.opts, ans: q.ans, tip: q.tip }))} color={color} onClose={onClose} t={t} play={play} />,
   };
   return games[gameId]?.() ?? <div style={{ padding: 24, color: t?.muted || "#a1a1a1", textAlign: "center", fontFamily: FONT }}>Coming soon…</div>;
 }
@@ -1343,8 +1513,8 @@ export function LearnItSubjectPage({ t, play, subject, onBack }) {
 
       {/* Game modal */}
       {activeGame && (
-        <GameModal onClose={closeGame} color={color} title={activeGameMeta?.title || "Game"} t={t}>
-          <GameRouter gameId={activeGame} subject={subject} color={color} onClose={closeGame} t={t} />
+        <GameModal onClose={closeGame} color={color} title={activeGameMeta?.title || "Game"} t={t} play={play}>
+          <GameRouter gameId={activeGame} subject={subject} color={color} onClose={closeGame} t={t} play={play} />
         </GameModal>
       )}
     </div>
