@@ -1,5 +1,34 @@
 # Changelog
 
+## v0.7.8 — component folder reorganization
+
+Reorganized the flat `src/components/` directory into 8 logical subfolders. No logic changed — this is a pure file move and import-path update.
+
+**New folder structure:**
+
+| Folder | Files moved | What lives here |
+|---|---|---|
+| `src/components/auth/` | 5 | `LandingPage`, `SignInPage`, `RegisterPage`, `ResetPasswordPage`, `VerifyEmailPage` |
+| `src/components/profile/` | 5 | `ProfilePage`, `AccountCustomizePage`, `ThemePickerPage`, `SettingsPage`, `PremiumPage` |
+| `src/components/tools/` | 4 | `ToolsLockInPage`, `ToolsTodoPage`, `ToolsOrganizedPage`, `FocusTimerPage` |
+| `src/components/growth/` | 5 | `DailyGrowthPage`, `GoalSettingPage`, `QuizPage`, `KnowledgeConstellation`, `ProgressDashboardPage` |
+| `src/components/social/` | 5 | `PostItFeed`, `LeaderboardPage`, `MentorshipPage`, `MomentumCard`, `MomentumHub` |
+| `src/components/content/` | 8 | `Reader`, `CategoriesPage`, `CategoryHubPage`, `SidebarSectionPage`, `IncomeIdeasPage`, `AudioPlayer`, `Charts`, `Tailor` |
+| `src/components/dashboard/` | 1 | `HomePage` |
+| `src/components/shell/` | 10 | `AppShell`, `BottomNav`, `HelpPage`, `WhereToStartPage`, `SecretSiennaPage`, `SystemStatusNotice`, `ErrorBoundary`, `Skeleton`, `Toast`, `Field` |
+| `src/components/inventorsInvestors/` | +1 | `InventorsInvestors.jsx` wrapper moved into its own feature folder |
+
+**Import updates:**
+- `src/App.jsx` — all 26 component imports updated to new paths; added missing `FocusTimerPage` import
+- `src/main.jsx` — `ErrorBoundary` and `Toast` updated to `shell/` paths
+- `src/components/shell/AppShell.jsx` — lazy imports updated to point across subfolders
+- All moved files — relative `../systems/`, `../icons/`, `../data/`, `../hooks/`, `../utils/` paths deepened to `../../`; cross-subfolder component references fixed
+- `eslint.config.js` — `AccountCustomizePage` path override updated to `profile/` subfolder
+
+**Unchanged:** `src/components/organized/`, `src/components/learnIt/`, `src/components/inventorsInvestors/pages/` — already well-organized.
+
+---
+
 ## v0.7.7 — mobile stabilization, overlay safety, and sync hardening
 
 - Fixed sidebar, notifications, and profile sheet back-button handling so mobile back gestures close overlays cleanly without leaving stale history entries behind.

@@ -60,7 +60,7 @@ export default defineConfig([
     files: [
       "src/components/inventorsInvestors/pages/InventorsInvestorsSwipePage.jsx",
       "src/components/inventorsInvestors/InventorsInvestorsUI.jsx",
-      "src/components/AccountCustomizePage.jsx",
+      "src/components/profile/AccountCustomizePage.jsx",
     ],
     rules: {
       "@next/next/no-img-element": "off",
