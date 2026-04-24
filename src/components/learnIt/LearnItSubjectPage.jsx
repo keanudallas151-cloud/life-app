@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const FONT = "-apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
 
@@ -1331,11 +1331,16 @@ function Progress({ current, total, color, t }) {
 function ScoreScreen({ score, total, color, customMsg, onReplay, onClose, t, play }) {
   const pct = Math.round((score / total) * 100);
   const emoji = pct === 100 ? "🏆" : pct >= 70 ? "🌟" : pct >= 50 ? "💪" : "📖";
+  // Play sound exactly once on mount. Use a ref guard so strict-mode double-invoke
+  // doesn't fire it twice and so changing `play` identity doesn't re-trigger.
+  const played = useRef(false);
   useEffect(() => {
+    if (played.current) return;
+    played.current = true;
     if (pct === 100) play?.("star");
     else if (pct >= 60) play?.("correct");
     else play?.("ok");
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pct, play]);
   const confettiColors = ["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#FF6FF2","#FF9E4F","#A0F0A0","#B388FF","#FFB347","#4FC3F7","#FF80AB","#69F0AE"];
   return (
     <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT }}>

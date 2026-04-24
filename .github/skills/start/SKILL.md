@@ -6,7 +6,7 @@ argument-hint: 'What life-app task should be handled?'
 
 # Start
 
-Runs at the start of every life-app conversation. Locks the agent into the correct repo, branch, latest update, and behavior posture before it touching anything.
+Runs at the start of every life-app conversation. Locks the agent into the correct repo, branch, latest update, and behavior posture before it touches anything.
 
 ---
 
