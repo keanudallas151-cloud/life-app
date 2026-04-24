@@ -19,7 +19,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { TreeNode } from "./components/Field";
+import { TreeNode } from "./components/shell/Field";
 import {
   allContent,
   CONTENT,
@@ -51,7 +51,7 @@ import { useQuizStats } from "./systems/useQuizStats";
 import { useSound, useSoundDelegation } from "./systems/useSound";
 import { useUserData } from "./systems/useUserData";
 
-import { AccountCustomizePage } from "./components/AccountCustomizePage";
+import { AccountCustomizePage } from "./components/profile/AccountCustomizePage";
 import {
   EbookReader,
   IncomeIdeasPage,
@@ -64,35 +64,36 @@ import {
   TailorIntro,
   TailorQuestions,
   TailorResult,
-} from "./components/AppShell";
-import { BottomNav } from "./components/BottomNav";
-import { CategoriesPage } from "./components/CategoriesPage";
-import { CategoryHubPage } from "./components/CategoryHubPage";
-import { DailyGrowthPage } from "./components/DailyGrowthPage";
-import { GoalSettingPage } from "./components/GoalSettingPage";
-import { HelpPage } from "./components/HelpPage";
-import { HomePage } from "./components/HomePage";
-import { InventorsInvestors } from "./components/InventorsInvestors";
+} from "./components/shell/AppShell";
+import { BottomNav } from "./components/shell/BottomNav";
+import { CategoriesPage } from "./components/content/CategoriesPage";
+import { CategoryHubPage } from "./components/content/CategoryHubPage";
+import { DailyGrowthPage } from "./components/growth/DailyGrowthPage";
+import { GoalSettingPage } from "./components/growth/GoalSettingPage";
+import { HelpPage } from "./components/shell/HelpPage";
+import { HomePage } from "./components/dashboard/HomePage";
+import { InventorsInvestors } from "./components/inventorsInvestors/InventorsInvestors";
 import { alpha } from "./components/inventorsInvestors/InventorsInvestorsUI";
-import { LandingPage } from "./components/LandingPage";
-import { LeaderboardPage } from "./components/LeaderboardPage";
-import { MentorshipPage } from "./components/MentorshipPage";
-import { PremiumPage } from "./components/PremiumPage";
-import ProfilePage from "./components/ProfilePage";
-import { ProgressDashboardPage } from "./components/ProgressDashboardPage";
-import { RegisterPage } from "./components/RegisterPage";
-import { ResetPasswordPage } from "./components/ResetPasswordPage";
-import { SecretSiennaPage } from "./components/SecretSiennaPage";
-import SettingsPage from "./components/SettingsPage";
-import { SidebarSectionPage } from "./components/SidebarSectionPage";
-import { SignInPage } from "./components/SignInPage";
-import { ThemePickerPage } from "./components/ThemePickerPage";
-import { ToolsLockInPage } from "./components/ToolsLockInPage";
-import { ToolsOrganizedPage } from "./components/ToolsOrganizedPage";
+import { LandingPage } from "./components/auth/LandingPage";
+import { LeaderboardPage } from "./components/social/LeaderboardPage";
+import { MentorshipPage } from "./components/social/MentorshipPage";
+import { PremiumPage } from "./components/profile/PremiumPage";
+import ProfilePage from "./components/profile/ProfilePage";
+import { ProgressDashboardPage } from "./components/growth/ProgressDashboardPage";
+import { RegisterPage } from "./components/auth/RegisterPage";
+import { ResetPasswordPage } from "./components/auth/ResetPasswordPage";
+import { SecretSiennaPage } from "./components/shell/SecretSiennaPage";
+import SettingsPage from "./components/profile/SettingsPage";
+import { SidebarSectionPage } from "./components/content/SidebarSectionPage";
+import { SignInPage } from "./components/auth/SignInPage";
+import { ThemePickerPage } from "./components/profile/ThemePickerPage";
+import { ToolsLockInPage } from "./components/tools/ToolsLockInPage";
+import { ToolsOrganizedPage } from "./components/tools/ToolsOrganizedPage";
+import { FocusTimerPage } from "./components/tools/FocusTimerPage";
 import { LearnItPage } from "./components/learnIt/LearnItPage";
 import { LearnItSubjectPage } from "./components/learnIt/LearnItSubjectPage";
-import { VerifyEmailPage } from "./components/VerifyEmailPage";
-import { WhereToStartPage } from "./components/WhereToStartPage";
+import { VerifyEmailPage } from "./components/auth/VerifyEmailPage";
+import { WhereToStartPage } from "./components/shell/WhereToStartPage";
 import { signInWithGoogle } from "./services/firebaseAuth";
 
 const PREF_DEFAULTS = {

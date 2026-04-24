@@ -4,8 +4,8 @@ import './index.css'
 import './ii-mobile-fixes.css'
 import './ios-global.css'
 import App from './App.jsx'
-import ErrorBoundary from './components/ErrorBoundary'
-import { ToastProvider } from './components/Toast'
+import ErrorBoundary from './components/shell/ErrorBoundary'
+import { ToastProvider } from './components/shell/Toast'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

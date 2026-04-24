@@ -1,8 +1,8 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import ErrorBoundary from '../src/components/ErrorBoundary'
-import { ToastProvider } from '../src/components/Toast'
+import ErrorBoundary from '../src/components/shell/ErrorBoundary'
+import { ToastProvider } from '../src/components/shell/Toast'
 
 const App = dynamic(() => import('../src/App.jsx'), { ssr: false })
 
