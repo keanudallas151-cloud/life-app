@@ -2023,11 +2023,12 @@ export default function LifeApp() {
               style={{
                 color: "#fff",
                 fontSize: 36,
-                fontWeight: 800,
-                letterSpacing: -1,
+                fontWeight: 700,
+                fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
+                letterSpacing: "-0.02em",
               }}
             >
-              l.
+              L
             </span>
             <div
               style={{
@@ -2937,7 +2938,7 @@ export default function LifeApp() {
                   color: "#fff",
                   fontSize: 20,
                   fontWeight: 700,
-                  fontFamily: "Georgia, serif",
+                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                   letterSpacing: "-0.02em",
                   lineHeight: 1,
                 }}
@@ -4738,11 +4739,11 @@ export default function LifeApp() {
               style={{
                 color: "#fff",
                 fontSize: 18,
-                fontWeight: 800,
+                fontWeight: 700,
                 fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
               }}
             >
-              l.
+              L
             </span>
           </div>
           <div className="life-a2hs-text">

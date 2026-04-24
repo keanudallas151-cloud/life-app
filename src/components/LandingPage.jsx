@@ -149,8 +149,8 @@ export function LandingPage({
             animation: "landing-icon-float 4s ease-in-out infinite",
           }}
         >
-          {/* Keep Georgia only for the brand logotype letter */}
-          <span style={{ color: "#fff", fontSize: 44, fontWeight: 800, fontFamily: "Georgia,serif", letterSpacing: -2, lineHeight: 1 }}>l.</span>
+          {/* SF Pro logotype letter */}
+          <span style={{ color: "#fff", fontSize: 44, fontWeight: 700, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", letterSpacing: "-0.02em", lineHeight: 1 }}>L</span>
         </div>
 
         {/* App name */}

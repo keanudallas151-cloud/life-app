@@ -91,7 +91,7 @@ function seededShuffle(arr, seed) {
 function StatCard({ label, value, col, t }) {
   return (
     <div style={{ background:t.white, border:`1px solid ${t.border}`, borderRadius:12, padding:"14px 16px", textAlign:"center" }}>
-      <div style={{ fontSize:22, fontWeight:800, color:col||t.ink, fontFamily:"Georgia,serif" }}>{value}</div>
+      <div style={{ fontSize:22, fontWeight:800, color:col||t.ink, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>{value}</div>
       <div style={{ fontSize:10, color:t.muted, marginTop:3, letterSpacing:1.5, textTransform:"uppercase" }}>{label}</div>
     </div>
   );
@@ -123,7 +123,7 @@ function TimerRing({ pct, value, color, t }) {
           strokeLinecap="round" style={{ transition:"stroke-dashoffset 1s linear,stroke 0.3s" }}/>
       </svg>
       <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <span style={{ fontSize:24, fontWeight:800, color, fontFamily:"Georgia,serif" }}>{value}</span>
+        <span style={{ fontSize:24, fontWeight:800, color, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>{value}</span>
       </div>
     </div>
   );
@@ -457,10 +457,10 @@ function SwipeBadgeDeck({ badges, stats, readKeys, totalTopics, t }) {
 
       {/* Header */}
       <div style={{ width: "100%", maxWidth: 420, padding: "24px 16px 16px", textAlign: "center" }}>
-        <p style={{ margin: "0 0 4px", fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: t.muted }}>
+        <p style={{ margin: "0 0 4px", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: t.muted }}>
           Life Badges
         </p>
-        <h2 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 800, color: t.ink, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
+        <h2 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 700, color: t.ink, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
           Earned, not given.
         </h2>
         {/* Progress pills */}
@@ -528,7 +528,7 @@ function SwipeBadgeDeck({ badges, stats, readKeys, totalTopics, t }) {
             position: "absolute", top: 20, right: 20,
             background: badge.unlocked ? badge.color : t.light,
             color: badge.unlocked ? "#fff" : t.muted,
-            fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
+            fontSize: 9, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase",
             padding: "4px 10px", borderRadius: 20,
             border: `1px solid ${badge.unlocked ? badge.color : t.border}`,
             boxShadow: badge.unlocked ? `0 2px 8px ${badge.color}55` : "none",
@@ -550,12 +550,12 @@ function SwipeBadgeDeck({ badges, stats, readKeys, totalTopics, t }) {
           </div>
 
           {/* Category */}
-          <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: catColor }}>
+          <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: catColor }}>
             {badge.category}
           </p>
 
           {/* Title */}
-          <h3 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 800, color: t.ink, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", lineHeight: 1.1 }}>
+          <h3 style={{ margin: "0 0 14px", fontSize: 28, fontWeight: 700, color: t.ink, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", lineHeight: 1.1 }}>
             {badge.label}
           </h3>
 
@@ -570,7 +570,7 @@ function SwipeBadgeDeck({ badges, stats, readKeys, totalTopics, t }) {
             border: `1px solid ${badge.unlocked ? badge.color + "33" : t.border}`,
             borderRadius: 14, padding: "12px 14px",
           }}>
-            <p style={{ margin: "0 0 4px", fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase", color: badge.unlocked ? badge.color : t.muted }}>
+            <p style={{ margin: "0 0 4px", fontSize: 9, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: badge.unlocked ? badge.color : t.muted }}>
               {badge.unlocked ? "How you unlocked this" : "How to unlock"}
             </p>
             <p style={{ margin: 0, fontSize: 12, color: badge.unlocked ? t.mid : t.muted, lineHeight: 1.6 }}>
@@ -676,7 +676,7 @@ function CommunicationPracticePage({ activity, t, play, onBack }) {
             margin: "0 0 8px",
             fontSize: 10,
             fontWeight: 700,
-            letterSpacing: 2.5,
+            letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: t.muted,
           }}
@@ -687,7 +687,7 @@ function CommunicationPracticePage({ activity, t, play, onBack }) {
           style={{
             margin: "0 0 10px",
             fontSize: 26,
-            fontWeight: 800,
+            fontWeight: 700,
             color: t.ink,
             fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           }}
@@ -700,7 +700,6 @@ function CommunicationPracticePage({ activity, t, play, onBack }) {
             color: t.muted,
             fontSize: 14,
             lineHeight: 1.7,
-            fontStyle: "italic",
           }}
         >
           {COMMUNICATION_ACTIVITIES[activity]?.desc}
@@ -1006,7 +1005,7 @@ export function QuizPage({
               style={{ padding:"14px 14px", flexShrink:0, background:"none", border:"none",
                 borderBottom:activeTab===id?`2px solid ${t.green}`:"2px solid transparent",
                 color:activeTab===id?t.green:t.muted, fontSize:13,
-                fontWeight:activeTab===id?700:400, cursor:"pointer", fontFamily:"Georgia,serif" }}>
+                fontWeight:activeTab===id?700:400, cursor:"pointer", fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
               {label}
             </button>
           ))}
@@ -1035,7 +1034,7 @@ export function QuizPage({
             </div>
             {stats.topicsPlayed && Object.keys(stats.topicsPlayed).length > 0 && (
               <>
-                <p style={{ margin:"0 0 12px", fontSize:11, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:t.muted }}>Topics played</p>
+                <p style={{ margin:"0 0 12px", fontSize:11, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:t.muted }}>Topics played</p>
                 <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:24 }}>
                   {Object.entries(stats.topicsPlayed).sort((a,b)=>b[1]-a[1]).map(([topic,n]) => {
                     const meta = TOPIC_META[topic];
@@ -1054,7 +1053,7 @@ export function QuizPage({
             )}
             {(stats.history||[]).length > 0 && (
               <>
-                <p style={{ margin:"0 0 12px", fontSize:11, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:t.muted }}>Recent history</p>
+                <p style={{ margin:"0 0 12px", fontSize:11, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:t.muted }}>Recent history</p>
                 <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
                   {[...(stats.history||[])].reverse().slice(0,8).map((h,i) => (
                     <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0", borderBottom:`1px solid ${t.light}` }}>
@@ -1088,7 +1087,7 @@ export function QuizPage({
             </div>
 
             {/* Topic */}
-            <p style={{ fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Topic</p>
+            <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.16em", textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Topic</p>
             <div className="life-quiz-topic-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:24 }}>
               {Object.entries(TOPIC_META).map(([k, meta]) => {
                 const sel = topic===k && fmt!=="daily";
@@ -1096,7 +1095,7 @@ export function QuizPage({
                   <button key={k} onClick={() => { setTopic(k); if(fmt==="daily") setFmt("multiple"); }}
                     style={{ background:sel?topicBg(meta.col):t.white, border:`1.5px solid ${sel?meta.col:t.border}`,
                       borderRadius:12, padding:"13px 14px", cursor:"pointer", textAlign:"left",
-                      display:"flex", alignItems:"center", gap:10, fontFamily:"Georgia,serif" }}>
+                      display:"flex", alignItems:"center", gap:10, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
                     <div style={{ width:32, height:32, borderRadius:8, background:sel?meta.col+"22":t.light, display:"flex", alignItems:"center", justifyContent:"center" }}>
                       {Ic[meta.icon]?.("none", sel?meta.col:"#8a8070", 16)}
                     </div>
@@ -1108,7 +1107,7 @@ export function QuizPage({
             </div>
 
             {/* Difficulty */}
-            <p style={{ fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Difficulty</p>
+            <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.16em", textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Difficulty</p>
             <div className="life-quiz-diff-row" style={{ display:"flex", gap:8, marginBottom:24, flexWrap:"wrap" }}>
               {["easy","medium","hard"].map(d => {
                 const dm  = DIFF_META[d];
@@ -1117,7 +1116,7 @@ export function QuizPage({
                 return (
                   <button key={d} onClick={() => { setDiff(d); if(fmt==="daily") setFmt("multiple"); }}
                     style={{ flex:"1 1 100px", minWidth:0, background:sel?diffColors[d]:t.white, border:`1.5px solid ${sel?diffColors[d]:t.border}`,
-                      borderRadius:12, padding:"12px 8px", cursor:"pointer", fontFamily:"Georgia,serif", textAlign:"center" }}>
+                      borderRadius:12, padding:"12px 8px", cursor:"pointer", fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", textAlign:"center" }}>
                     <div style={{ marginBottom:6, display:"flex", justifyContent:"center" }}>{Ic[dm.icon]?.("none", sel?"#fff":t.mid, 18)}</div>
                     <div style={{ fontSize:13, fontWeight:sel?700:400, color:sel?t.white:t.mid, textTransform:"capitalize" }}>{dm.label}</div>
                     <div style={{ fontSize:10, color:sel?"rgba(255,255,255,0.75)":t.muted, marginTop:2 }}>{dm.secs}s/q</div>
@@ -1127,7 +1126,7 @@ export function QuizPage({
             </div>
 
             {/* Format */}
-            <p style={{ fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Format</p>
+            <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.16em", textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Format</p>
              <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:28 }}>
                {["multiple","truefalse","blitz"].map(f => {
                 const fm  = FORMAT_META[f];
@@ -1136,7 +1135,7 @@ export function QuizPage({
                   <button key={f} onClick={() => { setFmt(f); }}
                     style={{ background:sel?t.greenLt:t.white, border:`1.5px solid ${sel?t.green:t.border}`,
                       borderRadius:12, padding:"14px 18px", cursor:"pointer", textAlign:"left",
-                      display:"flex", alignItems:"center", gap:12, fontFamily:"Georgia,serif" }}>
+                      display:"flex", alignItems:"center", gap:12, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
                     <span style={{ width:34, height:34, borderRadius:10, background: sel?`${t.green}22`:`${t.ink}08`, display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                       {Ic[fm.icon]?.("none", sel?t.green:t.muted, 18)}
                     </span>
@@ -1152,7 +1151,7 @@ export function QuizPage({
 
              {topic === "communication" && (
                <>
-                 <p style={{ fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Communication Activity</p>
+                 <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.16em", textTransform:"uppercase", color:t.muted, margin:"0 0 12px" }}>Communication Activity</p>
                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:28 }}>
                    {Object.entries(COMMUNICATION_ACTIVITIES).map(([id, meta]) => {
                      const selected = communicationActivity === id;
@@ -1188,7 +1187,7 @@ export function QuizPage({
 
              <button onClick={startQuiz}
                style={{ width:"100%", background:t.green, border:"none", borderRadius:14, padding:"18px", color:"#fff",
-                 fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"Georgia,serif",
+                 fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                  boxShadow:"0 6px 20px rgba(255,255,255,0.12)" }}>
               {topic === "communication" && communicationActivity !== "quiz"
                 ? `Start ${COMMUNICATION_ACTIVITIES[communicationActivity].label} →`
@@ -1227,8 +1226,8 @@ export function QuizPage({
               {Ic[newAchs[0].icon]?.("none", "#ffffff", 22)}
             </span>
             <div>
-              <div style={{ fontSize:12, color:"rgba(255,255,255,0.72)", fontFamily:"Georgia,serif" }}>Achievement Unlocked</div>
-              <div style={{ fontSize:15, fontWeight:700, color:"#fff", fontFamily:"Georgia,serif" }}>{newAchs[0].label}</div>
+              <div style={{ fontSize:12, color:"rgba(255,255,255,0.72)", fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>Achievement Unlocked</div>
+              <div style={{ fontSize:15, fontWeight:700, color:"#fff", fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>{newAchs[0].label}</div>
             </div>
           </div>
         )}
@@ -1236,11 +1235,11 @@ export function QuizPage({
           <div style={{ width:64, height:64, borderRadius:20, background:topicBg(topicMeta.col), margin:"0 auto 16px", display:"flex", alignItems:"center", justifyContent:"center" }}>
             {Ic[topicMeta.icon]?.("none", topicMeta.col, 28)}
           </div>
-          <h2 style={{ margin:"0 0 4px", fontSize:24, fontWeight:800, color:t.ink, fontFamily:"Georgia,serif" }}>{grade}</h2>
-          <p style={{ margin:"0 0 20px", color:t.muted, fontSize:13, fontStyle:"italic" }}>
+          <h2 style={{ margin:"0 0 4px", fontSize:24, fontWeight:700, color:t.ink, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>{grade}</h2>
+          <p style={{ margin:"0 0 20px", color:t.muted, fontSize:13 }}>
             {topicMeta.label} · {DIFF_META[diff]?.label} · {FORMAT_META[fmt]?.label}
           </p>
-          <div className="life-quiz-result-score" style={{ fontSize:"clamp(2.5rem, 12vw, 3.75rem)", fontWeight:800, color:topicMeta.col, lineHeight:1, fontFamily:"Georgia,serif" }}>
+          <div className="life-quiz-result-score" style={{ fontSize:"clamp(2.5rem, 12vw, 3.75rem)", fontWeight:800, color:topicMeta.col, lineHeight:1, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
             {score}<span style={{ fontSize:"clamp(1rem, 5vw, 1.5rem)", color:t.muted, fontWeight:400 }}>/{qs.length}</span>
           </div>
           <p style={{ margin:"6px 0 20px", color:t.muted, fontSize:14 }}>{pct}% correct</p>
@@ -1248,9 +1247,9 @@ export function QuizPage({
             <div style={{ height:"100%", width:`${pct}%`, background:pct>=70?t.green:pct>=50?t.gold:t.red, borderRadius:20, transition:"width 0.6s ease" }}/>
           </div>
           <div style={{ display:"flex", justifyContent:"space-around" }}>
-            <div><div style={{ fontSize:22, fontWeight:700, color:t.ink }}>{bestStreak}</div><div style={{ fontSize:10, color:t.muted, letterSpacing:1 }}>BEST STREAK</div></div>
-            <div><div style={{ fontSize:22, fontWeight:700, color:t.ink }}>{qs.length-score}</div><div style={{ fontSize:10, color:t.muted, letterSpacing:1 }}>MISSED</div></div>
-            <div><div style={{ display:"flex", justifyContent:"center", marginBottom:4 }}>{Ic[DIFF_META[diff]?.icon]?.("none", getDiffColors(t)[diff], 22)}</div><div style={{ fontSize:10, color:t.muted, letterSpacing:1, textTransform:"uppercase" }}>{diff}</div></div>
+            <div><div style={{ fontSize:22, fontWeight:700, color:t.ink }}>{bestStreak}</div><div style={{ fontSize:10, color:t.muted, letterSpacing:"0.06em" }}>BEST STREAK</div></div>
+            <div><div style={{ fontSize:22, fontWeight:700, color:t.ink }}>{qs.length-score}</div><div style={{ fontSize:10, color:t.muted, letterSpacing:"0.06em" }}>MISSED</div></div>
+            <div><div style={{ display:"flex", justifyContent:"center", marginBottom:4 }}>{Ic[DIFF_META[diff]?.icon]?.("none", getDiffColors(t)[diff], 22)}</div><div style={{ fontSize:10, color:t.muted, letterSpacing:"0.06em", textTransform:"uppercase" }}>{diff}</div></div>
           </div>
         </div>
 
@@ -1266,12 +1265,12 @@ export function QuizPage({
         {/* Review wrong answers */}
         {answers.filter(a=>!a.correct).length > 0 && (
           <div style={{ marginBottom:20 }}>
-            <p style={{ fontSize:10, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:t.red, margin:"0 0 10px" }}>Review missed questions</p>
+            <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:t.red, margin:"0 0 10px" }}>Review missed questions</p>
             {answers.filter(a=>!a.correct).map((a,i) => (
               <div key={i} style={{ background:t.light, border:`1px solid ${t.red}44`, borderRadius:12, padding:"14px 16px", marginBottom:8 }}>
-                <p style={{ margin:"0 0 6px", fontSize:13, fontWeight:700, color:t.ink, fontFamily:"Georgia,serif" }}>{a.q?.q}</p>
+                <p style={{ margin:"0 0 6px", fontSize:13, fontWeight:700, color:t.ink, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>{a.q?.q}</p>
                 <p style={{ margin:"0 0 4px", fontSize:12, color:t.green }}>✓ {a.q?.opts?.[a.q?.a]}</p>
-                {a.q?.explain && <p style={{ margin:0, fontSize:11, color:t.muted, fontStyle:"italic", lineHeight:1.6 }}>{a.q.explain}</p>}
+                {a.q?.explain && <p style={{ margin:0, fontSize:11, color:t.muted, lineHeight:1.6 }}>{a.q.explain}</p>}
               </div>
             ))}
           </div>
@@ -1279,11 +1278,11 @@ export function QuizPage({
 
         <div className="life-quiz-result-actions" style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
           <button onClick={() => { play("tap"); setPhase("setup"); setActiveTab("play"); setNewAchs([]); }}
-            style={{ flex:"1 1 140px", minWidth:0, background:t.white, border:`1.5px solid ${t.border}`, borderRadius:12, padding:"15px", color:t.mid, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"Georgia,serif" }}>
+            style={{ flex:"1 1 140px", minWidth:0, background:t.white, border:`1.5px solid ${t.border}`, borderRadius:12, padding:"15px", color:t.mid, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
             Change Setup
           </button>
           <button onClick={() => { play("tritone"); setNewAchs([]); startQuiz(); }}
-            style={{ flex:"2 1 180px", minWidth:0, background:t.green, border:"none", borderRadius:12, padding:"15px", color:"#fff", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:"Georgia,serif" }}>
+            style={{ flex:"2 1 180px", minWidth:0, background:t.green, border:"none", borderRadius:12, padding:"15px", color:"#fff", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
             Play Again →
           </button>
         </div>
@@ -1324,7 +1323,7 @@ export function QuizPage({
           <div style={{ width:26, height:26, borderRadius:7, background:topicBg(topicMeta.col), display:"flex", alignItems:"center", justifyContent:"center" }}>
             {Ic[topicMeta.icon]?.("none",topicMeta.col,13)}
           </div>
-          <span style={{ fontSize:12, color:t.muted, fontFamily:"Georgia,serif", fontStyle:"italic" }}>{topicMeta.label} · {DIFF_META[diff]?.label}</span>
+          <span style={{ fontSize:12, color:t.muted, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>{topicMeta.label} · {DIFF_META[diff]?.label}</span>
         </div>
         <div style={{ display:"flex", gap:8, alignItems:"center" }}>
           {streak >= 2 && (
@@ -1332,7 +1331,7 @@ export function QuizPage({
               🔥 {streak}
             </span>
           )}
-          <span style={{ fontSize:13, fontWeight:700, color:t.green, fontFamily:"Georgia,serif" }}>{score}/{idx}</span>
+          <span style={{ fontSize:13, fontWeight:700, color:t.green, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>{score}/{idx}</span>
         </div>
       </div>
 
@@ -1351,17 +1350,17 @@ export function QuizPage({
 
       {q.tag && (
         <div style={{ display:"flex", justifyContent:"center", marginBottom:10 }}>
-          <span style={{ fontSize:10, fontWeight:700, letterSpacing:1.5, textTransform:"uppercase", padding:"3px 10px", borderRadius:20, background:topicBg(topicMeta.col), color:topicMeta.col }}>
+          <span style={{ fontSize:10, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", padding:"3px 10px", borderRadius:20, background:topicBg(topicMeta.col), color:topicMeta.col }}>
             {q.tag}
           </span>
         </div>
       )}
 
       <div style={{ background:t.white, border:`1px solid ${t.border}`, borderRadius:16, padding:"22px 20px", marginBottom:16, boxShadow:"0 2px 10px rgba(0,0,0,0.05)" }}>
-        <p style={{ margin:"0 0 4px", fontSize:10, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:t.muted }}>
+        <p style={{ margin:"0 0 4px", fontSize:10, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:t.muted }}>
           Question {idx+1} of {qs.length}
         </p>
-        <p style={{ margin:0, fontSize:17, fontWeight:700, color:t.ink, lineHeight:1.55, fontFamily:"Georgia,serif" }}>{tfStatement || q.q}</p>
+        <p style={{ margin:0, fontSize:17, fontWeight:700, color:t.ink, lineHeight:1.55, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>{tfStatement || q.q}</p>
       </div>
 
       <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
@@ -1375,7 +1374,7 @@ export function QuizPage({
           return (
             <button key={i} onClick={() => handleAnswer(i)} disabled={chosen!==null}
               style={{ background:bg, border, borderRadius:12, padding:"14px 16px", textAlign:"left",
-                cursor:chosen!==null?"default":"pointer", fontFamily:"Georgia,serif",
+                cursor:chosen!==null?"default":"pointer", fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
                 color:col, fontSize:15, fontWeight:fw, display:"flex", alignItems:"center", gap:12, transition:"all 0.18s" }}>
               <span style={{ width:28, height:28, borderRadius:"50%", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center",
                 fontSize:12, fontWeight:700, transition:"all 0.18s",
@@ -1393,7 +1392,7 @@ export function QuizPage({
         <div style={{ marginTop:14, padding:"14px 16px",
           background:chosen===correctIdx?t.greenLt:`${t.red}1f`,
           border:`1px solid ${chosen===correctIdx?t.green+"44":t.red+"44"}`, borderRadius:12 }}>
-          <p style={{ margin:0, fontSize:13, color:chosen===correctIdx?t.green:t.red, fontFamily:"Georgia,serif", lineHeight:1.7 }}>
+          <p style={{ margin:0, fontSize:13, color:chosen===correctIdx?t.green:t.red, fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", lineHeight:1.7 }}>
             <span style={{ fontWeight:700 }}>{chosen===correctIdx?"✓ Correct — ":"✗ Incorrect — "}</span>
             {q.explain}
           </p>
