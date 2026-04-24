@@ -1,12 +1,8 @@
 import '../src/index.css'
 import CanonicalHostRedirect from './CanonicalHostRedirect'
-import { Inter } from 'next/font/google'
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-})
+// System font stack for native look: SF Pro on Apple devices, Inter-like
+// fallbacks on other platforms. The --life-font CSS variable defines this stack.
 
 const CANONICAL_SITE_URL = 'https://life-ten-green.vercel.app';
 
@@ -152,7 +148,7 @@ export default function RootLayout({ children }) {
           }
         `}</style>
       </head>
-      <body className={inter.className}>
+      <body>
         <CanonicalHostRedirect canonicalSiteUrl={siteUrl} />
         {children}
       </body>

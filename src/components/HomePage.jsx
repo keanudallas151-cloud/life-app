@@ -582,13 +582,13 @@ export function HomePage({
               style={{
                 textAlign: "left",
                 background: "rgba(255,255,255,0.04)",
-                border: `1px solid rgba(255,255,255,0.07)`,
+                border: `1px solid rgba(255,255,255,0.08)`,
                 borderRadius: 20,
-                padding: "12px 14px 11px",
-                boxShadow: S.sm,
+                padding: "14px 16px 13px",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
                 cursor: "pointer",
                 fontFamily: "-apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
-                minHeight: 72,
+                minHeight: 76,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
@@ -600,28 +600,28 @@ export function HomePage({
               }}
             >
               <div style={{
-                width: 30, height: 30, borderRadius: 9,
+                width: 32, height: 32, borderRadius: 10,
                 background: `${action.color}1F`,
                 border: `1px solid ${action.color}33`,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 lineHeight: 1,
               }}>
-                {Ic[action.icon]?.("none", action.color, 15)}
+                {Ic[action.icon]?.("none", action.color, 16)}
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: t.ink, letterSpacing: "-0.01em", marginBottom: 2 }}>{action.label}</div>
-                <div style={{ fontSize: 11, lineHeight: 1.4, color: t.muted }}>{action.desc}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: t.ink, letterSpacing: "-0.01em", marginBottom: 3 }}>{action.label}</div>
+                <div style={{ fontSize: 11.5, lineHeight: 1.4, color: t.muted }}>{action.desc}</div>
               </div>
             </button>
           ))}
         </div>
 
         {/* ── Daily Habit Tracker ─────────────────────────────── */}
-        <div style={{ marginTop: 24 }}>
+        <div style={{ marginTop: 26 }}>
           <p
             style={{
-              margin: "0 2px 10px",
-              fontSize: 11,
+              margin: "0 2px 12px",
+              fontSize: 13,
               fontWeight: 600,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
@@ -636,9 +636,9 @@ export function HomePage({
             style={{
               background: t.white,
               border: `1px solid ${t.border}`,
-              borderRadius: 20,
+              borderRadius: 22,
               overflow: "hidden",
-              boxShadow: S.sm,
+              boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
             }}
           >
             {/* Progress bar */}

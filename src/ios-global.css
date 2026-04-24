@@ -1,0 +1,511 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   ios-global.css — iOS Premium Polish Layer
+   ══════════════════════════════════════════════════════════════════════════════
+   Import AFTER index.css in main.jsx. Provides comprehensive iOS polish overrides
+   that refine the dark Vercel theme into a native iOS productivity app feel.
+   
+   Design principles:
+   • Large rounded corners (16-24px cards, 28-32px modals)
+   • Pill-shaped buttons (14px or 999px radius)
+   • Soft shadows with depth
+   • Glass blur on overlays
+   • iOS spring animations
+   • SF Pro typography refinements
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   0. iOS DESIGN TOKENS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Radius tokens */
+  --ios-radius-card: 20px;
+  --ios-radius-modal: 24px;
+  --ios-radius-button: 14px;
+  --ios-radius-settings: 18px;
+  
+  /* Shadow tokens */
+  --ios-shadow-card: 0 2px 12px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.08);
+  --ios-shadow-modal: 0 24px 80px rgba(0,0,0,0.4);
+  --ios-shadow-dropdown: 0 12px 48px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.2);
+  
+  /* Animation timing */
+  --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   1. GLOBAL CARD POLISH
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* Base card style — all interactive cards get iOS premium treatment */
+.life-card-hover {
+  border-radius: var(--ios-radius-card) !important;
+  box-shadow: var(--ios-shadow-card) !important;
+}
+
+/* Settings page cards */
+.life-settings-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+/* Resume reading card */
+.life-resume-card {
+  border-radius: 18px !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   2. iOS BUTTON STYLES
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* Primary CTA buttons — match green accent in any format */
+button[style*="#50c878"] {
+  border-radius: var(--ios-radius-button) !important;
+  box-shadow: 0 4px 16px rgba(80, 200, 120, 0.35) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Secondary / ghost buttons */
+button[style*="rgba(120,120,128"] {
+  border-radius: var(--ios-radius-button) !important;
+}
+
+/* Pill-shaped small buttons (dismiss, close, etc.) */
+button[style*="borderRadius: 999"],
+button[style*="border-radius: 999px"] {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   3. iOS SHEET & MODAL ANIMATIONS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+@keyframes ios-sheet-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ios-sheet-down {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
+}
+
+@keyframes ios-modal-scale {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ios-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ios-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Spring bounce for interactive elements */
+@keyframes ios-bounce {
+  0% { transform: scale(0.95); }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   4. INPUT & FORM POLISH
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* Text inputs — iOS style with soft bg and rounded pill shape
+   Note: --life-white is the card/surface color (#111111 in dark mode) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+textarea {
+  border-radius: 12px !important;
+  background: var(--life-surface-raised, #111111) !important;
+  border: 1px solid var(--life-border, #2e2e2e) !important;
+  transition: 
+    border-color 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
+input:focus,
+textarea:focus {
+  border-color: rgba(80, 200, 120, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(80, 200, 120, 0.12) !important;
+  outline: none !important;
+}
+
+/* Search inputs — more pill-like */
+input[type="search"] {
+  border-radius: 20px !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   5. SECTION HEADER TYPOGRAPHY
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* iOS-style section headers — 13px / 600 / uppercase / letter-spacing */
+.life-section-header,
+[class*="section-header"],
+p[style*="textTransform: uppercase"][style*="letterSpacing"] {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: var(--life-muted, #a1a1a1) !important;
+}
+
+/* Large title headings — iOS Dynamic Type */
+h1[style*="fontSize: 34"],
+h2[style*="fontSize: 34"] {
+  letter-spacing: -0.02em !important;
+  line-height: 1.1 !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   6. iOS GROUPED LIST ROWS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* List row with chevron pattern */
+.life-list-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+}
+
+.life-list-row:active {
+  background: rgba(255,255,255,0.04);
+}
+
+/* Chevron indicator */
+.life-list-chevron {
+  width: 8px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke: var(--life-muted, #a1a1a1);
+  stroke-width: 2;
+  fill: none;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   7. BOTTOM NAV IMPROVEMENTS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .life-bottom-nav {
+    /* Slightly more blur and darker glass */
+    background: rgba(18, 18, 18, 0.92) !important;
+    -webkit-backdrop-filter: saturate(1.6) blur(24px) !important;
+    backdrop-filter: saturate(1.6) blur(24px) !important;
+    border-top: 0.5px solid rgba(255,255,255,0.08) !important;
+    box-shadow: 
+      0 -1px 0 rgba(255,255,255,0.04),
+      0 -8px 32px rgba(0,0,0,0.25) !important;
+  }
+
+  .life-bottom-nav-dark {
+    background: rgba(10, 10, 10, 0.94) !important;
+    border-top: 0.5px solid rgba(255,255,255,0.06) !important;
+  }
+
+  /* Larger active indicator pill */
+  .life-bottom-nav-item--active::after {
+    width: 28px !important;
+    height: 3px !important;
+    border-radius: 999px !important;
+    top: 0 !important;
+  }
+
+  /* Smoother icon scaling */
+  .life-bottom-nav-item svg {
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  .life-bottom-nav-item--active svg {
+    transform: scale(1.12) translateY(-1px) !important;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   8. MODAL & OVERLAY POLISH
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* Overlay backdrops — standard blur */
+.life-overlay-dismiss,
+.life-sidebar-backdrop,
+[class*="backdrop"],
+div[style*="background: rgba(0,0,0,0.5)"],
+div[style*="background: rgba(20,20,20"] {
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Bottom sheet panels */
+[style*="borderRadius: 22px 22px 0 0"],
+[style*="border-radius: 22px 22px 0px 0px"] {
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.3) !important;
+}
+
+/* Pull handle on sheets */
+.life-sheet-handle,
+div[style*="width: 40"][style*="height: 5"][style*="borderRadius: 999"] {
+  background: var(--life-border, #2e2e2e) !important;
+  opacity: 0.8;
+}
+
+/* Notification dropdown */
+.life-notif-dropdown {
+  border-radius: 22px !important;
+  box-shadow: 
+    0 12px 48px rgba(0,0,0,0.35),
+    0 4px 16px rgba(0,0,0,0.2) !important;
+}
+
+/* Search dropdown */
+.life-search-dropdown {
+  border-radius: 0 0 20px 20px !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.25) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   9. TOAST NOTIFICATIONS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+.life-toast {
+  border-radius: 24px !important;
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.25),
+    0 2px 8px rgba(0,0,0,0.15) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   10. SIDEBAR POLISH
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+.life-sidebar {
+  box-shadow: 8px 0 40px rgba(0,0,0,0.2) !important;
+}
+
+/* Sidebar menu items */
+.life-sidebar button {
+  border-radius: 12px !important;
+  transition: 
+    background 0.15s ease,
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.life-sidebar button:active {
+  transform: scale(0.97) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   11. BADGE & PILL ELEMENTS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* Notification badge */
+.ios-notif-badge {
+  border-radius: 999px !important;
+  min-width: 18px;
+  height: 18px;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 6px rgba(229, 72, 77, 0.4) !important;
+}
+
+/* Status pills */
+[style*="borderRadius: 999"][style*="padding"][style*="fontSize: 10"],
+[style*="borderRadius: 999"][style*="padding"][style*="fontSize: 11"] {
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   12. PROGRESS & STAT CARDS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* Stat cards on home page */
+.life-home-stats > div {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12) !important;
+}
+
+/* Progress bars — more rounded */
+[style*="borderRadius: 6"][style*="height: 8"],
+[style*="borderRadius: 8"][style*="height: 10"] {
+  border-radius: 999px !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   13. ICON CONTAINERS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* Icon squares in lists */
+[style*="width: 30"][style*="height: 30"][style*="borderRadius: 8"],
+[style*="width: 32"][style*="height: 32"][style*="borderRadius: 8"] {
+  border-radius: 10px !important;
+}
+
+/* Larger icon containers */
+[style*="width: 42"][style*="height: 42"][style*="borderRadius"],
+[style*="width: 44"][style*="height: 44"][style*="borderRadius"] {
+  border-radius: 14px !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   14. SWITCH / TOGGLE REFINEMENTS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* iOS switch track */
+[role="switch"],
+input[type="checkbox"][role="switch"] {
+  border-radius: 999px !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   15. ANIMATION TIMING REFINEMENTS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* iOS spring specifically for transform transitions on interactive elements.
+   Scoped to transform only so existing color/opacity transitions are unaffected. */
+button,
+[role="button"],
+.life-card-hover,
+.life-bottom-nav-item {
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Gentler entrance for page content */
+[data-page-tag] {
+  animation: ios-fade-in 0.3s ease-out both;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   16. TOUCH FEEDBACK ENHANCEMENTS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Mobile: deeper press feedback */
+  button:active,
+  [role="button"]:active,
+  .life-card-hover:active {
+    transform: scale(0.96) !important;
+    transition: transform 0.08s ease !important;
+  }
+
+  /* Prevent double-tap zoom on interactive elements */
+  button,
+  [role="button"],
+  .life-bottom-nav-item {
+    touch-action: manipulation;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   17. DIALOG / ALERT BOXES
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* Alert dialogs — iOS ActionSheet / Alert style */
+[role="dialog"] > div[style*="borderRadius: 20"],
+[role="dialog"] > div[style*="border-radius: 20px"],
+[role="alertdialog"] > div {
+  border-radius: var(--ios-radius-modal) !important;
+  box-shadow: var(--ios-shadow-modal) !important;
+}
+
+/* Dialog buttons */
+[role="dialog"] button[style*="borderRadius: 12"] {
+  border-radius: var(--ios-radius-button) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   18. QUICK ACTION CARDS (2x2 GRID)
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+.life-whats-inside-grid .life-card-hover {
+  border-radius: var(--ios-radius-card) !important;
+  min-height: 92px !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   19. TOPBAR REFINEMENTS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+.life-topbar {
+  -webkit-backdrop-filter: saturate(1.5) blur(20px) !important;
+  backdrop-filter: saturate(1.5) blur(20px) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   20. SCROLLBAR STYLING (webkit browsers)
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+/* Minimal iOS-like scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────
+   21. DARK MODE GLASS EFFECTS
+   ──────────────────────────────────────────────────────────────────────────────── */
+
+body.life-dark .life-card-hover {
+  box-shadow: 
+    0 2px 12px rgba(0,0,0,0.2),
+    0 1px 3px rgba(0,0,0,0.12),
+    inset 0 0.5px 0 rgba(255,255,255,0.04) !important;
+}
+
+body.life-dark .life-sidebar,
+body.life-dark .life-notif-dropdown,
+body.life-dark .life-search-dropdown {
+  box-shadow: 
+    0 12px 48px rgba(0,0,0,0.5),
+    inset 0 0.5px 0 rgba(255,255,255,0.06) !important;
+}
