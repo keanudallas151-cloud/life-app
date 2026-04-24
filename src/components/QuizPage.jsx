@@ -591,66 +591,27 @@ function SwipeBadgeDeck({ badges, stats, readKeys, totalTopics, t }) {
         </div>
       </div>
 
-      {/* Navigation */}
-      <div style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 28 }}>
-        <button
-          type="button"
-          onClick={() => go("left")}
-          disabled={idx === 0}
-          style={{
-            width: 52, height: 52, borderRadius: "50%",
-            background: idx === 0 ? t.light : t.white,
-            border: `1.5px solid ${idx === 0 ? t.border : t.green + "55"}`,
-            color: idx === 0 ? t.muted : t.ink,
-            fontSize: 20, cursor: idx === 0 ? "default" : "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "all 0.2s ease",
-            boxShadow: idx === 0 ? "none" : `0 4px 12px rgba(0,0,0,0.3)`,
-          }}
-        >
-          ←
-        </button>
-
-        {/* Dot indicators */}
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          {resolvedBadges.map((b, i) => (
-            <button
-              key={b.id}
-              type="button"
-              onClick={() => { setAnimDir(i > idx ? "right" : "left"); setTimeout(() => { setIdx(i); setAnimDir(null); }, 260); }}
-              style={{
-                width: i === idx ? 20 : 6,
-                height: 6, borderRadius: 3,
-                background: i === idx ? (b.unlocked ? b.color : t.ink) : (b.unlocked ? t.green + "66" : t.border),
-                border: "none", cursor: "pointer", padding: 0,
-                transition: "all 0.25s cubic-bezier(0.22,1,0.36,1)",
-              }}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => go("right")}
-          disabled={idx === total - 1}
-          style={{
-            width: 52, height: 52, borderRadius: "50%",
-            background: idx === total - 1 ? t.light : t.white,
-            border: `1.5px solid ${idx === total - 1 ? t.border : t.green + "55"}`,
-            color: idx === total - 1 ? t.muted : t.ink,
-            fontSize: 20, cursor: idx === total - 1 ? "default" : "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "all 0.2s ease",
-            boxShadow: idx === total - 1 ? "none" : `0 4px 12px rgba(0,0,0,0.3)`,
-          }}
-        >
-          →
-        </button>
+      {/* Navigation - Dot indicators only */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 28 }}>
+        {resolvedBadges.map((b, i) => (
+          <button
+            key={b.id}
+            type="button"
+            onClick={() => { setAnimDir(i > idx ? "right" : "left"); setTimeout(() => { setIdx(i); setAnimDir(null); }, 260); }}
+            style={{
+              width: i === idx ? 20 : 6,
+              height: 6, borderRadius: 3,
+              background: i === idx ? (b.unlocked ? b.color : t.ink) : (b.unlocked ? t.green + "66" : t.border),
+              border: "none", cursor: "pointer", padding: 0,
+              transition: "all 0.25s cubic-bezier(0.22,1,0.36,1)",
+            }}
+          />
+        ))}
       </div>
 
       {/* Swipe hint */}
       <p style={{ margin: "14px 0 0", fontSize: 11, color: t.muted, textAlign: "center", letterSpacing: 0.3 }}>
-        Swipe or tap arrows to explore • {idx + 1} of {total}
+        Swipe to explore • {idx + 1} of {total}
       </p>
     </div>
   );
