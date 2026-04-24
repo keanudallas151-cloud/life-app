@@ -1972,6 +1972,13 @@ export default function LifeApp() {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
         }
+        @media (prefers-reduced-motion: reduce) {
+          [data-life-loading-logo],
+          [data-life-loading-dot] {
+            animation: none !important;
+            transform: none !important;
+          }
+        }
       `}</style>
         <div
           style={{
@@ -1980,6 +1987,7 @@ export default function LifeApp() {
           }}
         >
           <div
+            data-life-loading-logo
             style={{
               width: 90,
               height: 90,
@@ -2060,6 +2068,7 @@ export default function LifeApp() {
             {[0, 0.15, 0.3].map((delay, i) => (
               <span
                 key={i}
+                data-life-loading-dot
                 style={{
                   width: 10,
                   height: 10,

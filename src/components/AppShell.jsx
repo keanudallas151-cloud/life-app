@@ -4,7 +4,7 @@
 // through props. Safe to edit independently.
 "use client";
 
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 import { C } from "../systems/theme";
 import { Ic } from "../icons/Ic";
 
@@ -34,20 +34,68 @@ export const IncomeIdeasPage = lazy(() =>
 );
 
 export function RouteFallback() {
+  const base = "rgba(255,255,255,0.05)";
+  const sheen = "rgba(255,255,255,0.12)";
+  const skeletonBg = {
+    background: `linear-gradient(90deg, ${base} 0%, ${sheen} 50%, ${base} 100%)`,
+    backgroundSize: "200% 100%",
+    animation: "life-skeleton-shimmer 1.3s ease-in-out infinite",
+    borderRadius: 12,
+  };
   return (
     <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: 200,
-        color: C.muted,
-        fontSize: 13,
-        fontStyle: "italic",
-        fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
+        padding: "32px 20px",
+        maxWidth: 560,
+        margin: "0 auto",
+        fontFamily:
+          "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
       }}
     >
-      Loading…
+      <style>{`
+        @keyframes life-skeleton-shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [data-life-skeleton] { animation: none !important; }
+        }
+      `}</style>
+      <div
+        data-life-skeleton
+        style={{ ...skeletonBg, height: 22, width: "55%", marginBottom: 14 }}
+      />
+      <div
+        data-life-skeleton
+        style={{ ...skeletonBg, height: 14, width: "82%", marginBottom: 24 }}
+      />
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          data-life-skeleton
+          style={{
+            ...skeletonBg,
+            height: 84,
+            width: "100%",
+            marginBottom: 12,
+            borderRadius: 16,
+          }}
+        />
+      ))}
+      <span
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          overflow: "hidden",
+          clip: "rect(0 0 0 0)",
+        }}
+      >
+        Loading…
+      </span>
     </div>
   );
 }
