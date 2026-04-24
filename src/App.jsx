@@ -114,22 +114,22 @@ const PREF_DEFAULTS = {
 const SWIPE_HORIZONTAL_BIAS = 1.5;
 const SECRET_SIENNA_SEARCH_CODE = "160705kc";
 
-// Maps notification type/activity to an emoji icon
-function notifIcon(n) {
-  if (n.templateKey === "newMessage") return "💬";
-  if (n.templateKey === "newMatch") return "🤝";
-  if (n.templateKey === "profileUpdated") return "👤";
-  if (n.templateKey === "streakCelebration") return "🔥";
-  if (n.templateKey === "supportAcknowledged") return "🛟";
-  if (n.templateKey === "welcomeConfirmed") return "👋";
-  if (n.activity === "audio") return "🎙️";
-  if (n.targetPage === "home") return "👋";
-  if (n.targetPage === "where_to_start") return "📚";
-  if (n.targetPage === "daily_growth") return "🌱";
-  if (n.targetPage === "quiz") return "🧠";
-  if (n.targetPage === "leaderboard") return "🏆";
-  if (n.targetPage === "profile") return "👤";
-  return "✨";
+// Maps notification type/activity to an iOS-style SVG icon.
+function notifIconKey(n) {
+  if (n.templateKey === "newMessage") return "chat";
+  if (n.templateKey === "newMatch") return "users";
+  if (n.templateKey === "profileUpdated") return "user";
+  if (n.templateKey === "streakCelebration") return "flame";
+  if (n.templateKey === "supportAcknowledged") return "shield";
+  if (n.templateKey === "welcomeConfirmed") return "sparkle";
+  if (n.activity === "audio") return "mic";
+  if (n.targetPage === "home") return "home";
+  if (n.targetPage === "where_to_start") return "library";
+  if (n.targetPage === "daily_growth") return "leaf";
+  if (n.targetPage === "quiz") return "brain";
+  if (n.targetPage === "leaderboard") return "trophy";
+  if (n.targetPage === "profile") return "user";
+  return "sparkle";
 }
 
 function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
@@ -286,7 +286,7 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "flex-start", gap: 11 }}>
-          {/* Icon bubble */}
+          {/* Icon bubble — iOS-style rounded tinted chip */}
           <div
             style={{
               width: 36,
@@ -297,11 +297,14 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
                 : "rgba(61,90,76,0.1)",
               display: "grid",
               placeItems: "center",
-              fontSize: 16,
               flexShrink: 0,
             }}
           >
-            {notifIcon(n)}
+            {Ic[notifIconKey(n)]?.(
+              "none",
+              dark ? "#e8e8e8" : "#3d5a4c",
+              18,
+            )}
           </div>
 
           {/* Text */}
@@ -2735,7 +2738,18 @@ export default function LifeApp() {
                     gap: 10,
                   }}
                 >
-                  <span style={{ fontSize: 32 }}>🔔</span>
+                  <div
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 16,
+                      background: alpha(t.ink, 0.06),
+                      display: "grid",
+                      placeItems: "center",
+                    }}
+                  >
+                    {Ic.bell("none", alpha(t.ink, 0.4), 26)}
+                  </div>
                   <p
                     style={{
                       margin: 0,
@@ -4555,13 +4569,17 @@ export default function LifeApp() {
               >
                 <div
                   style={{
-                    fontSize: 52,
-                    marginBottom: 16,
-                    lineHeight: 1,
+                    width: 64,
+                    height: 64,
+                    borderRadius: 20,
+                    background: alpha(t.ink, 0.06),
+                    margin: "0 auto 16px",
+                    display: "grid",
+                    placeItems: "center",
                   }}
                   aria-hidden="true"
                 >
-                  📖
+                  {Ic.book("none", alpha(t.ink, 0.5), 30)}
                 </div>
                 <p
                   style={{
