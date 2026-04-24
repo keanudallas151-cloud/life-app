@@ -1,4232 +1,375 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const FONT = "-apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
 
+/* ──────────────────────────────────────────────────────────────
+   SUBJECT CONFIG
+────────────────────────────────────────────────────────────── */
 const SUBJECT_META = {
-  english: { label: "English", emoji: "📖", color: "#3B82F6", lightColor: "rgba(59,130,246,0.12)", borderColor: "rgba(59,130,246,0.25)" },
-  finance: { label: "Finance", emoji: "💰", color: "#50c878", lightColor: "rgba(80,200,120,0.12)", borderColor: "rgba(80,200,120,0.25)" },
+  english:  { label: "English",  emoji: "📖", color: "#3B82F6", lightColor: "rgba(59,130,246,0.12)", borderColor: "rgba(59,130,246,0.25)" },
+  finance:  { label: "Finance",  emoji: "💰", color: "#50c878", lightColor: "rgba(80,200,120,0.12)",  borderColor: "rgba(80,200,120,0.25)"  },
   demeanor: { label: "Demeanor", emoji: "🎯", color: "#A855F7", lightColor: "rgba(168,85,247,0.12)", borderColor: "rgba(168,85,247,0.25)" },
 };
 
+/* ──────────────────────────────────────────────────────────────
+   GAME DATA
+────────────────────────────────────────────────────────────── */
 const GAMES = {
   english: [
-    { id: "fill_gap", icon: "✏️", title: "Fill the Gap", desc: "Harder sentence completion with grammar, tone, and vocabulary.", type: "game" },
-    { id: "word_guess", icon: "🔤", title: "Word Guess", desc: "Guess from a much larger bank of useful five-letter words.", type: "game" },
-    { id: "vocab_match", icon: "🔗", title: "Vocab Match", desc: "Match advanced English terms to clear definitions.", type: "game" },
-    { id: "sentence", icon: "🔀", title: "Sentence Builder", desc: "Rebuild stronger English sentences in the correct order.", type: "game" },
-    { id: "word_trivia", icon: "❓", title: "Word Trivia", desc: "Grammar, punctuation, reading, writing, and language knowledge.", type: "game" },
-    { id: "word_ladder", icon: "🪜", title: "Word Ladder", desc: "Change one letter at a time through smarter word paths.", type: "game" },
+    { id: "fill_gap",     icon: "✏️", title: "Fill the Gap",     desc: "Complete the sentence with the right word.",    type: "game" },
+    { id: "word_guess",   icon: "🔤", title: "Word Guess",       desc: "Guess the hidden word one letter at a time.",   type: "game" },
+    { id: "vocab_match",  icon: "🔗", title: "Vocab Match",      desc: "Match words to their definitions fast.",        type: "game" },
+    { id: "sentence",     icon: "🔀", title: "Sentence Builder", desc: "Tap words in the correct order.",               type: "game" },
+    { id: "word_trivia",  icon: "❓", title: "Word Trivia",      desc: "Test your knowledge of the English language.",  type: "game" },
+    { id: "word_ladder",  icon: "🪜", title: "Word Ladder",      desc: "Change one letter at a time to reach the goal.",type: "game" },
   ],
   finance: [
-    { id: "finance_cards", icon: "📚", title: "Finance Cards", desc: "Quick finance refreshers.", type: "tool" },
-    { id: "finance_focus", icon: "📊", title: "Money Focus", desc: "Keep learning money language.", type: "tool" },
+    { id: "fin_terms",    icon: "📚", title: "Finance Terms",    desc: "Flip cards to learn key money vocabulary.",     type: "tool" },
+    { id: "budget",       icon: "📊", title: "Budget Builder",   desc: "Allocate your monthly income wisely.",          type: "tool" },
+    { id: "fin_trivia",   icon: "🧠", title: "Finance Trivia",   desc: "Quiz yourself on real money concepts.",         type: "game" },
+    { id: "invest_save",  icon: "📈", title: "Invest or Save?",  desc: "Make smart decisions in live scenarios.",       type: "game" },
+    { id: "money_math",   icon: "🔢", title: "Money Math",       desc: "Quick mental maths — beat the clock.",          type: "game" },
+    { id: "compound",     icon: "📈", title: "Compound Growth",  desc: "Estimate compound interest — beat the clock.",   type: "game" },
   ],
   demeanor: [
-    { id: "demeanor_cards", icon: "🗣️", title: "Demeanor Cards", desc: "Quick confidence and presence refreshers.", type: "tool" },
-    { id: "demeanor_focus", icon: "🎯", title: "Presence Focus", desc: "Practice calm, direct communication.", type: "tool" },
+    { id: "speak_it",     icon: "🗣️", title: "Speak It",        desc: "Pick the most confident response.",             type: "game" },
+    { id: "filler_catch", icon: "🚫", title: "Filler Catcher",  desc: "Tap every filler word in the paragraph.",       type: "game" },
+    { id: "tone_detect",  icon: "🎵", title: "Tone Detector",   desc: "Identify the tone of different messages.",      type: "game" },
+    { id: "conf_quiz",    icon: "⭐", title: "Confidence Quiz", desc: "Find out where your confidence really stands.", type: "game" },
+    { id: "daily_dem",    icon: "📅", title: "Daily Challenge", desc: "One challenge a day to sharpen your presence.", type: "tool" },
+    { id: "body_lang",    icon: "🧍", title: "Body Language IQ",desc: "Read the room with body language mastery.",     type: "game" },
   ],
 };
 
+/* ──────────────────────────────────────────────────────────────
+   GAME CONTENT
+────────────────────────────────────────────────────────────── */
+
+// ── English: Fill the Gap ──────────────────────────────────────
 const FILL_GAP_QS = [
-  {
-    "sentence": "The speaker gave a ___ explanation that everyone could follow.",
-    "options": [
-      "clear",
-      "cloudy",
-      "silent",
-      "heavy"
-    ],
-    "answer": "clear"
-  },
-  {
-    "sentence": "Her argument was ___ because every point had strong evidence.",
-    "options": [
-      "convincing",
-      "fragile",
-      "random",
-      "empty"
-    ],
-    "answer": "convincing"
-  },
-  {
-    "sentence": "A good paragraph usually has one main ___.",
-    "options": [
-      "idea",
-      "noise",
-      "colour",
-      "clock"
-    ],
-    "answer": "idea"
-  },
-  {
-    "sentence": "The author used vivid ___ to help readers picture the scene.",
-    "options": [
-      "imagery",
-      "payment",
-      "silence",
-      "gravity"
-    ],
-    "answer": "imagery"
-  },
-  {
-    "sentence": "He paused to ___ his thoughts before answering.",
-    "options": [
-      "organise",
-      "scatter",
-      "borrow",
-      "erase"
-    ],
-    "answer": "organise"
-  },
-  {
-    "sentence": "The instructions were ___, so nobody knew what to do.",
-    "options": [
-      "unclear",
-      "helpful",
-      "precise",
-      "simple"
-    ],
-    "answer": "unclear"
-  },
-  {
-    "sentence": "A formal email should use a respectful ___.",
-    "options": [
-      "tone",
-      "joke",
-      "rumour",
-      "gesture"
-    ],
-    "answer": "tone"
-  },
-  {
-    "sentence": "She revised the essay to remove ___ words.",
-    "options": [
-      "unnecessary",
-      "golden",
-      "musical",
-      "invisible"
-    ],
-    "answer": "unnecessary"
-  },
-  {
-    "sentence": "The sentence became stronger after she chose a more ___ verb.",
-    "options": [
-      "specific",
-      "sleepy",
-      "broken",
-      "watery"
-    ],
-    "answer": "specific"
-  },
-  {
-    "sentence": "The article was ___, presenting both sides fairly.",
-    "options": [
-      "balanced",
-      "crooked",
-      "furious",
-      "lonely"
-    ],
-    "answer": "balanced"
-  },
-  {
-    "sentence": "He used a dictionary to check the word's ___.",
-    "options": [
-      "meaning",
-      "weather",
-      "height",
-      "price"
-    ],
-    "answer": "meaning"
-  },
-  {
-    "sentence": "The story's ___ revealed why the character changed.",
-    "options": [
-      "ending",
-      "password",
-      "recipe",
-      "volume"
-    ],
-    "answer": "ending"
-  },
-  {
-    "sentence": "A synonym is a word with a similar ___.",
-    "options": [
-      "meaning",
-      "sound",
-      "shape",
-      "weight"
-    ],
-    "answer": "meaning"
-  },
-  {
-    "sentence": "An antonym has the ___ meaning of another word.",
-    "options": [
-      "opposite",
-      "hidden",
-      "same",
-      "minor"
-    ],
-    "answer": "opposite"
-  },
-  {
-    "sentence": "She gave a ___ summary instead of retelling every detail.",
-    "options": [
-      "brief",
-      "messy",
-      "endless",
-      "noisy"
-    ],
-    "answer": "brief"
-  },
-  {
-    "sentence": "The phrase was ___, so it could be interpreted in two ways.",
-    "options": [
-      "ambiguous",
-      "obvious",
-      "tiny",
-      "polite"
-    ],
-    "answer": "ambiguous"
-  },
-  {
-    "sentence": "Strong writers support claims with ___.",
-    "options": [
-      "evidence",
-      "decorations",
-      "excuses",
-      "riddles"
-    ],
-    "answer": "evidence"
-  },
-  {
-    "sentence": "The teacher asked us to ___ the poem line by line.",
-    "options": [
-      "analyse",
-      "ignore",
-      "fold",
-      "chase"
-    ],
-    "answer": "analyse"
-  },
-  {
-    "sentence": "His speech was ___ because it jumped between unrelated ideas.",
-    "options": [
-      "confusing",
-      "focused",
-      "elegant",
-      "accurate"
-    ],
-    "answer": "confusing"
-  },
-  {
-    "sentence": "A comma can separate items in a ___.",
-    "options": [
-      "list",
-      "ladder",
-      "cloud",
-      "river"
-    ],
-    "answer": "list"
-  },
-  {
-    "sentence": "The word 'quickly' is usually an ___.",
-    "options": [
-      "adverb",
-      "noun",
-      "article",
-      "pronoun"
-    ],
-    "answer": "adverb"
-  },
-  {
-    "sentence": "The word 'courage' is an abstract ___.",
-    "options": [
-      "noun",
-      "verb",
-      "preposition",
-      "conjunction"
-    ],
-    "answer": "noun"
-  },
-  {
-    "sentence": "A thesis statement presents the essay's main ___.",
-    "options": [
-      "argument",
-      "font",
-      "address",
-      "shadow"
-    ],
-    "answer": "argument"
-  },
-  {
-    "sentence": "The paragraph needs a smoother ___ between ideas.",
-    "options": [
-      "transition",
-      "collision",
-      "ending",
-      "receipt"
-    ],
-    "answer": "transition"
-  },
-  {
-    "sentence": "She used quotation marks to show the exact ___.",
-    "options": [
-      "words",
-      "colours",
-      "steps",
-      "prices"
-    ],
-    "answer": "words"
-  },
-  {
-    "sentence": "His response was too ___; it took five minutes to say one point.",
-    "options": [
-      "verbose",
-      "concise",
-      "silent",
-      "formal"
-    ],
-    "answer": "verbose"
-  },
-  {
-    "sentence": "The editor removed the ___ because it repeated the same idea.",
-    "options": [
-      "redundancy",
-      "headline",
-      "metaphor",
-      "question"
-    ],
-    "answer": "redundancy"
-  },
-  {
-    "sentence": "The novel's ___ is the time and place of the story.",
-    "options": [
-      "setting",
-      "grammar",
-      "margin",
-      "answer"
-    ],
-    "answer": "setting"
-  },
-  {
-    "sentence": "The ___ of the article is to persuade readers.",
-    "options": [
-      "purpose",
-      "texture",
-      "weather",
-      "volume"
-    ],
-    "answer": "purpose"
-  },
-  {
-    "sentence": "A question mark belongs at the end of an ___ sentence.",
-    "options": [
-      "interrogative",
-      "declarative",
-      "silent",
-      "ordinary"
-    ],
-    "answer": "interrogative"
-  },
-  {
-    "sentence": "The conclusion should ___ the main idea without copying it.",
-    "options": [
-      "restate",
-      "delete",
-      "confuse",
-      "hide"
-    ],
-    "answer": "restate"
-  },
-  {
-    "sentence": "The word 'although' introduces a ___.",
-    "options": [
-      "contrast",
-      "payment",
-      "definition",
-      "celebration"
-    ],
-    "answer": "contrast"
-  },
-  {
-    "sentence": "He chose a ___ example to make the point easier to understand.",
-    "options": [
-      "relevant",
-      "distant",
-      "random",
-      "crooked"
-    ],
-    "answer": "relevant"
-  },
-  {
-    "sentence": "The report was ___, with facts checked carefully.",
-    "options": [
-      "accurate",
-      "careless",
-      "imaginary",
-      "rushed"
-    ],
-    "answer": "accurate"
-  },
-  {
-    "sentence": "She added a ___ to explain where the information came from.",
-    "options": [
-      "citation",
-      "shortcut",
-      "question",
-      "nickname"
-    ],
-    "answer": "citation"
-  },
-  {
-    "sentence": "A metaphor compares two things without using ___.",
-    "options": [
-      "like",
-      "because",
-      "therefore",
-      "however"
-    ],
-    "answer": "like"
-  },
-  {
-    "sentence": "A simile often uses 'like' or ___.",
-    "options": [
-      "as",
-      "and",
-      "but",
-      "if"
-    ],
-    "answer": "as"
-  },
-  {
-    "sentence": "The narrator's ___ affects how the story is told.",
-    "options": [
-      "perspective",
-      "postcode",
-      "calendar",
-      "volume"
-    ],
-    "answer": "perspective"
-  },
-  {
-    "sentence": "A persuasive text tries to ___ the reader.",
-    "options": [
-      "convince",
-      "measure",
-      "decorate",
-      "interrupt"
-    ],
-    "answer": "convince"
-  },
-  {
-    "sentence": "The sentence lacked ___ because the subject and verb did not match.",
-    "options": [
-      "agreement",
-      "colour",
-      "length",
-      "speed"
-    ],
-    "answer": "agreement"
-  },
-  {
-    "sentence": "Good notes capture the ___ points, not every word.",
-    "options": [
-      "key",
-      "tiny",
-      "hidden",
-      "random"
-    ],
-    "answer": "key"
-  },
-  {
-    "sentence": "She used context clues to infer the word's ___.",
-    "options": [
-      "meaning",
-      "temperature",
-      "sound",
-      "size"
-    ],
-    "answer": "meaning"
-  },
-  {
-    "sentence": "The debate became more ___ when both sides gave evidence.",
-    "options": [
-      "substantive",
-      "careless",
-      "sleepy",
-      "empty"
-    ],
-    "answer": "substantive"
-  },
-  {
-    "sentence": "He corrected the ___ mistake before submitting the essay.",
-    "options": [
-      "grammar",
-      "weather",
-      "music",
-      "drawing"
-    ],
-    "answer": "grammar"
-  },
-  {
-    "sentence": "The first sentence of a paragraph is often called the ___ sentence.",
-    "options": [
-      "topic",
-      "secret",
-      "final",
-      "silent"
-    ],
-    "answer": "topic"
-  },
-  {
-    "sentence": "The author created ___ by delaying the answer.",
-    "options": [
-      "suspense",
-      "discount",
-      "furniture",
-      "silence"
-    ],
-    "answer": "suspense"
-  },
-  {
-    "sentence": "She made the instructions more ___ by numbering the steps.",
-    "options": [
-      "logical",
-      "mysterious",
-      "emotional",
-      "distant"
-    ],
-    "answer": "logical"
-  },
-  {
-    "sentence": "The word 'their' shows ___.",
-    "options": [
-      "possession",
-      "movement",
-      "questioning",
-      "comparison"
-    ],
-    "answer": "possession"
-  },
-  {
-    "sentence": "A reliable source is one you can ___.",
-    "options": [
-      "trust",
-      "fold",
-      "colour",
-      "borrow"
-    ],
-    "answer": "trust"
-  },
-  {
-    "sentence": "The essay needed a stronger ___ to grab attention.",
-    "options": [
-      "introduction",
-      "receipt",
-      "shadow",
-      "alphabet"
-    ],
-    "answer": "introduction"
-  },
-  {
-    "sentence": "The character's ___ explains what they want.",
-    "options": [
-      "motivation",
-      "postcode",
-      "costume",
-      "accent"
-    ],
-    "answer": "motivation"
-  },
-  {
-    "sentence": "The paragraph was ___ because every sentence supported the main idea.",
-    "options": [
-      "coherent",
-      "fragile",
-      "unrelated",
-      "random"
-    ],
-    "answer": "coherent"
-  },
-  {
-    "sentence": "She used a ___ tone when writing to the principal.",
-    "options": [
-      "formal",
-      "slangy",
-      "careless",
-      "playful"
-    ],
-    "answer": "formal"
-  },
-  {
-    "sentence": "The article's headline was designed to ___ attention.",
-    "options": [
-      "capture",
-      "lose",
-      "erase",
-      "borrow"
-    ],
-    "answer": "capture"
-  },
-  {
-    "sentence": "He used ___ language so readers could not misunderstand.",
-    "options": [
-      "precise",
-      "vague",
-      "lazy",
-      "dull"
-    ],
-    "answer": "precise"
-  },
-  {
-    "sentence": "The sentence was a ___ because it could stand alone.",
-    "options": [
-      "clause",
-      "prefix",
-      "letter",
-      "fragment"
-    ],
-    "answer": "clause"
-  },
-  {
-    "sentence": "The phrase 'in the morning' adds information about ___.",
-    "options": [
-      "time",
-      "ownership",
-      "cause",
-      "contrast"
-    ],
-    "answer": "time"
-  },
-  {
-    "sentence": "A prefix is added to the ___ of a word.",
-    "options": [
-      "beginning",
-      "middle",
-      "ending",
-      "definition"
-    ],
-    "answer": "beginning"
-  },
-  {
-    "sentence": "A suffix is added to the ___ of a word.",
-    "options": [
-      "end",
-      "front",
-      "sound",
-      "meaning"
-    ],
-    "answer": "end"
-  },
-  {
-    "sentence": "The teacher asked for a ___ answer, not a one-word reply.",
-    "options": [
-      "complete",
-      "tiny",
-      "secret",
-      "blurred"
-    ],
-    "answer": "complete"
-  },
-  {
-    "sentence": "The writer's ___ was calm even while discussing a serious issue.",
-    "options": [
-      "tone",
-      "height",
-      "shape",
-      "colour"
-    ],
-    "answer": "tone"
-  },
-  {
-    "sentence": "The speech was memorable because it used ___ repetition.",
-    "options": [
-      "purposeful",
-      "accidental",
-      "empty",
-      "silent"
-    ],
-    "answer": "purposeful"
-  }
+  { sentence: "She spoke with great ___ during the presentation.", options: ["confidence","confusion","sadness","anger"], answer: "confidence" },
+  { sentence: "The ___ of the river was crystal clear.", options: ["water","colour","surface","texture"], answer: "surface" },
+  { sentence: "He ___ the book in just two days.", options: ["finished","broken","slept","drove"], answer: "finished" },
+  { sentence: "The team worked hard to ___ their goal.", options: ["achieve","avoid","ignore","destroy"], answer: "achieve" },
+  { sentence: "She had a ___ smile that lit up the room.", options: ["radiant","dull","tiny","cold"], answer: "radiant" },
+  { sentence: "Reading daily helps ___ your vocabulary.", options: ["expand","shrink","break","limit"], answer: "expand" },
+  { sentence: "The ___ athlete trained for years to reach the Olympics.", options: ["dedicated","lazy","average","tired"], answer: "dedicated" },
+  { sentence: "He always arrives ___ to every meeting.", options: ["punctually","late","barely","randomly"], answer: "punctually" },
 ];
 
-const WORD_LIST = [
-  "ABOUT",
-  "ABUSE",
-  "ACTOR",
-  "ACUTE",
-  "ADAPT",
-  "ADMIT",
-  "ADOPT",
-  "ADULT",
-  "AFTER",
-  "AGAIN",
-  "AGENT",
-  "AGREE",
-  "AHEAD",
-  "ALARM",
-  "ALBUM",
-  "ALERT",
-  "ALIKE",
-  "ALIVE",
-  "ALLOW",
-  "ALTER",
-  "AMONG",
-  "ANGER",
-  "ANGLE",
-  "APPLY",
-  "ARENA",
-  "ARGUE",
-  "ARISE",
-  "ASIDE",
-  "ASSET",
-  "AUDIO",
-  "AVOID",
-  "BASIC",
-  "BASIS",
-  "BEACH",
-  "BEGIN",
-  "BEING",
-  "BELOW",
-  "BENCH",
-  "BIRTH",
-  "BLAME",
-  "BLOCK",
-  "BLOOM",
-  "BOARD",
-  "BOOST",
-  "BRAIN",
-  "BRAND",
-  "BRAVE",
-  "BREAK",
-  "BRIEF",
-  "BRING",
-  "BROAD",
-  "BROWN",
-  "BUILD",
-  "CARRY",
-  "CATCH",
-  "CAUSE",
-  "CHAIN",
-  "CHAIR",
-  "CHART",
-  "CHECK",
-  "CHEST",
-  "CHIEF",
-  "CHILD",
-  "CLAIM",
-  "CLASS",
-  "CLEAN",
-  "CLEAR",
-  "CLIMB",
-  "CLOSE",
-  "COACH",
-  "COAST",
-  "COULD",
-  "COUNT",
-  "COURT",
-  "COVER",
-  "CRAFT",
-  "CRASH",
-  "CREAM",
-  "CRISP",
-  "CROWD",
-  "CROWN",
-  "CURVE",
-  "DAILY",
-  "DANCE",
-  "DEALT",
-  "DEBTS",
-  "DEPTH",
-  "DOUBT",
-  "DREAM",
-  "DRESS",
-  "DRIVE",
-  "EARLY",
-  "EARTH",
-  "EIGHT",
-  "ELITE",
-  "EMPTY",
-  "ENEMY",
-  "ENJOY",
-  "ENTER",
-  "EQUAL",
-  "ERROR",
-  "EVENT",
-  "EVERY",
-  "EXACT",
-  "FAITH",
-  "FALSE",
-  "FAULT",
-  "FIELD",
-  "FINAL",
-  "FIRST",
-  "FLEET",
-  "FLOOR",
-  "FOCUS",
-  "FORCE",
-  "FRAME",
-  "FRESH",
-  "FRONT",
-  "FRUIT",
-  "GIANT",
-  "GIVEN",
-  "GLASS",
-  "GLOBE",
-  "GOING",
-  "GRACE",
-  "GRADE",
-  "GRANT",
-  "GREAT",
-  "GREEN",
-  "GROUP",
-  "GROWN",
-  "GUARD",
-  "GUESS",
-  "GUEST",
-  "GUIDE",
-  "HABIT",
-  "HAPPY",
-  "HEART",
-  "HEAVY",
-  "HENCE",
-  "HONOR",
-  "HOUSE",
-  "HUMAN",
-  "HUMOR",
-  "IDEAL",
-  "IMAGE",
-  "INDEX",
-  "INNER",
-  "INPUT",
-  "ISSUE",
-  "JOINT",
-  "JUDGE",
-  "KNOWN",
-  "LABEL",
-  "LARGE",
-  "LATER",
-  "LAUGH",
-  "LAYER",
-  "LEARN",
-  "LEAST",
-  "LEAVE",
-  "LEGAL",
-  "LEVEL",
-  "LIGHT",
-  "LIMIT",
-  "LOCAL",
-  "LOGIC",
-  "LOOSE",
-  "LUCKY",
-  "MAJOR",
-  "MARCH",
-  "MATCH",
-  "MAYBE",
-  "MEDIA",
-  "MIGHT",
-  "MINOR",
-  "MODEL",
-  "MONEY",
-  "MONTH",
-  "MORAL",
-  "MOTOR",
-  "MOUNT",
-  "MOUSE",
-  "MOUTH",
-  "MOVIE",
-  "MUSIC",
-  "NEEDS",
-  "NEVER",
-  "NIGHT",
-  "NOISE",
-  "NORTH",
-  "NOVEL",
-  "NURSE",
-  "OFFER",
-  "OFTEN",
-  "ORDER",
-  "OTHER",
-  "OUGHT",
-  "OWNER",
-  "PANEL",
-  "PAPER",
-  "PARTY",
-  "PEACE",
-  "PHASE",
-  "PHONE",
-  "PIECE",
-  "PILOT",
-  "PITCH",
-  "PLACE",
-  "PLAIN",
-  "PLANE",
-  "PLANT",
-  "POINT",
-  "POWER",
-  "PRESS",
-  "PRICE",
-  "PRIDE",
-  "PRIME",
-  "PRINT",
-  "PRIOR",
-  "PROOF",
-  "PROUD",
-  "QUICK",
-  "QUIET",
-  "RADIO",
-  "RAISE",
-  "RANGE",
-  "RAPID",
-  "REACH",
-  "READY",
-  "REALM",
-  "REFER",
-  "RIGHT",
-  "RIVER",
-  "ROUGH",
-  "ROUND",
-  "ROUTE",
-  "ROYAL",
-  "SCALE",
-  "SCENE",
-  "SCOPE",
-  "SCORE",
-  "SENSE",
-  "SERVE",
-  "SHARE",
-  "SHARP",
-  "SHEET",
-  "SHIFT",
-  "SHORT",
-  "SKILL",
-  "SMART",
-  "SMILE",
-  "SOLID",
-  "SOUND",
-  "SOUTH",
-  "SPACE",
-  "SPEAK",
-  "SPEED",
-  "SPEND",
-  "SPORT",
-  "STAFF",
-  "STAGE",
-  "STAND",
-  "START",
-  "STATE",
-  "STEAM",
-  "STEEL",
-  "STILL",
-  "STOCK",
-  "STONE",
-  "STORE",
-  "STORY",
-  "STYLE",
-  "SUGAR",
-  "TABLE",
-  "TEACH",
-  "THANK",
-  "THEME",
-  "THINK",
-  "THROW",
-  "TIGHT",
-  "TIMER",
-  "TITLE",
-  "TODAY",
-  "TOPIC",
-  "TOTAL",
-  "TOUCH",
-  "TRACE",
-  "TRACK",
-  "TRADE",
-  "TRAIN",
-  "TREAT",
-  "TREND",
-  "TRIAL",
-  "TRUST",
-  "TRUTH",
-  "UNION",
-  "UNTIL",
-  "UPPER",
-  "URBAN",
-  "USAGE",
-  "VALUE",
-  "VIDEO",
-  "VISIT",
-  "VOICE",
-  "WASTE",
-  "WATCH",
-  "WATER",
-  "WHERE",
-  "WHILE",
-  "WHOLE",
-  "WOMAN",
-  "WORLD",
-  "WORTH",
-  "WRITE",
-  "WRONG",
-  "YOUNG"
-];
+// ── English: Word Guess (Wordle-style) ─────────────────────────
+const WORD_LIST = ["SPEAK","TRADE","MONEY","LEARN","SMART","BRAVE","FOCUS","THINK","SKILL","WORTH"];
 
+// ── English: Vocab Match ───────────────────────────────────────
 const VOCAB_PAIRS = [
-  {
-    "word": "Eloquent",
-    "def": "Fluent, expressive, and persuasive when speaking or writing"
-  },
-  {
-    "word": "Diligent",
-    "def": "Showing careful and steady effort"
-  },
-  {
-    "word": "Resilient",
-    "def": "Able to recover after difficulty"
-  },
-  {
-    "word": "Concise",
-    "def": "Clear while using few words"
-  },
-  {
-    "word": "Ambiguous",
-    "def": "Able to be understood in more than one way"
-  },
-  {
-    "word": "Verbose",
-    "def": "Using more words than necessary"
-  },
-  {
-    "word": "Infer",
-    "def": "Work out a meaning from clues"
-  },
-  {
-    "word": "Context",
-    "def": "The surrounding words or situation that help explain meaning"
-  },
-  {
-    "word": "Evidence",
-    "def": "Facts or examples used to support a point"
-  },
-  {
-    "word": "Thesis",
-    "def": "The main argument of an essay"
-  },
-  {
-    "word": "Coherent",
-    "def": "Logical and easy to follow"
-  },
-  {
-    "word": "Persuasive",
-    "def": "Intended to convince someone"
-  },
-  {
-    "word": "Objective",
-    "def": "Based on facts rather than feelings"
-  },
-  {
-    "word": "Subjective",
-    "def": "Based on personal opinion or feeling"
-  },
-  {
-    "word": "Tone",
-    "def": "The attitude shown by a piece of writing"
-  },
-  {
-    "word": "Audience",
-    "def": "The people a text is written or spoken for"
-  },
-  {
-    "word": "Purpose",
-    "def": "The reason a text is created"
-  },
-  {
-    "word": "Metaphor",
-    "def": "A direct comparison between unlike things"
-  },
-  {
-    "word": "Simile",
-    "def": "A comparison using like or as"
-  },
-  {
-    "word": "Alliteration",
-    "def": "Repeated starting sounds in nearby words"
-  },
-  {
-    "word": "Irony",
-    "def": "A contrast between expectation and reality"
-  },
-  {
-    "word": "Foreshadowing",
-    "def": "Hints about what may happen later"
-  },
-  {
-    "word": "Protagonist",
-    "def": "The main character in a story"
-  },
-  {
-    "word": "Antagonist",
-    "def": "A character or force opposing the main character"
-  },
-  {
-    "word": "Motivation",
-    "def": "The reason a character acts"
-  },
-  {
-    "word": "Conflict",
-    "def": "A struggle between opposing forces"
-  },
-  {
-    "word": "Resolution",
-    "def": "The part where the main problem is settled"
-  },
-  {
-    "word": "Theme",
-    "def": "A deeper message or idea in a text"
-  },
-  {
-    "word": "Setting",
-    "def": "The time and place of a story"
-  },
-  {
-    "word": "Narrator",
-    "def": "The voice telling the story"
-  },
-  {
-    "word": "Perspective",
-    "def": "A point of view"
-  },
-  {
-    "word": "Bias",
-    "def": "An unfair preference for one side"
-  },
-  {
-    "word": "Citation",
-    "def": "A note showing the source of information"
-  },
-  {
-    "word": "Paraphrase",
-    "def": "Restate an idea in your own words"
-  },
-  {
-    "word": "Summarise",
-    "def": "Give the main points briefly"
-  },
-  {
-    "word": "Analyse",
-    "def": "Break something down to understand it"
-  },
-  {
-    "word": "Evaluate",
-    "def": "Judge the value or quality of something"
-  },
-  {
-    "word": "Compare",
-    "def": "Explain similarities"
-  },
-  {
-    "word": "Contrast",
-    "def": "Explain differences"
-  },
-  {
-    "word": "Transition",
-    "def": "A word or phrase that links ideas"
-  },
-  {
-    "word": "Clause",
-    "def": "A group of words with a subject and verb"
-  },
-  {
-    "word": "Fragment",
-    "def": "An incomplete sentence"
-  },
-  {
-    "word": "Predicate",
-    "def": "The part of a sentence that says what the subject does or is"
-  },
-  {
-    "word": "Adjective",
-    "def": "A word that describes a noun"
-  },
-  {
-    "word": "Adverb",
-    "def": "A word that describes a verb, adjective, or another adverb"
-  },
-  {
-    "word": "Preposition",
-    "def": "A word showing relationship, such as in, on, or before"
-  },
-  {
-    "word": "Conjunction",
-    "def": "A word that joins words or ideas"
-  },
-  {
-    "word": "Pronoun",
-    "def": "A word used in place of a noun"
-  },
-  {
-    "word": "Synonym",
-    "def": "A word with a similar meaning"
-  },
-  {
-    "word": "Antonym",
-    "def": "A word with the opposite meaning"
-  },
-  {
-    "word": "Prefix",
-    "def": "Letters added to the start of a word"
-  },
-  {
-    "word": "Suffix",
-    "def": "Letters added to the end of a word"
-  },
-  {
-    "word": "Root Word",
-    "def": "The basic part of a word"
-  },
-  {
-    "word": "Nuance",
-    "def": "A small but important difference in meaning"
-  },
-  {
-    "word": "Connotation",
-    "def": "The feeling or idea linked to a word"
-  },
-  {
-    "word": "Denotation",
-    "def": "The literal dictionary meaning of a word"
-  },
-  {
-    "word": "Rhetoric",
-    "def": "Language used to persuade or influence"
-  },
-  {
-    "word": "Anecdote",
-    "def": "A short personal story used to make a point"
-  },
-  {
-    "word": "Hyperbole",
-    "def": "Deliberate exaggeration"
-  },
-  {
-    "word": "Credible",
-    "def": "Believable and trustworthy"
-  },
-  {
-    "word": "Plagiarism",
-    "def": "Using someone else's work without credit"
-  },
-  {
-    "word": "Syntax",
-    "def": "The arrangement of words in a sentence"
-  },
-  {
-    "word": "Punctuation",
-    "def": "Marks that help organise meaning in writing"
-  },
-  {
-    "word": "Register",
-    "def": "The level of formality in language"
-  }
+  { word: "Eloquent",   def: "Well-spoken & expressive" },
+  { word: "Diligent",   def: "Hardworking & careful" },
+  { word: "Resilient",  def: "Bounces back from difficulty" },
+  { word: "Concise",    def: "Clear and brief" },
+  { word: "Ambiguous",  def: "Open to more than one meaning" },
+  { word: "Verbose",    def: "Using more words than needed" },
 ];
 
+// ── English: Sentence Builder ──────────────────────────────────
 const SENTENCE_QS = [
-  {
-    "words": [
-      "strong",
-      "ideas",
-      "to",
-      "understand",
-      "makes",
-      "easier",
-      "Clear",
-      "writing"
-    ],
-    "answer": [
-      "Clear",
-      "writing",
-      "makes",
-      "strong",
-      "ideas",
-      "easier",
-      "to",
-      "understand"
-    ]
-  },
-  {
-    "words": [
-      "uses",
-      "powerful",
-      "sentence",
-      "precise",
-      "A",
-      "words"
-    ],
-    "answer": [
-      "A",
-      "powerful",
-      "sentence",
-      "uses",
-      "precise",
-      "words"
-    ]
-  },
-  {
-    "words": [
-      "evidence",
-      "for",
-      "look",
-      "judging",
-      "before",
-      "readers",
-      "a",
-      "claim",
-      "Good"
-    ],
-    "answer": [
-      "Good",
-      "readers",
-      "look",
-      "for",
-      "evidence",
-      "before",
-      "judging",
-      "a",
-      "claim"
-    ]
-  },
-  {
-    "words": [
-      "paragraph",
-      "the",
-      "The",
-      "idea",
-      "guide",
-      "should",
-      "main",
-      "whole"
-    ],
-    "answer": [
-      "The",
-      "main",
-      "idea",
-      "should",
-      "guide",
-      "the",
-      "whole",
-      "paragraph"
-    ]
-  },
-  {
-    "words": [
-      "they",
-      "Strong",
-      "speakers",
-      "pause",
-      "before",
-      "answer"
-    ],
-    "answer": [
-      "Strong",
-      "speakers",
-      "pause",
-      "before",
-      "they",
-      "answer"
-    ]
-  },
-  {
-    "words": [
-      "clear",
-      "argument",
-      "a",
-      "Every",
-      "needs",
-      "essay"
-    ],
-    "answer": [
-      "Every",
-      "essay",
-      "needs",
-      "a",
-      "clear",
-      "argument"
-    ]
-  },
-  {
-    "words": [
-      "keep",
-      "points",
-      "A",
-      "the",
-      "only",
-      "key",
-      "should",
-      "summary"
-    ],
-    "answer": [
-      "A",
-      "summary",
-      "should",
-      "keep",
-      "only",
-      "the",
-      "key",
-      "points"
-    ]
-  },
-  {
-    "words": [
-      "sharper",
-      "revise",
-      "sentences",
-      "meaning",
-      "to",
-      "Writers",
-      "make"
-    ],
-    "answer": [
-      "Writers",
-      "revise",
-      "sentences",
-      "to",
-      "make",
-      "meaning",
-      "sharper"
-    ]
-  },
-  {
-    "words": [
-      "widely",
-      "Reading",
-      "vocabulary",
-      "builds",
-      "and",
-      "confidence"
-    ],
-    "answer": [
-      "Reading",
-      "widely",
-      "builds",
-      "vocabulary",
-      "and",
-      "confidence"
-    ]
-  },
-  {
-    "words": [
-      "sound",
-      "should",
-      "and",
-      "email",
-      "clear",
-      "respectful",
-      "A",
-      "formal"
-    ],
-    "answer": [
-      "A",
-      "formal",
-      "email",
-      "should",
-      "sound",
-      "respectful",
-      "and",
-      "clear"
-    ]
-  },
-  {
-    "words": [
-      "not",
-      "facts",
-      "best",
-      "answer",
-      "uses",
-      "The",
-      "guesswork"
-    ],
-    "answer": [
-      "The",
-      "best",
-      "answer",
-      "uses",
-      "facts",
-      "not",
-      "guesswork"
-    ]
-  },
-  {
-    "words": [
-      "A",
-      "introduces",
-      "the",
-      "point",
-      "main",
-      "sentence",
-      "topic"
-    ],
-    "answer": [
-      "A",
-      "topic",
-      "sentence",
-      "introduces",
-      "the",
-      "main",
-      "point"
-    ]
-  },
-  {
-    "words": [
-      "sentence",
-      "Transitions",
-      "from",
-      "the",
-      "one",
-      "to",
-      "next",
-      "flow",
-      "ideas",
-      "help"
-    ],
-    "answer": [
-      "Transitions",
-      "help",
-      "ideas",
-      "flow",
-      "from",
-      "one",
-      "sentence",
-      "to",
-      "the",
-      "next"
-    ]
-  },
-  {
-    "words": [
-      "leaves",
-      "conclusion",
-      "the",
-      "clarity",
-      "strong",
-      "A",
-      "with",
-      "reader"
-    ],
-    "answer": [
-      "A",
-      "strong",
-      "conclusion",
-      "leaves",
-      "the",
-      "reader",
-      "with",
-      "clarity"
-    ]
-  },
-  {
-    "words": [
-      "Careful",
-      "change",
-      "meaning",
-      "of",
-      "can",
-      "sentence",
-      "a",
-      "punctuation",
-      "the"
-    ],
-    "answer": [
-      "Careful",
-      "punctuation",
-      "can",
-      "change",
-      "the",
-      "meaning",
-      "of",
-      "a",
-      "sentence"
-    ]
-  },
-  {
-    "words": [
-      "The",
-      "imagery",
-      "create",
-      "to",
-      "picture",
-      "uses",
-      "author",
-      "clear",
-      "a"
-    ],
-    "answer": [
-      "The",
-      "author",
-      "uses",
-      "imagery",
-      "to",
-      "create",
-      "a",
-      "clear",
-      "picture"
-    ]
-  },
-  {
-    "words": [
-      "side",
-      "than",
-      "A",
-      "balanced",
-      "argument",
-      "shows",
-      "more",
-      "one"
-    ],
-    "answer": [
-      "A",
-      "balanced",
-      "argument",
-      "shows",
-      "more",
-      "than",
-      "one",
-      "side"
-    ]
-  },
-  {
-    "words": [
-      "ideas",
-      "instead",
-      "capture",
-      "everything",
-      "of",
-      "Good",
-      "copying",
-      "notes"
-    ],
-    "answer": [
-      "Good",
-      "notes",
-      "capture",
-      "ideas",
-      "instead",
-      "of",
-      "copying",
-      "everything"
-    ]
-  },
-  {
-    "words": [
-      "feel",
-      "make",
-      "verbs",
-      "Specific",
-      "writing",
-      "more",
-      "alive"
-    ],
-    "answer": [
-      "Specific",
-      "verbs",
-      "make",
-      "writing",
-      "feel",
-      "more",
-      "alive"
-    ]
-  },
-  {
-    "words": [
-      "during",
-      "speaker",
-      "a",
-      "used",
-      "tone",
-      "The",
-      "debate",
-      "calm",
-      "the"
-    ],
-    "answer": [
-      "The",
-      "speaker",
-      "used",
-      "a",
-      "calm",
-      "tone",
-      "during",
-      "the",
-      "debate"
-    ]
-  },
-  {
-    "words": [
-      "whole",
-      "weaken",
-      "An",
-      "a",
-      "argument",
-      "can",
-      "source",
-      "unreliable"
-    ],
-    "answer": [
-      "An",
-      "unreliable",
-      "source",
-      "can",
-      "weaken",
-      "a",
-      "whole",
-      "argument"
-    ]
-  },
-  {
-    "words": [
-      "readers",
-      "unknown",
-      "help",
-      "Context",
-      "meanings",
-      "clues",
-      "infer"
-    ],
-    "answer": [
-      "Context",
-      "clues",
-      "help",
-      "readers",
-      "infer",
-      "unknown",
-      "meanings"
-    ]
-  },
-  {
-    "words": [
-      "compares",
-      "two",
-      "A",
-      "metaphor",
-      "things",
-      "directly"
-    ],
-    "answer": [
-      "A",
-      "metaphor",
-      "compares",
-      "two",
-      "things",
-      "directly"
-    ]
-  },
-  {
-    "words": [
-      "words",
-      "simile",
-      "like",
-      "or",
-      "uses",
-      "as",
-      "the",
-      "A",
-      "often"
-    ],
-    "answer": [
-      "A",
-      "simile",
-      "often",
-      "uses",
-      "the",
-      "words",
-      "like",
-      "or",
-      "as"
-    ]
-  },
-  {
-    "words": [
-      "the",
-      "reader",
-      "what",
-      "The",
-      "narrator",
-      "controls",
-      "knows"
-    ],
-    "answer": [
-      "The",
-      "narrator",
-      "controls",
-      "what",
-      "the",
-      "reader",
-      "knows"
-    ]
-  },
-  {
-    "words": [
-      "changes",
-      "is",
-      "their",
-      "tested",
-      "A",
-      "when",
-      "motivation",
-      "character"
-    ],
-    "answer": [
-      "A",
-      "character",
-      "changes",
-      "when",
-      "their",
-      "motivation",
-      "is",
-      "tested"
-    ]
-  },
-  {
-    "words": [
-      "Grammar",
-      "clear",
-      "sentences",
-      "help",
-      "rules",
-      "stay"
-    ],
-    "answer": [
-      "Grammar",
-      "rules",
-      "help",
-      "sentences",
-      "stay",
-      "clear"
-    ]
-  },
-  {
-    "words": [
-      "The",
-      "is",
-      "ideas",
-      "draft",
-      "begin",
-      "where",
-      "first"
-    ],
-    "answer": [
-      "The",
-      "first",
-      "draft",
-      "is",
-      "where",
-      "ideas",
-      "begin"
-    ]
-  },
-  {
-    "words": [
-      "is",
-      "where",
-      "gets",
-      "Revision",
-      "stronger",
-      "writing",
-      "good"
-    ],
-    "answer": [
-      "Revision",
-      "is",
-      "where",
-      "good",
-      "writing",
-      "gets",
-      "stronger"
-    ]
-  },
-  {
-    "words": [
-      "ends",
-      "a",
-      "direct",
-      "question",
-      "question",
-      "mark",
-      "A"
-    ],
-    "answer": [
-      "A",
-      "question",
-      "mark",
-      "ends",
-      "a",
-      "direct",
-      "question"
-    ]
-  },
-  {
-    "words": [
-      "the",
-      "show",
-      "exact",
-      "marks",
-      "someone",
-      "words",
-      "said",
-      "Quotation"
-    ],
-    "answer": [
-      "Quotation",
-      "marks",
-      "show",
-      "the",
-      "exact",
-      "words",
-      "someone",
-      "said"
-    ]
-  },
-  {
-    "words": [
-      "main",
-      "idea",
-      "focus",
-      "should",
-      "paragraph",
-      "on",
-      "A",
-      "one"
-    ],
-    "answer": [
-      "A",
-      "paragraph",
-      "should",
-      "focus",
-      "on",
-      "one",
-      "main",
-      "idea"
-    ]
-  },
-  {
-    "words": [
-      "should",
-      "without",
-      "The",
-      "readers",
-      "misleading",
-      "headline",
-      "attention",
-      "capture"
-    ],
-    "answer": [
-      "The",
-      "headline",
-      "should",
-      "capture",
-      "attention",
-      "without",
-      "misleading",
-      "readers"
-    ]
-  },
-  {
-    "words": [
-      "change",
-      "tries",
-      "think",
-      "to",
-      "what",
-      "Persuasive",
-      "writing",
-      "people"
-    ],
-    "answer": [
-      "Persuasive",
-      "writing",
-      "tries",
-      "to",
-      "change",
-      "what",
-      "people",
-      "think"
-    ]
-  },
-  {
-    "words": [
-      "keeps",
-      "language",
-      "facts",
-      "out",
-      "Objective",
-      "of",
-      "emotion",
-      "the"
-    ],
-    "answer": [
-      "Objective",
-      "language",
-      "keeps",
-      "emotion",
-      "out",
-      "of",
-      "the",
-      "facts"
-    ]
-  },
-  {
-    "words": [
-      "personal",
-      "opinions",
-      "feelings",
-      "language",
-      "Subjective",
-      "shows",
-      "or"
-    ],
-    "answer": [
-      "Subjective",
-      "language",
-      "shows",
-      "personal",
-      "feelings",
-      "or",
-      "opinions"
-    ]
-  },
-  {
-    "words": [
-      "checked",
-      "A",
-      "be",
-      "source",
-      "and",
-      "can",
-      "credible",
-      "trusted"
-    ],
-    "answer": [
-      "A",
-      "credible",
-      "source",
-      "can",
-      "be",
-      "checked",
-      "and",
-      "trusted"
-    ]
-  },
-  {
-    "words": [
-      "audience",
-      "match",
-      "speakers",
-      "message",
-      "The",
-      "their",
-      "to",
-      "their",
-      "best"
-    ],
-    "answer": [
-      "The",
-      "best",
-      "speakers",
-      "match",
-      "their",
-      "message",
-      "to",
-      "their",
-      "audience"
-    ]
-  },
-  {
-    "words": [
-      "impact",
-      "can",
-      "speed",
-      "create",
-      "and",
-      "sentences",
-      "Short"
-    ],
-    "answer": [
-      "Short",
-      "sentences",
-      "can",
-      "create",
-      "speed",
-      "and",
-      "impact"
-    ]
-  },
-  {
-    "words": [
-      "can",
-      "complex",
-      "relationships",
-      "sentences",
-      "Longer",
-      "ideas",
-      "between",
-      "show"
-    ],
-    "answer": [
-      "Longer",
-      "sentences",
-      "can",
-      "show",
-      "complex",
-      "relationships",
-      "between",
-      "ideas"
-    ]
-  },
-  {
-    "words": [
-      "The",
-      "the",
-      "ending",
-      "main",
-      "conflict",
-      "should",
-      "resolve"
-    ],
-    "answer": [
-      "The",
-      "ending",
-      "should",
-      "resolve",
-      "the",
-      "main",
-      "conflict"
-    ]
-  },
-  {
-    "words": [
-      "hints",
-      "about",
-      "Foreshadowing",
-      "future",
-      "small",
-      "events",
-      "gives"
-    ],
-    "answer": [
-      "Foreshadowing",
-      "gives",
-      "small",
-      "hints",
-      "about",
-      "future",
-      "events"
-    ]
-  },
-  {
-    "words": [
-      "often",
-      "reversed",
-      "creates",
-      "surprise",
-      "because",
-      "are",
-      "Irony",
-      "expectations"
-    ],
-    "answer": [
-      "Irony",
-      "often",
-      "creates",
-      "surprise",
-      "because",
-      "expectations",
-      "are",
-      "reversed"
-    ]
-  },
-  {
-    "words": [
-      "a",
-      "make",
-      "sound",
-      "can",
-      "memorable",
-      "phrase",
-      "Alliteration"
-    ],
-    "answer": [
-      "Alliteration",
-      "can",
-      "make",
-      "a",
-      "phrase",
-      "sound",
-      "memorable"
-    ]
-  },
-  {
-    "words": [
-      "the",
-      "word",
-      "changes",
-      "A",
-      "a",
-      "of",
-      "from",
-      "prefix",
-      "front",
-      "meaning"
-    ],
-    "answer": [
-      "A",
-      "prefix",
-      "changes",
-      "meaning",
-      "from",
-      "the",
-      "front",
-      "of",
-      "a",
-      "word"
-    ]
-  },
-  {
-    "words": [
-      "A",
-      "from",
-      "meaning",
-      "of",
-      "word",
-      "suffix",
-      "changes",
-      "the",
-      "a",
-      "end"
-    ],
-    "answer": [
-      "A",
-      "suffix",
-      "changes",
-      "meaning",
-      "from",
-      "the",
-      "end",
-      "of",
-      "a",
-      "word"
-    ]
-  },
-  {
-    "words": [
-      "express",
-      "Strong",
-      "vocabulary",
-      "you",
-      "precision",
-      "with",
-      "ideas",
-      "helps"
-    ],
-    "answer": [
-      "Strong",
-      "vocabulary",
-      "helps",
-      "you",
-      "express",
-      "ideas",
-      "with",
-      "precision"
-    ]
-  },
-  {
-    "words": [
-      "reader",
-      "should",
-      "example",
-      "matters",
-      "each",
-      "why",
-      "understand",
-      "The"
-    ],
-    "answer": [
-      "The",
-      "reader",
-      "should",
-      "understand",
-      "why",
-      "each",
-      "example",
-      "matters"
-    ]
-  },
-  {
-    "words": [
-      "other",
-      "understand",
-      "that",
-      "the",
-      "A",
-      "shows",
-      "counterargument",
-      "you",
-      "side"
-    ],
-    "answer": [
-      "A",
-      "counterargument",
-      "shows",
-      "that",
-      "you",
-      "understand",
-      "the",
-      "other",
-      "side"
-    ]
-  },
-  {
-    "words": [
-      "is",
-      "rebuttal",
-      "counterargument",
-      "A",
-      "weaker",
-      "the",
-      "why",
-      "explains"
-    ],
-    "answer": [
-      "A",
-      "rebuttal",
-      "explains",
-      "why",
-      "the",
-      "counterargument",
-      "is",
-      "weaker"
-    ]
-  },
-  {
-    "words": [
-      "make",
-      "simple",
-      "can",
-      "powerful",
-      "a",
-      "Careful",
-      "idea",
-      "choice",
-      "word"
-    ],
-    "answer": [
-      "Careful",
-      "word",
-      "choice",
-      "can",
-      "make",
-      "a",
-      "simple",
-      "idea",
-      "powerful"
-    ]
-  },
-  {
-    "words": [
-      "The",
-      "readers",
-      "argument",
-      "the",
-      "introduction",
-      "should",
-      "for",
-      "prepare"
-    ],
-    "answer": [
-      "The",
-      "introduction",
-      "should",
-      "prepare",
-      "readers",
-      "for",
-      "the",
-      "argument"
-    ]
-  },
-  {
-    "words": [
-      "claim",
-      "to",
-      "must",
-      "clearly",
-      "the",
-      "Evidence",
-      "connect"
-    ],
-    "answer": [
-      "Evidence",
-      "must",
-      "connect",
-      "clearly",
-      "to",
-      "the",
-      "claim"
-    ]
-  },
-  {
-    "words": [
-      "sentence",
-      "missing",
-      "part",
-      "complete",
-      "is",
-      "fragment",
-      "a",
-      "of",
-      "A"
-    ],
-    "answer": [
-      "A",
-      "fragment",
-      "is",
-      "missing",
-      "part",
-      "of",
-      "a",
-      "complete",
-      "sentence"
-    ]
-  },
-  {
-    "words": [
-      "clause",
-      "a",
-      "contains",
-      "verb",
-      "and",
-      "A",
-      "subject",
-      "a"
-    ],
-    "answer": [
-      "A",
-      "clause",
-      "contains",
-      "a",
-      "subject",
-      "and",
-      "a",
-      "verb"
-    ]
-  },
-  {
-    "words": [
-      "subject",
-      "or",
-      "what",
-      "predicate",
-      "the",
-      "tells",
-      "does",
-      "The",
-      "is"
-    ],
-    "answer": [
-      "The",
-      "predicate",
-      "tells",
-      "what",
-      "the",
-      "subject",
-      "does",
-      "or",
-      "is"
-    ]
-  },
-  {
-    "words": [
-      "replace",
-      "noun",
-      "avoid",
-      "pronoun",
-      "to",
-      "repetition",
-      "can",
-      "a",
-      "A"
-    ],
-    "answer": [
-      "A",
-      "pronoun",
-      "can",
-      "replace",
-      "a",
-      "noun",
-      "to",
-      "avoid",
-      "repetition"
-    ]
-  },
-  {
-    "words": [
-      "or",
-      "connect",
-      "phrases",
-      "words",
-      "Conjunctions",
-      "clauses"
-    ],
-    "answer": [
-      "Conjunctions",
-      "connect",
-      "words",
-      "phrases",
-      "or",
-      "clauses"
-    ]
-  },
-  {
-    "words": [
-      "ideas",
-      "sentence",
-      "Prepositions",
-      "between",
-      "in",
-      "a",
-      "show",
-      "relationships"
-    ],
-    "answer": [
-      "Prepositions",
-      "show",
-      "relationships",
-      "between",
-      "ideas",
-      "in",
-      "a",
-      "sentence"
-    ]
-  },
-  {
-    "words": [
-      "clear",
-      "confident",
-      "A",
-      "answer",
-      "polished",
-      "sounds",
-      "and",
-      "complete"
-    ],
-    "answer": [
-      "A",
-      "polished",
-      "answer",
-      "sounds",
-      "clear",
-      "complete",
-      "and",
-      "confident"
-    ]
-  }
+  { words: ["always", "hard", "You", "should", "work"], answer: ["You", "should", "always", "work", "hard"] },
+  { words: ["the", "Knowledge", "key", "is", "to", "success"], answer: ["Knowledge", "is", "the", "key", "to", "success"] },
+  { words: ["your", "Build", "every", "skills", "day"], answer: ["Build", "your", "skills", "every", "day"] },
+  { words: ["reading", "daily", "Start", "books"], answer: ["Start", "reading", "books", "daily"] },
 ];
 
+// ── English: Word Trivia ───────────────────────────────────────
 const WORD_TRIVIA = [
-  {
-    "q": "Which word is a noun?",
-    "opts": [
-      "Quickly",
-      "Bravery",
-      "Jump",
-      "Blue"
-    ],
-    "ans": "Bravery"
-  },
-  {
-    "q": "Which word is a verb?",
-    "opts": [
-      "Decision",
-      "Decide",
-      "Careful",
-      "Silent"
-    ],
-    "ans": "Decide"
-  },
-  {
-    "q": "Which word is an adjective?",
-    "opts": [
-      "Carefully",
-      "Bright",
-      "Run",
-      "Chair"
-    ],
-    "ans": "Bright"
-  },
-  {
-    "q": "Which word is an adverb?",
-    "opts": [
-      "Slowly",
-      "Table",
-      "Green",
-      "Create"
-    ],
-    "ans": "Slowly"
-  },
-  {
-    "q": "What is a synonym for 'happy'?",
-    "opts": [
-      "Joyful",
-      "Angry",
-      "Tired",
-      "Empty"
-    ],
-    "ans": "Joyful"
-  },
-  {
-    "q": "What is an antonym for 'expand'?",
-    "opts": [
-      "Grow",
-      "Shrink",
-      "Open",
-      "Build"
-    ],
-    "ans": "Shrink"
-  },
-  {
-    "q": "What does 'concise' mean?",
-    "opts": [
-      "Clear and brief",
-      "Very loud",
-      "Hard to read",
-      "Full of jokes"
-    ],
-    "ans": "Clear and brief"
-  },
-  {
-    "q": "What does 'ambiguous' mean?",
-    "opts": [
-      "Having more than one possible meaning",
-      "Perfectly clear",
-      "Written in rhyme",
-      "Extremely short"
-    ],
-    "ans": "Having more than one possible meaning"
-  },
-  {
-    "q": "Which sentence is a question?",
-    "opts": [
-      "Close the door.",
-      "Where is my book?",
-      "The sky is blue.",
-      "I like reading."
-    ],
-    "ans": "Where is my book?"
-  },
-  {
-    "q": "Which punctuation ends an exclamation?",
-    "opts": [
-      ".",
-      "?",
-      "!",
-      ";"
-    ],
-    "ans": "!"
-  },
-  {
-    "q": "What is a metaphor?",
-    "opts": [
-      "A direct comparison",
-      "A spelling rule",
-      "A list of facts",
-      "A type of noun"
-    ],
-    "ans": "A direct comparison"
-  },
-  {
-    "q": "What is a simile?",
-    "opts": [
-      "A comparison using like or as",
-      "A paragraph ending",
-      "A word with opposite meaning",
-      "A formal greeting"
-    ],
-    "ans": "A comparison using like or as"
-  },
-  {
-    "q": "Which is a proper noun?",
-    "opts": [
-      "city",
-      "teacher",
-      "Australia",
-      "river"
-    ],
-    "ans": "Australia"
-  },
-  {
-    "q": "Which is a common noun?",
-    "opts": [
-      "Adelaide",
-      "Keanu",
-      "school",
-      "Monday"
-    ],
-    "ans": "school"
-  },
-  {
-    "q": "What is the subject of 'The dog barked loudly'?",
-    "opts": [
-      "The dog",
-      "barked",
-      "loudly",
-      "dog barked"
-    ],
-    "ans": "The dog"
-  },
-  {
-    "q": "What is the verb in 'She writes every day'?",
-    "opts": [
-      "She",
-      "writes",
-      "every",
-      "day"
-    ],
-    "ans": "writes"
-  },
-  {
-    "q": "Which word is a conjunction?",
-    "opts": [
-      "Because",
-      "Under",
-      "Quick",
-      "Chair"
-    ],
-    "ans": "Because"
-  },
-  {
-    "q": "Which word is a preposition?",
-    "opts": [
-      "Before",
-      "Beautiful",
-      "Laugh",
-      "Idea"
-    ],
-    "ans": "Before"
-  },
-  {
-    "q": "What does a thesis statement do?",
-    "opts": [
-      "States the main argument",
-      "Lists every source",
-      "Ends the story",
-      "Defines every word"
-    ],
-    "ans": "States the main argument"
-  },
-  {
-    "q": "What is evidence?",
-    "opts": [
-      "Support for a claim",
-      "A random opinion",
-      "The title only",
-      "A spelling mistake"
-    ],
-    "ans": "Support for a claim"
-  },
-  {
-    "q": "What does 'infer' mean?",
-    "opts": [
-      "Work out from clues",
-      "Copy exactly",
-      "Read aloud",
-      "Disagree loudly"
-    ],
-    "ans": "Work out from clues"
-  },
-  {
-    "q": "Which word is closest to 'reliable'?",
-    "opts": [
-      "Trustworthy",
-      "Colourful",
-      "Tiny",
-      "Noisy"
-    ],
-    "ans": "Trustworthy"
-  },
-  {
-    "q": "Which word means 'wordy'?",
-    "opts": [
-      "Verbose",
-      "Concise",
-      "Brief",
-      "Silent"
-    ],
-    "ans": "Verbose"
-  },
-  {
-    "q": "Which phrase is formal?",
-    "opts": [
-      "Could you please assist me?",
-      "Yo help me out",
-      "Gimme that",
-      "Nah I'm good"
-    ],
-    "ans": "Could you please assist me?"
-  },
-  {
-    "q": "What is tone in writing?",
-    "opts": [
-      "The writer's attitude",
-      "The page number",
-      "The sentence length only",
-      "The font size"
-    ],
-    "ans": "The writer's attitude"
-  },
-  {
-    "q": "What is audience?",
-    "opts": [
-      "Who the text is for",
-      "Where the text is printed",
-      "How many commas it has",
-      "The final sentence"
-    ],
-    "ans": "Who the text is for"
-  },
-  {
-    "q": "What is purpose?",
-    "opts": [
-      "Why a text was created",
-      "The longest word",
-      "A type of rhyme",
-      "A spelling pattern"
-    ],
-    "ans": "Why a text was created"
-  },
-  {
-    "q": "Which is an example of alliteration?",
-    "opts": [
-      "Bright birds build bridges",
-      "The bird is blue",
-      "She walked home",
-      "Time passed slowly"
-    ],
-    "ans": "Bright birds build bridges"
-  },
-  {
-    "q": "What is a paragraph mainly built around?",
-    "opts": [
-      "One main idea",
-      "Random topics",
-      "Only quotes",
-      "A title"
-    ],
-    "ans": "One main idea"
-  },
-  {
-    "q": "Which is a complete sentence?",
-    "opts": [
-      "Because it rained",
-      "The tall building",
-      "She finished the task.",
-      "Running through the park"
-    ],
-    "ans": "She finished the task."
-  },
-  {
-    "q": "Which is a sentence fragment?",
-    "opts": [
-      "Although he tried",
-      "He tried again.",
-      "They left early.",
-      "The cat slept."
-    ],
-    "ans": "Although he tried"
-  },
-  {
-    "q": "What is plagiarism?",
-    "opts": [
-      "Using someone's work without credit",
-      "Making notes",
-      "Reading quickly",
-      "Checking spelling"
-    ],
-    "ans": "Using someone's work without credit"
-  },
-  {
-    "q": "What is a citation?",
-    "opts": [
-      "A note showing the source",
-      "A type of verb",
-      "A paragraph break",
-      "A hidden meaning"
-    ],
-    "ans": "A note showing the source"
-  },
-  {
-    "q": "What does 'objective' mean?",
-    "opts": [
-      "Fact-based",
-      "Emotion-based",
-      "Funny",
-      "Confused"
-    ],
-    "ans": "Fact-based"
-  },
-  {
-    "q": "What does 'subjective' mean?",
-    "opts": [
-      "Opinion-based",
-      "Always false",
-      "Written badly",
-      "Fact-only"
-    ],
-    "ans": "Opinion-based"
-  },
-  {
-    "q": "What is foreshadowing?",
-    "opts": [
-      "Hints about future events",
-      "A repeated vowel sound",
-      "A grammar mistake",
-      "The final paragraph"
-    ],
-    "ans": "Hints about future events"
-  },
-  {
-    "q": "What is irony?",
-    "opts": [
-      "A contrast between expectation and reality",
-      "A list of instructions",
-      "A type of dictionary",
-      "A short email"
-    ],
-    "ans": "A contrast between expectation and reality"
-  },
-  {
-    "q": "What is the protagonist?",
-    "opts": [
-      "The main character",
-      "The villain only",
-      "The setting",
-      "The narrator's name"
-    ],
-    "ans": "The main character"
-  },
-  {
-    "q": "What is the antagonist?",
-    "opts": [
-      "A force opposing the main character",
-      "A happy ending",
-      "A punctuation mark",
-      "A type of synonym"
-    ],
-    "ans": "A force opposing the main character"
-  },
-  {
-    "q": "What is setting?",
-    "opts": [
-      "Time and place",
-      "Main argument",
-      "Author's surname",
-      "Number of chapters"
-    ],
-    "ans": "Time and place"
-  },
-  {
-    "q": "What is theme?",
-    "opts": [
-      "A deeper message",
-      "A spelling rule",
-      "A comma pattern",
-      "A type of font"
-    ],
-    "ans": "A deeper message"
-  },
-  {
-    "q": "Which word means 'to judge quality'?",
-    "opts": [
-      "Evaluate",
-      "Decorate",
-      "Interrupt",
-      "Whisper"
-    ],
-    "ans": "Evaluate"
-  },
-  {
-    "q": "Which word means 'to break down and study'?",
-    "opts": [
-      "Analyse",
-      "Ignore",
-      "Invent",
-      "Erase"
-    ],
-    "ans": "Analyse"
-  },
-  {
-    "q": "What is a transition?",
-    "opts": [
-      "A link between ideas",
-      "A type of noun",
-      "A spelling error",
-      "A book cover"
-    ],
-    "ans": "A link between ideas"
-  },
-  {
-    "q": "Which transition shows contrast?",
-    "opts": [
-      "However",
-      "Therefore",
-      "Also",
-      "For example"
-    ],
-    "ans": "However"
-  },
-  {
-    "q": "Which transition shows cause and effect?",
-    "opts": [
-      "Therefore",
-      "Meanwhile",
-      "Similarly",
-      "Instead"
-    ],
-    "ans": "Therefore"
-  },
-  {
-    "q": "Which word has a prefix?",
-    "opts": [
-      "Unclear",
-      "Clear",
-      "Chair",
-      "Table"
-    ],
-    "ans": "Unclear"
-  },
-  {
-    "q": "Which word has a suffix?",
-    "opts": [
-      "Careful",
-      "Care",
-      "Car",
-      "Cat"
-    ],
-    "ans": "Careful"
-  },
-  {
-    "q": "What is the root of 'unhelpful'?",
-    "opts": [
-      "help",
-      "un",
-      "ful",
-      "helpful"
-    ],
-    "ans": "help"
-  },
-  {
-    "q": "What does connotation mean?",
-    "opts": [
-      "The feeling linked to a word",
-      "The exact dictionary meaning",
-      "A paragraph's title",
-      "A grammar rule"
-    ],
-    "ans": "The feeling linked to a word"
-  },
-  {
-    "q": "What does denotation mean?",
-    "opts": [
-      "The literal meaning",
-      "The emotional feeling",
-      "The sound of a word",
-      "The speaker's volume"
-    ],
-    "ans": "The literal meaning"
-  },
-  {
-    "q": "Which word is more precise than 'good'?",
-    "opts": [
-      "Effective",
-      "Thing",
-      "Nice",
-      "Okay"
-    ],
-    "ans": "Effective"
-  },
-  {
-    "q": "Which is a stronger verb than 'went'?",
-    "opts": [
-      "Rushed",
-      "Was",
-      "Had",
-      "Did"
-    ],
-    "ans": "Rushed"
-  },
-  {
-    "q": "What does 'redundant' mean?",
-    "opts": [
-      "Repeated unnecessarily",
-      "Very important",
-      "Hard to spell",
-      "Completely new"
-    ],
-    "ans": "Repeated unnecessarily"
-  },
-  {
-    "q": "What does 'credible' mean?",
-    "opts": [
-      "Believable",
-      "Colourful",
-      "Expensive",
-      "Confusing"
-    ],
-    "ans": "Believable"
-  },
-  {
-    "q": "Which sentence uses active voice?",
-    "opts": [
-      "The student solved the problem.",
-      "The problem was solved by the student.",
-      "The problem had been solved.",
-      "The answer was given."
-    ],
-    "ans": "The student solved the problem."
-  },
-  {
-    "q": "Which sentence uses passive voice?",
-    "opts": [
-      "The report was written by Mia.",
-      "Mia wrote the report.",
-      "Mia edits reports.",
-      "Mia will write tomorrow."
-    ],
-    "ans": "The report was written by Mia."
-  },
-  {
-    "q": "Which word is a pronoun?",
-    "opts": [
-      "They",
-      "Table",
-      "Quick",
-      "Run"
-    ],
-    "ans": "They"
-  },
-  {
-    "q": "Which word is an article?",
-    "opts": [
-      "The",
-      "Run",
-      "Blue",
-      "Before"
-    ],
-    "ans": "The"
-  },
-  {
-    "q": "Which is a compound sentence?",
-    "opts": [
-      "I studied, and I passed.",
-      "Because I studied",
-      "The bright red book",
-      "Running quickly"
-    ],
-    "ans": "I studied, and I passed."
-  },
-  {
-    "q": "Which sentence uses quotation marks correctly?",
-    "opts": [
-      "She said, \"I am ready.\"",
-      "She said, I am ready.",
-      "\"She said, I am ready.",
-      "She said I am ready\"."
-    ],
-    "ans": "She said, \"I am ready.\""
-  }
+  { q: "How many letters are in the English alphabet?", opts: ["24","25","26","27"], ans: "26" },
+  { q: "What is the most commonly used letter in English?", opts: ["A","T","E","S"], ans: "E" },
+  { q: "What is a word that reads the same backwards?", opts: ["Homonym","Palindrome","Synonym","Acronym"], ans: "Palindrome" },
+  { q: "Which is a noun?", opts: ["Run","Quickly","Beautiful","Success"], ans: "Success" },
+  { q: "What does 'verbose' mean?", opts: ["Brief","Wordy","Clear","Silent"], ans: "Wordy" },
+  { q: "How many vowels are in the English language?", opts: ["4","5","6","7"], ans: "5" },
 ];
 
+// ── Finance: Flashcard Terms ───────────────────────────────────
+const FIN_TERMS = [
+  { term: "Compound Interest", def: "Earning interest on your interest — the most powerful force in investing." },
+  { term: "Net Worth", def: "What you own (assets) minus what you owe (liabilities)." },
+  { term: "ROI", def: "Return On Investment — how much profit you make relative to cost." },
+  { term: "Dividend", def: "A portion of a company's profit paid to shareholders." },
+  { term: "Inflation", def: "The rate at which prices rise, reducing purchasing power over time." },
+  { term: "Equity", def: "Your ownership stake in an asset or company." },
+  { term: "Liquidity", def: "How easily an asset can be converted to cash without losing value." },
+  { term: "Portfolio", def: "A collection of investments held by an individual or organisation." },
+];
+
+// ── Finance: Trivia ────────────────────────────────────────────
+const FIN_TRIVIA = [
+  { q: "What does 'APR' stand for?", opts: ["Annual Payment Rate","Annual Percentage Rate","Asset Purchase Rate","Average Profit Return"], ans: "Annual Percentage Rate" },
+  { q: "What is the stock market index that tracks the 500 largest US companies?", opts: ["NASDAQ","Dow Jones","S&P 500","Russell 2000"], ans: "S&P 500" },
+  { q: "What is a 'bull market'?", opts: ["A falling market","A rising market","A stable market","A crash"], ans: "A rising market" },
+  { q: "What percentage should you ideally save of your income?", opts: ["5%","10%","20%","50%"], ans: "20%" },
+  { q: "What is 'diversification' in investing?", opts: ["All in one stock","Spreading investments","Avoiding risk","Only buying bonds"], ans: "Spreading investments" },
+  { q: "What is the '50/30/20' rule?", opts: ["Debt/savings/spending","Needs/wants/savings","Income/tax/expenses","Investment/risk/reward"], ans: "Needs/wants/savings" },
+];
+
+// ── Finance: Invest or Save ────────────────────────────────────
+const INVEST_QS = [
+  { scenario: "You have $500 in an emergency fund and $200 spare. What do you do?", opts: ["Invest the $200","Save the $200","Spend the $200","Ignore it"], best: 1, reason: "Build your emergency fund to 3-6 months expenses before investing." },
+  { scenario: "You have no debt, 6 months emergency fund, and $1000 spare.", opts: ["Put in savings","Invest long-term","Buy something nice","Lend it out"], best: 1, reason: "With a solid foundation, investing long-term is the smart move." },
+  { scenario: "You have a credit card at 20% interest. You have $500 spare.", opts: ["Invest it","Pay off the card","Save it","Donate it"], best: 1, reason: "20% interest is higher than most investment returns — pay it off first." },
+  { scenario: "You're 20 years old with $100 spare per month.", opts: ["Spend it","Save it in cash","Invest in index funds","Keep under mattress"], best: 2, reason: "Starting early with index funds gives compound interest decades to work." },
+];
+
+// ── Finance: Money Math ────────────────────────────────────────
+const MONEY_QS = [
+  { q: "You earn $3,200/month. 20% goes to savings. How much is saved?", ans: "640", display: "$640" },
+  { q: "An item costs $80, on 25% off. What's the price?", ans: "60", display: "$60" },
+  { q: "$1,000 invested at 10% annually. After 2 years (compound)?", ans: "1210", display: "$1,210" },
+  { q: "You spend $45/week on coffee. Cost per year?", ans: "2340", display: "$2,340" },
+  { q: "Salary is $60,000. Tax rate 30%. Take-home per month?", ans: "3500", display: "$3,500" },
+];
+
+// ── Demeanor: Speak It ─────────────────────────────────────────
+const SPEAK_QS = [
+  { scenario: "Your boss asks for your opinion in a meeting.", opts: ["'I'm not sure...'","'Well, maybe if...'","'My view is clear: here's what I recommend.'","'Others probably know better.'"], best: 2, why: "Confident, direct, and solution-focused." },
+  { scenario: "Someone challenges your idea publicly.", opts: ["Go silent","Apologise immediately","'That's a fair point. Here's why I still believe...'","Agree with everything they say"], best: 2, why: "Acknowledging but holding your ground shows emotional intelligence." },
+  { scenario: "You need to ask for a pay rise.", opts: ["Wait for them to offer","Drop hints","'Based on my contributions, I'd like to discuss my salary.'","Ask a colleague to ask for you"], best: 2, why: "Direct, evidence-based requests are respected." },
+  { scenario: "You're introducing yourself to a new group.", opts: ["Say as little as possible","Ramble nervously","State your name, role, and one interesting fact clearly","Wait for someone to ask"], best: 2, why: "Clarity and confidence in introductions sets the tone immediately." },
+];
+
+// ── Demeanor: Filler Catcher ───────────────────────────────────
+const FILLER_TEXTS = [
+  {
+    text: "So, basically, I was like going to the meeting and um, I kind of presented the, you know, report and it was like really good actually.",
+    fillers: ["So", "basically", "like", "um", "kind of", "you know", "like", "actually"],
+  },
+  {
+    text: "I think, sort of, the project is literally going well and we're basically, um, hitting our targets so yeah.",
+    fillers: ["sort of", "literally", "basically", "um", "yeah"],
+  },
+  {
+    text: "Right, so, I'm going to just explain how this works. It's like, very, um, straightforward, right.",
+    fillers: ["Right", "so", "just", "like", "very", "um", "right"],
+  },
+];
+
+// ── Demeanor: Tone Detector ────────────────────────────────────
+const TONE_QS = [
+  { message: "I need this done NOW. No excuses.", tones: ["Professional","Aggressive","Enthusiastic","Polite"], ans: "Aggressive", tip: "Caps and ultimatums signal aggression, not urgency." },
+  { message: "Hey! Just wanted to check in and see how things are going 😊", tones: ["Aggressive","Formal","Friendly","Sarcastic"], ans: "Friendly", tip: "Warm, casual language with an emoji signals friendly intent." },
+  { message: "Per my last email, I clearly outlined the requirements.", tones: ["Passive-aggressive","Enthusiastic","Empathetic","Direct"], ans: "Passive-aggressive", tip: "'Per my last email' is a classic passive-aggressive phrase." },
+  { message: "Thank you for bringing this to my attention. I'll look into it promptly.", tones: ["Dismissive","Professional","Sarcastic","Casual"], ans: "Professional", tip: "Acknowledges, commits, and stays formal — textbook professional." },
+  { message: "Oh great, another meeting that could've been an email.", tones: ["Sarcastic","Enthusiastic","Empathetic","Neutral"], ans: "Sarcastic", tip: "The 'oh great' and contrast signals obvious sarcasm." },
+];
+
+// ── Demeanor: Confidence Quiz ──────────────────────────────────
+const CONF_QUIZ = [
+  { q: "When someone disagrees with you publicly, you...", opts: ["Immediately back down","Get defensive","Listen, then calmly explain your view","Stay silent and stew"], scores: [0,1,3,1] },
+  { q: "When you walk into a room of strangers, you...", opts: ["Hug the walls","Wait to be approached","Introduce yourself to someone","Check your phone"], scores: [0,1,3,1] },
+  { q: "When you make a mistake, you...", opts: ["Catastrophise","Blame others","Acknowledge, learn, move on","Avoid the topic forever"], scores: [0,0,3,0] },
+  { q: "When asked to speak impromptu, you...", opts: ["Panic","Deflect to someone else","Take a breath and speak clearly","Speak fast and nervous"], scores: [0,0,3,1] },
+  { q: "Your posture right now is...", opts: ["Slumped","Closed/crossed arms","Open and upright","Neck craned down"], scores: [0,1,3,0] },
+];
+
+// ── Demeanor: Body Language IQ ─────────────────────────────────
+const BODY_QS = [
+  { q: "Crossed arms typically signal...", opts: ["Confidence","Openness","Defensiveness or discomfort","Excitement"], ans: "Defensiveness or discomfort", tip: "Crossed arms create a physical barrier between you and others." },
+  { q: "Sustained eye contact (not staring) communicates...", opts: ["Aggression","Confidence and trustworthiness","Dishonesty","Boredom"], ans: "Confidence and trustworthiness", tip: "Eye contact shows you're engaged and have nothing to hide." },
+  { q: "Mirroring someone's body language usually...", opts: ["Annoys them","Builds rapport unconsciously","Shows dominance","Signals boredom"], ans: "Builds rapport unconsciously", tip: "Mirroring is a natural signal of alignment and empathy." },
+  { q: "A slow, steady nod while listening suggests...", opts: ["You're bored","Disagreement","Active listening and comprehension","Impatience"], ans: "Active listening and comprehension", tip: "Slow nods signal you're processing and engaged, not just waiting to talk." },
+  { q: "Touching your face frequently during a conversation often signals...", opts: ["Confidence","Engagement","Anxiety or uncertainty","Happiness"], ans: "Anxiety or uncertainty", tip: "Self-touching is a self-soothing behaviour — notice it and reduce it." },
+];
+
+// ── English: Word Ladder Puzzles ──────────────────────────────
 const WORD_LADDER_PUZZLES = [
-  {
-    "start": "CAT",
-    "end": "DOG",
-    "steps": [
-      "CAT",
-      "COT",
-      "COG",
-      "DOG"
-    ]
-  },
-  {
-    "start": "CAT",
-    "end": "BUG",
-    "steps": [
-      "CAT",
-      "BAT",
-      "BAG",
-      "BUG"
-    ]
-  },
-  {
-    "start": "DOG",
-    "end": "BAG",
-    "steps": [
-      "DOG",
-      "DIG",
-      "BIG",
-      "BAG"
-    ]
-  },
-  {
-    "start": "COLD",
-    "end": "WARM",
-    "steps": [
-      "COLD",
-      "CORD",
-      "WORD",
-      "WARD",
-      "WARM"
-    ]
-  },
-  {
-    "start": "HEAD",
-    "end": "TALL",
-    "steps": [
-      "HEAD",
-      "HEAL",
-      "TEAL",
-      "TELL",
-      "TALL"
-    ]
-  },
-  {
-    "start": "MAKE",
-    "end": "SALE",
-    "steps": [
-      "MAKE",
-      "TAKE",
-      "TALE",
-      "SALE"
-    ]
-  },
-  {
-    "start": "GOLD",
-    "end": "CARD",
-    "steps": [
-      "GOLD",
-      "COLD",
-      "CORD",
-      "CARD"
-    ]
-  },
-  {
-    "start": "FIRE",
-    "end": "WARM",
-    "steps": [
-      "FIRE",
-      "FIRM",
-      "FARM",
-      "WARM"
-    ]
-  },
-  {
-    "start": "MATH",
-    "end": "CARE",
-    "steps": [
-      "MATH",
-      "MATE",
-      "MARE",
-      "CARE"
-    ]
-  },
-  {
-    "start": "PARK",
-    "end": "BANK",
-    "steps": [
-      "PARK",
-      "DARK",
-      "DANK",
-      "BANK"
-    ]
-  },
-  {
-    "start": "LAMP",
-    "end": "LIKE",
-    "steps": [
-      "LAMP",
-      "LIMP",
-      "LIME",
-      "LIKE"
-    ]
-  },
-  {
-    "start": "MINE",
-    "end": "WISE",
-    "steps": [
-      "MINE",
-      "WINE",
-      "WIDE",
-      "WISE"
-    ]
-  },
-  {
-    "start": "FISH",
-    "end": "CASH",
-    "steps": [
-      "FISH",
-      "WISH",
-      "WASH",
-      "CASH"
-    ]
-  },
-  {
-    "start": "HAND",
-    "end": "WARM",
-    "steps": [
-      "HAND",
-      "HARD",
-      "WARD",
-      "WARM"
-    ]
-  },
-  {
-    "start": "BOLD",
-    "end": "BEND",
-    "steps": [
-      "BOLD",
-      "BOND",
-      "BAND",
-      "BEND"
-    ]
-  },
-  {
-    "start": "DUST",
-    "end": "MINT",
-    "steps": [
-      "DUST",
-      "MUST",
-      "MIST",
-      "MINT"
-    ]
-  },
-  {
-    "start": "SING",
-    "end": "RUNE",
-    "steps": [
-      "SING",
-      "RING",
-      "RUNG",
-      "RUNE"
-    ]
-  },
-  {
-    "start": "FORM",
-    "end": "HIRE",
-    "steps": [
-      "FORM",
-      "FIRM",
-      "FIRE",
-      "HIRE"
-    ]
-  },
-  {
-    "start": "SHIP",
-    "end": "SLOT",
-    "steps": [
-      "SHIP",
-      "SHOP",
-      "SHOT",
-      "SLOT"
-    ]
-  },
-  {
-    "start": "WORD",
-    "end": "CARE",
-    "steps": [
-      "WORD",
-      "WORE",
-      "CORE",
-      "CARE"
-    ]
-  },
-  {
-    "start": "TONE",
-    "end": "COPS",
-    "steps": [
-      "TONE",
-      "TONS",
-      "CONS",
-      "COPS"
-    ]
-  },
-  {
-    "start": "LEAD",
-    "end": "LEAF",
-    "steps": [
-      "LEAD",
-      "LOAD",
-      "LOAF",
-      "LEAF"
-    ]
-  },
-  {
-    "start": "COOL",
-    "end": "SOUL",
-    "steps": [
-      "COOL",
-      "FOOL",
-      "FOUL",
-      "SOUL"
-    ]
-  },
-  {
-    "start": "BOOK",
-    "end": "WOOL",
-    "steps": [
-      "BOOK",
-      "COOK",
-      "COOL",
-      "WOOL"
-    ]
-  },
-  {
-    "start": "SAND",
-    "end": "FEED",
-    "steps": [
-      "SAND",
-      "SEND",
-      "SEED",
-      "FEED"
-    ]
-  },
-  {
-    "start": "BOAT",
-    "end": "GOLD",
-    "steps": [
-      "BOAT",
-      "GOAT",
-      "GOAD",
-      "GOLD"
-    ]
-  },
-  {
-    "start": "PALE",
-    "end": "PAGE",
-    "steps": [
-      "PALE",
-      "SALE",
-      "SAGE",
-      "PAGE"
-    ]
-  },
-  {
-    "start": "CART",
-    "end": "WORD",
-    "steps": [
-      "CART",
-      "CARD",
-      "WARD",
-      "WORD"
-    ]
-  },
-  {
-    "start": "LINE",
-    "end": "SONG",
-    "steps": [
-      "LINE",
-      "LONE",
-      "LONG",
-      "SONG"
-    ]
-  },
-  {
-    "start": "TAIL",
-    "end": "TOLD",
-    "steps": [
-      "TAIL",
-      "TALL",
-      "TOLL",
-      "TOLD"
-    ]
-  },
-  {
-    "start": "SEAT",
-    "end": "MELT",
-    "steps": [
-      "SEAT",
-      "MEAT",
-      "MEET",
-      "MELT"
-    ]
-  },
-  {
-    "start": "GATE",
-    "end": "DART",
-    "steps": [
-      "GATE",
-      "DATE",
-      "DARE",
-      "DART"
-    ]
-  },
-  {
-    "start": "BIRD",
-    "end": "SEND",
-    "steps": [
-      "BIRD",
-      "BIND",
-      "BEND",
-      "SEND"
-    ]
-  },
-  {
-    "start": "HATE",
-    "end": "PATH",
-    "steps": [
-      "HATE",
-      "MATE",
-      "MATH",
-      "PATH"
-    ]
-  },
-  {
-    "start": "ROAD",
-    "end": "FARM",
-    "steps": [
-      "ROAD",
-      "ROAM",
-      "FOAM",
-      "FORM",
-      "FARM"
-    ]
-  },
-  {
-    "start": "WIND",
-    "end": "RIDE",
-    "steps": [
-      "WIND",
-      "WINE",
-      "WIDE",
-      "RIDE"
-    ]
-  },
-  {
-    "start": "PLAY",
-    "end": "SLAP",
-    "steps": [
-      "PLAY",
-      "CLAY",
-      "CLAP",
-      "SLAP"
-    ]
-  },
-  {
-    "start": "CAMP",
-    "end": "LISP",
-    "steps": [
-      "CAMP",
-      "LAMP",
-      "LIMP",
-      "LISP"
-    ]
-  },
-  {
-    "start": "COST",
-    "end": "LAST",
-    "steps": [
-      "COST",
-      "LOST",
-      "LIST",
-      "LAST"
-    ]
-  },
-  {
-    "start": "PINK",
-    "end": "LONE",
-    "steps": [
-      "PINK",
-      "PINE",
-      "LINE",
-      "LONE"
-    ]
-  },
-  {
-    "start": "TILE",
-    "end": "FIRM",
-    "steps": [
-      "TILE",
-      "TIRE",
-      "FIRE",
-      "FIRM"
-    ]
-  },
-  {
-    "start": "BARK",
-    "end": "CORN",
-    "steps": [
-      "BARK",
-      "BARN",
-      "BORN",
-      "CORN"
-    ]
-  },
-  {
-    "start": "RAIN",
-    "end": "SAID",
-    "steps": [
-      "RAIN",
-      "PAIN",
-      "PAID",
-      "SAID"
-    ]
-  },
-  {
-    "start": "MOON",
-    "end": "SOFT",
-    "steps": [
-      "MOON",
-      "SOON",
-      "SOOT",
-      "SOFT"
-    ]
-  },
-  {
-    "start": "RACE",
-    "end": "LUCK",
-    "steps": [
-      "RACE",
-      "RACK",
-      "LACK",
-      "LUCK"
-    ]
-  },
-  {
-    "start": "BITE",
-    "end": "SIPS",
-    "steps": [
-      "BITE",
-      "SITE",
-      "SITS",
-      "SIPS"
-    ]
-  },
-  {
-    "start": "NOTE",
-    "end": "COLD",
-    "steps": [
-      "NOTE",
-      "VOTE",
-      "VOLE",
-      "COLE",
-      "COLD"
-    ]
-  },
-  {
-    "start": "FOLD",
-    "end": "ROAD",
-    "steps": [
-      "FOLD",
-      "GOLD",
-      "GOAD",
-      "ROAD"
-    ]
-  },
-  {
-    "start": "MIND",
-    "end": "SAND",
-    "steps": [
-      "MIND",
-      "MEND",
-      "SEND",
-      "SAND"
-    ]
-  },
-  {
-    "start": "JUMP",
-    "end": "LAMP",
-    "steps": [
-      "JUMP",
-      "DUMP",
-      "DAMP",
-      "LAMP"
-    ]
-  },
-  {
-    "start": "GLOW",
-    "end": "SHOT",
-    "steps": [
-      "GLOW",
-      "SLOW",
-      "SLOT",
-      "SHOT"
-    ]
-  },
-  {
-    "start": "BEAR",
-    "end": "COAT",
-    "steps": [
-      "BEAR",
-      "BEAT",
-      "BOAT",
-      "COAT"
-    ]
-  },
-  {
-    "start": "FAST",
-    "end": "DISH",
-    "steps": [
-      "FAST",
-      "FIST",
-      "FISH",
-      "DISH"
-    ]
-  },
-  {
-    "start": "KING",
-    "end": "PINK",
-    "steps": [
-      "KING",
-      "RING",
-      "RINK",
-      "PINK"
-    ]
-  },
-  {
-    "start": "WALL",
-    "end": "MILD",
-    "steps": [
-      "WALL",
-      "WILL",
-      "WILD",
-      "MILD"
-    ]
-  }
+  { start: "CAT", end: "DOG", steps: ["CAT","COT","COG","DOG"] },
+  { start: "HOT", end: "COD", steps: ["HOT","HOG","COG","COD"] },
+  { start: "MIND", end: "GROW", steps: ["MIND","BIND","BIRD","GIRD","GRID","GRAD","GRAB","CRAB","CROW","GROW"] },
+  { start: "COLD", end: "WARM", steps: ["COLD", "CORD", "WORD", "WARD", "WARM"] },
+  { start: "BAKE", end: "BITE", steps: ["BIKE", "BITE"] },
+  { start: "BOOK", end: "COOL", steps: ["COOK", "COOL"] },
+  { start: "FARM", end: "FIRM", steps: ["FORM", "FIRM"] },
+  { start: "FIND", end: "BIND", steps: ["BIND"] },
+  { start: "MINE", end: "WINE", steps: ["WINE"] },
+  { start: "SALE", end: "MALE", steps: ["MALE"] },
 ];
 
-const FIN_TERMS_MINI = [
-  {
-    "term": "Compound Interest",
-    "def": "Earning interest on both your original money and previous interest."
-  },
-  {
-    "term": "Net Worth",
-    "def": "Assets minus liabilities."
-  },
-  {
-    "term": "Budget",
-    "def": "A plan for where your money goes."
-  },
-  {
-    "term": "Emergency Fund",
-    "def": "Savings kept for urgent unexpected costs."
-  },
-  {
-    "term": "Asset",
-    "def": "Something you own that has value."
-  },
-  {
-    "term": "Liability",
-    "def": "Something you owe."
-  }
-];
-
-const DEMEANOR_MINI = [
-  {
-    "term": "Confident Response",
-    "def": "Clear, calm, and direct without being aggressive."
-  },
-  {
-    "term": "Tone",
-    "def": "The emotional signal behind your words."
-  },
-  {
-    "term": "Posture",
-    "def": "How your body position affects how people read you."
-  },
-  {
-    "term": "Eye Contact",
-    "def": "Looking engaged without staring."
-  },
-  {
-    "term": "Pause",
-    "def": "A short silence that gives your words more control."
-  },
-  {
-    "term": "Presence",
-    "def": "How focused and steady you seem in the room."
-  }
-];
-
-const shuffle = (items) => {
-  const copy = [...items];
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-};
-
-const normaliseSubject = (value) => {
-  const raw = String(value || "english").toLowerCase().replace("learn_it_", "").replace("learn-", "").replace("learn_", "");
-  if (raw.includes("finance")) return "finance";
-  if (raw.includes("demeanor") || raw.includes("demeanour")) return "demeanor";
-  return "english";
-};
-
-function PrimaryButton({ children, onClick, color, disabled }) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      style={{
-        border: "none",
-        borderRadius: 999,
-        padding: "12px 18px",
-        background: disabled ? "rgba(255,255,255,0.12)" : color,
-        color: disabled ? "rgba(255,255,255,0.45)" : "#050505",
-        fontWeight: 800,
-        fontFamily: FONT,
-        cursor: disabled ? "not-allowed" : "pointer",
-        WebkitTapHighlightColor: "transparent",
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Modal({ title, color, children, onClose, play }) {
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
-
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "#090909", display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "#111" }}>
-        <button
-          type="button"
-          onClick={() => { play?.("back"); onClose(); }}
-          style={{ background: "none", border: "none", color, fontWeight: 800, fontSize: 16, fontFamily: FONT, cursor: "pointer" }}
-        >
-          ‹ Back
-        </button>
-        <strong style={{ color: "#ededed", fontSize: 17, fontFamily: FONT }}>{title}</strong>
-        <span style={{ width: 54 }} />
-      </div>
-      <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>{children}</div>
-    </div>
-  );
-}
-
-function Progress({ current, total, color }) {
-  const pct = Math.max(0, Math.min(100, (current / total) * 100));
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", color: "rgba(255,255,255,0.62)", fontSize: 12, marginBottom: 8, fontFamily: FONT }}>
-        <span>Progress</span>
-        <span>{current} / {total}</span>
-      </div>
-      <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: color, transition: "width 0.25s ease" }} />
-      </div>
-    </div>
-  );
-}
-
-function ScoreScreen({ score, total, color, onReplay, onClose }) {
-  const pct = Math.round((score / total) * 100);
-  return (
-    <div style={{ padding: 24, fontFamily: FONT, color: "#ededed", textAlign: "center" }}>
-      <div style={{ fontSize: 56, marginBottom: 8 }}>{pct >= 80 ? "🏆" : pct >= 55 ? "✅" : "📚"}</div>
-      <h2 style={{ margin: "0 0 8px", fontSize: 28 }}>{score} / {total}</h2>
-      <p style={{ margin: "0 auto 22px", color: "rgba(255,255,255,0.65)", maxWidth: 360, lineHeight: 1.5 }}>
-        {pct >= 80 ? "Strong work. You are building real English accuracy." : "Good attempt. Replay it and tighten the weak spots."}
-      </p>
-      <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-        <PrimaryButton color={color} onClick={onReplay}>Replay</PrimaryButton>
-        <PrimaryButton color={"rgba(255,255,255,0.18)"} onClick={onClose}>Close</PrimaryButton>
-      </div>
-    </div>
-  );
-}
-
-function QuizGame({ title, color, items, mode, onClose, play }) {
-  const [order, setOrder] = useState(() => shuffle(items));
-  const [qi, setQi] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const [score, setScore] = useState(0);
-  const [done, setDone] = useState(false);
-  const item = order[qi];
-  const questionText = mode === "fill" ? item.sentence : item.q;
-  const options = mode === "fill" ? item.options : item.opts;
-  const answer = mode === "fill" ? item.answer : item.ans;
-
-  const pick = (opt) => {
-    if (selected) return;
-    setSelected(opt);
-    const correct = opt === answer;
-    if (correct) {
-      setScore((s) => s + 1);
-      play?.("correct");
-    } else {
-      play?.("wrong");
-    }
-    setTimeout(() => {
-      if (qi + 1 >= order.length) setDone(true);
-      else {
-        setQi((n) => n + 1);
-        setSelected(null);
-      }
-    }, 700);
-  };
-
-  if (done) {
-    return <ScoreScreen score={score} total={order.length} color={color} onReplay={() => { setOrder(shuffle(items)); setQi(0); setSelected(null); setScore(0); setDone(false); }} onClose={onClose} />;
-  }
-
-  return (
-    <div style={{ padding: 20, fontFamily: FONT, color: "#ededed" }}>
-      <Progress current={qi + 1} total={order.length} color={color} />
-      <p style={{ color, fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 10px" }}>{title}</p>
-      <h2 style={{ fontSize: 23, lineHeight: 1.35, margin: "0 0 20px" }}>{questionText}</h2>
-      <div style={{ display: "grid", gap: 10 }}>
-        {options.map((opt) => {
-          const isCorrect = selected && opt === answer;
-          const isWrong = selected === opt && opt !== answer;
-          return (
-            <button
-              type="button"
-              key={opt}
-              onClick={() => pick(opt)}
-              style={{
-                textAlign: "left",
-                border: `1px solid ${isCorrect ? color : isWrong ? "#ef4444" : "rgba(255,255,255,0.1)"}`,
-                background: isCorrect ? `${color}22` : isWrong ? "rgba(239,68,68,0.16)" : "rgba(255,255,255,0.045)",
-                color: "#ededed",
-                borderRadius: 16,
-                padding: "15px 16px",
-                fontSize: 15,
-                fontWeight: 750,
-                fontFamily: FONT,
-                cursor: selected ? "default" : "pointer",
-              }}
-            >
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-      {selected && selected !== answer ? <p style={{ color: "rgba(255,255,255,0.72)", marginTop: 14 }}>Correct answer: <strong>{answer}</strong></p> : null}
-    </div>
-  );
-}
-
-function WordGuessGame({ color, onClose, play }) {
-  const [target, setTarget] = useState(() => WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)]);
-  const [guess, setGuess] = useState("");
-  const [attempts, setAttempts] = useState([]);
-  const [message, setMessage] = useState("Type a five-letter word. You get six attempts.");
-  const [done, setDone] = useState(false);
-
-  const submit = () => {
-    const cleaned = guess.trim().toUpperCase();
-    if (cleaned.length !== target.length) {
-      setMessage(`Use exactly ${target.length} letters.`);
-      return;
-    }
-    const won = cleaned === target;
-    const nextAttempts = [...attempts, cleaned];
-    setAttempts(nextAttempts);
-    setGuess("");
-    if (won) {
-      play?.("correct");
-      setMessage("Correct. Strong word work.");
-      setDone(true);
-    } else if (nextAttempts.length >= 6) {
-      play?.("wrong");
-      setMessage(`Out of attempts. The word was ${target}.`);
-      setDone(true);
-    } else {
-      play?.("tap");
-      setMessage(nextAttempts.length >= 3 ? `Hint: starts with ${target[0]} and ends with ${target[target.length - 1]}.` : "Not it. Try another word.");
-    }
-  };
-
-  const reset = () => {
-    setTarget(WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)]);
-    setGuess("");
-    setAttempts([]);
-    setMessage("Type a five-letter word. You get six attempts.");
-    setDone(false);
-  };
-
-  return (
-    <div style={{ padding: 20, fontFamily: FONT, color: "#ededed" }}>
-      <Progress current={attempts.length} total={6} color={color} />
-      <p style={{ color, fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>Word Guess</p>
-      <h2 style={{ margin: "0 0 10px", fontSize: 25 }}>Guess the hidden word</h2>
-      <div style={{ display: "flex", gap: 7, margin: "18px 0" }}>
-        {target.split("").map((letter, i) => (
-          <div key={i} style={{ width: 42, height: 48, borderRadius: 12, border: `1px solid ${color}66`, display: "grid", placeItems: "center", fontWeight: 900, fontSize: 22, background: "rgba(255,255,255,0.05)" }}>
-            {done ? letter : attempts.length >= 4 && (i === 0 || i === target.length - 1) ? letter : "•"}
-          </div>
-        ))}
-      </div>
-      <input
-        value={guess}
-        onChange={(e) => setGuess(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, target.length))}
-        onKeyDown={(e) => { if (e.key === "Enter" && !done) submit(); }}
-        placeholder="TYPE WORD"
-        disabled={done}
-        style={{ width: "100%", boxSizing: "border-box", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: 16, background: "rgba(255,255,255,0.06)", color: "#ededed", fontSize: 20, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: FONT }}
-      />
-      <p style={{ color: "rgba(255,255,255,0.68)", lineHeight: 1.5 }}>{message}</p>
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-        <PrimaryButton color={color} onClick={submit} disabled={done}>Submit</PrimaryButton>
-        <PrimaryButton color={"rgba(255,255,255,0.18)"} onClick={reset}>New word</PrimaryButton>
-        <PrimaryButton color={"rgba(255,255,255,0.18)"} onClick={onClose}>Close</PrimaryButton>
-      </div>
-      <div style={{ display: "grid", gap: 8 }}>
-        {attempts.map((item, index) => (
-          <div key={`${item}-${index}`} style={{ padding: 12, borderRadius: 14, background: item === target ? `${color}22` : "rgba(255,255,255,0.045)", border: `1px solid ${item === target ? color : "rgba(255,255,255,0.08)"}` }}>
-            {item.split("").map((letter, i) => {
-              const exact = letter === target[i];
-              const present = !exact && target.includes(letter);
-              return <span key={i} style={{ display: "inline-grid", placeItems: "center", width: 30, height: 30, marginRight: 5, borderRadius: 8, background: exact ? color : present ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.08)", color: exact ? "#050505" : "#ededed", fontWeight: 900 }}>{letter}</span>;
-            })}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function VocabMatchGame({ color, onClose, play }) {
-  const [round, setRound] = useState(() => shuffle(VOCAB_PAIRS).slice(0, 12));
-  const [defs, setDefs] = useState(() => shuffle(round));
-  const [selected, setSelected] = useState(null);
-  const [matched, setMatched] = useState([]);
-  const complete = matched.length === round.length;
-
-  const reset = () => {
-    const next = shuffle(VOCAB_PAIRS).slice(0, 12);
-    setRound(next);
-    setDefs(shuffle(next));
-    setSelected(null);
-    setMatched([]);
-  };
-
-  const chooseDef = (pair) => {
-    if (!selected || matched.includes(pair.word)) return;
-    if (selected.word === pair.word) {
-      setMatched((m) => [...m, pair.word]);
-      setSelected(null);
-      play?.("correct");
-    } else {
-      play?.("wrong");
-      setSelected(null);
-    }
-  };
-
-  return (
-    <div style={{ padding: 20, fontFamily: FONT, color: "#ededed" }}>
-      <Progress current={matched.length} total={round.length} color={color} />
-      <p style={{ color, fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>Vocab Match</p>
-      <h2 style={{ margin: "0 0 14px" }}>Match the word to the definition</h2>
-      {complete ? (
-        <ScoreScreen score={round.length} total={round.length} color={color} onReplay={reset} onClose={onClose} />
-      ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <div style={{ display: "grid", gap: 8 }}>
-            {round.map((pair) => (
-              <button key={pair.word} type="button" disabled={matched.includes(pair.word)} onClick={() => setSelected(pair)} style={{ border: `1px solid ${selected?.word === pair.word ? color : "rgba(255,255,255,0.1)"}`, borderRadius: 14, padding: "12px 10px", background: matched.includes(pair.word) ? `${color}22` : selected?.word === pair.word ? `${color}18` : "rgba(255,255,255,0.045)", color: "#ededed", fontWeight: 850, fontFamily: FONT, cursor: "pointer" }}>
-                {matched.includes(pair.word) ? "✓ " : ""}{pair.word}
-              </button>
-            ))}
-          </div>
-          <div style={{ display: "grid", gap: 8 }}>
-            {defs.map((pair) => (
-              <button key={pair.def} type="button" disabled={matched.includes(pair.word)} onClick={() => chooseDef(pair)} style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "12px 10px", background: matched.includes(pair.word) ? `${color}22` : "rgba(255,255,255,0.045)", color: "rgba(255,255,255,0.86)", lineHeight: 1.35, fontSize: 13, fontFamily: FONT, cursor: "pointer", textAlign: "left" }}>
-                {pair.def}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SentenceBuilderGame({ color, onClose, play }) {
-  const [order, setOrder] = useState(() => shuffle(SENTENCE_QS));
-  const [qi, setQi] = useState(0);
-  const [picked, setPicked] = useState([]);
-  const [score, setScore] = useState(0);
-  const [message, setMessage] = useState("Tap words in the correct order.");
-  const [done, setDone] = useState(false);
-  const q = order[qi];
-
-  const choose = (index) => {
-    if (picked.includes(index)) return;
-    const next = [...picked, index];
-    setPicked(next);
-    if (next.length === q.answer.length) {
-      const built = next.map((i) => q.words[i]);
-      const correct = built.join(" ") === q.answer.join(" ");
-      if (correct) {
-        setScore((s) => s + 1);
-        setMessage("Correct sentence.");
-        play?.("correct");
-      } else {
-        setMessage(`Correct answer: ${q.answer.join(" ")}`);
-        play?.("wrong");
-      }
-      setTimeout(() => {
-        if (qi + 1 >= order.length) setDone(true);
-        else {
-          setQi((n) => n + 1);
-          setPicked([]);
-          setMessage("Tap words in the correct order.");
-        }
-      }, 1200);
-    }
-  };
-
-  if (done) {
-    return <ScoreScreen score={score} total={order.length} color={color} onReplay={() => { setOrder(shuffle(SENTENCE_QS)); setQi(0); setPicked([]); setScore(0); setMessage("Tap words in the correct order."); setDone(false); }} onClose={onClose} />;
-  }
-
-  return (
-    <div style={{ padding: 20, fontFamily: FONT, color: "#ededed" }}>
-      <Progress current={qi + 1} total={order.length} color={color} />
-      <p style={{ color, fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>Sentence Builder</p>
-      <div style={{ minHeight: 76, border: `1px dashed ${color}88`, borderRadius: 18, padding: 14, background: "rgba(255,255,255,0.04)", fontSize: 18, lineHeight: 1.5, marginBottom: 16 }}>
-        {picked.length ? picked.map((i) => q.words[i]).join(" ") : "Build the sentence here..."}
-      </div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
-        {q.words.map((word, index) => (
-          <button key={`${word}-${index}`} type="button" disabled={picked.includes(index)} onClick={() => choose(index)} style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 999, padding: "10px 13px", background: picked.includes(index) ? `${color}22` : "rgba(255,255,255,0.06)", color: picked.includes(index) ? "rgba(255,255,255,0.4)" : "#ededed", fontWeight: 800, fontFamily: FONT, cursor: "pointer" }}>
-            {word}
-          </button>
-        ))}
-      </div>
-      <p style={{ color: "rgba(255,255,255,0.68)" }}>{message}</p>
-      <PrimaryButton color={"rgba(255,255,255,0.18)"} onClick={() => { setPicked([]); setMessage("Tap words in the correct order."); }}>Clear</PrimaryButton>
-    </div>
-  );
-}
-
-function WordLadderGame({ color, onClose, play }) {
-  const [puzzle, setPuzzle] = useState(() => WORD_LADDER_PUZZLES[Math.floor(Math.random() * WORD_LADDER_PUZZLES.length)]);
-  const [position, setPosition] = useState(0);
-  const [entry, setEntry] = useState("");
-  const [message, setMessage] = useState("Enter the next word in the ladder.");
-  const complete = position >= puzzle.steps.length - 1;
-
-  const submit = () => {
-    if (complete) return;
-    const cleaned = entry.trim().toUpperCase();
-    const expected = puzzle.steps[position + 1];
-    if (cleaned === expected) {
-      setPosition((p) => p + 1);
-      setEntry("");
-      setMessage(position + 1 >= puzzle.steps.length - 1 ? "Ladder complete." : "Correct. Keep climbing.");
-      play?.("correct");
-    } else {
-      setMessage(`Not yet. Change one letter from ${puzzle.steps[position]}.`);
-      play?.("wrong");
-    }
-  };
-
-  const reset = () => {
-    setPuzzle(WORD_LADDER_PUZZLES[Math.floor(Math.random() * WORD_LADDER_PUZZLES.length)]);
-    setPosition(0);
-    setEntry("");
-    setMessage("Enter the next word in the ladder.");
-  };
-
-  return (
-    <div style={{ padding: 20, fontFamily: FONT, color: "#ededed" }}>
-      <Progress current={position + 1} total={puzzle.steps.length} color={color} />
-      <p style={{ color, fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>Word Ladder</p>
-      <h2 style={{ margin: "0 0 8px" }}>{puzzle.start} → {puzzle.end}</h2>
-      <p style={{ color: "rgba(255,255,255,0.65)", lineHeight: 1.45 }}>Change one letter at a time. Each step must be the exact next word.</p>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "18px 0" }}>
-        {puzzle.steps.map((step, index) => (
-          <span key={`${step}-${index}`} style={{ padding: "10px 12px", borderRadius: 12, border: `1px solid ${index <= position ? color : "rgba(255,255,255,0.1)"}`, background: index <= position ? `${color}22` : "rgba(255,255,255,0.04)", color: index <= position ? "#ededed" : "rgba(255,255,255,0.22)", fontWeight: 900, letterSpacing: "0.08em" }}>
-            {index <= position ? step : "____"}
-          </span>
-        ))}
-      </div>
-      <input
-        value={entry}
-        onChange={(e) => setEntry(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, puzzle.start.length))}
-        onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
-        disabled={complete}
-        placeholder={puzzle.start.length === 3 ? "WORD" : "NEXT"}
-        style={{ width: "100%", boxSizing: "border-box", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: 16, background: "rgba(255,255,255,0.06)", color: "#ededed", fontSize: 20, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: FONT }}
-      />
-      <p style={{ color: "rgba(255,255,255,0.68)" }}>{message}</p>
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        <PrimaryButton color={color} onClick={submit} disabled={complete}>Submit</PrimaryButton>
-        <PrimaryButton color={"rgba(255,255,255,0.18)"} onClick={reset}>New ladder</PrimaryButton>
-        <PrimaryButton color={"rgba(255,255,255,0.18)"} onClick={onClose}>Close</PrimaryButton>
-      </div>
-    </div>
-  );
-}
-
-function MiniCardsGame({ color, items, title, onClose }) {
-  const [index, setIndex] = useState(0);
-  const item = items[index % items.length];
-  return (
-    <div style={{ padding: 20, fontFamily: FONT, color: "#ededed" }}>
-      <p style={{ color, fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>{title}</p>
-      <div style={{ border: `1px solid ${color}55`, borderRadius: 24, padding: 24, background: "rgba(255,255,255,0.05)", minHeight: 180 }}>
-        <h2 style={{ marginTop: 0 }}>{item.term}</h2>
-        <p style={{ color: "rgba(255,255,255,0.72)", lineHeight: 1.55, fontSize: 16 }}>{item.def}</p>
-      </div>
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
-        <PrimaryButton color={color} onClick={() => setIndex((n) => n + 1)}>Next card</PrimaryButton>
-        <PrimaryButton color={"rgba(255,255,255,0.18)"} onClick={onClose}>Close</PrimaryButton>
-      </div>
-    </div>
-  );
-}
-
-function GameBody({ gameId, color, onClose, play }) {
-  if (gameId === "fill_gap") return <QuizGame title="Fill the Gap" color={color} items={FILL_GAP_QS} mode="fill" onClose={onClose} play={play} />;
-  if (gameId === "word_guess") return <WordGuessGame color={color} onClose={onClose} play={play} />;
-  if (gameId === "vocab_match") return <VocabMatchGame color={color} onClose={onClose} play={play} />;
-  if (gameId === "sentence") return <SentenceBuilderGame color={color} onClose={onClose} play={play} />;
-  if (gameId === "word_trivia") return <QuizGame title="Word Trivia" color={color} items={WORD_TRIVIA} mode="trivia" onClose={onClose} play={play} />;
-  if (gameId === "word_ladder") return <WordLadderGame color={color} onClose={onClose} play={play} />;
-  if (gameId.startsWith("finance")) return <MiniCardsGame color={color} title="Finance Cards" items={FIN_TERMS_MINI} onClose={onClose} />;
-  return <MiniCardsGame color={color} title="Demeanor Cards" items={DEMEANOR_MINI} onClose={onClose} />;
-}
-
+/* ──────────────────────────────────────────────────────────────
+   FLIP CARD COMPONENT
+────────────────────────────────────────────────────────────── */
 function FlipCard({ game, color, lightColor, borderColor, index, onPlay }) {
   const [flipped, setFlipped] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), index * 60);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setMounted(true), index * 65);
+    return () => clearTimeout(t);
   }, [index]);
 
   return (
-    <div style={{ perspective: "1000px", opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(14px)", transition: "opacity 0.25s ease, transform 0.3s ease" }}>
-      <div onClick={() => setFlipped((v) => !v)} style={{ position: "relative", width: "100%", aspectRatio: "1 / 1.05", transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)", transition: "transform 0.45s cubic-bezier(0.34,1.56,0.64,1)", cursor: "pointer" }}>
-        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", background: "rgba(255,255,255,0.045)", border: `1px solid ${borderColor}`, borderRadius: 22, padding: 16, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 10, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
-          <span style={{ position: "absolute", top: 12, right: 12, padding: "3px 8px", borderRadius: 999, background: lightColor, color, fontSize: 9, fontWeight: 900, letterSpacing: "0.06em", textTransform: "uppercase" }}>{game.type}</span>
-          <div style={{ fontSize: 34 }}>{game.icon}</div>
-          <strong style={{ color: "#ededed", fontSize: 16 }}>{game.title}</strong>
-          <p style={{ margin: 0, color: "rgba(255,255,255,0.56)", fontSize: 12, lineHeight: 1.45 }}>{game.desc}</p>
-          <span style={{ position: "absolute", bottom: 10, color, fontSize: 10, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase", opacity: 0.65 }}>flip</span>
+    <div
+      style={{
+        perspective: "1000px",
+        opacity: mounted ? 1 : 0,
+        transform: mounted ? "translateY(0) scale(1)" : "translateY(16px) scale(0.94)",
+        transition: `opacity 0.35s ease ${index * 65}ms, transform 0.4s cubic-bezier(0.34,1.56,0.64,1) ${index * 65}ms`,
+      }}
+    >
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "1 / 1.05",
+          transformStyle: "preserve-3d",
+          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+          transition: "transform 0.5s cubic-bezier(0.34,1.56,0.64,1)",
+          cursor: "pointer",
+        }}
+        onClick={() => setFlipped(!flipped)}
+      >
+        {/* FRONT */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          background: "rgba(255,255,255,0.045)",
+          border: `1px solid ${borderColor}`,
+          borderRadius: 22,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "18px 14px 34px",
+          gap: 10,
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+          boxShadow: `0 4px 20px rgba(0,0,0,0.15)`,
+        }}>
+          {/* Type badge */}
+          <div style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            padding: "3px 8px",
+            borderRadius: 999,
+            background: lightColor,
+            border: `1px solid ${borderColor}`,
+            fontSize: 9,
+            fontWeight: 700,
+            color: color,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            fontFamily: FONT,
+          }}>
+            {game.type}
+          </div>
+
+          <div style={{ fontSize: 32, lineHeight: 1 }}>{game.icon}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "#ededed", textAlign: "center", fontFamily: FONT, letterSpacing: "-0.02em" }}>
+            {game.title}
+          </div>
+          <div style={{
+            fontSize: 12,
+            color: "rgba(161,161,161,0.7)",
+            textAlign: "center",
+            lineHeight: 1.5,
+            fontFamily: FONT,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            padding: "0 4px",
+          }}>
+            {game.desc}
+          </div>
+
+          {/* Tap hint — subtle pulsing dot, Apple-style */}
+          <div
+            aria-hidden="true"
+            className="life-flipcard-hint"
+            style={{
+              position: "absolute",
+              bottom: 10,
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              pointerEvents: "none",
+            }}
+          >
+            <span
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: "50%",
+                background: color,
+                boxShadow: `0 0 0 0 ${color}`,
+                animation: "life-flipcard-hint-pulse 1.8s ease-in-out infinite",
+              }}
+            />
+            <span style={{
+              fontSize: 9.5,
+              color: color,
+              fontFamily: FONT,
+              fontWeight: 600,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              opacity: 0.55,
+            }}>flip</span>
+          </div>
         </div>
-        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "rotateY(180deg)", background: `linear-gradient(160deg, ${lightColor.replace("0.12", "0.2")} 0%, rgba(255,255,255,0.04) 100%)`, border: `1.5px solid ${color}66`, borderRadius: 22, padding: 16, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 12, boxShadow: `0 4px 28px ${color}25` }}>
-          <div style={{ fontSize: 32 }}>{game.icon}</div>
-          <strong style={{ color: "#ededed", fontSize: 15 }}>Ready to play?</strong>
-          <p style={{ margin: 0, color: "rgba(255,255,255,0.62)", fontSize: 12, lineHeight: 1.45 }}>{game.desc}</p>
-          <button type="button" onClick={(e) => { e.stopPropagation(); onPlay(game); }} style={{ border: "none", borderRadius: 999, padding: "11px 24px", background: color, color: "#050505", fontWeight: 900, fontFamily: FONT, cursor: "pointer" }}>
+
+        {/* BACK */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          transform: "rotateY(180deg)",
+          background: `linear-gradient(160deg, ${lightColor.replace("0.12","0.18")} 0%, rgba(255,255,255,0.04) 100%)`,
+          border: `1.5px solid ${color}60`,
+          borderRadius: 22,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "18px 14px",
+          gap: 12,
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+          boxShadow: `0 4px 28px ${color}25`,
+        }}>
+          <div style={{ fontSize: 28 }}>{game.icon}</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#ededed", textAlign: "center", fontFamily: FONT }}>
+            Ready to play?
+          </div>
+          <div style={{ fontSize: 11.5, color: "rgba(161,161,161,0.7)", textAlign: "center", lineHeight: 1.5, fontFamily: FONT }}>
+            {game.desc}
+          </div>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onPlay(game.id); }}
+            style={{
+              marginTop: 4,
+              padding: "11px 24px",
+              background: color,
+              color: "#000",
+              border: "none",
+              borderRadius: 999,
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT,
+              letterSpacing: "-0.01em",
+              boxShadow: `0 4px 16px ${color}40`,
+              transition: "transform 0.15s cubic-bezier(0.34,1.56,0.64,1)",
+              WebkitTapHighlightColor: "transparent",
+            }}
+            onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.94)"; }}
+            onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+            onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.94)"; }}
+            onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+          >
             ▶ Play
           </button>
         </div>
@@ -4235,68 +378,1231 @@ function FlipCard({ game, color, lightColor, borderColor, index, onPlay }) {
   );
 }
 
-export function LearnItSubjectPage({ subject = "english", subjectId, activeSubject, onBack, onClose, setPage, t, play }) {
-  const subjectKey = normaliseSubject(subjectId || activeSubject || subject);
-  const meta = SUBJECT_META[subjectKey] || SUBJECT_META.english;
-  const games = GAMES[subjectKey] || GAMES.english;
-  const [activeGame, setActiveGame] = useState(null);
-
-  const goBack = () => {
-    play?.("back");
-    if (onBack) onBack();
-    else if (onClose) onClose();
-    else if (setPage) setPage("learn_it");
-  };
+/* ──────────────────────────────────────────────────────────────
+   GAME MODAL WRAPPER
+────────────────────────────────────────────────────────────── */
+function GameModal({ children, onClose, color, title, t, play }) {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
 
   return (
-    <div style={{ minHeight: "100%", background: t?.skin || "#0a0a0a", color: "#ededed", fontFamily: FONT, paddingBottom: 36 }}>
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: t?.white || "#111", borderBottom: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
-        <button type="button" onClick={goBack} style={{ background: "none", border: "none", color: meta.color, fontSize: 16, fontWeight: 900, fontFamily: FONT, cursor: "pointer" }}>‹ Back</button>
-        <div style={{ flex: 1, textAlign: "center", marginRight: 58 }}>
-          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", fontWeight: 900, letterSpacing: "0.1em" }}>LEARN-IT</div>
-          <div style={{ fontSize: 22, fontWeight: 900 }}>{meta.emoji} {meta.label}</div>
+    <div style={{
+      position: "fixed",
+      inset: 0,
+      zIndex: 1000,
+      background: t?.skin || "#0a0a0a",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+    }}>
+      {/* Header */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "16px 20px",
+        borderBottom: `1px solid ${t?.border || "rgba(255,255,255,0.07)"}`,
+        background: t?.white || "#111111",
+      }}>
+        <button
+          type="button"
+          onClick={() => { play?.("back"); onClose(); }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: color || t?.green,
+            fontSize: 16,
+            fontWeight: 600,
+            fontFamily: FONT,
+            padding: 0,
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          <svg width="10" height="18" viewBox="0 0 10 18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 1 1 9 9 17" />
+          </svg>
+          Back
+        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, justifyContent: "center", marginLeft: "-50px" }}>
+          <div style={{ width: 3, height: 20, borderRadius: 999, background: color, flexShrink: 0 }} />
+          <span style={{ fontSize: 17, fontWeight: 700, color: t?.ink || "#ededed", fontFamily: FONT, letterSpacing: "-0.02em" }}>{title}</span>
         </div>
+        <div style={{ width: 50 }} />
       </div>
-
-      <main style={{ padding: "22px 18px" }}>
-        <p style={{ margin: "0 0 18px", color: "rgba(255,255,255,0.62)", lineHeight: 1.55 }}>
-          {subjectKey === "english"
-            ? "6 interactive activities with 50+ content items each. Tap a card to flip it, then press Play."
-            : "Tap a card to flip it, then press Play."}
-        </p>
-
-        {subjectKey === "english" ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 14, marginBottom: 18 }}>
-            {[
-              ["Fill Gap", FILL_GAP_QS.length],
-              ["Word Guess", WORD_LIST.length],
-              ["Vocab Match", VOCAB_PAIRS.length],
-              ["Sentence Builder", SENTENCE_QS.length],
-              ["Word Trivia", WORD_TRIVIA.length],
-              ["Word Ladder", WORD_LADDER_PUZZLES.length],
-            ].map(([label, count]) => (
-              <div key={label} style={{ border: `1px solid ${meta.borderColor}`, background: meta.lightColor, color: "#ededed", borderRadius: 16, padding: 12 }}>
-                <strong style={{ color: meta.color, fontSize: 18 }}>{count}+</strong>
-                <div style={{ color: "rgba(255,255,255,0.65)", fontSize: 12, marginTop: 2 }}>{label} items</div>
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(142px, 1fr))", gap: 14 }}>
-          {games.map((game, index) => (
-            <FlipCard key={game.id} game={game} index={index} color={meta.color} lightColor={meta.lightColor} borderColor={meta.borderColor} onPlay={setActiveGame} />
-          ))}
-        </div>
-      </main>
-
-      {activeGame ? (
-        <Modal title={activeGame.title} color={meta.color} onClose={() => setActiveGame(null)} play={play}>
-          <GameBody gameId={activeGame.id} color={meta.color} onClose={() => setActiveGame(null)} play={play} />
-        </Modal>
-      ) : null}
+      {/* Content */}
+      <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+        {children}
+      </div>
     </div>
   );
 }
 
-export default LearnItSubjectPage;
+/* ──────────────────────────────────────────────────────────────
+   INDIVIDUAL GAMES
+────────────────────────────────────────────────────────────── */
+
+function FillGapGame({ color, onClose, t, play }) {
+  const [qi, setQi] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const q = FILL_GAP_QS[qi];
+
+  const pick = (opt) => {
+    if (selected) return;
+    setSelected(opt);
+    if (opt === q.answer) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
+    setTimeout(() => {
+      if (qi + 1 >= FILL_GAP_QS.length) setDone(true);
+      else { setQi(qi + 1); setSelected(null); }
+    }, 900);
+  };
+
+  if (done) return <ScoreScreen score={score} total={FILL_GAP_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={qi} total={FILL_GAP_QS.length} color={color} t={t} />
+      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "22px 18px", marginBottom: 22, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
+        <p style={{ fontSize: 16, color: t?.ink || "#ededed", lineHeight: 1.65, margin: 0, fontWeight: 500, letterSpacing: "-0.01em" }}>
+          {q.sentence.replace("___", "______")}
+        </p>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        {q.options.map(opt => {
+          const isCorrect = opt === q.answer;
+          const isWrong = selected === opt && !isCorrect;
+          return (
+            <button key={opt} type="button" onClick={() => pick(opt)}
+              onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+              onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+              style={{
+              padding: "14px 12px",
+              borderRadius: 16,
+              border: `1.5px solid ${selected ? isCorrect ? color : isWrong ? "#e5484d" : t?.border || "rgba(255,255,255,0.07)" : t?.border || "rgba(255,255,255,0.1)"}`,
+              background: selected ? isCorrect ? `${color}18` : isWrong ? "rgba(229,72,77,0.12)" : t?.light || "rgba(255,255,255,0.03)" : t?.light || "rgba(255,255,255,0.05)",
+              color: selected ? isCorrect ? color : isWrong ? "#e5484d" : t?.muted || "#a1a1a1" : t?.ink || "#ededed",
+              fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: FONT,
+              transition: "all 0.15s cubic-bezier(0.34,1.56,0.64,1)", WebkitTapHighlightColor: "transparent",
+            }}>
+              {opt}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function WordGuessGame({ color, t, play }) {
+  const [target] = useState(() => WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)]);
+  const [guesses, setGuesses] = useState([]);
+  const [current, setCurrent] = useState("");
+  const [won, setWon] = useState(false);
+  const [lost, setLost] = useState(false);
+  const maxGuesses = 6;
+
+  const submit = () => {
+    if (current.length !== 5) return;
+    const g = current.toUpperCase();
+    const next = [...guesses, g];
+    setGuesses(next);
+    setCurrent("");
+    play?.("tap");
+    if (g === target) { setWon(true); play?.("correct"); }
+    else if (next.length >= maxGuesses) { setLost(true); play?.("wrong"); }
+  };
+
+  const getLetterState = (letter, pos, word) => {
+    if (word[pos] === letter) return "correct";
+    if (target.includes(letter)) return "present";
+    return "absent";
+  };
+
+  const reset = () => { setGuesses([]); setCurrent(""); setWon(false); setLost(false); };
+
+  if (won || lost) return (
+    <div style={{ padding: 24, textAlign: "center", fontFamily: FONT }}>
+      <div
+        style={{
+          width: 64, height: 64, borderRadius: 20,
+          background: won ? `${color}22` : "rgba(255,255,255,0.08)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          margin: "0 auto 16px",
+        }}
+        aria-hidden="true"
+      >
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={won ? color : (t?.muted || "#a1a1a1")} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          {won ? <polyline points="20,6 9,17 4,12"/> : <><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></>}
+        </svg>
+      </div>
+      <div style={{ fontSize: 22, fontWeight: 700, color: t?.ink || "#ededed", marginBottom: 8 }}>{won ? "You got it!" : "Better luck next time"}</div>
+      <div style={{ fontSize: 15, color: t?.muted || "#a1a1a1", marginBottom: 24 }}>The word was <strong style={{ color }}>{target}</strong></div>
+      <button type="button" onClick={reset} style={{ padding: "13px 28px", background: color, color: "#000", borderRadius: 999, border: "none", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Play Again</button>
+    </div>
+  );
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <p style={{ textAlign: "center", fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 20 }}>Guess the 5-letter word in {maxGuesses} tries</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 24, alignItems: "center" }}>
+        {Array.from({ length: maxGuesses }).map((_, ri) => {
+          const g = guesses[ri] || "";
+          return (
+            <div key={ri} style={{ display: "flex", gap: 6 }}>
+              {Array.from({ length: 5 }).map((_, ci) => {
+                const l = g[ci] || (ri === guesses.length ? current[ci] : "");
+                const state = g[ci] ? getLetterState(g[ci], ci, g) : "empty";
+                return (
+                  <div key={ci} style={{
+                    width: 52, height: 52, borderRadius: 12,
+                    border: `2px solid ${state === "correct" ? color : state === "present" ? "#f59e0b" : state === "absent" ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.2)"}`,
+                    background: state === "correct" ? `${color}25` : state === "present" ? "rgba(245,158,11,0.2)" : state === "absent" ? "rgba(255,255,255,0.06)" : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 20, fontWeight: 800, color: state === "correct" ? color : state === "present" ? "#f59e0b" : t?.ink || "#ededed",
+                    fontFamily: FONT, transition: "all 0.2s ease",
+                  }}>{l}</div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 16 }}>
+        <input
+          type="text" maxLength={5}
+          value={current}
+          onChange={(e) => setCurrent(e.target.value.toUpperCase().replace(/[^A-Z]/g, ""))}
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+          style={{
+            flex: 1, maxWidth: 180, padding: "13px 16px", borderRadius: 14,
+            background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.15)",
+            color: "#ededed", fontSize: 18, fontWeight: 800, textAlign: "center",
+            outline: "none", fontFamily: FONT, letterSpacing: "0.2em",
+          }}
+          placeholder="GUESS"
+        />
+        <button type="button" onClick={submit} style={{
+          padding: "13px 20px", background: color, color: "#000", borderRadius: 14,
+          border: "none", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT,
+        }}>Enter</button>
+      </div>
+      <p style={{ textAlign: "center", fontSize: 12, color: t?.muted || "#a1a1a1" }}>{guesses.length}/{maxGuesses} guesses</p>
+    </div>
+  );
+}
+
+function VocabMatchGame({ color, onClose, t, play }) {
+  const [selected, setSelected] = useState({ word: null, def: null });
+  const [matched, setMatched] = useState([]);
+  const [wrong, setWrong] = useState(false);
+  const [done, setDone] = useState(false);
+  const [moves, setMoves] = useState(0);
+  const words = VOCAB_PAIRS.map(p => p.word);
+  const defs = [...VOCAB_PAIRS.map(p => p.def)].sort(() => Math.random() - 0.5);
+
+  const pick = (type, val) => {
+    play?.("tap");
+    const next = { ...selected, [type]: val };
+    setSelected(next);
+    if (next.word && next.def) {
+      setMoves(m => m + 1);
+      const pair = VOCAB_PAIRS.find(p => p.word === next.word);
+      if (pair?.def === next.def) {
+        play?.("correct");
+        const newMatched = [...matched, next.word];
+        setMatched(newMatched);
+        setSelected({ word: null, def: null });
+        if (newMatched.length === VOCAB_PAIRS.length) setTimeout(() => setDone(true), 400);
+      } else {
+        play?.("wrong");
+        setWrong(true);
+        setTimeout(() => { setWrong(false); setSelected({ word: null, def: null }); }, 700);
+      }
+    }
+  };
+
+  if (done) return <ScoreScreen score={VOCAB_PAIRS.length} total={VOCAB_PAIRS.length} color={color} customMsg={`Matched all in ${moves} moves!`} onReplay={() => { setSelected({ word: null, def: null }); setMatched([]); setWrong(false); setDone(false); setMoves(0); }} onClose={onClose} t={t} play={play} />;
+
+  const btnStyle = (active, isMatched) => ({
+    padding: "11px 12px", borderRadius: 12, border: `1.5px solid ${isMatched ? `${color}40` : active ? color : "rgba(255,255,255,0.1)"}`,
+    background: isMatched ? `${color}10` : active ? `${color}18` : wrong && active ? "rgba(229,72,77,0.15)" : "rgba(255,255,255,0.04)",
+    color: isMatched ? `${color}80` : active ? color : t?.ink || "#ededed",
+    fontSize: 12.5, fontWeight: 600, cursor: isMatched ? "default" : "pointer",
+    fontFamily: FONT, textAlign: "left", lineHeight: 1.4,
+    transition: "all 0.2s ease", WebkitTapHighlightColor: "transparent",
+    opacity: isMatched ? 0.5 : 1,
+  });
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <p style={{ textAlign: "center", fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 20 }}>Match each word to its definition</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Words</p>
+          {words.map(w => (
+            <button key={w} type="button" onClick={() => !matched.includes(w) && pick("word", w)} style={btnStyle(selected.word === w, matched.includes(w))}>{w}</button>
+          ))}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Definitions</p>
+          {defs.map(d => {
+            const matchedWord = VOCAB_PAIRS.find(p => p.def === d && matched.includes(p.word));
+            return (
+              <button key={d} type="button" onClick={() => !matchedWord && pick("def", d)} style={btnStyle(selected.def === d, !!matchedWord)}>{d}</button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SentenceBuilderGame({ color, onClose, t, play }) {
+  const [qi, setQi] = useState(0);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const q = SENTENCE_QS[qi];
+  const [shuffled] = useState(() => SENTENCE_QS.map(q => [...q.words].sort(() => Math.random() - 0.5)));
+  const [built, setBuilt] = useState([]);
+  const [remaining, setRemaining] = useState(shuffled[0]);
+  const [result, setResult] = useState(null);
+
+  const addWord = (word, idx) => {
+    if (result) return;
+    play?.("tap");
+    setBuilt(b => [...b, word]);
+    setRemaining(r => r.filter((_, i) => i !== idx));
+  };
+
+  const removeWord = (idx) => {
+    if (result) return;
+    const word = built[idx];
+    setBuilt(b => b.filter((_, i) => i !== idx));
+    setRemaining(r => [...r, word]);
+  };
+
+  const check = () => {
+    const correct = JSON.stringify(built) === JSON.stringify(q.answer);
+    setResult(correct ? "correct" : "wrong");
+    if (correct) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
+    setTimeout(() => {
+      if (qi + 1 >= SENTENCE_QS.length) setDone(true);
+      else {
+        setQi(qi + 1);
+        setBuilt([]);
+        setRemaining(shuffled[qi + 1]);
+        setResult(null);
+      }
+    }, 1000);
+  };
+
+  if (done) return <ScoreScreen score={score} total={SENTENCE_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setDone(false); setBuilt([]); setRemaining(shuffled[0]); setResult(null); }} onClose={onClose} t={t} play={play} />;
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={qi} total={SENTENCE_QS.length} color={color} t={t} />
+      <p style={{ fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 16 }}>Tap words to build the sentence in the correct order</p>
+      {/* Built area */}
+      <div style={{ minHeight: 64, background: "rgba(255,255,255,0.04)", borderRadius: 16, border: `2px dashed ${result === "correct" ? color : result === "wrong" ? "#e5484d" : "rgba(255,255,255,0.12)"}`, padding: "12px 14px", marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 8, transition: "border-color 0.2s ease" }}>
+        {built.map((w, i) => (
+          <button key={i} type="button" onClick={() => removeWord(i)} style={{ padding: "7px 12px", borderRadius: 999, background: `${color}22`, border: `1px solid ${color}60`, color, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONT, WebkitTapHighlightColor: "transparent" }}>{w}</button>        ))}
+        {built.length === 0 && <span style={{ color: "rgba(161,161,161,0.35)", fontSize: 13 }}>Tap words below…</span>}
+      </div>
+      {/* Word bank */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
+        {remaining.map((w, i) => (
+          <button key={i} type="button" onClick={() => addWord(w, i)} style={{ padding: "9px 14px", borderRadius: 999, background: t?.light || "rgba(255,255,255,0.07)", border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`, color: t?.ink || "#ededed", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: FONT, WebkitTapHighlightColor: "transparent" }}>{w}</button>
+        ))}
+      </div>
+      <button type="button" onClick={check} disabled={remaining.length > 0} style={{ width: "100%", padding: "14px", background: remaining.length > 0 ? "rgba(255,255,255,0.06)" : color, color: remaining.length > 0 ? "#a1a1a1" : "#000", borderRadius: 14, border: "none", fontSize: 15, fontWeight: 700, cursor: remaining.length > 0 ? "not-allowed" : "pointer", fontFamily: FONT, transition: "all 0.2s ease" }}>
+        Check Sentence
+      </button>
+    </div>
+  );
+}
+
+function MultiChoiceGame({ questions, color, onClose, t, play }) {
+  const [qi, setQi] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const q = questions[qi];
+
+  const pick = (opt) => {
+    if (selected) return;
+    setSelected(opt);
+    if (opt === q.ans) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
+    setTimeout(() => {
+      if (qi + 1 >= questions.length) setDone(true);
+      else { setQi(qi + 1); setSelected(null); }
+    }, 900);
+  };
+
+  if (done) return <ScoreScreen score={score} total={questions.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={qi} total={questions.length} color={color} t={t} />
+      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px 18px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
+        <p style={{ fontSize: 16, color: t?.ink || "#ededed", lineHeight: 1.55, margin: 0, fontWeight: 500 }}>{q.q}</p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {q.opts.map(opt => {
+          const isCorrect = opt === q.ans;
+          const isWrong = selected === opt && !isCorrect;
+          return (
+            <button key={opt} type="button" onClick={() => pick(opt)}
+              onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+              onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+              style={{
+              padding: "14px 16px", borderRadius: 14, textAlign: "left",
+              border: `1.5px solid ${selected ? isCorrect ? color : isWrong ? "#e5484d" : t?.border || "rgba(255,255,255,0.07)" : t?.border || "rgba(255,255,255,0.1)"}`,
+              background: selected ? isCorrect ? `${color}18` : isWrong ? "rgba(229,72,77,0.12)" : t?.light || "rgba(255,255,255,0.03)" : t?.light || "rgba(255,255,255,0.05)",
+              color: selected ? isCorrect ? color : isWrong ? "#e5484d" : "#666" : t?.ink || "#ededed",
+              fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: FONT,
+              transition: "all 0.15s cubic-bezier(0.34,1.56,0.64,1)", WebkitTapHighlightColor: "transparent",
+            }}>{opt}</button>
+          );
+        })}
+      </div>
+      {selected && q.tip && <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 14, background: `${color}10`, border: `1px solid ${color}30`, fontSize: 12.5, color: color, lineHeight: 1.55, fontFamily: FONT }}>{q.tip}</div>}
+    </div>
+  );
+}
+
+function FlashcardGame({ cards, color, t, play }) {
+  const [i, setI] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [seen, setSeen] = useState(new Set());
+  const card = cards[i];
+
+  const next = () => {
+    play?.("ok");
+    setSeen(s => new Set([...s, i]));
+    setFlipped(false);
+    setTimeout(() => setI(n => (n + 1) % cards.length), 150);
+  };
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT, textAlign: "center" }}>
+      <p style={{ fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 20 }}>Tap to flip · {seen.size}/{cards.length} seen</p>
+      <div style={{ perspective: "1200px", marginBottom: 20 }}>
+        <div
+          onClick={() => { play?.("tap"); setFlipped(!flipped); }}
+          style={{
+            height: 220, position: "relative",
+            transformStyle: "preserve-3d",
+            transition: "transform 0.5s cubic-bezier(0.34,1.56,0.64,1)",
+            transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+            cursor: "pointer",
+          }}
+        >
+          {/* Front */}
+          <div style={{
+            position: "absolute", inset: 0,
+            backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden",
+            background: t?.light || "#1a1a1a",
+            border: `1.5px solid ${t?.border || "rgba(255,255,255,0.12)"}`,
+            borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 24px",
+          }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 14 }}>Term</p>
+            <p style={{ fontSize: 22, fontWeight: 700, color: t?.ink || "#ededed", margin: 0, letterSpacing: "-0.02em" }}>{card.term}</p>
+            <p style={{ fontSize: 12, color: t?.muted || "rgba(161,161,161,0.5)", marginTop: 16 }}>Tap to reveal definition</p>
+          </div>
+          {/* Back */}
+          <div style={{
+            position: "absolute", inset: 0,
+            backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden",
+            transform: "rotateY(180deg)",
+            background: `${color}14`,
+            border: `1.5px solid ${color}60`,
+            borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 24px",
+            boxShadow: `0 8px 40px ${color}30`,
+          }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 14 }}>Definition</p>
+            <p style={{ fontSize: 16, color: t?.ink || "#ededed", lineHeight: 1.65, margin: 0, fontWeight: 400 }}>{card.def}</p>
+          </div>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 10 }}>
+        <button type="button" onClick={() => { setI(n => (n - 1 + cards.length) % cards.length); setFlipped(false); }} style={{ flex: 1, padding: "13px", background: t?.light || "rgba(255,255,255,0.07)", color: t?.ink || "#ededed", border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`, borderRadius: 14, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>← Prev</button>
+        <button type="button" onClick={next} style={{ flex: 1, padding: "13px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Next →</button>
+      </div>
+    </div>
+  );
+}
+
+function BudgetGame({ color, t, play }) {
+  const categories = ["Housing","Food","Transport","Entertainment","Savings","Healthcare"];
+  const [budget] = useState(3000);
+  const [alloc, setAlloc] = useState({ Housing: 900, Food: 450, Transport: 300, Entertainment: 150, Savings: 600, Healthcare: 150 });
+  const total = Object.values(alloc).reduce((a, b) => a + b, 0);
+  const remaining = budget - total;
+
+  const ideal = { Housing: [25,35], Food: [10,15], Transport: [10,15], Entertainment: [5,10], Savings: [20,25], Healthcare: [5,10] };
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "18px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+        <p style={{ fontSize: 12, color: t?.muted || "#a1a1a1", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Monthly Budget</p>
+        <p style={{ fontSize: 28, fontWeight: 800, color: t?.ink || "#ededed", margin: 0, letterSpacing: "-0.03em" }}>${budget.toLocaleString()}</p>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
+          <span style={{ fontSize: 13, color: t?.muted || "#a1a1a1" }}>Allocated: <strong style={{ color: remaining < 0 ? "#e5484d" : t?.ink || "#ededed" }}>${total}</strong></span>
+          <span style={{ fontSize: 13, color: remaining < 0 ? "#e5484d" : color, fontWeight: 600 }}>Remaining: ${remaining}</span>
+        </div>
+        <div style={{ marginTop: 10, height: 6, borderRadius: 999, background: t?.light || "rgba(255,255,255,0.1)", overflow: "hidden" }}>
+          <div style={{ width: `${Math.min((total / budget) * 100, 100)}%`, height: "100%", background: remaining < 0 ? "#e5484d" : color, borderRadius: 999, transition: "width 0.3s ease" }} />
+        </div>
+      </div>
+      {categories.map(cat => {
+        const pct = Math.round((alloc[cat] / budget) * 100);
+        const [min, max] = ideal[cat];
+        const ok = pct >= min && pct <= max;
+        return (
+          <div key={cat} style={{ marginBottom: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: t?.ink || "#ededed" }}>{cat}</span>
+              <span style={{ fontSize: 13, color: ok ? color : "#f59e0b", fontWeight: 600 }}>${alloc[cat]} ({pct}%) {ok ? "✓" : "⚠"}</span>
+            </div>
+            <input type="range" min={0} max={budget} step={50} value={alloc[cat]}
+              onChange={e => {
+                const v = +e.target.value;
+                setAlloc(a => {
+                  const [mi, ma] = ideal[cat];
+                  const pctNew = Math.round((v / budget) * 100);
+                  const pctOld = Math.round((a[cat] / budget) * 100);
+                  if (pctNew >= mi && pctNew <= ma && !(pctOld >= mi && pctOld <= ma)) play?.("star");
+                  return { ...a, [cat]: v };
+                });
+              }}
+              style={{ width: "100%", accentColor: ok ? color : "#f59e0b" }}
+            />
+            <p style={{ fontSize: 10, color: "rgba(161,161,161,0.5)", margin: "3px 0 0" }}>Ideal: {min}–{max}% of income</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function InvestSaveGame({ color, onClose, t, play }) {
+  const [qi, setQi] = useState(0);
+  const [score, setScore] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [done, setDone] = useState(false);
+  const q = INVEST_QS[qi];
+
+  const pick = (idx) => {
+    if (selected !== null) return;
+    setSelected(idx);
+    if (idx === q.best) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
+    setTimeout(() => {
+      if (qi + 1 >= INVEST_QS.length) setDone(true);
+      else { setQi(qi + 1); setSelected(null); }
+    }, 1400);
+  };
+
+  if (done) return <ScoreScreen score={score} total={INVEST_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={qi} total={INVEST_QS.length} color={color} t={t} />
+      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Scenario</p>
+        <p style={{ fontSize: 15, color: t?.ink || "#ededed", lineHeight: 1.6, margin: 0 }}>{q.scenario}</p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {q.opts.map((opt, idx) => {
+          const isBest = idx === q.best;
+          const isPicked = selected === idx;
+          return (
+            <button key={idx} type="button" onClick={() => pick(idx)}
+              onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+              onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+              style={{
+              padding: "14px 16px", borderRadius: 14, textAlign: "left",
+              border: `1.5px solid ${selected !== null ? isBest ? color : isPicked ? "#e5484d" : t?.border || "rgba(255,255,255,0.07)" : t?.border || "rgba(255,255,255,0.1)"}`,
+              background: selected !== null ? isBest ? `${color}18` : isPicked ? "rgba(229,72,77,0.12)" : "transparent" : t?.light || "rgba(255,255,255,0.05)",
+              color: selected !== null ? isBest ? color : isPicked ? "#e5484d" : "#555" : t?.ink || "#ededed",
+              fontSize: 14, cursor: "pointer", fontFamily: FONT, fontWeight: 500,
+              transition: "all 0.15s cubic-bezier(0.34,1.56,0.64,1)", WebkitTapHighlightColor: "transparent",
+            }}>{opt}</button>
+          );
+        })}
+      </div>
+      {selected !== null && <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 14, background: `${color}10`, border: `1px solid ${color}30`, fontSize: 12.5, color: color, lineHeight: 1.55 }}>{q.reason}</div>}
+    </div>
+  );
+}
+
+function MoneyMathGame({ color, onClose, t, play }) {
+  const [qi, setQi] = useState(0);
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const q = MONEY_QS[qi];
+
+  const check = () => {
+    const correct = input.replace(/[^0-9]/g, "") === q.ans;
+    setResult(correct ? "correct" : "wrong");
+    if (correct) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
+    setTimeout(() => {
+      if (qi + 1 >= MONEY_QS.length) setDone(true);
+      else { setQi(qi + 1); setInput(""); setResult(null); }
+    }, 1200);
+  };
+
+  if (done) return <ScoreScreen score={score} total={MONEY_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setInput(""); setResult(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={qi} total={MONEY_QS.length} color={color} t={t} />
+      <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+        <p style={{ fontSize: 15, color: t?.ink || "#ededed", lineHeight: 1.6, margin: 0 }}>{q.q}</p>
+      </div>
+      {result && <div style={{ textAlign: "center", fontSize: 15, color: result === "correct" ? color : "#e5484d", fontWeight: 700, marginBottom: 12 }}>{result === "correct" ? "✓ Correct! " + q.display : `✗ Answer: ${q.display}`}</div>}
+      <div style={{ display: "flex", gap: 10 }}>
+        <input type="number" value={input} onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && check()}
+          placeholder="Your answer ($)"
+          style={{ flex: 1, padding: "13px 16px", borderRadius: 14, background: t?.light || "rgba(255,255,255,0.07)", border: `1.5px solid ${result === "correct" ? color : result === "wrong" ? "#e5484d" : t?.border || "rgba(255,255,255,0.15)"}`, color: t?.ink || "#ededed", fontSize: 16, outline: "none", fontFamily: FONT }} />
+        <button type="button" onClick={check} style={{ padding: "13px 20px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Check</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Finance: Compound Growth ───────────────────────────────────
+const COMPOUND_QS = [
+  { principal: 1000, rate: 10, years: 2, ans: "$1,210", display: "$1,210", opts: ["$1,100", "$1,210", "$1,200", "$1,020"] },
+  { principal: 5000, rate: 8,  years: 3, ans: "$6,298", display: "$6,298", opts: ["$6,200", "$6,298", "$5,800", "$6,500"] },
+  { principal: 2000, rate: 6,  years: 5, ans: "$2,676", display: "$2,676", opts: ["$2,600", "$2,800", "$2,676", "$2,300"] },
+  { principal: 10000, rate: 7, years: 4, ans: "$13,108", display: "$13,108", opts: ["$12,800", "$13,400", "$13,108", "$14,000"] },
+  { principal: 500,  rate: 12, years: 3, ans: "$702",   display: "$702",   opts: ["$680", "$720", "$702", "$660"] },
+];
+
+function CompoundGrowthGame({ color, onClose, t, play }) {
+  const [qi, setQi] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15);
+
+  const q = COMPOUND_QS[qi];
+
+  useEffect(() => {
+    if (selected !== null || done) return;
+    if (timeLeft <= 0) {
+      setSelected("__timeout__");
+      play?.("wrong");
+      setTimeout(() => {
+        if (qi + 1 >= COMPOUND_QS.length) setDone(true);
+        else { setQi(qi + 1); setSelected(null); setTimeLeft(15); }
+      }, 1200);
+      return;
+    }
+    const id = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
+    return () => clearTimeout(id);
+  }, [timeLeft, selected, done, qi, play]);
+
+  const pick = (opt) => {
+    if (selected !== null) return;
+    setSelected(opt);
+    const correct = opt === q.ans;
+    if (correct) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
+    setTimeout(() => {
+      if (qi + 1 >= COMPOUND_QS.length) setDone(true);
+      else { setQi(qi + 1); setSelected(null); setTimeLeft(15); }
+    }, 1200);
+  };
+
+  if (done) return <ScoreScreen score={score} total={COMPOUND_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); setTimeLeft(15); }} onClose={onClose} t={t} play={play} />;
+
+  const urgentColor = timeLeft <= 5 ? "#e5484d" : timeLeft <= 8 ? "#f59e0b" : color;
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={qi} total={COMPOUND_QS.length} color={color} t={t} />
+      {/* Timer */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <span style={{ fontSize: 12, color: t?.muted || "#a1a1a1", fontFamily: FONT }}>Compound Interest</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: urgentColor, boxShadow: `0 0 8px ${urgentColor}`, transition: "all 0.3s ease" }} />
+          <span style={{ fontSize: 15, fontWeight: 700, color: urgentColor, fontFamily: FONT, transition: "color 0.3s ease", minWidth: 24, textAlign: "right" }}>{timeLeft}s</span>
+        </div>
+      </div>
+      {/* Question card */}
+      <div style={{ background: t?.light || "#1a1a1a", borderRadius: 20, padding: "22px 18px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 14, textAlign: "center" }}>
+          {[
+            { label: "Principal", val: `$${q.principal.toLocaleString()}` },
+            { label: "Rate / yr", val: `${q.rate}%` },
+            { label: "Years", val: `${q.years}y` },
+          ].map(({ label, val }) => (
+            <div key={label} style={{ background: `${color}12`, borderRadius: 12, padding: "10px 6px", border: `1px solid ${color}30` }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 4 }}>{label}</div>
+              <div style={{ fontSize: 17, fontWeight: 800, color: t?.ink || "#ededed", letterSpacing: "-0.02em" }}>{val}</div>
+            </div>
+          ))}
+        </div>
+        <p style={{ margin: 0, fontSize: 13, color: t?.muted || "#a1a1a1", textAlign: "center", fontFamily: FONT }}>What is the final value? (compound interest)</p>
+      </div>
+      {/* Options */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        {q.opts.map(opt => {
+          const isCorrect = opt === q.ans;
+          const isWrong = selected === opt && !isCorrect;
+          return (
+            <button key={opt} type="button" onClick={() => pick(opt)}
+              onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+              onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+              style={{
+                padding: "16px 10px", borderRadius: 16, fontFamily: FONT,
+                border: `1.5px solid ${selected ? isCorrect ? color : isWrong ? "#e5484d" : t?.border || "rgba(255,255,255,0.07)" : t?.border || "rgba(255,255,255,0.1)"}`,
+                background: selected ? isCorrect ? `${color}20` : isWrong ? "rgba(229,72,77,0.15)" : t?.light || "rgba(255,255,255,0.03)" : t?.light || "rgba(255,255,255,0.05)",
+                color: selected ? isCorrect ? color : isWrong ? "#e5484d" : t?.muted || "#a1a1a1" : t?.ink || "#ededed",
+                fontSize: 17, fontWeight: 700, cursor: "pointer", letterSpacing: "-0.01em",
+                transition: "all 0.15s cubic-bezier(0.34,1.56,0.64,1)",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >{opt.startsWith("$") ? opt : `$${opt}`}</button>
+          );
+        })}
+      </div>
+      {selected && selected !== "__timeout__" && (
+        <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 14, background: `${color}10`, border: `1px solid ${color}30`, fontSize: 12.5, color, lineHeight: 1.55, fontFamily: FONT }}>
+          Formula: Principal × (1 + rate)^years = {q.display}
+        </div>
+      )}
+      {selected === "__timeout__" && (
+        <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 14, background: "rgba(229,72,77,0.12)", border: "1px solid #e5484d40", fontSize: 12.5, color: "#e5484d", lineHeight: 1.55, fontFamily: FONT }}>
+          Time&apos;s up! Answer: {q.display}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SpeakItGame({ color, onClose, t, play }) {
+  const [qi, setQi] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const q = SPEAK_QS[qi];
+
+  const pick = (idx) => {
+    if (selected !== null) return;
+    setSelected(idx);
+    if (idx === q.best) { setScore(s => s + 1); play?.("correct"); }
+    else play?.("wrong");
+    setTimeout(() => {
+      if (qi + 1 >= SPEAK_QS.length) setDone(true);
+      else { setQi(qi + 1); setSelected(null); }
+    }, 1400);
+  };
+
+  if (done) return <ScoreScreen score={score} total={SPEAK_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={qi} total={SPEAK_QS.length} color={color} t={t} />
+      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Situation</p>
+        <p style={{ fontSize: 15, color: t?.ink || "#ededed", lineHeight: 1.6, margin: 0 }}>{q.scenario}</p>
+      </div>
+      <p style={{ fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 12 }}>What do you say?</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {q.opts.map((opt, idx) => {
+          const isBest = idx === q.best;
+          const isPicked = selected === idx;
+          return (
+            <button key={idx} type="button" onClick={() => pick(idx)}
+              onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+              onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+              style={{
+              padding: "14px 16px", borderRadius: 14, textAlign: "left",
+              border: `1.5px solid ${selected !== null ? isBest ? color : isPicked ? "#e5484d" : t?.border || "rgba(255,255,255,0.07)" : t?.border || "rgba(255,255,255,0.1)"}`,
+              background: selected !== null ? isBest ? `${color}18` : isPicked ? "rgba(229,72,77,0.12)" : "transparent" : t?.light || "rgba(255,255,255,0.05)",
+              color: selected !== null ? isBest ? color : isPicked ? "#e5484d" : "#555" : t?.ink || "#ededed",
+              fontSize: 13.5, cursor: "pointer", fontFamily: FONT, fontWeight: 400,
+              transition: "all 0.15s cubic-bezier(0.34,1.56,0.64,1)", fontStyle: "italic",
+            }}>{opt}</button>
+          );
+        })}
+      </div>
+      {selected !== null && <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 14, background: `${color}10`, border: `1px solid ${color}30`, fontSize: 12.5, color: color, lineHeight: 1.55 }}>{q.why}</div>}
+    </div>
+  );
+}
+
+function FillerCatcherGame({ color, onClose, t, play }) {
+  const [ti, setTi] = useState(0);
+  const [tapped, setTapped] = useState(new Set());
+  const [score, setScore] = useState(0);
+  const [checked, setChecked] = useState(false);
+  const [done, setDone] = useState(false);
+  const filler = FILLER_TEXTS[ti];
+  const words = filler.text.split(" ");
+
+  const toggle = (word) => {
+    if (checked) return;
+    play?.("tap");
+    setTapped(prev => {
+      const next = new Set(prev);
+      if (next.has(word)) next.delete(word);
+      else next.add(word);
+      return next;
+    });
+  };
+
+  const checkAnswers = () => {
+    setChecked(true);
+    play?.("ok");
+    const correct = filler.fillers.filter(f => tapped.has(f)).length;
+    const wrong = [...tapped].filter(w => !filler.fillers.includes(w)).length;
+    setScore(s => s + Math.max(0, correct - wrong));
+    setTimeout(() => {
+      if (ti + 1 >= FILLER_TEXTS.length) setDone(true);
+      else { setTi(ti + 1); setTapped(new Set()); setChecked(false); }
+    }, 1800);
+  };
+
+  if (done) return <ScoreScreen score={score} total={FILLER_TEXTS.reduce((a, f) => a + f.fillers.length, 0)} color={color} customMsg="Filler words found!" onReplay={() => { setTi(0); setTapped(new Set()); setScore(0); setChecked(false); setDone(false); }} onClose={onClose} t={t} play={play} />;
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={ti} total={FILLER_TEXTS.length} color={color} t={t} />
+      <p style={{ fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 16 }}>Tap every filler word (um, like, basically, etc.)</p>
+      <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, lineHeight: 2.2, display: "flex", flexWrap: "wrap", gap: "0 4px" }}>
+        {words.map((word, i) => {
+          const clean = word.replace(/[^a-zA-Z]/g, "");
+          const isTapped = tapped.has(clean) || tapped.has(word);
+          const isFiller = checked && filler.fillers.includes(clean);
+          const isWrong = checked && isTapped && !isFiller;
+          return (
+            <button key={i} type="button" onClick={() => toggle(clean || word)} style={{
+              background: checked ? isFiller ? `${color}25` : isWrong ? "rgba(229,72,77,0.2)" : "transparent" : isTapped ? `${color}20` : "transparent",
+              border: `1px solid ${isTapped || (checked && isFiller) ? checked ? isFiller ? color : "#e5484d" : color : "transparent"}`,
+              borderRadius: 6, padding: "1px 4px", cursor: "pointer",
+              color: checked ? isFiller ? color : isWrong ? "#e5484d" : t?.ink || "#ededed" : isTapped ? color : t?.ink || "#ededed",
+              fontSize: 16, lineHeight: 1.8, fontFamily: FONT,
+              transition: "all 0.15s ease", WebkitTapHighlightColor: "transparent",
+            }}>{word}</button>
+          );
+        })}
+      </div>
+      {!checked && (
+        <button type="button" onClick={checkAnswers} style={{ width: "100%", padding: "14px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Check My Answers</button>
+      )}
+    </div>
+  );
+}
+
+function ConfidenceQuiz({ color, t, play }) {
+  const [qi, setQi] = useState(0);
+  const [score, setScore] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [done, setDone] = useState(false);
+  const q = CONF_QUIZ[qi];
+  const maxScore = CONF_QUIZ.reduce((a, q) => a + Math.max(...q.scores), 0);
+
+  const pick = (idx) => {
+    if (selected !== null) return;
+    play?.("ok");
+    setSelected(idx);
+    setScore(s => s + q.scores[idx]);
+    setTimeout(() => {
+      if (qi + 1 >= CONF_QUIZ.length) setDone(true);
+      else { setQi(qi + 1); setSelected(null); }
+    }, 700);
+  };
+
+  if (done) {
+    const pct = Math.round((score / maxScore) * 100);
+    const label = pct >= 80 ? "Highly Confident" : pct >= 55 ? "Growing Confident" : "Building Foundation";
+    const iconPath = pct >= 80
+      ? <><path d="M6 9a6 6 0 0012 0V4H6v5z"/><path d="M6 4H3v3a3 3 0 003 3"/><path d="M18 4h3v3a3 3 0 01-3 3"/><path d="M9 21h6"/><path d="M12 15v6"/></>
+      : pct >= 55
+        ? <><circle cx="12" cy="12" r="10"/><polyline points="16,10 11,15 8,12"/></>
+        : <><path d="M11 20A7 7 0 014 13c0-5 4-9 9-11 0 5 2 9 2 11a4 4 0 01-4 7z"/><path d="M11 20c0-5.5 5-9 7-9"/></>;
+    return (
+      <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT }}>
+        <div style={{ width: 100, height: 100, borderRadius: "50%", background: `${color}15`, border: `3px solid ${color}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{iconPath}</svg>
+        </div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: t?.ink || "#ededed", marginBottom: 8, letterSpacing: "-0.03em" }}>{label}</div>
+        <div style={{ fontSize: 16, color, fontWeight: 700, marginBottom: 24 }}>Score: {pct}%</div>
+        <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 16, padding: "16px 20px", textAlign: "left", marginBottom: 24, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+          <p style={{ color: t?.ink || "#ededed", fontSize: 14, lineHeight: 1.65, margin: 0 }}>
+            {pct >= 80 ? "You carry yourself with genuine confidence. Keep practising direct communication and expanding your comfort zone." : pct >= 55 ? "You're building strong confidence habits. Focus on posture, eye contact, and speaking up earlier in conversations." : "Confidence is a skill — and you're developing it. Start with small wins: introduce yourself first, speak up in small groups, maintain eye contact."}
+          </p>
+        </div>
+        <button type="button" onClick={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} style={{ padding: "13px 28px", background: color, color: "#000", borderRadius: 999, border: "none", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Retake Quiz</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <Progress current={qi} total={CONF_QUIZ.length} color={color} t={t} />
+      <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+        <p style={{ fontSize: 16, color: t?.ink || "#ededed", lineHeight: 1.55, margin: 0, fontWeight: 500 }}>{q.q}</p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {q.opts.map((opt, idx) => (
+          <button key={idx} type="button" onClick={() => pick(idx)}
+            onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+            onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+            style={{
+            padding: "14px 16px", borderRadius: 14, textAlign: "left",
+            border: `1.5px solid ${selected === idx ? color : t?.border || "rgba(255,255,255,0.1)"}`,
+            background: selected === idx ? `${color}15` : t?.light || "rgba(255,255,255,0.05)",
+            color: selected === idx ? color : t?.ink || "#ededed",
+            fontSize: 14, cursor: "pointer", fontFamily: FONT, fontWeight: 400,
+            transition: "all 0.15s cubic-bezier(0.34,1.56,0.64,1)", WebkitTapHighlightColor: "transparent",
+          }}>{opt}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DailyDemChallenge({ color, onClose, t, play }) {
+  const challenges = [
+    { emoji: "🗣️", title: "The Cold Introduction", task: "Introduce yourself to one stranger or new colleague today. Use your name, what you do, and one interesting fact about yourself. Be first.", tip: "Being first to speak shows confidence and sets the social frame." },
+    { emoji: "📱", title: "No Filler Day", task: "For the next conversation you have — no 'um', 'like', 'basically', or 'you know'. Pause instead. Silence is more powerful than filler.", tip: "Strategic pauses make you appear more composed and authoritative." },
+    { emoji: "👁️", title: "Eye Contact Challenge", task: "In your next 3 conversations, maintain natural eye contact 70% of the time. Don't stare — just hold it longer than you normally would.", tip: "Consistent eye contact signals confidence, engagement, and honesty." },
+    { emoji: "🧍", title: "Posture Reset", task: "Set 3 phone reminders today. Each time: roll shoulders back, chin up, feet shoulder-width. Notice how your mood shifts when your body changes.", tip: "Amy Cuddy's research shows posture changes your hormone levels, not just perception." },
+    { emoji: "💬", title: "Lead The Conversation", task: "Start a conversation today — ask a genuine question about something the other person cares about. Then listen more than you speak.", tip: "The best conversationalists make others feel heard, not impressed." },
+    { emoji: "🎯", title: "Direct Request", task: "Ask for something directly today — no hedging, no apologising. 'Can I have X by Y time?' Say it once, clearly, then wait.", tip: "Direct requests without qualifiers are taken more seriously and respected more." },
+  ];
+  const today = new Date().getDay();
+  const challenge = challenges[today % challenges.length];
+  const [accepted, setAccepted] = useState(false);
+
+  if (accepted) {
+    return (
+      <div style={{ padding: "40px 24px", textAlign: "center", fontFamily: FONT }}>
+        <div
+          style={{
+            width: 72, height: 72, borderRadius: 22,
+            background: `${color}1F`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 16px",
+          }}
+          aria-hidden="true"
+        >
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20,6 9,17 4,12"/>
+          </svg>
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: t?.ink || "#ededed", marginBottom: 8, letterSpacing: "-0.03em" }}>Challenge Accepted!</div>
+        <div style={{ fontSize: 15, color: t?.muted || "#a1a1a1", marginBottom: 28, lineHeight: 1.55 }}>Come back tomorrow for a new one.</div>
+        <button type="button" onClick={onClose} style={{ padding: "13px 32px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Done</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "24px 20px 40px", fontFamily: FONT }}>
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <div style={{ fontSize: 52, marginBottom: 12 }}>{challenge.emoji}</div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: t?.ink || "#ededed", letterSpacing: "-0.03em", marginBottom: 4 }}>{challenge.title}</div>
+        <div style={{ fontSize: 12, color, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Today's Challenge</div>
+      </div>
+      <div style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px", marginBottom: 16, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}` }}>
+        <p style={{ fontSize: 15, color: t?.ink || "#ededed", lineHeight: 1.65, margin: 0 }}>{challenge.task}</p>
+      </div>
+      <div style={{ background: `${color}10`, borderRadius: 16, padding: "16px 18px", border: `1px solid ${color}30` }}>
+        <p style={{ fontSize: 12, fontWeight: 700, color, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Why This Works</p>
+        <p style={{ fontSize: 13.5, color: t?.ink || "#ededed", lineHeight: 1.6, margin: 0 }}>{challenge.tip}</p>
+      </div>
+      <button type="button" onClick={() => { play?.("star"); setAccepted(true); }} style={{ width: "100%", marginTop: 24, padding: "14px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>I Accept the Challenge ✓</button>
+    </div>
+  );
+}
+
+function WordLadderGame({ color, t, play }) {
+  const [pi, setPi] = useState(0);
+  const [revealed, setRevealed] = useState(1);
+  const p = WORD_LADDER_PUZZLES[pi];
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+      <p style={{ fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 20 }}>Change one letter at a time to get from <strong style={{ color }}>{p.start}</strong> → <strong style={{ color }}>{p.end}</strong></p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "center", marginBottom: 24 }}>
+        {p.steps.map((step, i) => (
+          <div key={i} style={{
+            display: "flex", gap: 6, alignItems: "center",
+            opacity: i < revealed ? 1 : 0.25,
+            transition: "opacity 0.3s ease",
+          }}>
+            {step.split("").map((l, li) => {
+              const prev = p.steps[i - 1];
+              const changed = prev && prev[li] !== l;
+              return (
+                <div key={li} style={{
+                  width: 48, height: 52, borderRadius: 12,
+                  border: `2px solid ${i < revealed ? changed && i > 0 ? color : t?.border || "rgba(255,255,255,0.15)" : t?.border || "rgba(255,255,255,0.08)"}`,
+                  background: changed && i > 0 && i < revealed ? `${color}18` : t?.light || "rgba(255,255,255,0.04)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 20, fontWeight: 800, color: changed && i < revealed ? color : t?.ink || "#ededed",
+                  fontFamily: FONT, transition: "all 0.3s ease",
+                }}>{l}</div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 10 }}>
+        {revealed < p.steps.length && (
+          <button type="button" onClick={() => {
+            const next = revealed + 1;
+            play?.("correct");
+            setRevealed(next);
+            if (next >= p.steps.length) setTimeout(() => play?.("correct"), 350);
+          }} style={{ flex: 1, padding: "13px", background: `${color}18`, color, border: `1px solid ${color}40`, borderRadius: 14, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Reveal Next Step</button>
+        )}
+        {pi + 1 < WORD_LADDER_PUZZLES.length && revealed >= p.steps.length && (
+          <button type="button" onClick={() => { setPi(pi + 1); setRevealed(1); }} style={{ flex: 1, padding: "13px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Next Puzzle →</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SHARED COMPONENTS
+────────────────────────────────────────────────────────────── */
+function Progress({ current, total, color, t }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+        <span style={{ fontSize: 12, color: t?.muted || "#a1a1a1", fontFamily: FONT }}>Question {current + 1} of {total}</span>
+        <span style={{ fontSize: 12, color, fontWeight: 600, fontFamily: FONT }}>{Math.round(((current) / total) * 100)}%</span>
+      </div>
+      <div style={{ height: 6, borderRadius: 999, background: t?.light || "#1a1a1a", overflow: "hidden" }}>
+        <div style={{ width: `${(current / total) * 100}%`, height: "100%", background: color, borderRadius: 999, transition: "width 0.4s cubic-bezier(0.34,1.56,0.64,1)" }} />
+      </div>
+    </div>
+  );
+}
+
+function ScoreScreen({ score, total, color, customMsg, onReplay, onClose, t, play }) {
+  const pct = Math.round((score / total) * 100);
+  // Centre icon varies by performance. Use SVGs for a cleaner, iOS-native feel.
+  const iconPath = pct === 100
+    ? <><path d="M6 9a6 6 0 0012 0V4H6v5z"/><path d="M6 4H3v3a3 3 0 003 3"/><path d="M18 4h3v3a3 3 0 01-3 3"/><path d="M9 21h6"/><path d="M12 15v6"/></>
+    : pct >= 70
+      ? <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/>
+      : pct >= 50
+        ? <><circle cx="12" cy="12" r="10"/><polyline points="16,10 11,15 8,12"/></>
+        : <><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></>;
+  // Play sound exactly once on mount. Use a ref guard so strict-mode double-invoke
+  // doesn't fire it twice and so changing `play` identity doesn't re-trigger.
+  const played = useRef(false);
+  useEffect(() => {
+    if (played.current) return;
+    played.current = true;
+    if (pct === 100) play?.("star");
+    else if (pct >= 60) play?.("correct");
+    else play?.("ok");
+  }, [pct, play]);
+  const confettiColors = ["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#FF6FF2","#FF9E4F","#A0F0A0","#B388FF","#FFB347","#4FC3F7","#FF80AB","#69F0AE"];
+  return (
+    <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT }}>
+      <style>{`
+        @keyframes scoreRing { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.12);opacity:0} }
+        @keyframes confettiFall { 0%{transform:translateY(-40px) rotate(0deg);opacity:1} 100%{transform:translateY(220px) rotate(720deg);opacity:0} }
+      `}</style>
+      {pct === 100 && (
+        <div style={{ position: "relative", height: 0, overflow: "visible" }}>
+          {confettiColors.map((c, i) => (
+            <div key={i} style={{
+              position: "absolute",
+              left: `${8 + (i * 7.5)}%`,
+              top: 0,
+              width: 10,
+              height: 10,
+              borderRadius: i % 2 === 0 ? "50%" : 2,
+              background: c,
+              animation: `confettiFall ${1.2 + (i % 4) * 0.2}s ease-in ${(i % 5) * 0.12}s both`,
+              pointerEvents: "none",
+            }} />
+          ))}
+        </div>
+      )}
+      <div style={{ position: "relative", width: 120, height: 120, margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: `3px solid ${color}`, animation: "scoreRing 2s ease-in-out infinite" }} />
+        <div style={{ width: 100, height: 100, borderRadius: "50%", background: t?.white || "#111111", border: `3px solid ${color}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{iconPath}</svg>
+        </div>
+      </div>
+      <div style={{ fontSize: 28, fontWeight: 800, color: t?.ink || "#ededed", letterSpacing: "-0.04em", marginBottom: 6 }}>
+        {score}/{total}
+      </div>
+      <div style={{ fontSize: 14, color, fontWeight: 600, marginBottom: 8 }}>{customMsg || "Score"}</div>
+      <div style={{ display: "inline-flex", padding: "6px 16px", borderRadius: 999, background: pct >= 70 ? `${color}18` : t?.light || "rgba(255,255,255,0.07)", border: `1px solid ${pct >= 70 ? color + "40" : t?.border || "rgba(255,255,255,0.1)"}`, fontSize: 13, color: pct >= 70 ? color : t?.muted || "#a1a1a1", fontWeight: 600, marginBottom: 28 }}>
+        {pct >= 90 ? "Outstanding!" : pct >= 70 ? "Great work!" : pct >= 50 ? "Keep going!" : "Practice makes perfect"}
+      </div>
+      <div style={{ display: "flex", gap: 12 }}>
+        <button type="button" onClick={onReplay} style={{ flex: 1, padding: "13px", background: t?.light || `${color}18`, color: t?.ink || color, border: `1px solid ${t?.border || color + "40"}`, borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>↺ Again</button>
+        <button type="button" onClick={onClose} style={{ flex: 1, padding: "13px", background: t?.light || "rgba(255,255,255,0.07)", color: t?.ink || "#ededed", border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`, borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Done</button>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
+   GAME ROUTER
+────────────────────────────────────────────────────────────── */
+function GameRouter({ gameId, color, onClose, t, play }) {
+  const games = {
+    fill_gap:     () => <FillGapGame color={color} onClose={onClose} t={t} play={play} />,
+    word_guess:   () => <WordGuessGame color={color} onClose={onClose} t={t} play={play} />,
+    vocab_match:  () => <VocabMatchGame color={color} onClose={onClose} t={t} play={play} />,
+    sentence:     () => <SentenceBuilderGame color={color} onClose={onClose} t={t} play={play} />,
+    word_trivia:  () => <MultiChoiceGame questions={WORD_TRIVIA} color={color} onClose={onClose} t={t} play={play} />,
+    word_ladder:  () => <WordLadderGame color={color} onClose={onClose} t={t} play={play} />,
+    fin_terms:    () => <FlashcardGame cards={FIN_TERMS} color={color} onClose={onClose} t={t} play={play} />,
+    budget:       () => <BudgetGame color={color} onClose={onClose} t={t} play={play} />,
+    fin_trivia:   () => <MultiChoiceGame questions={FIN_TRIVIA} color={color} onClose={onClose} t={t} play={play} />,
+    invest_save:  () => <InvestSaveGame color={color} onClose={onClose} t={t} play={play} />,
+    money_math:   () => <MoneyMathGame color={color} onClose={onClose} t={t} play={play} />,
+    compound:     () => <CompoundGrowthGame color={color} onClose={onClose} t={t} play={play} />,
+    speak_it:     () => <SpeakItGame color={color} onClose={onClose} t={t} play={play} />,
+    filler_catch: () => <FillerCatcherGame color={color} onClose={onClose} t={t} play={play} />,
+    tone_detect:  () => <MultiChoiceGame questions={TONE_QS.map(q => ({ q: `Tone of: "${q.message}"`, opts: q.tones, ans: q.ans, tip: q.tip }))} color={color} onClose={onClose} t={t} play={play} />,
+    conf_quiz:    () => <ConfidenceQuiz color={color} onClose={onClose} t={t} play={play} />,
+    daily_dem:    () => <DailyDemChallenge color={color} onClose={onClose} t={t} play={play} />,
+    body_lang:    () => <MultiChoiceGame questions={BODY_QS.map(q => ({ q: q.q, opts: q.opts, ans: q.ans, tip: q.tip }))} color={color} onClose={onClose} t={t} play={play} />,
+  };
+  return games[gameId]?.() ?? <div style={{ padding: 24, color: t?.muted || "#a1a1a1", textAlign: "center", fontFamily: FONT }}>Coming soon…</div>;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   MAIN PAGE
+────────────────────────────────────────────────────────────── */
+export function LearnItSubjectPage({ t, play, subject, onBack }) {
+  const [activeGame, setActiveGame] = useState(null);
+  const meta = SUBJECT_META[subject] || SUBJECT_META.english;
+  const games = GAMES[subject] || GAMES.english;
+  const { color, lightColor, borderColor, label, emoji } = meta;
+
+  const openGame = (id) => {
+    play?.("tap");
+    setActiveGame(id);
+  };
+
+  const closeGame = () => {
+    play?.("back");
+    setActiveGame(null);
+  };
+
+  const activeGameMeta = games.find(g => g.id === activeGame);
+
+  return (
+    <div
+      data-page-tag="#learn_it_subject"
+      style={{
+        padding: "0 0 96px",
+        fontFamily: FONT,
+        minHeight: "100%",
+        position: "relative",
+      }}
+    >
+      {/* Header */}
+      <div style={{
+        padding: "28px 18px 22px",
+        background: "rgba(255,255,255,0.02)",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* Glow bg */}
+        <div aria-hidden style={{
+          position: "absolute", top: -60, right: -60,
+          width: 200, height: 200, borderRadius: "50%",
+          background: `radial-gradient(circle, ${color}28 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }} />
+
+        {/* Back button */}
+        <button
+          type="button"
+          onClick={() => { play?.("back"); onBack?.(); }}
+          style={{
+            display: "flex", alignItems: "center", gap: 5,
+            background: "none", border: "none", cursor: "pointer",
+            color, fontSize: 16, fontWeight: 400, fontFamily: FONT,
+            padding: 0, marginBottom: 18, WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          <svg width="10" height="18" viewBox="0 0 10 18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 1 1 9 9 17" />
+          </svg>
+          Learn-It
+        </button>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 14, position: "relative" }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: 18,
+            background: lightColor, border: `1.5px solid ${borderColor}`,
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28,
+          }}>
+            {emoji}
+          </div>
+          <div>
+            <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color, fontFamily: FONT }}>Learn-It</p>
+            <h2 style={{ margin: 0, fontSize: 30, fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1.05, color: (t && t.ink) || "#ededed", fontFamily: FONT }}>{label}</h2>
+          </div>
+        </div>
+
+        <p style={{ margin: "14px 0 0", fontSize: 13.5, color: (t && t.muted) || "#a1a1a1", lineHeight: 1.55, fontFamily: FONT, position: "relative" }}>
+          {games.length} interactive activities — tap a card to flip it, then press Play.
+        </p>
+      </div>
+
+      {/* Card grid */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, 1fr)",
+        gap: 12,
+        padding: "20px 16px",
+      }}>
+        {games.map((game, i) => (
+          <FlipCard
+            key={game.id}
+            game={game}
+            color={color}
+            lightColor={lightColor}
+            borderColor={borderColor}
+            index={i}
+            onPlay={openGame}
+          />
+        ))}
+      </div>
+
+      {/* Game modal */}
+      {activeGame && (
+        <GameModal onClose={closeGame} color={color} title={activeGameMeta?.title || "Game"} t={t} play={play}>
+          <GameRouter gameId={activeGame} subject={subject} color={color} onClose={closeGame} t={t} play={play} />
+        </GameModal>
+      )}
+    </div>
+  );
+}
