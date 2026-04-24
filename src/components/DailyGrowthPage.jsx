@@ -187,7 +187,7 @@ export function DailyGrowthPage({ t, play, setPage, onMomentumEvent }) {
               margin: "0 0 6px",
               fontSize: 10,
               fontWeight: 700,
-              letterSpacing: 2.2,
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: t.muted,
             }}
@@ -211,7 +211,7 @@ export function DailyGrowthPage({ t, play, setPage, onMomentumEvent }) {
               margin: "0 0 8px",
               fontSize: 10,
               fontWeight: 700,
-              letterSpacing: 2.2,
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: t.muted,
             }}
@@ -275,7 +275,7 @@ export function DailyGrowthPage({ t, play, setPage, onMomentumEvent }) {
             fontSize: 11,
             fontWeight: 700,
             color: t.green,
-            letterSpacing: 0.5,
+            letterSpacing: "0.03em",
           }}
         >
           {completed.length}/{GROWTH_ITEMS.length} TODAY
@@ -296,7 +296,7 @@ export function DailyGrowthPage({ t, play, setPage, onMomentumEvent }) {
               margin: "0 0 8px",
               fontSize: 10,
               fontWeight: 700,
-              letterSpacing: 2.2,
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: t.green,
             }}
@@ -596,7 +596,6 @@ function JournalTool({ item, t, play, onComplete }) {
           fontSize: 14,
           color: t.mid,
           lineHeight: 1.7,
-          fontStyle: "italic",
           paddingLeft: 12,
           borderLeft: `3px solid ${t.green}`,
         }}
@@ -691,7 +690,7 @@ function TimerTool({ item, t, play, onComplete }) {
           fontWeight: 800,
           color: remaining === 0 ? t.green : t.ink,
           fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
-          letterSpacing: -1,
+          letterSpacing: "-0.03em",
           padding: "20px 0",
         }}
       >

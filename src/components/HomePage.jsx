@@ -3,6 +3,39 @@ import { MAP } from "../data/content";
 import { clearResumeTopic, getResumeTopic } from "../systems/resumeReading";
 import { S } from "../systems/theme";
 import { Ic } from "../icons/Ic";
+import { LS } from "../systems/storage";
+
+const HABIT_KEY = "life_daily_habits";
+const DEFAULT_HABITS = [
+  { id: "h1", label: "Drink 2L of water", icon: "💧" },
+  { id: "h2", label: "Read for 10 minutes", icon: "📖" },
+  { id: "h3", label: "No social media before noon", icon: "🔕" },
+  { id: "h4", label: "Write one goal down", icon: "✍️" },
+  { id: "h5", label: "Move your body", icon: "🏃" },
+];
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+function useDailyHabits() {
+  const [state, setState] = useState(() => {
+    const saved = LS.get(HABIT_KEY, {});
+    const today = todayKey();
+    return saved.date === today ? saved.checked ?? [] : [];
+  });
+
+  const toggle = (id) => {
+    setState((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      LS.set(HABIT_KEY, { date: todayKey(), checked: next });
+      return next;
+    });
+  };
+
+  return { checked: state, toggle };
+}
 
 function greetingFor(hour) {
   if (hour >= 5 && hour < 12) return "Good Morning";
@@ -23,6 +56,7 @@ export function HomePage({
   onOpenIncomeIdeas,
 }) {
   const [dismissed, setDismissed] = useState(false);
+  const { checked: habitChecked, toggle: toggleHabit } = useDailyHabits();
   const resumeTopic = useMemo(() => {
     const saved = getResumeTopic();
     if (!saved?.key || !MAP[saved.key]) return null;
@@ -130,7 +164,7 @@ export function HomePage({
           <h1
             style={{
               margin: "0 0 18px",
-              fontSize: "clamp(5.2rem, 38vw, 10rem)",
+              fontSize: "clamp(6rem, 45vw, 11rem)",
               fontWeight: 800,
               color: t.ink,
               fontFamily: '"New York", Georgia, "Times New Roman", serif',
@@ -551,11 +585,11 @@ export function HomePage({
                 background: "rgba(255,255,255,0.04)",
                 border: `1px solid rgba(255,255,255,0.07)`,
                 borderRadius: 20,
-                padding: "16px 16px 14px",
+                padding: "12px 14px 11px",
                 boxShadow: S.sm,
                 cursor: "pointer",
                 fontFamily: "-apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
-                minHeight: 90,
+                minHeight: 72,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
@@ -567,30 +601,143 @@ export function HomePage({
               }}
             >
               <div style={{
-                width: 36, height: 36, borderRadius: 11,
+                width: 30, height: 30, borderRadius: 9,
                 background: `${action.color}1F`,
                 border: `1px solid ${action.color}33`,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 lineHeight: 1,
               }}>
-                {Ic[action.icon]?.("none", action.color, 18)}
+                {Ic[action.icon]?.("none", action.color, 15)}
               </div>
               <div>
-                <div style={{ fontSize: 13.5, fontWeight: 600, color: t.ink, letterSpacing: "-0.01em", marginBottom: 2 }}>{action.label}</div>
-                <div style={{ fontSize: 11.5, lineHeight: 1.45, color: t.muted }}>{action.desc}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: t.ink, letterSpacing: "-0.01em", marginBottom: 2 }}>{action.label}</div>
+                <div style={{ fontSize: 11, lineHeight: 1.4, color: t.muted }}>{action.desc}</div>
               </div>
             </button>
           ))}
         </div>
 
+        {/* ── Daily Habit Tracker ─────────────────────────────── */}
+        <div style={{ marginTop: 24 }}>
+          <p
+            style={{
+              margin: "0 2px 10px",
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: t.muted,
+              textAlign: "center",
+              fontFamily: "-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif",
+            }}
+          >
+            Daily Habits — {habitChecked.length}/{DEFAULT_HABITS.length}
+          </p>
+          <div
+            style={{
+              background: t.white,
+              border: `1px solid ${t.border}`,
+              borderRadius: 20,
+              overflow: "hidden",
+              boxShadow: S.sm,
+            }}
+          >
+            {/* Progress bar */}
+            <div style={{ height: 3, background: t.skin }}>
+              <div
+                style={{
+                  height: "100%",
+                  width: `${(habitChecked.length / DEFAULT_HABITS.length) * 100}%`,
+                  background: t.green,
+                  transition: "width 0.4s cubic-bezier(0.34,1.56,0.64,1)",
+                  borderRadius: 999,
+                }}
+              />
+            </div>
+            {DEFAULT_HABITS.map((h, i) => {
+              const done = habitChecked.includes(h.id);
+              return (
+                <button
+                  key={h.id}
+                  type="button"
+                  onClick={() => toggleHabit(h.id)}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "12px 16px",
+                    background: done ? `${t.green}0a` : "transparent",
+                    border: "none",
+                    borderBottom: i < DEFAULT_HABITS.length - 1 ? `1px solid ${t.border}` : "none",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    fontFamily: "-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif",
+                    WebkitTapHighlightColor: "transparent",
+                    transition: "background 0.2s ease",
+                  }}
+                >
+                  {/* Check circle */}
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      background: done ? t.green : "transparent",
+                      border: `2px solid ${done ? t.green : t.border}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      transition: "all 0.25s cubic-bezier(0.34,1.56,0.64,1)",
+                    }}
+                  >
+                    {done && (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                  <span style={{ fontSize: 14 }}>{h.icon}</span>
+                  <span
+                    style={{
+                      flex: 1,
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: done ? t.muted : t.ink,
+                      textDecoration: done ? "line-through" : "none",
+                      transition: "color 0.2s ease, text-decoration 0.2s ease",
+                    }}
+                  >
+                    {h.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {habitChecked.length === DEFAULT_HABITS.length && (
+            <p
+              style={{
+                margin: "10px 0 0",
+                textAlign: "center",
+                fontSize: 13,
+                fontWeight: 600,
+                color: t.green,
+                fontFamily: "-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif",
+              }}
+            >
+              ✦ All habits done today — great work!
+            </p>
+          )}
+        </div>
+
         <p
           style={{
-            margin: "32px auto 8px",
+            margin: "24px auto 8px",
             textAlign: "center",
             fontSize: 11,
             color: t.muted,
             fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
-            fontStyle: "italic",
             opacity: 0.8,
           }}
         >

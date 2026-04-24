@@ -537,39 +537,28 @@ export default function ProfilePage({
       <button
         type="button"
         onClick={doSignOut}
+        onPointerDown={(e) => { e.currentTarget.style.transform = "scale(0.97)"; e.currentTarget.style.background = `${t.red}18`; }}
+        onPointerUp={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.background = "transparent"; }}
+        onPointerCancel={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.background = "transparent"; }}
+        onPointerLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.background = "transparent"; }}
         style={{
           width: "100%",
           background: "transparent",
           border: `1.5px solid ${t.red}`,
           borderRadius: 14,
-          padding: "14px 16px",
+          padding: "15px 16px",
           color: t.red,
           fontSize: 15,
-          fontWeight: 700,
+          fontWeight: 600,
           cursor: "pointer",
           fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           gap: 8,
-          transition: "background 0.18s ease, color 0.18s ease",
+          transition: "background 0.18s ease, transform 0.15s cubic-bezier(0.34,1.56,0.64,1)",
           WebkitTapHighlightColor: "transparent",
-        }}
-        onTouchStart={(e) => {
-          e.currentTarget.style.background = t.red;
-          e.currentTarget.style.color = "#fff";
-        }}
-        onTouchEnd={(e) => {
-          e.currentTarget.style.background = "transparent";
-          e.currentTarget.style.color = t.red;
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = t.red;
-          e.currentTarget.style.color = "#fff";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "transparent";
-          e.currentTarget.style.color = t.red;
+          letterSpacing: "-0.01em",
         }}
       >
         <svg
