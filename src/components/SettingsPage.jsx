@@ -343,9 +343,10 @@ export default function SettingsPage({
             style={{
               background: t.white,
               border: `1px solid ${t.border}`,
-              borderRadius: 12,
-              padding: "4px 16px",
-              marginBottom: 20,
+              borderRadius: 18,
+              padding: "6px 18px",
+              marginBottom: 22,
+              boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
             }}
           >
             {/* Section header row (always visible) — styled like an iOS
@@ -380,11 +381,11 @@ export default function SettingsPage({
                 <span
                   aria-hidden
                   style={{
-                    width: 30,
-                    height: 30,
-                    minWidth: 30,
-                    minHeight: 30,
-                    borderRadius: 8,
+                    width: 32,
+                    height: 32,
+                    minWidth: 32,
+                    minHeight: 32,
+                    borderRadius: 10,
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",

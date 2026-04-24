@@ -2209,9 +2209,10 @@ export default function LifeApp() {
               style={{
                 background: t.white,
                 border: `1px solid ${t.border}`,
-                borderRadius: 14,
+                borderRadius: 18,
                 padding: "20px 22px",
-                marginBottom: 12,
+                marginBottom: 14,
+                boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
               }}
             >
               <h3
@@ -2662,8 +2663,8 @@ export default function LifeApp() {
               zIndex: 70,
               background: t.white,
               border: `1px solid ${alpha(t.border, dark ? 0.6 : 0.9)}`,
-              borderRadius: isNarrowViewport ? 22 : 18,
-              boxShadow: `0 12px 36px ${alpha(t.ink, dark ? 0.34 : 0.18)}`,
+              borderRadius: isNarrowViewport ? 24 : 22,
+              boxShadow: `0 12px 48px ${alpha(t.ink, dark ? 0.4 : 0.22)}, 0 4px 16px ${alpha(t.ink, dark ? 0.2 : 0.1)}`,
               width: isNarrowViewport ? "auto" : 340,
               maxHeight:
                 "min(480px, calc(100dvh - (72px + var(--safe-top, 0px) + var(--safe-bottom, 0px))))",
@@ -2917,10 +2918,10 @@ export default function LifeApp() {
               style={{
                 width: 36,
                 height: 36,
-                borderRadius: 10,
+                borderRadius: 12,
                 background: "linear-gradient(145deg, #1c1c1e, #2c2c2e)",
                 border: "0.5px solid rgba(255,255,255,0.1)",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -4395,8 +4396,9 @@ export default function LifeApp() {
                     marginTop: 28,
                     background: t.white,
                     border: `1px solid ${t.border}`,
-                    borderRadius: 16,
-                    padding: "20px 18px",
+                    borderRadius: 20,
+                    padding: "22px 20px",
+                    boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
                   }}
                 >
                   <p
@@ -4620,7 +4622,7 @@ export default function LifeApp() {
                   style={{
                     width: 64,
                     height: 64,
-                    borderRadius: 20,
+                    borderRadius: 22,
                     background: alpha(t.ink, 0.06),
                     margin: "0 auto 16px",
                     display: "grid",
@@ -4853,15 +4855,15 @@ function DeleteAccountConfirm({ t, busy, onCancel, onConfirm, cancelRef }) {
         style={{
           background: t.white,
           color: t.ink,
-          borderRadius: 20,
+          borderRadius: 24,
           border: `1px solid ${t.border}`,
           maxWidth: 340,
           width: "100%",
-          padding: "22px 22px 16px",
+          padding: "24px 24px 18px",
           textAlign: "center",
           fontFamily:
             "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.35)",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.4)",
           animation: "ios-modal-in 0.26s cubic-bezier(0.22,1,0.36,1) both",
         }}
       >
@@ -4891,8 +4893,8 @@ function DeleteAccountConfirm({ t, busy, onCancel, onConfirm, cancelRef }) {
             style={{
               appearance: "none",
               border: "none",
-              borderRadius: 12,
-              padding: "12px 14px",
+              borderRadius: 14,
+              padding: "13px 16px",
               fontSize: 15,
               fontWeight: 600,
               cursor: busy ? "default" : "pointer",
@@ -4912,8 +4914,8 @@ function DeleteAccountConfirm({ t, busy, onCancel, onConfirm, cancelRef }) {
             style={{
               appearance: "none",
               border: `1px solid ${t.border}`,
-              borderRadius: 12,
-              padding: "12px 14px",
+              borderRadius: 14,
+              padding: "13px 16px",
               fontSize: 15,
               fontWeight: 500,
               cursor: busy ? "default" : "pointer",
