@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MAP } from "../data/content";
 import { clearResumeTopic, getResumeTopic } from "../systems/resumeReading";
 import { S } from "../systems/theme";
+import { Ic } from "../icons/Ic";
 
 function greetingFor(hour) {
   if (hour >= 5 && hour < 12) return "Good Morning";
@@ -554,10 +555,10 @@ export function HomePage({
           }}
         >
           {[
-            { label: "Practice Quiz", desc: "Jump into your next round.", onClick: onOpenQuiz, emoji: "🎯", color: "#3B82F6" },
-            { label: "Daily Growth", desc: "Keep momentum alive today.", onClick: onOpenDailyGrowth, emoji: "🌱", color: "#50c878" },
-            { label: "Momentum Hub", desc: "Streaks, missions, wins.", onClick: onOpenMomentumHub, emoji: "🔥", color: "#f5a623" },
-            { label: "My Goals", desc: "Set and track what matters.", onClick: onOpenGoalSetting, emoji: "🏆", color: "#A855F7" },
+            { label: "Practice Quiz",  desc: "Jump into your next round.",  onClick: onOpenQuiz,         icon: "target",   color: "#0A84FF" }, // SF Blue
+            { label: "Daily Growth",   desc: "Keep momentum alive today.",  onClick: onOpenDailyGrowth,  icon: "leaf",     color: "#30D158" }, // SF Green
+            { label: "Momentum Hub",   desc: "Streaks, missions, wins.",    onClick: onOpenMomentumHub,  icon: "flame",    color: "#FF9F0A" }, // SF Orange
+            { label: "My Goals",       desc: "Set and track what matters.", onClick: onOpenGoalSetting,  icon: "trophy",   color: "#BF5AF2" }, // SF Purple
           ].map((action, i) => (
             <button
               key={action.label}
@@ -586,12 +587,12 @@ export function HomePage({
             >
               <div style={{
                 width: 36, height: 36, borderRadius: 11,
-                background: `${action.color}18`,
-                border: `1px solid ${action.color}30`,
+                background: `${action.color}1F`,
+                border: `1px solid ${action.color}33`,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 18, lineHeight: 1,
+                lineHeight: 1,
               }}>
-                {action.emoji}
+                {Ic[action.icon]?.("none", action.color, 18)}
               </div>
               <div>
                 <div style={{ fontSize: 13.5, fontWeight: 600, color: t.ink, letterSpacing: "-0.01em", marginBottom: 2 }}>{action.label}</div>

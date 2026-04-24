@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useCurrentUserProfile } from "../hooks/useCurrentUserProfile";
 import { getReadingStreak } from "../systems/readingStreak";
 import { LS } from "../systems/storage";
+import { Ic } from "../icons/Ic";
 
 export default function ProfilePage({
   t,
@@ -93,29 +94,29 @@ export default function ProfilePage({
       label: "Topics Read",
       value: readKeys.length,
       suffix: `/${totalTopics}`,
-      icon: "📖",
+      icon: "book",
       accent: t.green,
     },
     {
       label: "Day Streak",
       value: streak.count || 0,
       suffix: "",
-      icon: "🔥",
-      accent: "#e67e22",
+      icon: "flame",
+      accent: "#FF9F0A",
     },
     {
       label: "Saved",
       value: bookmarks.length,
       suffix: "",
-      icon: "🔖",
-      accent: "#8e44ad",
+      icon: "pin",
+      accent: "#BF5AF2",
     },
     {
       label: "Goals Done",
       value: completedGoals,
       suffix: goals.length > 0 ? `/${goals.length}` : "",
-      icon: "🎯",
-      accent: "#2980b9",
+      icon: "target",
+      accent: "#0A84FF",
     },
   ];
 
@@ -395,8 +396,18 @@ export default function ProfilePage({
                 border: `1px solid ${t.border}`,
               }}
             >
-              <div style={{ fontSize: 18, lineHeight: 1, marginBottom: 4 }}>
-                {s.icon}
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
+                  background: `${s.accent}1F`,
+                  margin: "0 auto 6px",
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                {Ic[s.icon]?.("none", s.accent, 16)}
               </div>
               <div
                 style={{
