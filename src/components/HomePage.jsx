@@ -15,8 +15,7 @@ const DEFAULT_HABITS = [
 ];
 
 function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  return new Date().toISOString().split("T")[0];
 }
 
 function useDailyHabits() {
