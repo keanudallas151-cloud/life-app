@@ -113,11 +113,13 @@ export function RegisterPage({
 
       <h2
         style={{
-          fontSize: 24,
+          fontSize: 32,
           fontWeight: 700,
-          margin: "0 0 4px",
+          margin: "12px 0 4px",
           color: C.ink,
-          fontFamily: "Georgia,serif",
+          fontFamily: "-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif",
+          letterSpacing: "-0.035em",
+          lineHeight: 1.1,
           textAlign: "center",
         }}
       >
@@ -125,14 +127,15 @@ export function RegisterPage({
       </h2>
       <p
         style={{
-          margin: "0 0 16px",
-          fontSize: 13,
+          margin: "0 0 24px",
+          fontSize: 15,
           color: C.muted,
-          fontStyle: "italic",
+          fontFamily: "-apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
+          letterSpacing: "-0.01em",
           textAlign: "center",
         }}
       >
-        Welcome To Life
+        Join Life. in under a minute
       </p>
 
       <SystemStatusNotice notice={systemNotice} style={{ maxWidth: 360, marginBottom: 14 }} />

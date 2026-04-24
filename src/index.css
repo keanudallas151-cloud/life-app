@@ -6315,3 +6315,856 @@ button:focus-visible {
   z-index: 100;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   iOS WHOLE-APP NATIVE SKIN
+   Every page, every component, every state — matched to default iOS patterns.
+   Modeled on screenshots from Find My, App Store, Settings, Reminders.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────────────────────
+   01. GLOBAL: SF Pro font stack FORCED on everything
+   ────────────────────────────────────────────────────────────────────────── */
+
+html, body, #root, #__next,
+[data-page-tag], [data-page-tag] * {
+  font-family: -apple-system, "SF Pro Display", "SF Pro Text", BlinkMacSystemFont,
+    "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Exception: keep Georgia only for the home hero quote */
+[data-page-tag="#dashboard_home"] blockquote,
+[data-page-tag="#dashboard_home"] h1 {
+  font-family: "New York", Georgia, "Times New Roman", serif !important;
+}
+
+/* Code blocks */
+code, pre, kbd, samp {
+  font-family: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   02. LARGE TITLE PATTERN — every page header
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag] > h1,
+[data-page-tag] > h2,
+[data-page-tag] > div > h1:first-child,
+[data-page-tag] > div > h2:first-of-type {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.05 !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   03. UNIVERSAL iOS BACK BUTTON — all back buttons match
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag] button[aria-label*="ack"],
+[data-page-tag] button[aria-label*="Return"],
+[data-page-tag] button[onClick*="back"],
+.ios-back {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
+  color: #50c878 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 8px 0 !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: transparent !important;
+  transition: opacity 0.15s ease !important;
+}
+
+[data-page-tag] button[aria-label*="ack"]:active,
+[data-page-tag] button[aria-label*="Return"]:active,
+.ios-back:active {
+  opacity: 0.5 !important;
+  transform: none !important;
+}
+
+/* Back chevron — make it iOS-chunky */
+[data-page-tag] button[aria-label*="ack"] svg,
+.ios-back svg {
+  stroke-width: 2.5 !important;
+  width: 11px !important;
+  height: 20px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   04. UNIVERSAL iOS CARD — every card rounded 18px, hairline border
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Default card treatment */
+[data-page-tag] [style*="borderRadius: 14"],
+[data-page-tag] [style*="borderRadius: 16"],
+[data-page-tag] [style*="borderRadius: 18"],
+[data-page-tag] [style*="borderRadius: 20"],
+[data-page-tag] [style*="border-radius: 14"],
+[data-page-tag] [style*="border-radius: 16"],
+[data-page-tag] [style*="border-radius: 18"],
+[data-page-tag] [style*="border-radius: 20"] {
+  border-radius: 18px !important;
+}
+
+/* Modal/sheet radius */
+[data-page-tag] [style*="borderRadius: 22"],
+[data-page-tag] [style*="borderRadius: 24"],
+[data-page-tag] [style*="borderRadius: 28"] {
+  border-radius: 22px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   05. UNIVERSAL iOS INPUTS — text fields, textareas, selects
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag] input[type="text"],
+[data-page-tag] input[type="email"],
+[data-page-tag] input[type="password"],
+[data-page-tag] input[type="number"],
+[data-page-tag] input[type="tel"],
+[data-page-tag] input[type="date"],
+[data-page-tag] input[type="url"],
+[data-page-tag] input[type="search"],
+[data-page-tag] textarea {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 16px !important; /* prevents iOS zoom */
+  border-radius: 14px !important;
+  min-height: 50px !important;
+  padding: 0 16px !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: #ededed !important;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease !important;
+  outline: none !important;
+  letter-spacing: -0.01em !important;
+}
+
+[data-page-tag] textarea {
+  padding: 14px 16px !important;
+  min-height: 100px !important;
+  line-height: 1.5 !important;
+  resize: vertical !important;
+}
+
+[data-page-tag] input:focus,
+[data-page-tag] textarea:focus {
+  border-color: #50c878 !important;
+  background: rgba(80,200,120,0.05) !important;
+  box-shadow: 0 0 0 3px rgba(80,200,120,0.15) !important;
+}
+
+[data-page-tag] input::placeholder,
+[data-page-tag] textarea::placeholder {
+  color: rgba(161,161,161,0.55) !important;
+  font-weight: 400 !important;
+}
+
+/* Select element — native iOS picker style */
+[data-page-tag] select {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 16px !important;
+  border-radius: 14px !important;
+  min-height: 50px !important;
+  padding: 0 40px 0 16px !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: rgba(255,255,255,0.06)
+    url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23a1a1a1%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E")
+    no-repeat right 14px center !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: #ededed !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   06. UNIVERSAL iOS BUTTONS — pill shape, spring press
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Default button style is overridden by more specific rules */
+[data-page-tag] button:not([class*="life-sidebar"]):not([class*="life-bottom-nav"]):not([aria-label*="ack"]):not(.ios-back):not([data-ghost]) {
+  -webkit-tap-highlight-color: transparent !important;
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease !important;
+  letter-spacing: -0.01em !important;
+}
+
+[data-page-tag] button:not([class*="life-sidebar"]):not([class*="life-bottom-nav"]):not([aria-label*="ack"]):not(.ios-back):not([data-ghost]):active {
+  transform: scale(0.96) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   07. iOS GROUPED LIST SECTION — used everywhere lists appear
+   ────────────────────────────────────────────────────────────────────────── */
+
+.ios-list {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.ios-list-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  min-height: 50px;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  color: #ededed;
+}
+
+.ios-list-row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
+  height: 0.5px;
+  background: rgba(255,255,255,0.08);
+}
+
+.ios-list-row:active {
+  background: rgba(255,255,255,0.06);
+}
+
+.ios-list-row-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ios-list-row-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ios-list-row-title {
+  font-size: 16px;
+  font-weight: 400;
+  color: #ededed;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.ios-list-row-subtitle {
+  font-size: 13px;
+  color: rgba(161,161,161,0.75);
+  margin-top: 1px;
+  line-height: 1.35;
+}
+
+.ios-list-row-value {
+  font-size: 16px;
+  color: rgba(161,161,161,0.8);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ios-list-row-chevron {
+  color: rgba(161,161,161,0.4);
+  flex-shrink: 0;
+  margin-left: -4px;
+}
+
+.ios-list-section-header {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(161,161,161,0.7);
+  letter-spacing: -0.01em;
+  padding: 0 16px 8px;
+  margin-top: 20px;
+  margin-bottom: 4px;
+}
+
+.ios-list-footer-text {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  color: rgba(161,161,161,0.55);
+  padding: 8px 16px 0;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   08. SIGN-IN / REGISTER / RESET PASSWORD — iOS auth screen
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#sign_in_page"],
+[data-page-tag="#register_page"],
+[data-page-tag="#reset_password_page"],
+[data-page-tag="#verify_email_page"] {
+  background: #0a0a0a !important;
+  padding: max(48px, env(safe-area-inset-top)) 20px 32px !important;
+}
+
+[data-page-tag="#sign_in_page"] h2,
+[data-page-tag="#register_page"] h2,
+[data-page-tag="#reset_password_page"] h2,
+[data-page-tag="#verify_email_page"] h2 {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.1 !important;
+  margin: 24px 0 6px !important;
+  text-align: center !important;
+}
+
+[data-page-tag="#sign_in_page"] p,
+[data-page-tag="#register_page"] p {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  letter-spacing: -0.01em !important;
+  font-style: normal !important;
+}
+
+/* Auth form card */
+.life-auth-card {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow:
+    0 4px 20px rgba(0,0,0,0.2),
+    0 1px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Form labels */
+.life-auth-card label,
+[data-page-tag="#sign_in_page"] label,
+[data-page-tag="#register_page"] label {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: rgba(161,161,161,0.8) !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+}
+
+/* Primary submit buttons */
+[data-page-tag="#sign_in_page"] button[type="submit"],
+[data-page-tag="#register_page"] button[type="submit"] {
+  border-radius: 14px !important;
+  min-height: 52px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Social buttons */
+.life-auth-shell button[type="button"] {
+  border-radius: 14px !important;
+  min-height: 48px !important;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 15px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   09. LANDING PAGE — iOS welcome screen
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#landing_page"] h1 {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.04em !important;
+  line-height: 1.02 !important;
+}
+
+[data-page-tag="#landing_page"] button {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   10. PROFILE PAGE — iOS profile header
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#profile_page"] h1,
+[data-page-tag="#profile_page"] h2 {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   11. PRIVACY / TERMS / LEGAL — iOS document reader
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#privacy_policy_page"],
+[data-page-tag="#terms_condition_page"],
+[data-page-tag="#cookie_notice_page"] {
+  background: #0a0a0a !important;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  padding: max(48px, env(safe-area-inset-top)) 20px 48px !important;
+}
+
+[data-page-tag="#privacy_policy_page"] h1,
+[data-page-tag="#terms_condition_page"] h1,
+[data-page-tag="#cookie_notice_page"] h1 {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.05 !important;
+  margin-bottom: 20px !important;
+}
+
+[data-page-tag="#privacy_policy_page"] h3,
+[data-page-tag="#terms_condition_page"] h3 {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.3 !important;
+}
+
+[data-page-tag="#privacy_policy_page"] p,
+[data-page-tag="#terms_condition_page"] p {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+  letter-spacing: -0.01em !important;
+  color: rgba(161,161,161,0.9) !important;
+}
+
+/* Privacy/terms section cards */
+[data-page-tag="#privacy_policy_page"] > div > div > div,
+[data-page-tag="#terms_condition_page"] > div > div > div {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 18px !important;
+  padding: 18px 18px !important;
+  margin-bottom: 10px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   12. SETTINGS PAGE — iOS grouped settings
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#setting_preferences"] h2 {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.05 !important;
+}
+
+.life-settings-page h3 {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: rgba(161,161,161,0.7) !important;
+  letter-spacing: -0.01em !important;
+  padding: 0 4px 8px !important;
+  margin-top: 24px !important;
+  text-transform: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   13. HELP PAGE — iOS help center
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#help_page"] h1,
+[data-page-tag="#help_page"] h2 {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   14. SIDEBAR SECTION PAGE (Tools, Socials, etc) — iOS hero + grid
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag^="#sidebar_"] h2 {
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.05 !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   15. QUIZ PAGE — iOS quiz card pattern
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#quiz_page"] h1,
+[data-page-tag="#quiz_page"] h2 {
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+}
+
+[data-page-tag="#quiz_page"] button:not([aria-label*="ack"]) {
+  border-radius: 16px !important;
+  min-height: 56px !important;
+  padding: 14px 18px !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   16. CATEGORY HUB / CATEGORIES — iOS app-store-style cards
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#categories_page"] h2,
+[data-page-tag="#category_hub"] h2,
+[data-page-tag="#where_to_start"] h2 {
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   17. READER PAGE — iOS reading experience
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#ebook_reader"] {
+  font-family: "New York", Georgia, "Times New Roman", serif !important;
+}
+
+[data-page-tag="#ebook_reader"] button {
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   18. MOMENTUM HUB — iOS fitness-style stats
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#momentum_hub"] h1,
+[data-page-tag="#momentum_hub"] h2 {
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* Tabular numbers on all momentum displays */
+[data-page-tag="#momentum_hub"] [class*="stat"] {
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   19. POSTIT FEED — iOS messages-style bubbles
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#post_it"] h2 {
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   20. LEADERBOARD PAGE — iOS ranking list
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#leaderboard_page"] h1,
+[data-page-tag="#leaderboard_page"] h2 {
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   21. MENTORSHIP PAGE
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#mentorship_page"] h1,
+[data-page-tag="#mentorship_page"] h2 {
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   22. PREMIUM PAGE — iOS paywall/upgrade pattern
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#premium_page"] h1,
+[data-page-tag="#premium_page"] h2 {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   23. ACCOUNT CUSTOMIZE / THEME PICKER
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#account_customize"] h2,
+[data-page-tag="#theme_picker"] h2 {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   24. PROGRESS DASHBOARD — iOS activity-style rings
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#progress_dashboard"] h1,
+[data-page-tag="#progress_dashboard"] h2 {
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   25. INVENTORS & INVESTORS — iOS networking pattern
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag="#inventors_investors"] h1,
+[data-page-tag="#inventors_investors"] h2 {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   26. SIDEBAR — iOS drawer with frosted glass + grouped sections
+   ────────────────────────────────────────────────────────────────────────── */
+
+.life-sidebar {
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  background: rgba(10,10,10,0.88) !important;
+  border-right: 0.5px solid rgba(255,255,255,0.08) !important;
+}
+
+.life-sidebar-section-header {
+  padding: 14px 16px 6px !important;
+}
+
+.life-sidebar-section-header > button {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: rgba(161,161,161,0.6) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   27. MODALS / SHEETS — iOS bottom sheet
+   ────────────────────────────────────────────────────────────────────────── */
+
+[role="dialog"] {
+  border-radius: 22px !important;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.25),
+    0 20px 60px rgba(0,0,0,0.25) !important;
+}
+
+[role="dialog"] h2,
+[role="dialog"] h3 {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  text-align: center !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   28. TOGGLE SWITCHES globally — iOS-style green
+   ────────────────────────────────────────────────────────────────────────── */
+
+input[type="checkbox"][role="switch"],
+.life-toggle,
+.ios-toggle-native {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 52px;
+  height: 31px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.16);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+input[type="checkbox"][role="switch"]::before,
+.life-toggle::before,
+.ios-toggle-native::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25), 0 0 0 0.5px rgba(0,0,0,0.1);
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+input[type="checkbox"][role="switch"]:checked,
+.life-toggle[data-checked="true"],
+.ios-toggle-native:checked {
+  background: #34c759;
+}
+
+input[type="checkbox"][role="switch"]:checked::before,
+.life-toggle[data-checked="true"]::before,
+.ios-toggle-native:checked::before {
+  transform: translateX(21px);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   29. DATE / RANGE INPUTS — iOS native
+   ────────────────────────────────────────────────────────────────────────── */
+
+[data-page-tag] input[type="date"] {
+  background:
+    rgba(255,255,255,0.06)
+    url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2218%22%20height%3D%2218%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23a1a1a1%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%222%22%20ry%3D%222%22%2F%3E%3Cline%20x1%3D%2216%22%20y1%3D%222%22%20x2%3D%2216%22%20y2%3D%226%22%2F%3E%3Cline%20x1%3D%228%22%20y1%3D%222%22%20x2%3D%228%22%20y2%3D%226%22%2F%3E%3Cline%20x1%3D%223%22%20y1%3D%2210%22%20x2%3D%2221%22%20y2%3D%2210%22%2F%3E%3C%2Fsvg%3E")
+    no-repeat right 14px center !important;
+}
+
+/* Range inputs (sliders) */
+[data-page-tag] input[type="range"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.15) !important;
+  outline: none !important;
+  border: none !important;
+  min-height: unset !important;
+  padding: 0 !important;
+}
+
+[data-page-tag] input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(0,0,0,0.08) !important;
+  cursor: pointer !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   30. BOTTOM TAB BAR — exact iOS tab bar proportions
+   ────────────────────────────────────────────────────────────────────────── */
+
+.life-bottom-nav {
+  min-height: calc(50px + env(safe-area-inset-bottom)) !important;
+  padding-top: 6px !important;
+  padding-bottom: max(env(safe-area-inset-bottom), 10px) !important;
+  border-top: 0.33px solid rgba(255,255,255,0.12) !important;
+}
+
+.life-bottom-nav-item svg {
+  width: 25px !important;
+  height: 25px !important;
+}
+
+.life-bottom-nav-label {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  margin-top: 2px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   31. STATUS BAR SPACER — fake status bar for web app feel
+   ────────────────────────────────────────────────────────────────────────── */
+
+@supports (padding: max(0px)) {
+  html, body {
+    padding-top: env(safe-area-inset-top) !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   32. TOAST / NOTIFICATION — iOS banner style
+   ────────────────────────────────────────────────────────────────────────── */
+
+.life-toast {
+  border-radius: 22px !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  background: rgba(30,30,30,0.88) !important;
+  border: 0.5px solid rgba(255,255,255,0.12) !important;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.35),
+    0 1px 4px rgba(0,0,0,0.15) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   33. NOTIFICATION PANEL — iOS notification center
+   ────────────────────────────────────────────────────────────────────────── */
+
+.life-notif-panel {
+  border-radius: 22px 22px 0 0 !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  background: rgba(15,15,15,0.92) !important;
+  border-top: 0.5px solid rgba(255,255,255,0.12) !important;
+}
+
+.life-notif-panel h3 {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  text-align: center !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   34. SKELETON LOADING — iOS placeholder shimmer
+   ────────────────────────────────────────────────────────────────────────── */
+
+.life-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 100%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: ios-shimmer-sweep 1.5s linear infinite !important;
+  border-radius: 10px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   35. FOCUS STATES — iOS accessibility ring
+   ────────────────────────────────────────────────────────────────────────── */
+
+*:focus-visible {
+  outline: 2px solid #50c878 !important;
+  outline-offset: 2px !important;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-offset: 1px !important;
+}
+

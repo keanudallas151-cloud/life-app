@@ -1950,9 +1950,8 @@ export default function LifeApp() {
         data-page-tag="#privacy_policy_page"
         style={{
           height: "100%",
-          background: C.skin,
-          fontFamily: "Georgia,serif",
-          padding: "48px 24px",
+          background: "#0a0a0a",
+          padding: "max(40px, env(safe-area-inset-top)) 20px 48px",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
         }}
@@ -1963,39 +1962,52 @@ export default function LifeApp() {
               play("back");
               setScreen("landing");
             }}
+            className="ios-back"
             style={{
               background: "none",
               border: "none",
-              color: C.muted,
-              fontSize: 13,
+              color: "#50c878",
+              fontSize: 16,
+              fontWeight: 400,
               cursor: "pointer",
-              fontFamily: "Georgia,serif",
               marginBottom: 20,
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 4,
+              padding: "8px 0",
+              WebkitTapHighlightColor: "transparent",
+              letterSpacing: "-0.01em",
             }}
           >
             <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
+              width="11" height="20"
+              viewBox="0 0 12 22"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>{" "}
+              <polyline points="10 2 2 11 10 20" />
+            </svg>
             Back
           </button>
+          <p style={{
+            margin: "0 0 6px",
+            fontSize: 13,
+            fontWeight: 600,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            color: "#50c878",
+          }}>Legal</p>
           <h1
             style={{
-              fontSize: 28,
+              fontSize: 34,
               fontWeight: 700,
-              color: C.ink,
-              margin: "0 0 20px",
+              color: "#ededed",
+              letterSpacing: "-0.035em",
+              lineHeight: 1.05,
+              margin: "0 0 24px",
             }}
           >
             Privacy Policy
@@ -2080,9 +2092,8 @@ export default function LifeApp() {
         data-page-tag="#terms_condition_page"
         style={{
           height: "100%",
-          background: C.skin,
-          fontFamily: "Georgia,serif",
-          padding: "48px 24px",
+          background: "#0a0a0a",
+          padding: "max(40px, env(safe-area-inset-top)) 20px 48px",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
         }}
@@ -2093,39 +2104,37 @@ export default function LifeApp() {
               play("back");
               setScreen("landing");
             }}
+            className="ios-back"
             style={{
               background: "none",
               border: "none",
-              color: C.muted,
-              fontSize: 13,
+              color: "#50c878",
+              fontSize: 16,
+              fontWeight: 400,
               cursor: "pointer",
-              fontFamily: "Georgia,serif",
               marginBottom: 20,
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 4,
+              padding: "8px 0",
+              WebkitTapHighlightColor: "transparent",
+              letterSpacing: "-0.01em",
             }}
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>{" "}
+            <svg width="11" height="20" viewBox="0 0 12 22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="10 2 2 11 10 20" />
+            </svg>
             Back
           </button>
+          <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: "#50c878" }}>Legal</p>
           <h1
             style={{
-              fontSize: 28,
+              fontSize: 34,
               fontWeight: 700,
-              color: C.ink,
-              margin: "0 0 20px",
+              color: "#ededed",
+              letterSpacing: "-0.035em",
+              lineHeight: 1.05,
+              margin: "0 0 24px",
             }}
           >
             Terms & Conditions

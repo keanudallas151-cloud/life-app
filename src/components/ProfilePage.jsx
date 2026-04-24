@@ -339,11 +339,13 @@ export default function ProfilePage({
             <h2
               style={{
                 margin: "0 0 3px",
-                fontSize: 20,
-                fontWeight: 800,
+                fontSize: 26,
+                fontWeight: 700,
                 color: t.ink,
+                letterSpacing: "-0.03em",
                 wordBreak: "break-word",
-                lineHeight: 1.2,
+                lineHeight: 1.15,
+                fontFamily: "-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif",
               }}
             >
               {user?.name || "User"}
@@ -351,10 +353,11 @@ export default function ProfilePage({
             <p
               style={{
                 margin: 0,
-                fontSize: 13,
+                fontSize: 14,
                 color: t.muted,
-                fontStyle: "italic",
                 wordBreak: "break-word",
+                letterSpacing: "-0.01em",
+                fontFamily: "-apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
               }}
             >
               {user?.email}

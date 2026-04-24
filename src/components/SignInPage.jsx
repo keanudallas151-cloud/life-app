@@ -101,26 +101,29 @@ export function SignInPage({
 
       <h2
         style={{
-          fontSize: 24,
+          fontSize: 32,
           fontWeight: 700,
-          margin: "0 0 4px",
+          margin: "12px 0 4px",
           color: C.ink,
-          fontFamily: "Georgia,serif",
-          textAlign: "center",
-        }}
-      >
-        Sign In To Life.
-      </h2>
-      <p
-        style={{
-          margin: "0 0 16px",
-          fontSize: 13,
-          color: C.muted,
-          fontStyle: "italic",
+          fontFamily: "-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif",
+          letterSpacing: "-0.035em",
+          lineHeight: 1.1,
           textAlign: "center",
         }}
       >
         Welcome Back
+      </h2>
+      <p
+        style={{
+          margin: "0 0 24px",
+          fontSize: 15,
+          color: C.muted,
+          fontFamily: "-apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif",
+          letterSpacing: "-0.01em",
+          textAlign: "center",
+        }}
+      >
+        Sign in to continue
       </p>
 
       <SystemStatusNotice notice={systemNotice} style={{ maxWidth: 360, marginBottom: 14 }} />
