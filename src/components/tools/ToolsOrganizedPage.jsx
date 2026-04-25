@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import "../organized/mobile-native-fixes.css";
 
 const OrganizedPage = dynamic(
   () => import("../organized").then((m) => ({ default: m.OrganizedPage })),
