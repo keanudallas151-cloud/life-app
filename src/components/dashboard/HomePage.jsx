@@ -213,6 +213,7 @@ export function HomePage({
   };
 
   const onResumeKeyDown = (e) => {
+    if (e.target !== e.currentTarget) return;
     if (e.key !== "Delete" && e.key !== "Backspace") return;
     e.stopPropagation();
     e.preventDefault();
@@ -502,6 +503,11 @@ export function HomePage({
             onPointerUp={onResumePointerUp}
             onPointerCancel={onResumePointerCancel}
             onClickCapture={onResumeClickCapture}
+            onKeyDown={onResumeKeyDown}
+            tabIndex={0}
+            role="group"
+            aria-label={`Continue reading ${resumeTopic.label} card`}
+            aria-describedby="life-resume-swipe-dismiss-hint"
             style={{
               position: "relative",
               marginBottom: isDismissing ? 0 : 24,
@@ -521,12 +527,26 @@ export function HomePage({
               WebkitUserSelect: "none",
             }}
           >
+            <span
+              id="life-resume-swipe-dismiss-hint"
+              style={{
+                position: "absolute",
+                width: 1,
+                height: 1,
+                padding: 0,
+                margin: -1,
+                overflow: "hidden",
+                clip: "rect(0 0 0 0)",
+                whiteSpace: "nowrap",
+                border: 0,
+              }}
+            >
+              Swipe left to dismiss this card. Keyboard users can focus the card and press Delete or Backspace to dismiss.
+            </span>
             <button
               type="button"
               onClick={() => onResume(resumeTopic.key)}
-              onKeyDown={onResumeKeyDown}
               aria-label={`Continue reading ${resumeTopic.label}`}
-              aria-describedby="life-resume-swipe-dismiss-hint"
               style={{
                 width: "100%",
                 display: "flex",
@@ -541,22 +561,6 @@ export function HomePage({
                 color: "inherit",
               }}
             >
-              <span
-                id="life-resume-swipe-dismiss-hint"
-                style={{
-                  position: "absolute",
-                  width: 1,
-                  height: 1,
-                  padding: 0,
-                  margin: -1,
-                  overflow: "hidden",
-                  clip: "rect(0 0 0 0)",
-                  whiteSpace: "nowrap",
-                  border: 0,
-                }}
-              >
-                Swipe left to dismiss. Keyboard users can press Delete or Backspace to dismiss.
-              </span>
               <div
                 style={{
                   width: 42,
