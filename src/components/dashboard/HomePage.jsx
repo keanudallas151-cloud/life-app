@@ -126,18 +126,9 @@ export function HomePage({
     return String(userName).trim().split(/\s+/)[0] || "";
   }, [userName]);
 
-  const handleDismissResume = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    play?.("swipe");
-    beginDismissResume();
-  };
-
   const onResumePointerDown = (e) => {
     if (resumePhase !== "idle" && resumePhase !== "snapping") return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
-    // Don't start a swipe when the touch begins on the dismiss button.
-    if (e.target?.closest?.("[data-resume-dismiss]")) return;
     resumeDragRef.current = {
       active: true,
       startX: e.clientX,
@@ -531,7 +522,7 @@ export function HomePage({
                 display: "flex",
                 alignItems: "center",
                 gap: 14,
-                padding: "16px 52px 16px 18px",
+                padding: "16px 14px 16px 18px",
                 background: "transparent",
                 border: "none",
                 cursor: "pointer",
@@ -584,66 +575,70 @@ export function HomePage({
                   {resumeTopic.label}
                 </p>
               </div>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={t.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginRight: 2 }}>
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleDismissResume}
-              aria-label="Dismiss continue reading"
-              title="Dismiss"
-              data-resume-dismiss=""
-              style={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                width: 20,
-                height: 20,
-                minHeight: 20,
-                borderRadius: 999,
-                background: "rgba(161,161,161,0.15)",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: t.muted,
-                padding: 0,
-                zIndex: 2,
-                transition: "background 0.15s ease, transform 0.12s cubic-bezier(0.34,1.56,0.64,1)",
-                WebkitTapHighlightColor: "transparent",
-              }}
-              onTouchStart={(e) => {
-                e.currentTarget.style.background = "rgba(161,161,161,0.28)";
-                e.currentTarget.style.transform = "scale(0.88)";
-              }}
-              onTouchEnd={(e) => {
-                e.currentTarget.style.background = "rgba(161,161,161,0.15)";
-                e.currentTarget.style.transform = "scale(1)";
-              }}
-              onTouchCancel={(e) => {
-                e.currentTarget.style.background = "rgba(161,161,161,0.15)";
-                e.currentTarget.style.transform = "scale(1)";
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(161,161,161,0.22)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(161,161,161,0.15)";
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = "scale(0.88)";
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-              }}
-            >
-              <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <div
+                aria-hidden="true"
+                className={isDragging ? undefined : "life-resume-swipe-hint"}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 7,
+                  flexShrink: 0,
+                  color: t.muted,
+                  opacity: isDragging ? 0 : 0.74,
+                  transition: "opacity 0.2s ease",
+                  pointerEvents: "none",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: 1.1,
+                    lineHeight: 1,
+                    textTransform: "uppercase",
+                    whiteSpace: "nowrap",
+                    color: t.muted,
+                  }}
+                >
+                  Swipe left
+                </span>
+                <span
+                  style={{
+                    position: "relative",
+                    width: 31,
+                    height: 20,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <span
+                    className="life-resume-swipe-trail"
+                    style={{
+                      position: "absolute",
+                      inset: "5px 0 5px 6px",
+                      borderRadius: 999,
+                      background: `linear-gradient(90deg, ${t.green}00, ${t.green}18)`,
+                      boxShadow: `0 0 16px ${t.green}22`,
+                    }}
+                  />
+                  <svg
+                    className="life-resume-swipe-arrows"
+                    width="30"
+                    height="20"
+                    viewBox="0 0 30 20"
+                    fill="none"
+                    stroke={t.green}
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ position: "relative", flexShrink: 0 }}
+                  >
+                    <polyline points="16 4 10 10 16 16" />
+                    <polyline points="24 4 18 10 24 16" />
+                  </svg>
+                </span>
+              </div>
             </button>
           </div>
           );
