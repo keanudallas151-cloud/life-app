@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 const OrganizedPage = dynamic(
@@ -12,6 +12,8 @@ const OrganizedPage = dynamic(
 export function ToolsOrganizedPage({ uid, setPage, setScreen }) {
   const prefix = uid && uid !== "_" ? `organized_${uid}` : "organized";
   const [mounted, setMounted] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimerRef = useRef(null);
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -21,6 +23,7 @@ export function ToolsOrganizedPage({ uid, setPage, setScreen }) {
     return () => {
       document.body.classList.remove("life-organized-active");
       document.title = previousTitle;
+      if (scrollTimerRef.current) window.clearTimeout(scrollTimerRef.current);
     };
   }, []);
 
@@ -36,7 +39,12 @@ export function ToolsOrganizedPage({ uid, setPage, setScreen }) {
   const overlay = (
     <div
       data-page-tag="#tools_organized_page"
-      className="organized-feature"
+      className={`organized-feature${isScrolling ? " is-scrolling" : ""}`}
+      onScroll={() => {
+        setIsScrolling(true);
+        if (scrollTimerRef.current) window.clearTimeout(scrollTimerRef.current);
+        scrollTimerRef.current = window.setTimeout(() => setIsScrolling(false), 520);
+      }}
       style={{
         position: "fixed",
         inset: 0,
@@ -44,6 +52,7 @@ export function ToolsOrganizedPage({ uid, setPage, setScreen }) {
         background: "var(--background)",
         color: "var(--foreground)",
         overflow: "auto",
+        overscrollBehavior: "contain",
         WebkitOverflowScrolling: "touch",
       }}
     >

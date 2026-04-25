@@ -47,6 +47,22 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: 'health', name: 'Health', color: 'oklch(0.50 0.10 200)' },
 ]
 
+const DEFAULT_SETTINGS: AppSettings = {
+  showCompletedTasks: true,
+  sortBy: 'createdAt',
+  sortOrder: 'desc',
+  swipeThreshold: 100,
+  animationSpeed: 0.3,
+  hapticFeedback: true,
+  buttonSounds: true,
+  soundVolume: 0.5,
+  theme: 'light',
+  notificationsEnabled: false,
+  notificationSound: 'chime',
+  notificationAdvance: 30,
+  notificationVolume: 0.7,
+}
+
 type TaskUpdates = {
   [K in keyof Task]?: Task[K]
 }
@@ -58,26 +74,22 @@ function App() {
   const [tags, setTags] = useKV<string[]>('tags-v2', [])
   const [templates, setTemplates] = useKV<TaskTemplate[]>('task-templates', [])
   const [history, setHistory] = useKV<HistoryEntry[]>('task-history', [])
-  const [settings, setSettings] = useKV<AppSettings>('app-settings', {
-    showCompletedTasks: true,
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
-    swipeThreshold: 100,
-    animationSpeed: 0.3,
-    hapticFeedback: true,
-    buttonSounds: true,
-    soundVolume: 0.5,
-    theme: 'light',
-    notificationsEnabled: false,
-    notificationSound: 'chime',
-    notificationAdvance: 30,
-    notificationVolume: 0.7,
-  })
+  const [settings, setSettings] = useKV<AppSettings>('app-settings', DEFAULT_SETTINGS)
 
   useEffect(() => {
     const volume = settings?.soundVolume ?? 0.5
     setGlobalVolume(volume)
   }, [settings?.soundVolume])
+
+  useEffect(() => {
+    if (settings?.buttonSounds === false) {
+      setSettings((current) =>
+        current
+          ? { ...current, buttonSounds: true }
+          : DEFAULT_SETTINGS
+      )
+    }
+  }, [settings?.buttonSounds, setSettings])
 
   const [filter, setFilter] = useState<FilterType>('all')
   const [viewMode, setViewMode] = useState<ViewMode>('list')
@@ -527,6 +539,8 @@ function App() {
   }
 
   const handleViewModeChange = (newMode: ViewMode) => {
+    if (newMode === viewMode) return
+    playButtonSound(true)
     const viewOrder: ViewMode[] = ['list', 'calendar', 'stats', 'settings']
     const currentIndex = viewOrder.indexOf(viewMode || 'list')
     const newIndex = viewOrder.indexOf(newMode)
@@ -589,18 +603,7 @@ function App() {
     const currentTheme = settings?.theme || (typeof document !== 'undefined' && document.body.classList.contains('life-dark') ? 'dark' : 'light')
     const newTheme = currentTheme === 'light' ? 'dark' : 'light'
     setSettings((current) => ({
-      showCompletedTasks: true,
-      sortBy: 'createdAt',
-      sortOrder: 'desc',
-      swipeThreshold: 100,
-      animationSpeed: 0.3,
-      hapticFeedback: true,
-      buttonSounds: true,
-      soundVolume: 0.5,
-      notificationsEnabled: false,
-      notificationSound: 'chime',
-      notificationAdvance: 30,
-      notificationVolume: 0.7,
+      ...DEFAULT_SETTINGS,
       ...(current || {}),
       theme: newTheme
     }))
@@ -621,18 +624,7 @@ function App() {
     if (!storedTheme) {
       // Initial: adopt whatever life-app is showing.
       setSettings((current) => ({
-        showCompletedTasks: true,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-        swipeThreshold: 100,
-        animationSpeed: 0.3,
-        hapticFeedback: true,
-        buttonSounds: true,
-        soundVolume: 0.5,
-        notificationsEnabled: false,
-        notificationSound: 'chime',
-        notificationAdvance: 30,
-        notificationVolume: 0.7,
+        ...DEFAULT_SETTINGS,
         ...(current || {}),
         theme: bodyIsDark ? 'dark' : 'light',
       }))
@@ -902,7 +894,10 @@ function App() {
       <BottomNav
         viewMode={viewMode || 'list'}
         onViewModeChange={handleViewModeChange}
-        onAddTask={() => setAddTaskFormOpen(true)}
+        onAddTask={() => {
+          playButtonSound(true)
+          setAddTaskFormOpen(true)
+        }}
       />
       <AddTaskForm
         open={addTaskFormOpen}

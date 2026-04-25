@@ -227,7 +227,7 @@ export function LegalViewer({
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto p-2 sm:p-4"
+        className="organized-legal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto p-2 sm:p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -241,12 +241,12 @@ export function LegalViewer({
           initial={{ opacity: 0, scale: 0.96, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 16 }}
-          transition={{ duration: 0.2 }}
-          className="flex w-full max-w-6xl flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-border bg-background shadow-2xl my-4"
-          style={{ height: 'min(90vh, 800px)' }}
+          transition={{ type: 'spring', stiffness: 260, damping: 26 }}
+          className="organized-legal-panel flex w-full max-w-6xl flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-border bg-background shadow-2xl my-4"
+          style={{ height: 'min(90dvh, 800px)' }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between border-b border-border px-4 sm:px-6 py-3 sm:py-4">
+           <div className="organized-legal-header flex items-center justify-between border-b border-border px-4 sm:px-6 py-3 sm:py-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               <div>
@@ -263,7 +263,7 @@ export function LegalViewer({
               onClick={() => onOpenChange(false)}
               aria-label="Close legal viewer"
               type="button"
-              className="h-8 w-8 sm:h-10 sm:w-10"
+              className="organized-legal-close h-8 w-8 sm:h-10 sm:w-10"
             >
               <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -274,8 +274,8 @@ export function LegalViewer({
             onValueChange={(value) => setActiveDocument(value as LegalDocument)}
             className="flex min-h-0 flex-1 flex-col overflow-hidden"
           >
-            <div className="border-b border-border px-4 pt-4 overflow-x-auto">
-              <TabsList className="grid h-auto min-w-max grid-cols-2 gap-2 bg-transparent md:grid-cols-3 xl:grid-cols-6">
+             <div className="organized-legal-tabs-wrap border-b border-border px-4 pt-4 overflow-x-auto">
+               <TabsList className="organized-legal-tabs grid h-auto min-w-max grid-cols-2 gap-2 bg-transparent md:grid-cols-3 xl:grid-cols-6">
                 {LEGAL_DOCUMENTS.map((doc) => {
                   const Icon = doc.icon
 
@@ -283,7 +283,7 @@ export function LegalViewer({
                     <TabsTrigger
                       key={doc.id}
                       value={doc.id}
-                      className="flex h-auto flex-col gap-2 rounded-xl border border-border px-3 py-3 data-[state=active]:border-primary"
+                      className="organized-legal-tab flex h-auto flex-col gap-2 rounded-xl border border-border px-3 py-3 data-[state=active]:border-primary"
                     >
                       <Icon className="h-4 w-4" />
                       <span className="hidden text-xs sm:inline">{doc.title}</span>
@@ -296,7 +296,7 @@ export function LegalViewer({
               </TabsList>
             </div>
 
-            <div className="flex-1 min-h-0 overflow-hidden px-4 sm:px-6 pb-4 sm:pb-6 pt-4">
+            <div className="organized-legal-body flex-1 min-h-0 overflow-hidden px-4 sm:px-6 pb-4 sm:pb-6 pt-4">
               <AnimatePresence mode="wait">
                 {LEGAL_DOCUMENTS.map((doc) => (
                   <TabsContent
@@ -304,7 +304,7 @@ export function LegalViewer({
                     value={doc.id}
                     className="h-full m-0 data-[state=inactive]:hidden"
                   >
-                    <Card className="h-full overflow-hidden">
+                    <Card className="organized-legal-card h-full overflow-hidden">
                       <ScrollArea className="h-full">
                         <div className="p-4 sm:p-6 md:p-8">
                           {loading && doc.id === activeDocument ? (
@@ -331,7 +331,7 @@ export function LegalViewer({
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -10 }}
                               transition={{ duration: 0.2 }}
-                              className="prose prose-sm max-w-none dark:prose-invert md:prose-base
+                                className="organized-legal-prose prose prose-sm max-w-none dark:prose-invert md:prose-base
                                 prose-headings:font-bold prose-headings:tracking-tight
                                 prose-h1:mb-4 prose-h1:text-2xl sm:prose-h1:text-3xl
                                 prose-h2:mt-6 sm:prose-h2:mt-8 prose-h2:mb-3 prose-h2:text-xl sm:prose-h2:text-2xl
@@ -356,7 +356,7 @@ export function LegalViewer({
             </div>
           </Tabs>
 
-          <div className="border-t border-border bg-muted/20 px-4 sm:px-6 py-3 sm:py-4">
+           <div className="organized-legal-footer border-t border-border bg-muted/20 px-4 sm:px-6 py-3 sm:py-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] sm:text-xs text-muted-foreground">
               <p>Last updated: {new Date().toLocaleDateString()}</p>
               <p className="hidden sm:block">life. - Your Guide to Better Living</p>
