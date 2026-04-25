@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Dialog,
@@ -48,6 +48,9 @@ type KeyDownLikeEvent = {
   key: string
 }
 
+const isUsableCategory = (category: Category) =>
+  Boolean(category.id && category.name && category.color)
+
 export function AddTaskForm({
   open,
   onOpenChange,
@@ -64,13 +67,19 @@ export function AddTaskForm({
   const [subtasks, setSubtasks] = useState<Subtask[]>([])
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('')
   const [dueDatePopoverOpen, setDueDatePopoverOpen] = useState(false)
+  const validCategories = useMemo(
+    () => categories.filter(isUsableCategory),
+    [categories]
+  )
 
   useEffect(() => {
-    const validCategories = categories.filter(cat => cat && cat.id && cat.name && cat.color)
     if (validCategories.length > 0 && !categoryId) {
       setCategoryId(validCategories[0].id)
     }
-  }, [categories, categoryId])
+    if (categoryId && !validCategories.some((cat) => cat.id === categoryId)) {
+      setCategoryId(validCategories[0]?.id || '')
+    }
+  }, [validCategories, categoryId])
 
   const handleVoiceTranscript = (transcript: string) => {
     if (title) {
@@ -105,7 +114,7 @@ export function AddTaskForm({
       return
     }
 
-    if (!categoryId || categories.length === 0) {
+    if (!categoryId || !validCategories.some((cat) => cat.id === categoryId)) {
       toast.error('Please create a category first')
       return
     }
@@ -122,7 +131,7 @@ export function AddTaskForm({
     )
 
     setTitle('')
-    setCategoryId(categories[0]?.id || '')
+    setCategoryId(validCategories[0]?.id || '')
     setPriority('medium')
     setNotes('')
     setDueDate(undefined)
@@ -155,7 +164,7 @@ export function AddTaskForm({
           </DialogDescription>
         </DialogHeader>
 
-        {categories.length === 0 ? (
+        {validCategories.length === 0 ? (
           <div className="py-8 text-center">
             <p className="text-muted-foreground mb-4">
               You need to create at least one category before adding tasks
@@ -192,8 +201,7 @@ export function AddTaskForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories
-                        .filter((cat) => cat && cat.id && cat.name && cat.color)
+                      {validCategories
                         .map((category) => (
                           <SelectItem key={category.id} value={category.id}>
                             <div className="flex items-center gap-2">
