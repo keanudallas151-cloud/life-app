@@ -448,7 +448,7 @@ export function SettingsView({
                               Button Sounds
                             </Label>
                             <p className="text-xs text-muted-foreground">
-                              Subtle audio feedback
+                              Always on for every tap
                             </p>
                           </div>
                         </div>
@@ -457,6 +457,7 @@ export function SettingsView({
                           checked={settings.buttonSounds ?? true}
                           disabled
                           aria-label="Button sounds are always on"
+                          title="Button sounds are always on"
                         />
                       </div>
 
