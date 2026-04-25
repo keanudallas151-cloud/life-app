@@ -342,7 +342,7 @@ export function HomePage({
                 display: "flex",
                 alignItems: "center",
                 gap: 14,
-                padding: "16px 44px 16px 18px",
+                padding: "16px 52px 16px 18px",
                 background: "transparent",
                 border: "none",
                 cursor: "pointer",
@@ -407,13 +407,13 @@ export function HomePage({
               title="Dismiss"
               style={{
                 position: "absolute",
-                top: 12,
-                right: 12,
-                width: 28,
-                height: 28,
-                minHeight: 28,
+                top: 8,
+                right: 8,
+                width: 20,
+                height: 20,
+                minHeight: 20,
                 borderRadius: 999,
-                background: "rgba(255,255,255,0.06)",
+                background: "rgba(161,161,161,0.15)",
                 border: "none",
                 cursor: "pointer",
                 display: "flex",
@@ -426,31 +426,31 @@ export function HomePage({
                 WebkitTapHighlightColor: "transparent",
               }}
               onTouchStart={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.12)";
-                e.currentTarget.style.transform = "scale(0.9)";
+                e.currentTarget.style.background = "rgba(161,161,161,0.28)";
+                e.currentTarget.style.transform = "scale(0.88)";
               }}
               onTouchEnd={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                e.currentTarget.style.background = "rgba(161,161,161,0.15)";
                 e.currentTarget.style.transform = "scale(1)";
               }}
               onTouchCancel={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                e.currentTarget.style.background = "rgba(161,161,161,0.15)";
                 e.currentTarget.style.transform = "scale(1)";
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.10)";
+                e.currentTarget.style.background = "rgba(161,161,161,0.22)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                e.currentTarget.style.background = "rgba(161,161,161,0.15)";
               }}
               onMouseDown={(e) => {
-                e.currentTarget.style.transform = "scale(0.9)";
+                e.currentTarget.style.transform = "scale(0.88)";
               }}
               onMouseUp={(e) => {
                 e.currentTarget.style.transform = "scale(1)";
               }}
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
