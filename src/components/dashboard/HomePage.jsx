@@ -212,6 +212,14 @@ export function HomePage({
     }
   };
 
+  const onResumeKeyDown = (e) => {
+    if (e.key !== "Delete" && e.key !== "Backspace") return;
+    e.stopPropagation();
+    e.preventDefault();
+    play?.("swipe");
+    beginDismissResume();
+  };
+
   return (
     <div
       data-page-tag="#dashboard_home"
@@ -516,7 +524,9 @@ export function HomePage({
             <button
               type="button"
               onClick={() => onResume(resumeTopic.key)}
-              aria-label={`Continue reading ${resumeTopic.label}. Swipe left to dismiss.`}
+              onKeyDown={onResumeKeyDown}
+              aria-label={`Continue reading ${resumeTopic.label}`}
+              aria-describedby="life-resume-swipe-dismiss-hint"
               style={{
                 width: "100%",
                 display: "flex",
@@ -531,6 +541,22 @@ export function HomePage({
                 color: "inherit",
               }}
             >
+              <span
+                id="life-resume-swipe-dismiss-hint"
+                style={{
+                  position: "absolute",
+                  width: 1,
+                  height: 1,
+                  padding: 0,
+                  margin: -1,
+                  overflow: "hidden",
+                  clip: "rect(0 0 0 0)",
+                  whiteSpace: "nowrap",
+                  border: 0,
+                }}
+              >
+                Swipe left to dismiss. Keyboard users can press Delete or Backspace to dismiss.
+              </span>
               <div
                 style={{
                   width: 42,
