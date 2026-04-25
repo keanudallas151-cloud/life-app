@@ -83,7 +83,7 @@ export function SettingsView({
   settings,
   onSettingsChange,
 }: SettingsViewProps) {
-  const [expandedSection, setExpandedSection] = useState<ExpandedSection>(null);
+  const [expandedSection, setExpandedSection] = useState<ExpandedSection>("categories");
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryColor, setNewCategoryColor] = useState(
     "oklch(0.55 0.18 250)",
@@ -274,9 +274,9 @@ export function SettingsView({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-full"
+      className="organized-settings-panel flex flex-col h-full"
     >
-      <div className="flex items-center gap-3 mb-6">
+      <div className="organized-settings-intro flex items-center gap-3 mb-6">
         <div>
           <p className="text-sm text-muted-foreground">
             Customize your experience
@@ -284,12 +284,12 @@ export function SettingsView({
         </div>
       </div>
 
-      <ScrollArea className="flex-1 pr-4">
-        <div className="space-y-4 pb-8">
+      <ScrollArea className="organized-settings-scroll flex-1">
+        <div className="organized-settings-stack space-y-4 pb-8">
           <Card className="overflow-hidden divide-y divide-border">
             <motion.button
               onClick={() => toggleSection("appearance")}
-              className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
+              className="organized-settings-row w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
               whileTap={{ scale: 0.99 }}
             >
               <div className="flex items-center gap-3">
@@ -366,7 +366,7 @@ export function SettingsView({
           <Card className="overflow-hidden divide-y divide-border">
             <motion.button
               onClick={() => toggleSection("feedback")}
-              className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
+              className="organized-settings-row w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
               whileTap={{ scale: 0.99 }}
             >
               <div className="flex items-center gap-3">
@@ -510,7 +510,7 @@ export function SettingsView({
           <Card className="overflow-hidden divide-y divide-border">
             <motion.button
               onClick={() => toggleSection("notifications")}
-              className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
+              className="organized-settings-row w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
               whileTap={{ scale: 0.99 }}
             >
               <div className="flex items-center gap-3">
@@ -714,7 +714,7 @@ export function SettingsView({
           <Card className="overflow-hidden divide-y divide-border">
             <motion.button
               onClick={() => toggleSection("categories")}
-              className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
+              className="organized-settings-row w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
               whileTap={{ scale: 0.99 }}
             >
               <div className="flex items-center gap-3">
@@ -753,18 +753,18 @@ export function SettingsView({
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                   className="overflow-hidden bg-muted/20"
                 >
-                  <div className="px-4 py-3 space-y-2 max-h-[500px] overflow-y-auto">
+                    <div className="organized-categories-panel px-4 py-3 space-y-2 max-h-[500px] overflow-y-auto">
                     <div className="space-y-2">
                       {categories.map((category) => (
                         <motion.div
                           key={category.id}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-card/50 border border-border/50"
+                          className="organized-category-pill flex items-center justify-between py-2.5 px-3 rounded-lg bg-card/50 border border-border/50"
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div
-                              className="h-6 w-6 rounded-full border border-border flex-shrink-0 shadow-sm"
+                              className="organized-category-dot h-6 w-6 rounded-full border border-border flex-shrink-0 shadow-sm"
                               style={{ backgroundColor: category.color }}
                             />
                             <span className="font-medium text-sm truncate">
@@ -799,7 +799,7 @@ export function SettingsView({
                       ))}
                     </div>
 
-                    <div className="pt-3 mt-3 border-t border-border/50 space-y-3 sticky bottom-0 bg-muted/20">
+                    <div className="organized-add-category-panel pt-3 mt-3 border-t border-border/50 space-y-3 sticky bottom-0 bg-muted/20">
                       <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         Add Category
                       </Label>
@@ -835,7 +835,7 @@ export function SettingsView({
           <Card className="overflow-hidden divide-y divide-border">
             <motion.button
               onClick={() => toggleSection("tags")}
-              className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
+              className="organized-settings-row w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
               whileTap={{ scale: 0.99 }}
             >
               <div className="flex items-center gap-3">
@@ -869,7 +869,7 @@ export function SettingsView({
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                   className="overflow-hidden bg-muted/20"
                 >
-                  <div className="px-4 py-3 space-y-3 max-h-[400px] overflow-y-auto">
+                    <div className="organized-tags-panel px-4 py-3 space-y-3 max-h-[400px] overflow-y-auto">
                     <div className="flex flex-wrap gap-2">
                       {tags.length === 0 ? (
                         <p className="text-sm text-muted-foreground py-2">
@@ -1014,7 +1014,7 @@ export function SettingsView({
                 if (settings?.buttonSounds) playButtonSound();
                 setLegalViewerOpen(true);
               }}
-              className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
+              className="organized-settings-row w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors"
               whileTap={{ scale: 0.99 }}
             >
               <div className="flex items-center gap-3">

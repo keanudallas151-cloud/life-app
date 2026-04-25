@@ -744,7 +744,7 @@ body.life-organized-active [data-slot="sheet-content"]::before {
   margin: 8px auto 4px;
 }
 
-body.life-dark body.life-organized-active [data-slot="sheet-content"]::before {
+body.life-dark.life-organized-active [data-slot="sheet-content"]::before {
   background: rgba(255,255,255,0.2);
 }
 
@@ -1226,3 +1226,182 @@ body.life-dark .organized-feature [data-slot="card"] {
     0 8px 22px color-mix(in oklch, var(--primary) 28%, transparent) !important;
 }
 
+/* ── FIX 56: Settings page — iOS inset grouped list rhythm ──────────────── */
+.organized-settings-panel {
+  --organized-row-icon: 42px;
+}
+
+.organized-settings-intro {
+  margin: -0.25rem 1rem 1rem !important;
+  padding: 0 0.25rem !important;
+}
+
+.organized-settings-intro p {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+}
+
+.organized-settings-scroll {
+  padding-right: 0 !important;
+}
+
+.organized-settings-stack {
+  padding: 0 0 108px !important;
+}
+
+.organized-settings-panel [data-slot="card"] {
+  border-radius: 28px !important;
+  overflow: hidden !important;
+  border-color: color-mix(in oklch, var(--border) 78%, transparent) !important;
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--card) 98%, white 2%), var(--card)) !important;
+}
+
+.organized-settings-row {
+  min-height: 68px !important;
+  padding: 16px 18px !important;
+  text-align: left !important;
+}
+
+.organized-settings-row > div:first-child > div:first-child {
+  width: var(--organized-row-icon) !important;
+  height: var(--organized-row-icon) !important;
+  border-radius: 50% !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, currentColor 10%, transparent),
+    0 4px 12px rgba(0,0,0,0.06) !important;
+}
+
+.organized-settings-row span.font-medium {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.026em !important;
+}
+
+.organized-categories-panel,
+.organized-tags-panel {
+  max-height: none !important;
+  padding: 18px !important;
+  background: color-mix(in oklch, var(--background) 88%, var(--card)) !important;
+}
+
+.organized-category-pill {
+  min-height: 62px !important;
+  border-radius: 999px !important;
+  padding: 11px 14px !important;
+  background: var(--card) !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 8px 20px rgba(0,0,0,0.05) !important;
+}
+
+.organized-category-dot {
+  width: 34px !important;
+  height: 34px !important;
+  border: 2px solid var(--card) !important;
+  box-shadow:
+    0 2px 9px rgba(0,0,0,0.22),
+    0 0 0 1px color-mix(in oklch, var(--border) 75%, transparent) !important;
+}
+
+.organized-category-pill span.font-medium {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.organized-category-pill button[data-slot="button"] {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border-radius: 50% !important;
+}
+
+.organized-add-category-panel {
+  position: static !important;
+  margin-top: 18px !important;
+  padding: 18px 0 0 !important;
+  background: transparent !important;
+}
+
+.organized-add-category-panel [data-slot="input"],
+.organized-tags-panel [data-slot="input"] {
+  min-height: 52px !important;
+  border-radius: 999px !important;
+  padding-inline: 18px !important;
+  background: var(--input) !important;
+}
+
+.organized-add-category-panel button[data-slot="button"] {
+  min-height: 54px !important;
+  border-radius: 999px !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+}
+
+/* ── FIX 57: Add-task dialog — safer iOS bottom-sheet proportions ───────── */
+body.life-organized-active [data-slot="dialog-content"]:has(#task-title) {
+  width: min(94vw, 560px) !important;
+  max-height: min(82dvh, 720px) !important;
+  border-radius: 28px !important;
+  padding: 22px !important;
+}
+
+body.life-organized-active [data-slot="dialog-content"]:has(#task-title) [data-slot="dialog-title"] {
+  font-size: 24px !important;
+  letter-spacing: -0.026em !important;
+}
+
+body.life-organized-active [data-slot="dialog-content"]:has(#task-title) button[data-slot="button"] {
+  min-height: 44px !important;
+  border-radius: 999px !important;
+}
+
+body.life-organized-active [data-slot="dialog-content"]:has(#task-title) > div:last-child button[data-slot="button"] {
+  min-height: 52px !important;
+  padding-inline: 20px !important;
+}
+
+/* ── FIX 58: Bottom nav — match iOS tab-bar spacing from reference ───────── */
+.organized-bottom-nav > div {
+  max-width: 430px !important;
+  min-height: 88px !important;
+  padding: 9px 12px max(12px, env(safe-area-inset-bottom)) !important;
+}
+
+.organized-nav-item {
+  min-height: 58px !important;
+  border-radius: 18px !important;
+  gap: 6px !important;
+}
+
+.organized-nav-item svg {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.organized-nav-item span[class*="text-"] {
+  font-size: 12px !important;
+  line-height: 1.1 !important;
+}
+
+.organized-fab {
+  width: 72px !important;
+  height: 72px !important;
+  margin-top: -34px !important;
+  border: 5px solid var(--background) !important;
+}
+
+@media (max-width: 380px) {
+  .organized-bottom-nav > div {
+    padding-inline: 6px !important;
+  }
+  .organized-nav-item span[class*="text-"] {
+    font-size: 11px !important;
+  }
+  .organized-fab {
+    width: 64px !important;
+    height: 64px !important;
+  }
+}
