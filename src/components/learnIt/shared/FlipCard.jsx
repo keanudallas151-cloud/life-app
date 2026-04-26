@@ -171,6 +171,15 @@ export function FlipCard({
   const rotateAngle = flipped ? 180 : peeking ? 45 : 0;
   const pressScale = pressed && !flipped ? 0.97 : 1;
 
+  // Belt-and-suspenders for iOS Safari: even when `backface-visibility:hidden`
+  // is silently disabled (e.g. due to a `filter:` ancestor or a child with
+  // `backdrop-filter:`), explicitly hide the off-screen face via opacity and
+  // visibility so the front can never cover the back's Play button.
+  // The toggle is delayed to the flip's midpoint (~half of 0.6s) so faces
+  // swap exactly when the card is edge-on, preserving the 3D illusion.
+  const halfFlipDelay = reducedMotion ? 0 : 0.3;
+  const faceVisibilityTransition = `opacity 0s linear ${halfFlipDelay}s, visibility 0s linear ${halfFlipDelay}s`;
+
   const ariaLabel = getFlipCardAriaLabel(game, flipped);
   const longDescId = `flipcard-desc-${game.id}`;
 
@@ -239,7 +248,9 @@ export function FlipCard({
               : `0 6px 22px rgba(0,0,0,0.22)`,
             overflow: "hidden",
             pointerEvents: flipped ? "none" : "auto",
-            transition: "box-shadow 0.18s ease",
+            opacity: flipped ? 0 : 1,
+            visibility: flipped ? "hidden" : "visible",
+            transition: `box-shadow 0.18s ease, ${faceVisibilityTransition}`,
           }}
         >
           {/* Shimmer sweep on mount */}
@@ -416,6 +427,9 @@ export function FlipCard({
             gap: 5,
             boxShadow: `0 4px 28px ${color}25`,
             pointerEvents: flipped ? "auto" : "none",
+            opacity: flipped ? 1 : 0,
+            visibility: flipped ? "visible" : "hidden",
+            transition: faceVisibilityTransition,
             overflow: "hidden",
           }}
         >
