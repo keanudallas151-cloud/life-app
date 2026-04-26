@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FONT } from "./shared/constants.js";
 import { FlipCard } from "./shared/FlipCard.jsx";
 import { GameModal } from "./shared/GameModal.jsx";
@@ -352,21 +352,6 @@ export function LearnItSubjectPage({ t, play, subject, onBack }) {
 
   const activeGameMeta = games.find(g => g.id === activeGame);
 
-  // ── Phase 2 — segmented filter (All / Games / Tools / New)
-  const [filter, setFilter] = useState("all");
-  const visibleGames = useMemo(() => {
-    if (filter === "games") return games.filter((g) => g.type === "game");
-    if (filter === "tools") return games.filter((g) => g.type === "tool");
-    if (filter === "new")   return games.filter((g) => g.tag === "new");
-    return games;
-  }, [filter, games]);
-  const filterCounts = useMemo(() => ({
-    all:   games.length,
-    games: games.filter((g) => g.type === "game").length,
-    tools: games.filter((g) => g.type === "tool").length,
-    new:   games.filter((g) => g.tag === "new").length,
-  }), [games]);
-
   // ── Phase 2 — collapsing title (large-title → compact header)
   const titleSentinelRef = useRef(null);
   const [titleCollapsed, setTitleCollapsed] = useState(false);
@@ -385,52 +370,7 @@ export function LearnItSubjectPage({ t, play, subject, onBack }) {
     return () => obs.disconnect();
   }, [subject]);
 
-  // ── Phase 2 — pull-to-refresh: re-shuffle the on-screen card order
-  const [shuffleSeed, setShuffleSeed] = useState(0);
-  const shuffledGames = useMemo(() => {
-    if (!shuffleSeed) return visibleGames;
-    // Stable Fisher-Yates seeded by shuffleSeed
-    const arr = [...visibleGames];
-    let s = shuffleSeed;
-    const rand = () => {
-      s = (s * 9301 + 49297) % 233280;
-      return s / 233280;
-    };
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }, [visibleGames, shuffleSeed]);
-
   const gridScrollRef = useRef(null);
-  const pullRef = useRef({ startY: 0, atTop: false, dy: 0 });
-  const [pullDist, setPullDist] = useState(0);
-  const PULL_TRIGGER = 70;
-
-  const onGridTouchStart = (e) => {
-    const el = gridScrollRef.current;
-    pullRef.current.startY = e.touches[0].clientY;
-    pullRef.current.atTop = !el || el.scrollTop <= 0;
-    pullRef.current.dy = 0;
-  };
-  const onGridTouchMove = (e) => {
-    if (!pullRef.current.atTop) return;
-    const dy = e.touches[0].clientY - pullRef.current.startY;
-    if (dy > 0) {
-      pullRef.current.dy = dy;
-      // Soft resistance feel
-      setPullDist(Math.min(120, dy * 0.55));
-    }
-  };
-  const onGridTouchEnd = () => {
-    if (pullRef.current.atTop && pullRef.current.dy > PULL_TRIGGER) {
-      play?.("refresh");
-      setShuffleSeed((n) => n + 1);
-    }
-    pullRef.current.dy = 0;
-    setPullDist(0);
-  };
 
   return (
     <div
@@ -546,78 +486,20 @@ export function LearnItSubjectPage({ t, play, subject, onBack }) {
             <h2 className="life-learnit-title" style={{ margin: 0, fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1.05, color: (t && t.ink) || "#ededed", fontFamily: FONT }}>{label}</h2>
           </div>
         </div>
-
-        <p style={{ margin: "14px 0 0", fontSize: 13.5, color: (t && t.muted) || "#a1a1a1", lineHeight: 1.55, fontFamily: FONT, position: "relative" }}>
-          {games.length} interactive activities — tap a card to flip it, then press Play.
-        </p>
-      </div>
-
-      {/* Sentinel for IntersectionObserver — placed just below the title row */}
-      <div ref={titleSentinelRef} aria-hidden="true" style={{ height: 1, marginTop: -1 }} />
-
-      {/* Segmented filter (sticky) */}
-      <div
-        className="life-learnit-segmented"
-        role="tablist"
-        aria-label="Activity filter"
-        style={{
-          "--life-segment-active-bg": `${color}26`,
-          "--life-segment-active-fg": color,
-        }}
-      >
-        {[
-          { key: "all",   label: "All" },
-          { key: "games", label: "Games" },
-          { key: "tools", label: "Tools" },
-          { key: "new",   label: "New" },
-        ].map(({ key, label: flabel }) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            className="life-learnit-segment"
-            aria-pressed={filter === key}
-            aria-selected={filter === key}
-            onClick={() => { play?.("tap_soft"); setFilter(key); }}
-            disabled={filterCounts[key] === 0}
-            style={{ opacity: filterCounts[key] === 0 ? 0.4 : 1 }}
-          >
-            {flabel}
-            {filterCounts[key] > 0 && (
-              <span style={{ marginLeft: 6, fontSize: 10, opacity: 0.7 }}>{filterCounts[key]}</span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Pull-to-refresh affordance */}
-      <div
-        className="life-learnit-refresh"
-        data-active={pullDist > 0 ? "true" : "false"}
-        data-armed={pullDist >= PULL_TRIGGER ? "true" : "false"}
-        aria-hidden="true"
-      >
-        <span className="life-learnit-refresh-icon" style={{ color }}>↻ Pull to shuffle</span>
       </div>
 
       {/* Card grid */}
       <div
         ref={gridScrollRef}
         className="life-learnit-grid"
-        onTouchStart={onGridTouchStart}
-        onTouchMove={onGridTouchMove}
-        onTouchEnd={onGridTouchEnd}
-        onTouchCancel={onGridTouchEnd}
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(2, 1fr)",
-          transform: pullDist > 0 ? `translateY(${pullDist}px)` : undefined,
-          transition: pullDist === 0 ? "transform 0.32s cubic-bezier(0.34,1.56,0.64,1)" : "none",
         }}
       >
-        {shuffledGames.map((game, i) => (
+        {games.map((game, i) => (
           <FlipCard
-            key={`${game.id}-${shuffleSeed}`}
+            key={game.id}
             game={game}
             color={color}
             lightColor={lightColor}
@@ -630,7 +512,7 @@ export function LearnItSubjectPage({ t, play, subject, onBack }) {
             play={play}
           />
         ))}
-        {shuffledGames.length === 0 && (
+        {games.length === 0 && (
           <div style={{
             gridColumn: "1 / -1",
             padding: "24px 16px",

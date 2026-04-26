@@ -50,14 +50,8 @@ export function FlipCard({
   const flipTimerRef = useRef(null);
   const lastSoundRef = useRef({ type: null, ts: 0 });
 
-  const longDesc = game.longDesc || game.desc;
-  const howTo = game.howTo;
-  const learnTags = Array.isArray(game.learn) ? game.learn.slice(0, 3) : [];
   const isNew = game.tag === "new";
   const best = getBestScore(game.id);
-
-  // Difficulty hint text for the back-face meta row
-  const difficultyHint = game.difficulty || (game.type === "tool" ? "Practice" : "Easy → Hard");
 
   // Suppress duplicate sounds within 250 ms
   const playOnce = (type) => {
@@ -200,7 +194,6 @@ export function FlipCard({
   })();
 
   const ariaLabel = getFlipCardAriaLabel(game, flipped);
-  const longDescId = `flipcard-desc-${game.id}`;
 
   return (
     <div
@@ -219,7 +212,6 @@ export function FlipCard({
         tabIndex={0}
         aria-pressed={flipped}
         aria-label={ariaLabel}
-        aria-describedby={longDescId}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         onPointerDown={handlePointerDown}
@@ -426,9 +418,9 @@ export function FlipCard({
             display: flipped ? "flex" : "none",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "flex-start",
-            padding: "12px 12px 44px",
-            gap: 5,
+            justifyContent: "center",
+            padding: "16px 12px 60px",
+            gap: 8,
             boxShadow: `0 4px 28px ${color}25`,
             overflow: "hidden",
           }}
@@ -456,10 +448,10 @@ export function FlipCard({
             </div>
           )}
 
-          <div style={{ fontSize: 22, lineHeight: 1, marginTop: 2 }}>{game.icon}</div>
+          <div style={{ fontSize: 30, lineHeight: 1 }}>{game.icon}</div>
           <div
             style={{
-              fontSize: 13,
+              fontSize: 15,
               fontWeight: 700,
               color: "#ededed",
               textAlign: "center",
@@ -470,162 +462,26 @@ export function FlipCard({
             {game.title}
           </div>
 
-          {/* Long description */}
-          <div
-            id={longDescId}
-            style={{
-              fontSize: 10.5,
-              color: "rgba(220,220,220,0.78)",
-              textAlign: "center",
-              lineHeight: 1.42,
-              fontFamily: FONT,
-              padding: "0 2px",
-              display: "-webkit-box",
-              WebkitLineClamp: howTo ? 3 : 4,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-          >
-            {longDesc}
-          </div>
-
-          {/* How-To one-liner */}
-          {howTo && (
-            <div
-              style={{
-                fontSize: 9.5,
-                color: "rgba(220,220,220,0.55)",
-                textAlign: "center",
-                lineHeight: 1.4,
-                fontFamily: FONT,
-                padding: "0 4px",
-                fontStyle: "italic",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
-              {howTo}
-            </div>
-          )}
-
-          {/* Learn chips */}
-          {learnTags.length > 0 && (
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 4,
-                justifyContent: "center",
-                marginTop: 1,
-              }}
-            >
-              {learnTags.map((tag) => (
-                <span
-                  key={tag}
-                  style={{
-                    padding: "1.5px 6px",
-                    borderRadius: 999,
-                    background: `${color}1A`,
-                    border: `1px solid ${color}33`,
-                    fontSize: 8,
-                    fontWeight: 700,
-                    color,
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                    fontFamily: FONT,
-                  }}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Meta chips: type + difficulty hint */}
-          <div
-            style={{
-              display: "flex",
-              gap: 5,
-              flexWrap: "wrap",
-              justifyContent: "center",
-              marginTop: 2,
-            }}
-          >
-            <span
-              style={{
-                padding: "2px 7px",
-                borderRadius: 999,
-                background: lightColor,
-                border: `1px solid ${borderColor}`,
-                fontSize: 8.5,
-                fontWeight: 700,
-                color: color,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                fontFamily: FONT,
-              }}
-            >
-              {game.type}
-            </span>
-            <span
-              style={{
-                padding: "2px 7px",
-                borderRadius: 999,
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                fontSize: 8.5,
-                fontWeight: 600,
-                color: "rgba(220,220,220,0.85)",
-                letterSpacing: "0.04em",
-                fontFamily: FONT,
-              }}
-            >
-              {difficultyHint}
-            </span>
-            {isNew && (
-              <span
-                style={{
-                  padding: "2px 7px",
-                  borderRadius: 999,
-                  background: color,
-                  fontSize: 8.5,
-                  fontWeight: 800,
-                  color: "#000",
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  fontFamily: FONT,
-                }}
-              >
-                New
-              </span>
-            )}
-          </div>
-
           {/* Compact Play pill, anchored bottom-center */}
           <button
             type="button"
             className="life-flipcard-play"
             onClick={handlePlayClick}
-            // Critical: stop pointer-down from bubbling to card wrapper
-            // so the long-press timer never starts when touching Play.
             onPointerDown={(e) => e.stopPropagation()}
             aria-label={`Play ${game.title}`}
-            aria-describedby={longDescId}
             tabIndex={flipped ? 0 : -1}
             style={{
               position: "absolute",
-              bottom: 10,
+              bottom: 14,
               left: "50%",
               transform: "translateX(-50%)",
-              padding: "7px 18px",
-              minHeight: 36,
+              padding: "8px 22px",
+              minHeight: 38,
               background: color,
               color: "#000",
               border: "none",
               borderRadius: 999,
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: 700,
               cursor: "pointer",
               fontFamily: FONT,
