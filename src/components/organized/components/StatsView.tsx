@@ -173,7 +173,7 @@ export function StatsView({ tasks, categories, history, onNavigate, onShowHistor
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 [&>*]:h-full">
         {summaryCards.map((card) => {
           const Icon = card.icon
           return (
@@ -184,7 +184,7 @@ export function StatsView({ tasks, categories, history, onNavigate, onShowHistor
               className="w-full text-left"
             >
               <Card className={cn('h-full rounded-[24px] border-2 bg-card shadow-none transition-colors duration-150', card.cardClassName)}>
-                <CardContent className="relative flex min-h-[170px] flex-col items-center justify-center gap-3 px-4 py-5 text-center">
+                <CardContent className="relative flex min-h-[180px] flex-col items-center justify-center gap-3 px-4 py-5 text-center">
                   <div className={cn('flex h-11 w-11 items-center justify-center rounded-full', card.chipClassName)}>
                     <Icon className={cn('h-5 w-5', card.iconClassName)} weight={card.iconWeight} />
                   </div>
@@ -195,10 +195,13 @@ export function StatsView({ tasks, categories, history, onNavigate, onShowHistor
                     </Badge>
                   ) : null}
 
-                  <p className="text-[3.1rem] font-bold leading-none tracking-[-0.06em] text-foreground">
+                  <p
+                    className="text-[3.1rem] font-bold leading-none tracking-[-0.06em] text-foreground"
+                    style={{ fontVariantNumeric: 'tabular-nums', fontFeatureSettings: '"tnum"' }}
+                  >
                     {card.value}
                   </p>
-                  <p className="max-w-[9ch] text-[1.05rem] font-semibold leading-[1.05] text-foreground">
+                  <p className="text-[1.05rem] font-semibold leading-[1.05] text-foreground">
                     {card.label}
                   </p>
                 </CardContent>

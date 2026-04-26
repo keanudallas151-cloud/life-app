@@ -418,14 +418,21 @@ body.life-dark.life-organized-active [data-slot="alert-dialog-content"],
    Cap height so the bottom nav remains visible and usable. */
 @media (max-width: 639px) {
   body.life-organized-active [data-slot="dialog-content"] {
-    max-height: 72dvh !important;
-    overflow-y: auto !important;
-    /* Keep it centered in the usable area above the bottom nav */
+    max-height: 88dvh !important;
     top: 44% !important;
     transform: translate(-50%, -50%) !important;
-    width: calc(100% - 2rem) !important;
-    padding: 1.25rem 1rem 1rem !important;
+    width: calc(100% - 1.5rem) !important;
   }
+}
+
+/* ── Fix: Popover calendar — ensure opaque background in all themes */
+body.life-organized-active [data-radix-popper-content-wrapper] {
+  z-index: 10050 !important;
+}
+body.life-organized-active [data-radix-popper-content-wrapper] > * {
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border-color: var(--border) !important;
 }
 
 .organized-feature :is(button, [role="button"], a, input, textarea, select, [tabindex]):focus-visible {
@@ -1717,4 +1724,12 @@ body.life-organized-active [data-slot="dialog-content"] > button.absolute {
   .organized-legal-prose {
     font-size: 16px !important;
   }
+}
+
+/* ── Fix: Tabular nums — even number rendering across stats and badges */
+.organized-feature .text-\[3\.1rem\],
+.organized-feature [data-slot="badge"],
+.organized-feature .tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }

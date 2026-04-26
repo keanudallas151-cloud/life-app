@@ -67,6 +67,30 @@ const TYPE_COOLDOWN_MS = {
   home_return: 220,
   lobby_enter: 240,
   tritone: 300,
+  // ─── Arcade / game sounds ─────────────────────────────────────
+  game_start:   500,
+  coin:         100,
+  powerup:      300,
+  level_up:     500,
+  game_over:    500,
+  streak_2:     150,
+  streak_3:     200,
+  streak_5:     300,
+  timer_tick:   850,
+  timer_low:    800,
+  timer_out:    400,
+  key_press:     30,
+  word_correct: 150,
+  word_wrong:   150,
+  match_found:  150,
+  round_clear:  300,
+  hint_used:    200,
+  ladder_step:  150,
+  ladder_done:  500,
+  sentence_ok:  120,
+  game_tap:      40,
+  back_game:    200,
+  build_word:    80,
 };
 
 const SOUND_MODE_DENSITY = {
@@ -168,6 +192,58 @@ const V_LOBBY_ENTER = { notes: [440, 523.25, 659.25, 880], times: [0, 0.04, 0.08
 const V_TAP_SOFT    = { notes: [1046.5],         times: [0],           dur: 0.05, wave: "sine",     detune: 0,   peak: 0.04 };
 const V_TAP_FIRM    = { notes: [659.25, 880],    times: [0, 0.03],     dur: 0.09, wave: "sine",     detune: 0,   peak: 0.06 };
 
+// ─── ARCADE / 90s GAME PALETTE ────────────────────────────────────────────
+// Square-wave ("square") gives that classic chiptune crunch.
+// Short envelopes + higher frequencies = punchy retro feel.
+// All peaks kept low so they blend with existing app sounds at similar volume.
+
+// Enter a game — ascending 4-note fanfare (C5→E5→G5→C6)
+const V_GAME_START   = { notes: [523.25, 659.25, 783.99, 1046.5], times: [0, 0.055, 0.11, 0.17], dur: 0.10, wave: "square", detune: 0,   peak: 0.055 };
+// Classic coin pickup (E5→B5, short)
+const V_COIN         = { notes: [659.25, 987.77], times: [0, 0.07], dur: 0.08, wave: "square", detune: 0,   peak: 0.055 };
+// Power-up: rising arpeggio (C4→E4→G4→C5→E5)
+const V_POWERUP      = { notes: [261.63, 329.63, 392, 523.25, 659.25], times: [0, 0.04, 0.08, 0.12, 0.16], dur: 0.07, wave: "square", detune: 0, peak: 0.05 };
+// Level-up fanfare (C5→E5→G5→C5→E5→C6)
+const V_LEVEL_UP     = { notes: [523.25, 659.25, 783.99, 523.25, 659.25, 1046.5], times: [0, 0.06, 0.12, 0.20, 0.26, 0.32], dur: 0.10, wave: "square", detune: 0, peak: 0.055 };
+// Game over: descending sad (G4→E4→C4→G3)
+const V_GAME_OVER    = { notes: [392, 329.63, 261.63, 196], times: [0, 0.09, 0.18, 0.28], dur: 0.13, wave: "triangle", detune: -20, peak: 0.055 };
+// Streak 2 — double ping
+const V_STREAK_2     = { notes: [880, 1046.5], times: [0, 0.07], dur: 0.07, wave: "square", detune: 0, peak: 0.05 };
+// Streak 3 — triple ascending ping
+const V_STREAK_3     = { notes: [880, 1046.5, 1318.51], times: [0, 0.055, 0.11], dur: 0.07, wave: "square", detune: 0, peak: 0.055 };
+// Streak 5 — achievement fanfare
+const V_STREAK_5     = { notes: [523.25, 659.25, 880, 1046.5, 1318.51], times: [0, 0.04, 0.08, 0.12, 0.16], dur: 0.09, wave: "square", detune: 0, peak: 0.055 };
+// Timer tick — subtle metronome click (fires once/sec in danger zone)
+const V_TIMER_TICK   = { notes: [440],     times: [0], dur: 0.03, wave: "square", detune: 0,   peak: 0.030 };
+// Timer low — urgent warning beep
+const V_TIMER_LOW    = { notes: [880],     times: [0], dur: 0.05, wave: "square", detune: 0,   peak: 0.040 };
+// Timer out — error buzzer (descending square)
+const V_TIMER_OUT    = { notes: [262, 196], times: [0, 0.09], dur: 0.14, wave: "square", detune: -30, peak: 0.055 };
+// Key press — 8-bit keyboard click (very short, high)
+const V_KEY_PRESS    = { notes: [1046.5], times: [0], dur: 0.04, wave: "square", detune: 0, peak: 0.032 };
+// Word correct — 3-note ascending confirm
+const V_WORD_CORRECT = { notes: [523.25, 659.25, 880], times: [0, 0.07, 0.14], dur: 0.09, wave: "square", detune: 0, peak: 0.055 };
+// Word wrong — descending wah (triangle for softer feel)
+const V_WORD_WRONG   = { notes: [349.23, 261.63], times: [0, 0.09], dur: 0.15, wave: "triangle", detune: -50, peak: 0.055 };
+// Match found — quick 3-note sparkle
+const V_MATCH_FOUND  = { notes: [659.25, 880, 1046.5], times: [0, 0.055, 0.11], dur: 0.08, wave: "square", detune: 0, peak: 0.05 };
+// Round clear — 5-note ascending celebration
+const V_ROUND_CLEAR  = { notes: [523.25, 659.25, 784, 880, 1046.5], times: [0, 0.04, 0.08, 0.12, 0.16], dur: 0.09, wave: "square", detune: 0, peak: 0.055 };
+// Hint used — soft descending whoosh
+const V_HINT_USED    = { notes: [880, 659.25, 523.25], times: [0, 0.045, 0.09], dur: 0.10, wave: "triangle", detune: -25, peak: 0.050 };
+// Ladder step — 2-note step up
+const V_LADDER_STEP  = { notes: [523.25, 659.25], times: [0, 0.065], dur: 0.08, wave: "square", detune: 0, peak: 0.05 };
+// Ladder done — full 6-note ascending completion
+const V_LADDER_DONE  = { notes: [523.25, 659.25, 880, 1046.5, 1318.51, 1568], times: [0, 0.05, 0.10, 0.15, 0.20, 0.25], dur: 0.10, wave: "square", detune: 0, peak: 0.055 };
+// Sentence ok — placed word confirmation
+const V_SENTENCE_OK  = { notes: [784, 1046.5], times: [0, 0.055], dur: 0.07, wave: "square", detune: 0, peak: 0.050 };
+// Game tap — punchy 8-bit button press
+const V_GAME_TAP     = { notes: [783.99], times: [0], dur: 0.04, wave: "square", detune: 0, peak: 0.038 };
+// Back from game — short descending exit
+const V_BACK_GAME    = { notes: [523.25, 392], times: [0, 0.065], dur: 0.09, wave: "sine", detune: -15, peak: 0.055 };
+// Build word — submit/confirm chime
+const V_BUILD_WORD   = { notes: [880, 1046.5], times: [0, 0.045], dur: 0.07, wave: "square", detune: 0, peak: 0.045 };
+
 const EXTRA_VARIANTS = {
   toggle_on: V_TOGGLE_ON,
   toggle_off: V_TOGGLE_OFF,
@@ -194,6 +270,30 @@ const EXTRA_VARIANTS = {
   tap_firm: V_TAP_FIRM,
   home_return: V_HOME_RETURN,
   lobby_enter: V_LOBBY_ENTER,
+  // ─── Arcade palette ─────────────────────────────────────────────────
+  game_start:   V_GAME_START,
+  coin:         V_COIN,
+  powerup:      V_POWERUP,
+  level_up:     V_LEVEL_UP,
+  game_over:    V_GAME_OVER,
+  streak_2:     V_STREAK_2,
+  streak_3:     V_STREAK_3,
+  streak_5:     V_STREAK_5,
+  timer_tick:   V_TIMER_TICK,
+  timer_low:    V_TIMER_LOW,
+  timer_out:    V_TIMER_OUT,
+  key_press:    V_KEY_PRESS,
+  word_correct: V_WORD_CORRECT,
+  word_wrong:   V_WORD_WRONG,
+  match_found:  V_MATCH_FOUND,
+  round_clear:  V_ROUND_CLEAR,
+  hint_used:    V_HINT_USED,
+  ladder_step:  V_LADDER_STEP,
+  ladder_done:  V_LADDER_DONE,
+  sentence_ok:  V_SENTENCE_OK,
+  game_tap:     V_GAME_TAP,
+  back_game:    V_BACK_GAME,
+  build_word:   V_BUILD_WORD,
 };
 
 // ─────────────────────────────────────────────────────────────────────────

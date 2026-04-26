@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const FONT = "-apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif";
 
@@ -83,6 +83,21 @@ const FILL_GAP_QS = [
   { sentence: "She kept a ___ tone throughout the difficult negotiation.", options: ["aggressive","calm","panicked","dismissive"], answer: "calm" },
   { sentence: "His ___ humour made even the toughest days bearable.", options: ["dry","wet","sharp","heavy"], answer: "dry" },
   { sentence: "The team's ___ effort led to a record-breaking result.", options: ["collective","individual","selfish","random"], answer: "collective" },
+  { sentence: "The project manager kept the team ___ with regular updates.", options: ["confused","informed","distracted","silent"], answer: "informed" },
+  { sentence: "She demonstrated ___ leadership by stepping up during the crisis.", options: ["passive","exemplary","hesitant","average"], answer: "exemplary" },
+  { sentence: "The research paper was ___ by leading experts in the field.", options: ["ignored","peer-reviewed","dismissed","written"], answer: "peer-reviewed" },
+  { sentence: "His ___ approach to the problem saved the company thousands.", options: ["reckless","innovative","careless","costly"], answer: "innovative" },
+  { sentence: "She remained ___ despite the chaos unfolding around her.", options: ["frantic","composed","nervous","distracted"], answer: "composed" },
+  { sentence: "The contract was ___ after both parties reached an agreement.", options: ["cancelled","finalised","ignored","delayed"], answer: "finalised" },
+  { sentence: "He was praised for his ___ response during the emergency.", options: ["slow","delayed","swift","cautious"], answer: "swift" },
+  { sentence: "The new system was more ___ than anything they had used before.", options: ["complicated","outdated","efficient","confusing"], answer: "efficient" },
+  { sentence: "The journalist published a ___ exposé on corporate misconduct.", options: ["biased","damaging","thorough","brief"], answer: "thorough" },
+  { sentence: "Her writing style is ___ — she never wastes a single word.", options: ["verbose","repetitive","succinct","confusing"], answer: "succinct" },
+  { sentence: "The negotiation required both parties to make ___.", options: ["enemies","demands","compromises","decisions"], answer: "compromises" },
+  { sentence: "The team's ___ was evident in the seamless execution of the event.", options: ["chaos","coordination","confusion","disagreement"], answer: "coordination" },
+  { sentence: "He was known for his ___ wit and sharp observations.", options: ["dull","incisive","slow","gentle"], answer: "incisive" },
+  { sentence: "The architecture of the building was ___ by its historic surroundings.", options: ["ignored","inspired","disturbed","limited"], answer: "inspired" },
+  { sentence: "The athlete showed ___ determination, training through pain and setbacks.", options: ["little","extraordinary","minimal","average"], answer: "extraordinary" },
 ];
 
 // ── English: Word Guess (Wordle-style) ─────────────────────────
@@ -95,6 +110,7 @@ const WORD_LIST = [
   "YOUTH","ADORE","ANGER","BASIC","BLANK","BONUS","BOUND","BRAIN","BROAD","BUILD",
   "CATCH","DANCE","EAGLE","FANCY","GIANT","HAPPY","IMAGE","JUDGE","KNIFE","LEGAL",
   "MAJOR","NIGHT","OLIVE","PHASE","QUEST","RADAR","SQUAD","TABLE","ULTRA","BLAZE",
+  "GRANT","SOLVE","FORCE","CHESS","FROST","GAVEL","PERCH","TROVE","EXACT","PLUMB",
 ];
 
 // ── English: Vocab Match ───────────────────────────────────────
@@ -123,30 +139,41 @@ const VOCAB_PAIRS = [
   { word: "Humble",       def: "Modest and not arrogant" },
   { word: "Impeccable",   def: "Perfect, without any flaws" },
   { word: "Lucid",        def: "Clear and easy to understand" },
+  { word: "Forthright",  def: "Direct and outspoken in speech" },
+  { word: "Tenuous",     def: "Very weak or insubstantial" },
+  { word: "Adept",       def: "Very skilled or proficient at something" },
+  { word: "Exemplary",   def: "Serving as a model worthy of imitation" },
+  { word: "Nuanced",     def: "Showing subtle shades of difference or meaning" },
+  { word: "Deft",        def: "Neatly skilful and quick in movement" },
 ];
 
 // ── English: Sentence Builder ──────────────────────────────────
 const SENTENCE_QS = [
-  { words: ["always", "hard", "You", "should", "work"], answer: ["You", "should", "always", "work", "hard"] },
-  { words: ["the", "Knowledge", "key", "is", "to", "success"], answer: ["Knowledge", "is", "the", "key", "to", "success"] },
-  { words: ["your", "Build", "every", "skills", "day"], answer: ["Build", "your", "skills", "every", "day"] },
-  { words: ["reading", "daily", "Start", "books"], answer: ["Start", "reading", "books", "daily"] },
-  { words: ["never", "You", "give", "should", "up"], answer: ["You", "should", "never", "give", "up"] },
-  { words: ["speak", "Practise", "to", "clearly"], answer: ["Practise", "to", "speak", "clearly"] },
-  { words: ["time", "your", "Manage", "wisely"], answer: ["Manage", "your", "time", "wisely"] },
-  { words: ["a", "goal", "Set", "every", "week"], answer: ["Set", "a", "goal", "every", "week"] },
-  { words: ["Listen", "more", "than", "you", "speak"], answer: ["Listen", "more", "than", "you", "speak"] },
-  { words: ["ideas", "Share", "your", "confidently"], answer: ["Share", "your", "ideas", "confidently"] },
-  { words: ["mistakes", "from", "Learn", "your"], answer: ["Learn", "from", "your", "mistakes"] },
-  { words: ["day", "every", "Be", "grateful"], answer: ["Be", "grateful", "every", "day"] },
-  { words: ["the", "Consistency", "key", "is"], answer: ["Consistency", "is", "the", "key"] },
-  { words: ["feedback", "Seek", "regularly"], answer: ["Seek", "feedback", "regularly"] },
-  { words: ["a", "good", "Be", "listener"], answer: ["Be", "a", "good", "listener"] },
-  { words: ["action", "Take", "now"], answer: ["Take", "action", "now"] },
-  { words: ["words", "your", "Choose", "carefully"], answer: ["Choose", "your", "words", "carefully"] },
-  { words: ["positive", "Stay", "under", "pressure"], answer: ["Stay", "positive", "under", "pressure"] },
-  { words: ["others", "Respect", "always"], answer: ["Respect", "others", "always"] },
-  { words: ["mindset", "growth", "Develop", "a"], answer: ["Develop", "a", "growth", "mindset"] },
+  { hint: "Core Advice",   words: ["always", "hard", "You", "should", "work"],        answer: ["You", "should", "always", "work", "hard"] },
+  { hint: "Proverb",       words: ["the", "Knowledge", "key", "is", "to", "success"], answer: ["Knowledge", "is", "the", "key", "to", "success"] },
+  { hint: "Growth",        words: ["your", "Build", "every", "skills", "day"],         answer: ["Build", "your", "skills", "every", "day"] },
+  { hint: "Daily Habit",   words: ["reading", "daily", "Start", "books"],              answer: ["Start", "reading", "books", "daily"] },
+  { hint: "Resilience",    words: ["never", "You", "give", "should", "up"],            answer: ["You", "should", "never", "give", "up"] },
+  { hint: "Communication", words: ["speak", "Practise", "to", "clearly"],              answer: ["Practise", "to", "speak", "clearly"] },
+  { hint: "Time",          words: ["time", "your", "Manage", "wisely"],                answer: ["Manage", "your", "time", "wisely"] },
+  { hint: "Goal Setting",  words: ["a", "goal", "Set", "every", "week"],               answer: ["Set", "a", "goal", "every", "week"] },
+  { hint: "Listening",     words: ["Listen", "more", "than", "you", "speak"],          answer: ["Listen", "more", "than", "you", "speak"] },
+  { hint: "Confidence",    words: ["ideas", "Share", "your", "confidently"],           answer: ["Share", "your", "ideas", "confidently"] },
+  { hint: "Learning",      words: ["mistakes", "from", "Learn", "your"],               answer: ["Learn", "from", "your", "mistakes"] },
+  { hint: "Gratitude",     words: ["day", "every", "Be", "grateful"],                  answer: ["Be", "grateful", "every", "day"] },
+  { hint: "Success",       words: ["the", "Consistency", "key", "is"],                 answer: ["Consistency", "is", "the", "key"] },
+  { hint: "Feedback",      words: ["feedback", "Seek", "regularly"],                   answer: ["Seek", "feedback", "regularly"] },
+  { hint: "Relationships", words: ["a", "good", "Be", "listener"],                     answer: ["Be", "a", "good", "listener"] },
+  { hint: "Action",        words: ["action", "Take", "now"],                           answer: ["Take", "action", "now"] },
+  { hint: "Communication", words: ["words", "your", "Choose", "carefully"],            answer: ["Choose", "your", "words", "carefully"] },
+  { hint: "Mindset",       words: ["positive", "Stay", "under", "pressure"],           answer: ["Stay", "positive", "under", "pressure"] },
+  { hint: "Respect",       words: ["others", "Respect", "always"],                     answer: ["Respect", "others", "always"] },
+  { hint: "Mindset",       words: ["mindset", "growth", "Develop", "a"],               answer: ["Develop", "a", "growth", "mindset"] },
+  { hint: "Leadership",    words: ["Always", "lead", "by", "example"],                 answer: ["Always", "lead", "by", "example"] },
+  { hint: "Persistence",   words: ["every", "hard", "Try", "day"],                     answer: ["Try", "hard", "every", "day"] },
+  { hint: "Confidence",    words: ["first", "impression", "A", "matters"],             answer: ["A", "first", "impression", "matters"] },
+  { hint: "Mindset",       words: ["can", "You", "do", "this"],                        answer: ["You", "can", "do", "this"] },
+  { hint: "Communication", words: ["honestly", "clearly", "Speak", "and"],             answer: ["Speak", "clearly", "and", "honestly"] },
 ];
 
 // ── English: Word Trivia ───────────────────────────────────────
@@ -181,6 +208,24 @@ const WORD_TRIVIA = [
   { q: "What is a homophone?", opts: ["Word with same spelling","Word with same sound, different meaning","Opposite word","Made-up word"], ans: "Word with same sound, different meaning", tip: "E.g. 'hear' and 'here' sound the same but mean different things." },
   { q: "Which sentence is passive?", opts: ["She kicked the ball","The ball was kicked by her","She kicks well","She is kicking"], ans: "The ball was kicked by her", tip: "Passive voice: subject receives the action. Active voice is usually clearer." },
   { q: "What does 'concise' mean?", opts: ["Long and detailed","Short and clear","Repetitive","Confusing"], ans: "Short and clear", tip: "Concise writing says the most with the fewest words." },
+  { q: "Which sentence uses correct subject-verb agreement?", opts: ["The team are playing well","The team is playing well","The team were playing well","The team play good"], ans: "The team is playing well", tip: "Collective nouns like 'team' take singular verbs in American English." },
+  { q: "What is the comparative form of 'good'?", opts: ["Gooder","More good","Better","Goodest"], ans: "Better", tip: "Good → Better → Best. Irregular comparatives are common in English." },
+  { q: "What does the suffix '-tion' typically indicate?", opts: ["An adjective","An action or process","A person","A location"], ans: "An action or process", tip: "E.g. education (the process of educating), imagination, communication." },
+  { q: "Which of these is an example of alliteration?", opts: ["She sells sea shells","The sun rose slowly","A red apple","Running fast"], ans: "She sells sea shells", tip: "Alliteration = repeated initial consonant sounds in consecutive or close words." },
+  { q: "What does 'irony' mean?", opts: ["Saying exactly what you mean","Saying the opposite of what you mean for effect","A type of metaphor","Exaggeration for emphasis"], ans: "Saying the opposite of what you mean for effect", tip: "E.g. 'Oh great, another flat tyre' when something bad happens." },
+  { q: "What is the subject of: 'The big brown dog barked loudly'?", opts: ["Barked","Loudly","The big brown dog","Brown"], ans: "The big brown dog", tip: "The subject is who or what the sentence is about — the dog." },
+  { q: "What is the correct spelling?", opts: ["Accomodate","Accommodate","Acommodate","Accommadate"], ans: "Accommodate", tip: "Remember: two C's and two M's — a-c-c-o-m-m-o-d-a-t-e." },
+  { q: "Which word is a preposition?", opts: ["Quickly","Between","Joyful","Shout"], ans: "Between", tip: "Prepositions show position, direction, or relationship: in, on, at, between, under." },
+  { q: "What does 'empathy' mean?", opts: ["Feeling superior to others","The ability to understand others' feelings","Being emotionally cold","Feeling sorry for yourself"], ans: "The ability to understand others' feelings", tip: "Empathy = feeling WITH someone. Sympathy = feeling FOR someone." },
+  { q: "What is the future tense of 'to write'?", opts: ["Wrote","Written","Will write","Has written"], ans: "Will write", tip: "Simple future uses 'will' + base verb: I will write, she will write." },
+  { q: "Which punctuation mark introduces a list?", opts: ["Semicolon","Comma","Colon","Hyphen"], ans: "Colon", tip: "A colon (:) introduces a list, explanation, or quotation." },
+  { q: "What is an oxymoron?", opts: ["Words with the same sound","Two contradictory words together","A type of poem","A figure of speech using comparison"], ans: "Two contradictory words together", tip: "E.g. 'deafening silence', 'living death', 'bittersweet'. The contrast creates effect." },
+  { q: "What is 'onomatopoeia'?", opts: ["A type of rhyme","A word that sounds like what it describes","A comparison using 'like' or 'as'","A word with double meaning"], ans: "A word that sounds like what it describes", tip: "E.g. buzz, crash, sizzle, hiss — the sound reflects the meaning." },
+  { q: "Which sentence contains a dangling modifier?", opts: ["Running fast, he caught the bus","Running fast, the bus was caught","She ran fast to catch the bus","He quickly ran to the bus"], ans: "Running fast, the bus was caught", tip: "The modifier 'running fast' has no logical subject — the bus can't run!" },
+  { q: "What is the rule for 'i before e'?", opts: ["Always use i before e","Use i before e except after c","Use e before i after c","There is no rule"], ans: "Use i before e except after c", tip: "E.g. believe, achieve, but receive, ceiling. Exceptions include 'weird'." },
+  { q: "What does it mean to write in an 'active voice'?", opts: ["The subject performs the action","The subject receives the action","The verb is in past tense","The sentence is very short"], ans: "The subject performs the action", tip: "Active: 'The dog chased the cat.' Passive: 'The cat was chased by the dog.'" },
+  { q: "What is a 'clause' in grammar?", opts: ["A type of full stop","A group of words with a subject and verb","A type of adjective","A word that links sentences"], ans: "A group of words with a subject and verb", tip: "Independent clauses are complete sentences. Dependent clauses need more." },
+  { q: "Which is the correct use of a semicolon?", opts: ["She ran quickly; to the shop","I love reading; she loves writing","Go to the market; and buy milk","He was; tired after the run"], ans: "I love reading; she loves writing", tip: "A semicolon joins two related independent clauses without a conjunction." },
 ];
 
 // ── Finance: Flashcard Terms ───────────────────────────────────
@@ -685,7 +730,9 @@ function FlipCard({ game, color, lightColor, borderColor, index, onPlay }) {
 function GameModal({ children, onClose, color, title, t, play }) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    play?.("game_start");
     return () => { document.body.style.overflow = ""; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -693,23 +740,89 @@ function GameModal({ children, onClose, color, title, t, play }) {
       position: "fixed",
       inset: 0,
       zIndex: 1000,
-      background: t?.skin || "#0a0a0a",
+      background: `radial-gradient(ellipse at 70% 20%, ${color}0a 0%, transparent 60%), ${t?.skin || "#0a0a0a"}`,
       display: "flex",
       flexDirection: "column",
       overflow: "hidden",
     }}>
+      <style>{`
+        @keyframes gmBgSweep {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes questionIn {
+          from { opacity: 0; transform: translateY(12px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes fillGapShake {
+          0%,100% { transform: translateX(0); }
+          20%,60% { transform: translateX(-7px); }
+          40%,80% { transform: translateX(7px); }
+        }
+        @keyframes correctBurst {
+          0%   { opacity: 0; transform: translateY(-20px) scale(0.6); }
+          40%  { opacity: 1; transform: translateY(4px) scale(1.08); }
+          70%  { transform: translateY(0) scale(1); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes tipSlideUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes tileFlip {
+          0%   { transform: scaleY(1); }
+          50%  { transform: scaleY(0); }
+          100% { transform: scaleY(1); }
+        }
+        @keyframes streakPop {
+          from { opacity: 0; transform: scale(0.6); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes timerRingAnim {
+          from { stroke-dashoffset: 0; }
+          to   { stroke-dashoffset: 188; }
+        }
+        @keyframes popIn {
+          0%   { transform: scale(0.85); opacity: 0; }
+          60%  { transform: scale(1.08); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes rowShake {
+          0%,100% { transform: translateX(0); }
+          15%,45%,75% { transform: translateX(-8px); }
+          30%,60%,90% { transform: translateX(8px); }
+        }
+        @keyframes bounceTile {
+          0%,100% { transform: translateY(0); }
+          50%      { transform: translateY(-12px); }
+        }
+        @keyframes roundComplete {
+          0%   { opacity: 0; transform: scale(0.7) translateY(-20px); }
+          60%  { opacity: 1; transform: scale(1.05) translateY(4px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes scoreRing {
+          0%,100% { transform: scale(1); opacity: 0.6; }
+          50%     { transform: scale(1.12); opacity: 0; }
+        }
+        @keyframes confettiFall {
+          0%   { transform: translateY(-40px) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(220px) rotate(720deg); opacity: 0; }
+        }
+      `}</style>
       {/* Header */}
       <div style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         padding: "16px 20px",
-        borderBottom: `1px solid ${t?.border || "rgba(255,255,255,0.07)"}`,
+        borderBottom: `1px solid ${color}30`,
         background: t?.white || "#111111",
       }}>
         <button
           type="button"
-          onClick={() => { play?.("back"); onClose(); }}
+          onClick={() => { play?.("back_game"); onClose(); }}
           style={{
             display: "flex",
             alignItems: "center",
@@ -753,31 +866,113 @@ function FillGapGame({ color, onClose, t, play }) {
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [hintUsed, setHintUsed] = useState(false);
+  const [options, setOptions] = useState(FILL_GAP_QS[0].options);
+  const [shake, setShake] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15);
+  const [showCorrect, setShowCorrect] = useState(false);
   const q = FILL_GAP_QS[qi];
+
+  useEffect(() => {
+    setOptions(FILL_GAP_QS[qi]?.options || []);
+    setHintUsed(false);
+  }, [qi]);
+
+  useEffect(() => {
+    setTimeLeft(15);
+  }, [qi]);
+
+  useEffect(() => {
+    if (selected || done) return;
+    if (timeLeft <= 0) {
+      setStreak(0);
+      const p = play;
+      p?.("timer_out");
+      setTimeout(() => {
+        if (qi + 1 >= FILL_GAP_QS.length) setDone(true);
+        else { setQi(q2 => q2 + 1); setSelected(null); setTimeLeft(15); }
+      }, 400);
+      return;
+    }
+    if (timeLeft <= 5) play?.("timer_tick");
+    const timer = setTimeout(() => setTimeLeft(tl => tl - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [timeLeft, selected, done, qi, play]);
 
   const pick = (opt) => {
     if (selected) return;
     setSelected(opt);
-    if (opt === q.answer) { setScore(s => s + 1); play?.("correct"); }
-    else play?.("wrong");
+    if (opt === q.answer) {
+      setScore(s => s + 1);
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      if (newStreak >= 5)      play?.("streak_5");
+      else if (newStreak >= 3) play?.("streak_3");
+      else if (newStreak >= 2) play?.("streak_2");
+      else                     play?.("coin");
+      setShowCorrect(true);
+      setTimeout(() => setShowCorrect(false), 700);
+    } else {
+      setStreak(0);
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
+      play?.("word_wrong");
+    }
     setTimeout(() => {
       if (qi + 1 >= FILL_GAP_QS.length) setDone(true);
       else { setQi(qi + 1); setSelected(null); }
     }, 900);
   };
 
-  if (done) return <ScoreScreen score={score} total={FILL_GAP_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
+  if (done) return <ScoreScreen score={score} total={FILL_GAP_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); setStreak(0); }} onClose={onClose} t={t} play={play} />;
 
   return (
-    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT, position: "relative" }}>
+      {showCorrect && (
+        <div style={{
+          position: "absolute", top: 80, left: "50%", transform: "translateX(-50%)",
+          zIndex: 10, pointerEvents: "none",
+          background: `${color}dd`, borderRadius: 999,
+          padding: "8px 20px", fontSize: 16, fontWeight: 800, color: "#000",
+          animation: "correctBurst 0.55s cubic-bezier(0.34,1.56,0.64,1) both",
+          fontFamily: FONT,
+        }}>✓ Correct!</div>
+      )}
+      {/* Timer ring */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+        <div style={{ position: "relative", width: 64, height: 64 }}>
+          <svg width="64" height="64" viewBox="0 0 64 64" style={{ transform: "rotate(-90deg)" }}>
+            <circle cx="32" cy="32" r="28" fill="none" stroke={t?.border||"rgba(255,255,255,0.1)"} strokeWidth="4" />
+            <circle cx="32" cy="32" r="28" fill="none"
+              stroke={timeLeft <= 5 ? "#e5484d" : timeLeft <= 8 ? "#f59e0b" : color}
+              strokeWidth="4"
+              strokeDasharray="176"
+              strokeDashoffset={`${176 - (timeLeft / 15) * 176}`}
+              strokeLinecap="round"
+              style={{ transition: "stroke-dashoffset 0.9s linear, stroke 0.3s ease" }}
+            />
+          </svg>
+          <div style={{
+            position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 16, fontWeight: 800, color: timeLeft <= 5 ? "#e5484d" : timeLeft <= 8 ? "#f59e0b" : color,
+            fontFamily: FONT, transition: "color 0.3s ease",
+          }}>{timeLeft}</div>
+        </div>
+      </div>
       <Progress current={qi} total={FILL_GAP_QS.length} color={color} t={t} />
-      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "22px 18px", marginBottom: 22, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
+      {streak >= 3 && (
+        <div style={{ textAlign: "right", marginTop: -14, marginBottom: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontFamily: FONT, animation: "streakPop 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>🔥 ×{streak} streak!</span>
+        </div>
+      )}
+      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "22px 18px", marginBottom: 22, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: shake ? "fillGapShake 0.35s ease" : "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
         <p style={{ fontSize: 16, color: t?.ink || "#ededed", lineHeight: 1.65, margin: 0, fontWeight: 500, letterSpacing: "-0.01em" }}>
           {q.sentence.replace("___", "______")}
         </p>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        {q.options.map(opt => {
+        {options.map(opt => {
           const isCorrect = opt === q.answer;
           const isWrong = selected === opt && !isCorrect;
           return (
@@ -798,9 +993,30 @@ function FillGapGame({ color, onClose, t, play }) {
           );
         })}
       </div>
+      {!selected && !hintUsed && (
+        <button type="button" onClick={() => {
+          play?.("hint_used");
+          setHintUsed(true);
+          const wrongs = q.options.filter(o => o !== q.answer);
+          const keep = wrongs[Math.floor(Math.random() * wrongs.length)];
+          setOptions([q.answer, keep].sort(() => Math.random() - 0.5));
+        }} style={{
+          display: "block", margin: "12px auto 0", padding: "8px 18px",
+          background: "rgba(255,255,255,0.06)", color: t?.muted || "#a1a1a1",
+          border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`,
+          borderRadius: 999, fontSize: 12.5, fontWeight: 600, cursor: "pointer",
+          fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+        }}>💡 Hint (removes 2 options)</button>
+      )}
     </div>
   );
 }
+
+const KB_ROWS = [
+  ["Q","W","E","R","T","Y","U","I","O","P"],
+  ["A","S","D","F","G","H","J","K","L"],
+  ["ENTER","Z","X","C","V","B","N","M","⌫"],
+];
 
 function WordGuessGame({ color, t, play }) {
   const [target] = useState(() => WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)]);
@@ -808,17 +1024,24 @@ function WordGuessGame({ color, t, play }) {
   const [current, setCurrent] = useState("");
   const [won, setWon] = useState(false);
   const [lost, setLost] = useState(false);
+  const [shakeRow, setShakeRow] = useState(false);
   const maxGuesses = 6;
 
   const submit = () => {
-    if (current.length !== 5) return;
+    if (current.length !== 5) {
+      setShakeRow(true);
+      setTimeout(() => setShakeRow(false), 400);
+      play?.("timer_out");
+      return;
+    }
     const g = current.toUpperCase();
     const next = [...guesses, g];
     setGuesses(next);
     setCurrent("");
-    play?.("tap");
-    if (g === target) { setWon(true); play?.("correct"); }
-    else if (next.length >= maxGuesses) { setLost(true); play?.("wrong"); }
+    play?.("build_word");
+    if (g === target) { setWon(true); play?.("level_up"); }
+    else if (next.length >= maxGuesses) { setLost(true); play?.("game_over"); }
+    else { play?.("word_wrong"); }
   };
 
   const getLetterState = (letter, pos, word) => {
@@ -827,48 +1050,102 @@ function WordGuessGame({ color, t, play }) {
     return "absent";
   };
 
-  const reset = () => { setGuesses([]); setCurrent(""); setWon(false); setLost(false); };
+  const letterStates = (() => {
+    const states = {};
+    guesses.forEach(g => {
+      g.split("").forEach((l, i) => {
+        const cur = states[l];
+        if (target[i] === l) { states[l] = "correct"; }
+        else if (target.includes(l) && cur !== "correct") { states[l] = "present"; }
+        else if (!target.includes(l) && cur !== "correct" && cur !== "present") { states[l] = "absent"; }
+      });
+    });
+    return states;
+  })();
 
-  if (won || lost) return (
-    <div style={{ padding: 24, textAlign: "center", fontFamily: FONT }}>
-      <div
-        style={{
-          width: 64, height: 64, borderRadius: 20,
-          background: won ? `${color}22` : "rgba(255,255,255,0.08)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          margin: "0 auto 16px",
-        }}
-        aria-hidden="true"
-      >
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={won ? color : (t?.muted || "#a1a1a1")} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          {won ? <polyline points="20,6 9,17 4,12"/> : <><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></>}
-        </svg>
+  const tapKey = (key) => {
+    if (won || lost) return;
+    if (key === "⌫") { setCurrent(c => c.slice(0, -1)); play?.("game_tap"); }
+    else if (key === "ENTER") { submit(); }
+    else if (current.length < 5) { setCurrent(c => c + key); play?.("key_press"); }
+  };
+
+  const keyStyle = (k) => {
+    const s = letterStates[k];
+    const isWide = k === "ENTER" || k === "⌫";
+    return {
+      minWidth: isWide ? 52 : 34, height: 44, borderRadius: 8,
+      background: s === "correct" ? color : s === "present" ? "#f59e0b" : s === "absent" ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.08)",
+      color: s === "correct" || s === "present" ? "#000" : t?.ink || "#ededed",
+      border: "none", fontSize: isWide ? 10 : 14, fontWeight: 700,
+      cursor: "pointer", fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+      transition: "background 0.2s ease",
+      flexShrink: 0,
+    };
+  };
+
+  const reset = () => { setGuesses([]); setCurrent(""); setWon(false); setLost(false); setShakeRow(false); };
+
+  if (won || lost) {
+    const guessCount = guesses.length;
+    return (
+      <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 24 }}>
+          {target.split("").map((l, i) => (
+            <div key={i} style={{
+              width: 52, height: 52, borderRadius: 12,
+              background: won ? `${color}25` : "rgba(255,255,255,0.08)",
+              border: `2px solid ${won ? color : "rgba(255,255,255,0.2)"}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, fontWeight: 800, color: won ? color : t?.ink||"#ededed",
+              fontFamily: FONT,
+              animation: won ? `bounceTile 0.5s cubic-bezier(0.34,1.56,0.64,1) ${i * 100}ms both` : "none",
+            }}>{l}</div>
+          ))}
+        </div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: t?.ink||"#ededed", marginBottom: 8, letterSpacing: "-0.03em" }}>
+          {won ? "🎉 You Got It!" : "Better luck next time"}
+        </div>
+        {won && <div style={{ fontSize: 14, color: t?.muted||"#a1a1a1", marginBottom: 8 }}>Solved in {guessCount} guess{guessCount !== 1 ? "es" : ""}!</div>}
+        {!won && <div style={{ fontSize: 15, color: t?.muted||"#a1a1a1", marginBottom: 24 }}>The word was <strong style={{ color }}>{target}</strong></div>}
+        {won && (
+          <div style={{ display: "inline-flex", padding: "6px 18px", borderRadius: 999, background: `${color}18`, border: `1px solid ${color}40`, fontSize: 14, color, fontWeight: 700, marginBottom: 24 }}>
+            {guessCount === 1 ? "Hole in one! 🌟" : guessCount <= 3 ? "Impressive! ⚡" : guessCount <= 5 ? "Well played! 👏" : "Just made it! 🎯"}
+          </div>
+        )}
+        <button type="button" onClick={reset} style={{
+          padding: "14px 36px", background: color, color: "#000", borderRadius: 14,
+          border: "none", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: FONT,
+          boxShadow: `0 4px 20px ${color}40`,
+        }}>Play Again</button>
       </div>
-      <div style={{ fontSize: 22, fontWeight: 700, color: t?.ink || "#ededed", marginBottom: 8 }}>{won ? "You got it!" : "Better luck next time"}</div>
-      <div style={{ fontSize: 15, color: t?.muted || "#a1a1a1", marginBottom: 24 }}>The word was <strong style={{ color }}>{target}</strong></div>
-      <button type="button" onClick={reset} style={{ padding: "13px 28px", background: color, color: "#000", borderRadius: 999, border: "none", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Play Again</button>
-    </div>
-  );
+    );
+  }
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
       <p style={{ textAlign: "center", fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 20 }}>Guess the 5-letter word in {maxGuesses} tries</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 24, alignItems: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16, alignItems: "center" }}>
         {Array.from({ length: maxGuesses }).map((_, ri) => {
           const g = guesses[ri] || "";
+          const isCompleted = ri < guesses.length;
           return (
-            <div key={ri} style={{ display: "flex", gap: 6 }}>
+            <div key={ri} style={{
+              display: "flex", gap: 6,
+              animation: ri === guesses.length && shakeRow ? "rowShake 0.4s ease both" : "none",
+            }}>
               {Array.from({ length: 5 }).map((_, ci) => {
                 const l = g[ci] || (ri === guesses.length ? current[ci] : "");
                 const state = g[ci] ? getLetterState(g[ci], ci, g) : "empty";
                 return (
                   <div key={ci} style={{
                     width: 52, height: 52, borderRadius: 12,
-                    border: `2px solid ${state === "correct" ? color : state === "present" ? "#f59e0b" : state === "absent" ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.2)"}`,
+                    border: `2px solid ${state === "correct" ? color : state === "present" ? "#f59e0b" : state === "absent" ? "rgba(255,255,255,0.15)" : ri === guesses.length && l ? `${color}90` : ri === guesses.length ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.15)"}`,
                     background: state === "correct" ? `${color}25` : state === "present" ? "rgba(245,158,11,0.2)" : state === "absent" ? "rgba(255,255,255,0.06)" : "transparent",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 20, fontWeight: 800, color: state === "correct" ? color : state === "present" ? "#f59e0b" : t?.ink || "#ededed",
                     fontFamily: FONT, transition: "all 0.2s ease",
+                    animation: ri === guesses.length && l && !isCompleted ? "popIn 0.15s cubic-bezier(0.34,1.56,0.64,1) both" : isCompleted && g[ci] ? `tileFlip 0.4s ease ${ci * 0.08}s both` : "none",
                   }}>{l}</div>
                 );
               })}
@@ -876,64 +1153,103 @@ function WordGuessGame({ color, t, play }) {
           );
         })}
       </div>
-      <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 16 }}>
-        <input
-          type="text" maxLength={5}
-          value={current}
-          onChange={(e) => setCurrent(e.target.value.toUpperCase().replace(/[^A-Z]/g, ""))}
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-          style={{
-            flex: 1, maxWidth: 180, padding: "13px 16px", borderRadius: 14,
-            background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,255,255,0.15)",
-            color: "#ededed", fontSize: 18, fontWeight: 800, textAlign: "center",
-            outline: "none", fontFamily: FONT, letterSpacing: "0.2em",
-          }}
-          placeholder="GUESS"
-        />
-        <button type="button" onClick={submit} style={{
-          padding: "13px 20px", background: color, color: "#000", borderRadius: 14,
-          border: "none", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT,
-        }}>Enter</button>
+      <input
+        type="text" maxLength={5}
+        value={current}
+        onChange={(e) => setCurrent(e.target.value.toUpperCase().replace(/[^A-Z]/g, ""))}
+        onKeyDown={(e) => e.key === "Enter" && submit()}
+        style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 1, height: 1 }}
+        readOnly
+      />
+      <div style={{ marginTop: 8 }}>
+        {KB_ROWS.map((row, ri) => (
+          <div key={ri} style={{ display: "flex", justifyContent: "center", gap: 5, marginBottom: 6 }}>
+            {row.map(k => (
+              <button key={k} type="button" onClick={() => tapKey(k)} style={keyStyle(k)}>{k}</button>
+            ))}
+          </div>
+        ))}
       </div>
-      <p style={{ textAlign: "center", fontSize: 12, color: t?.muted || "#a1a1a1" }}>{guesses.length}/{maxGuesses} guesses</p>
+      <p style={{ textAlign: "center", fontSize: 12, color: t?.muted || "#a1a1a1", marginTop: 8 }}>{guesses.length}/{maxGuesses} guesses</p>
     </div>
   );
 }
 
 function VocabMatchGame({ color, onClose, t, play }) {
+  const ROUND_SIZE = 6;
+  const totalRounds = Math.ceil(VOCAB_PAIRS.length / ROUND_SIZE);
+  const [round, setRound] = useState(0);
   const [selected, setSelected] = useState({ word: null, def: null });
   const [matched, setMatched] = useState([]);
   const [wrong, setWrong] = useState(false);
   const [done, setDone] = useState(false);
   const [moves, setMoves] = useState(0);
-  const words = VOCAB_PAIRS.map(p => p.word);
-  const defs = [...VOCAB_PAIRS.map(p => p.def)].sort(() => Math.random() - 0.5);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [roundComplete, setRoundComplete] = useState(false);
+
+  const roundPairs = VOCAB_PAIRS.slice(round * ROUND_SIZE, (round + 1) * ROUND_SIZE);
+  const [roundDefsMap] = useState(() => {
+    const map = [];
+    for (let r = 0; r < Math.ceil(VOCAB_PAIRS.length / ROUND_SIZE); r++) {
+      const pairs = VOCAB_PAIRS.slice(r * ROUND_SIZE, (r + 1) * ROUND_SIZE);
+      map.push([...pairs.map(p => p.def)].sort(() => Math.random() - 0.5));
+    }
+    return map;
+  });
+  const roundDefs = roundDefsMap[round] || [...roundPairs.map(p => p.def)].sort(() => Math.random() - 0.5);
+  const roundWords = roundPairs.map(p => p.word);
+  const roundMatched = matched.filter(w => roundWords.includes(w));
+
+  useEffect(() => {
+    if (done) return;
+    if (roundMatched.length === roundPairs.length) return;
+    if (timeLeft <= 0) {
+      play?.("timer_out");
+      if (round + 1 >= totalRounds) { setDone(true); return; }
+      setTimeout(() => { setRound(r => r + 1); setTimeLeft(30); setSelected({ word: null, def: null }); }, 400);
+      return;
+    }
+    if (timeLeft <= 5) play?.("timer_tick");
+    const timer = setTimeout(() => setTimeLeft(tl => tl - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [timeLeft, done, round, roundMatched.length, roundPairs.length, totalRounds, play]);
+
+  useEffect(() => {
+    if (roundMatched.length === roundPairs.length && roundPairs.length > 0) {
+      play?.("round_clear");
+      setRoundComplete(true);
+      setTimeout(() => {
+        setRoundComplete(false);
+        if (round + 1 >= totalRounds) { setDone(true); }
+        else { setRound(r => r + 1); setTimeLeft(30); setSelected({ word: null, def: null }); }
+      }, 1400);
+    }
+  }, [roundMatched.length, roundPairs.length, round, totalRounds, play]);
 
   const pick = (type, val) => {
-    play?.("tap");
+    play?.("game_tap");
     const next = { ...selected, [type]: val };
     setSelected(next);
     if (next.word && next.def) {
       setMoves(m => m + 1);
       const pair = VOCAB_PAIRS.find(p => p.word === next.word);
       if (pair?.def === next.def) {
-        play?.("correct");
+        play?.("match_found");
         const newMatched = [...matched, next.word];
         setMatched(newMatched);
         setSelected({ word: null, def: null });
-        if (newMatched.length === VOCAB_PAIRS.length) setTimeout(() => setDone(true), 400);
       } else {
-        play?.("wrong");
+        play?.("word_wrong");
         setWrong(true);
         setTimeout(() => { setWrong(false); setSelected({ word: null, def: null }); }, 700);
       }
     }
   };
 
-  if (done) return <ScoreScreen score={VOCAB_PAIRS.length} total={VOCAB_PAIRS.length} color={color} customMsg={`Matched all in ${moves} moves!`} onReplay={() => { setSelected({ word: null, def: null }); setMatched([]); setWrong(false); setDone(false); setMoves(0); }} onClose={onClose} t={t} play={play} />;
+  if (done) return <ScoreScreen score={matched.length} total={VOCAB_PAIRS.length} color={color} customMsg={`Matched ${matched.length} in ${moves} moves!`} onReplay={() => { setRound(0); setSelected({ word: null, def: null }); setMatched([]); setWrong(false); setDone(false); setMoves(0); setTimeLeft(30); }} onClose={onClose} t={t} play={play} />;
 
   const btnStyle = (active, isMatched) => ({
-    padding: "11px 12px", borderRadius: 12, border: `1.5px solid ${isMatched ? `${color}40` : active ? color : "rgba(255,255,255,0.1)"}`,
+    padding: "11px 12px", borderRadius: 12, border: `1.5px solid ${isMatched ? `${color}40` : active ? color : wrong && active ? "#e5484d" : "rgba(255,255,255,0.1)"}`,
     background: isMatched ? `${color}10` : active ? `${color}18` : wrong && active ? "rgba(229,72,77,0.15)" : "rgba(255,255,255,0.04)",
     color: isMatched ? `${color}80` : active ? color : t?.ink || "#ededed",
     fontSize: 12.5, fontWeight: 600, cursor: isMatched ? "default" : "pointer",
@@ -943,18 +1259,48 @@ function VocabMatchGame({ color, onClose, t, play }) {
   });
 
   return (
-    <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
-      <p style={{ textAlign: "center", fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 20 }}>Match each word to its definition</p>
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT, position: "relative" }}>
+      {roundComplete && (
+        <div style={{
+          position: "absolute", top: "30%", left: "50%", transform: "translateX(-50%)",
+          zIndex: 20, pointerEvents: "none", textAlign: "center",
+          animation: "roundComplete 0.45s cubic-bezier(0.34,1.56,0.64,1) both",
+          background: `${color}ee`, borderRadius: 20, padding: "20px 32px",
+          boxShadow: `0 8px 40px ${color}60`,
+          minWidth: 200,
+        }}>
+          <div style={{ fontSize: 36, marginBottom: 8 }}>🎯</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: "#000", fontFamily: FONT }}>Round Complete!</div>
+          <div style={{ fontSize: 13, color: "rgba(0,0,0,0.7)", fontFamily: FONT, marginTop: 4 }}>
+            {round + 1 < totalRounds ? `Round ${round + 2} starting…` : "Final round!"}
+          </div>
+        </div>
+      )}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: t?.ink || "#ededed", fontFamily: FONT }}>Round {round + 1} of {totalRounds}</span>
+        <div style={{ padding: "5px 12px", borderRadius: 999, background: timeLeft <= 8 ? "rgba(229,72,77,0.15)" : `${color}15`, border: `1px solid ${timeLeft <= 8 ? "#e5484d40" : color + "40"}` }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: timeLeft <= 8 ? "#e5484d" : color, fontFamily: FONT }}>{timeLeft}s</span>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 6, justifyContent: "center", marginBottom: 12 }}>
+        {Array.from({ length: totalRounds }).map((_, i) => (
+          <div key={i} style={{
+            width: i === round ? 20 : 8, height: 8, borderRadius: 999,
+            background: i < round ? color : i === round ? color : t?.border||"rgba(255,255,255,0.15)",
+            transition: "all 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+          }} />
+        ))}
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <p style={{ fontSize: 11, fontWeight: 600, color: color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Words</p>
-          {words.map(w => (
+          {roundWords.map(w => (
             <button key={w} type="button" onClick={() => !matched.includes(w) && pick("word", w)} style={btnStyle(selected.word === w, matched.includes(w))}>{w}</button>
           ))}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <p style={{ fontSize: 11, fontWeight: 600, color: color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Definitions</p>
-          {defs.map(d => {
+          {roundDefs.map(d => {
             const matchedWord = VOCAB_PAIRS.find(p => p.def === d && matched.includes(p.word));
             return (
               <button key={d} type="button" onClick={() => !matchedWord && pick("def", d)} style={btnStyle(selected.def === d, !!matchedWord)}>{d}</button>
@@ -970,21 +1316,24 @@ function SentenceBuilderGame({ color, onClose, t, play }) {
   const [qi, setQi] = useState(0);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const [firstTry, setFirstTry] = useState(true);
   const q = SENTENCE_QS[qi];
-  const [shuffled] = useState(() => SENTENCE_QS.map(q => [...q.words].sort(() => Math.random() - 0.5)));
+  const [shuffled] = useState(() => SENTENCE_QS.map(sentenceQ => [...sentenceQ.words].sort(() => Math.random() - 0.5)));
   const [built, setBuilt] = useState([]);
   const [remaining, setRemaining] = useState(shuffled[0]);
   const [result, setResult] = useState(null);
 
   const addWord = (word, idx) => {
     if (result) return;
-    play?.("tap");
+    play?.("key_press");
     setBuilt(b => [...b, word]);
     setRemaining(r => r.filter((_, i) => i !== idx));
   };
 
   const removeWord = (idx) => {
     if (result) return;
+    play?.("game_tap");
+    setFirstTry(false);
     const word = built[idx];
     setBuilt(b => b.filter((_, i) => i !== idx));
     setRemaining(r => [...r, word]);
@@ -993,67 +1342,157 @@ function SentenceBuilderGame({ color, onClose, t, play }) {
   const check = () => {
     const correct = JSON.stringify(built) === JSON.stringify(q.answer);
     setResult(correct ? "correct" : "wrong");
-    if (correct) { setScore(s => s + 1); play?.("correct"); }
-    else play?.("wrong");
-    setTimeout(() => {
-      if (qi + 1 >= SENTENCE_QS.length) setDone(true);
-      else {
-        setQi(qi + 1);
-        setBuilt([]);
-        setRemaining(shuffled[qi + 1]);
-        setResult(null);
-      }
-    }, 1000);
+    if (correct) {
+      setScore(s => s + (firstTry ? 2 : 1));
+      play?.("sentence_ok");
+      setTimeout(() => play?.("coin"), 180);
+      if (firstTry) setTimeout(() => play?.("streak_2"), 400);
+      setTimeout(() => {
+        if (qi + 1 >= SENTENCE_QS.length) setDone(true);
+        else { setQi(qi + 1); setBuilt([]); setRemaining(shuffled[qi + 1]); setResult(null); setFirstTry(true); }
+      }, 1000);
+    } else {
+      play?.("word_wrong");
+    }
   };
 
-  if (done) return <ScoreScreen score={score} total={SENTENCE_QS.length} color={color} onReplay={() => { setQi(0); setScore(0); setDone(false); setBuilt([]); setRemaining(shuffled[0]); setResult(null); }} onClose={onClose} t={t} play={play} />;
+  if (done) return <ScoreScreen score={score} total={SENTENCE_QS.length * 2} color={color} onReplay={() => { setQi(0); setScore(0); setDone(false); setBuilt([]); setRemaining(shuffled[0]); setResult(null); setFirstTry(true); }} onClose={onClose} t={t} play={play} />;
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
       <Progress current={qi} total={SENTENCE_QS.length} color={color} t={t} />
+      <div style={{ textAlign: "center", marginBottom: 12 }}>
+        <span style={{
+          fontSize: 11, fontWeight: 700, color,
+          textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: FONT,
+          padding: "4px 12px", borderRadius: 999,
+          background: `${color}15`, border: `1px solid ${color}30`,
+        }}>📌 {q.hint}</span>
+      </div>
       <p style={{ fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 16 }}>Tap words to build the sentence in the correct order</p>
       {/* Built area */}
       <div style={{ minHeight: 64, background: "rgba(255,255,255,0.04)", borderRadius: 16, border: `2px dashed ${result === "correct" ? color : result === "wrong" ? "#e5484d" : "rgba(255,255,255,0.12)"}`, padding: "12px 14px", marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 8, transition: "border-color 0.2s ease" }}>
         {built.map((w, i) => (
-          <button key={i} type="button" onClick={() => removeWord(i)} style={{ padding: "7px 12px", borderRadius: 999, background: `${color}22`, border: `1px solid ${color}60`, color, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONT, WebkitTapHighlightColor: "transparent" }}>{w}</button>        ))}
+          <button key={i} type="button" onClick={() => removeWord(i)} style={{ padding: "7px 12px", borderRadius: 999, background: `${color}22`, border: `1px solid ${color}60`, color, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONT, WebkitTapHighlightColor: "transparent" }}>{w}</button>
+        ))}
         {built.length === 0 && <span style={{ color: "rgba(161,161,161,0.35)", fontSize: 13 }}>Tap words below…</span>}
       </div>
-      {/* Word bank */}
+      {/* Shuffle + Word bank */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+        <button type="button" onClick={() => { play?.("hint_used"); setRemaining(r => [...r].sort(() => Math.random() - 0.5)); }} style={{ padding: "7px 14px", borderRadius: 999, background: "rgba(255,255,255,0.06)", color: t?.muted || "#a1a1a1", border: `1px solid ${t?.border || "rgba(255,255,255,0.1)"}`, fontSize: 12, cursor: "pointer", fontFamily: FONT, WebkitTapHighlightColor: "transparent" }}>⇄ Shuffle</button>
+      </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
         {remaining.map((w, i) => (
           <button key={i} type="button" onClick={() => addWord(w, i)} style={{ padding: "9px 14px", borderRadius: 999, background: t?.light || "rgba(255,255,255,0.07)", border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`, color: t?.ink || "#ededed", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: FONT, WebkitTapHighlightColor: "transparent" }}>{w}</button>
         ))}
       </div>
+      {firstTry && remaining.length === 0 && result === null && (
+        <p style={{ textAlign: "center", fontSize: 11.5, color: color, fontWeight: 700, marginBottom: 6, fontFamily: FONT }}>✨ First try bonus active!</p>
+      )}
       <button type="button" onClick={check} disabled={remaining.length > 0} style={{ width: "100%", padding: "14px", background: remaining.length > 0 ? "rgba(255,255,255,0.06)" : color, color: remaining.length > 0 ? "#a1a1a1" : "#000", borderRadius: 14, border: "none", fontSize: 15, fontWeight: 700, cursor: remaining.length > 0 ? "not-allowed" : "pointer", fontFamily: FONT, transition: "all 0.2s ease" }}>
         Check Sentence
       </button>
+      {result === "wrong" && (
+        <button type="button" onClick={() => {
+          play?.("game_tap");
+          setBuilt([]);
+          setRemaining(shuffled[qi]);
+          setResult(null);
+          setFirstTry(false);
+        }} style={{ width: "100%", marginTop: 10, padding: "13px", background: "rgba(255,255,255,0.06)", color: t?.ink || "#ededed", border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`, borderRadius: 14, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>↺ Try Again</button>
+      )}
+      {result === "correct" && (
+        <div style={{
+          marginTop: 12, padding: "12px 16px", borderRadius: 14,
+          background: `${color}15`, border: `1px solid ${color}40`,
+          fontSize: 14, color, fontWeight: 600, fontFamily: FONT,
+          textAlign: "center", animation: "tipSlideUp 0.3s ease both",
+          lineHeight: 1.6,
+        }}>✓ &ldquo;{q.answer.join(" ")}&rdquo;</div>
+      )}
     </div>
   );
 }
 
 function MultiChoiceGame({ questions, color, onClose, t, play }) {
+  const QUIZ_TIME = 12;
+  const TIMEOUT_SENTINEL = "__timeout__";
   const [qi, setQi] = useState(0);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(QUIZ_TIME);
   const q = questions[qi];
+  const multiplier = streak >= 5 ? 3 : streak >= 3 ? 2 : 1;
+
+  useEffect(() => {
+    setTimeLeft(QUIZ_TIME);
+  }, [qi]);
+
+  useEffect(() => {
+    if (selected || done) return;
+    if (timeLeft <= 0) {
+      play?.("timer_out");
+      setSelected(TIMEOUT_SENTINEL);
+      setStreak(0);
+      setTimeout(() => {
+        if (qi + 1 >= questions.length) setDone(true);
+        else { setQi(q2 => q2 + 1); setSelected(null); }
+      }, 900);
+      return;
+    }
+    if (timeLeft <= 3) play?.("timer_tick");
+    const tickTimer = setTimeout(() => setTimeLeft(tl => tl - 1), 1000);
+    return () => clearTimeout(tickTimer);
+  }, [timeLeft, selected, done, qi, questions.length, play]);
 
   const pick = (opt) => {
     if (selected) return;
+    play?.("game_tap");
     setSelected(opt);
-    if (opt === q.ans) { setScore(s => s + 1); play?.("correct"); }
-    else play?.("wrong");
+    if (opt === q.ans) {
+      setScore(s => s + multiplier);
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      if (newStreak >= 5)      { setTimeout(() => play?.("streak_5"), 80); }
+      else if (newStreak >= 3) { setTimeout(() => play?.("streak_3"), 80); }
+      else                     { setTimeout(() => play?.("coin"), 80); }
+    } else {
+      setStreak(0);
+      setTimeout(() => play?.("word_wrong"), 80);
+    }
     setTimeout(() => {
       if (qi + 1 >= questions.length) setDone(true);
       else { setQi(qi + 1); setSelected(null); }
     }, 900);
   };
 
-  if (done) return <ScoreScreen score={score} total={questions.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); }} onClose={onClose} t={t} play={play} />;
+  if (done) return <ScoreScreen score={score} total={questions.length} color={color} onReplay={() => { setQi(0); setScore(0); setSelected(null); setDone(false); setStreak(0); }} onClose={onClose} t={t} play={play} />;
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
       <Progress current={qi} total={questions.length} color={color} t={t} />
+      {multiplier > 1 && (
+        <div style={{ textAlign: "right", marginBottom: 8 }}>
+          <span style={{
+            fontSize: multiplier === 3 ? 18 : 14, fontWeight: 700, color: "#f59e0b",
+            fontFamily: FONT, animation: "streakPop 0.3s cubic-bezier(0.34,1.56,0.64,1) both",
+            display: "inline-block",
+          }}>
+            {"🔥".repeat(multiplier - 1)} ×{multiplier} Multiplier!
+          </span>
+        </div>
+      )}
+      {/* Question timer bar */}
+      <div style={{ height: 4, borderRadius: 999, background: t?.border||"rgba(255,255,255,0.1)", marginBottom: 16, overflow: "hidden" }}>
+        <div style={{
+          height: "100%", borderRadius: 999,
+          background: timeLeft <= 4 ? "#e5484d" : timeLeft <= 7 ? "#f59e0b" : color,
+          width: `${(timeLeft / QUIZ_TIME) * 100}%`,
+          transition: "width 0.9s linear, background 0.3s ease",
+        }} />
+      </div>
       <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "20px 18px", marginBottom: 20, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
         <p style={{ fontSize: 16, color: t?.ink || "#ededed", lineHeight: 1.55, margin: 0, fontWeight: 500 }}>{q.q}</p>
       </div>
@@ -1076,7 +1515,14 @@ function MultiChoiceGame({ questions, color, onClose, t, play }) {
           );
         })}
       </div>
-      {selected && q.tip && <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 14, background: `${color}10`, border: `1px solid ${color}30`, fontSize: 12.5, color: color, lineHeight: 1.55, fontFamily: FONT }}>{q.tip}</div>}
+      {selected && q.tip && (
+        <div style={{
+          marginTop: 14, padding: "12px 16px", borderRadius: 14,
+          background: `${color}10`, border: `1px solid ${color}30`,
+          fontSize: 12.5, color: color, lineHeight: 1.55, fontFamily: FONT,
+          animation: "tipSlideUp 0.32s cubic-bezier(0.34,1.56,0.64,1) both",
+        }}>{q.tip}</div>
+      )}
     </div>
   );
 }
@@ -1639,49 +2085,205 @@ function DailyDemChallenge({ color, onClose, t, play }) {
 
 function WordLadderGame({ color, t, play }) {
   const [pi, setPi] = useState(0);
-  const [revealed, setRevealed] = useState(1);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [input, setInput] = useState("");
+  const [revealed, setRevealed] = useState([0]);
+  const [shake, setShake] = useState(false);
+  const [correct, setCorrect] = useState(false);
+  const [hintUsed, setHintUsed] = useState(false);
+  const [score, setScore] = useState(0);
+  const [totalSteps, setTotalSteps] = useState(0);
+  const [done, setDone] = useState(false);
+
   const p = WORD_LADDER_PUZZLES[pi];
+  const stepWord = p.steps[currentStep];
+  const prevWord = p.steps[currentStep - 1];
+
+  const differsBy1 = (a, b) => {
+    if (a.length !== b.length) return false;
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) diff++; }
+    return diff === 1;
+  };
+
+  const changedLetterIdx = (a, b) => {
+    for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) return i; }
+    return -1;
+  };
+
+  const submitStep = () => {
+    const guess = input.toUpperCase().trim();
+    if (guess.length !== stepWord.length) return;
+    if (!differsBy1(guess, prevWord)) {
+      setShake(true);
+      play?.("word_wrong");
+      setTimeout(() => setShake(false), 400);
+      return;
+    }
+    if (guess === stepWord) {
+      play?.("ladder_step");
+      setCorrect(true);
+      setScore(s => s + (hintUsed ? 0 : 1));
+      setTotalSteps(s => s + 1);
+      const newRevealed = [...revealed, currentStep];
+      setRevealed(newRevealed);
+      setTimeout(() => {
+        setCorrect(false);
+        if (currentStep + 1 >= p.steps.length) {
+          play?.("round_clear");
+          if (pi + 1 >= WORD_LADDER_PUZZLES.length) {
+            setTimeout(() => { play?.("ladder_done"); setDone(true); }, 500);
+          } else {
+            setTimeout(() => {
+              setPi(pi + 1); setCurrentStep(1); setRevealed([0]); setInput(""); setHintUsed(false);
+            }, 600);
+          }
+        } else {
+          setCurrentStep(currentStep + 1); setInput(""); setHintUsed(false);
+        }
+      }, 800);
+    } else {
+      setShake(true);
+      play?.("word_wrong");
+      setTimeout(() => setShake(false), 400);
+    }
+  };
+
+  const useHint = () => {
+    play?.("hint_used");
+    setHintUsed(true);
+    setInput(stepWord);
+  };
+
+  if (done) {
+    const pct = totalSteps > 0 ? Math.round((score / totalSteps) * 100) : 100;
+    return (
+      <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT }}>
+        <div style={{ fontSize: 52, marginBottom: 16 }}>🪜</div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: t?.ink || "#ededed", marginBottom: 8, letterSpacing: "-0.03em" }}>All Ladders Complete!</div>
+        <div style={{ fontSize: 16, color, fontWeight: 700, marginBottom: 24 }}>{score}/{totalSteps} steps solved independently</div>
+        <div style={{ fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 24 }}>{pct >= 80 ? "Outstanding!" : pct >= 60 ? "Great work!" : "Keep practising!"}</div>
+        <button type="button" onClick={() => { setPi(0); setCurrentStep(1); setRevealed([0]); setInput(""); setScore(0); setTotalSteps(0); setDone(false); setHintUsed(false); }} style={{ padding: "13px 28px", background: color, color: "#000", borderRadius: 999, border: "none", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Play Again</button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "20px 20px 40px", fontFamily: FONT }}>
-      <p style={{ fontSize: 13, color: t?.muted || "#a1a1a1", marginBottom: 20 }}>Change one letter at a time to get from <strong style={{ color }}>{p.start}</strong> → <strong style={{ color }}>{p.end}</strong></p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "center", marginBottom: 24 }}>
-        {p.steps.map((step, i) => (
-          <div key={i} style={{
-            display: "flex", gap: 6, alignItems: "center",
-            opacity: i < revealed ? 1 : 0.25,
-            transition: "opacity 0.3s ease",
-          }}>
-            {step.split("").map((l, li) => {
-              const prev = p.steps[i - 1];
-              const changed = prev && prev[li] !== l;
-              return (
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div>
+          <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color, textTransform: "uppercase", letterSpacing: "0.06em" }}>Puzzle {pi + 1} of {WORD_LADDER_PUZZLES.length}</p>
+          <p style={{ margin: "3px 0 0", fontSize: 13, color: t?.muted || "#a1a1a1" }}>
+            <strong style={{ color }}>{p.start}</strong> → <strong style={{ color }}>{p.end}</strong> ({p.steps.length - 1} step{p.steps.length > 2 ? "s" : ""})
+          </p>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <p style={{ margin: 0, fontSize: 11, color: t?.muted || "#a1a1a1" }}>Score</p>
+          <p style={{ margin: "2px 0 0", fontSize: 18, fontWeight: 800, color, letterSpacing: "-0.02em" }}>{score}</p>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center", marginBottom: 20 }}>
+        {revealed.map(idx => {
+          const word = p.steps[idx];
+          const prev = p.steps[idx - 1];
+          const changedIdx = prev ? changedLetterIdx(prev, word) : -1;
+          return (
+            <div key={idx} style={{ display: "flex", gap: 5 }}>
+              {word.split("").map((l, li) => (
                 <div key={li} style={{
-                  width: 48, height: 52, borderRadius: 12,
-                  border: `2px solid ${i < revealed ? changed && i > 0 ? color : t?.border || "rgba(255,255,255,0.15)" : t?.border || "rgba(255,255,255,0.08)"}`,
-                  background: changed && i > 0 && i < revealed ? `${color}18` : t?.light || "rgba(255,255,255,0.04)",
+                  width: word.length > 4 ? 44 : 52, height: word.length > 4 ? 46 : 52,
+                  borderRadius: 12, border: `2px solid ${li === changedIdx && idx > 0 ? color : t?.border || "rgba(255,255,255,0.15)"}`,
+                  background: li === changedIdx && idx > 0 ? `${color}18` : t?.light || "rgba(255,255,255,0.05)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 20, fontWeight: 800, color: changed && i < revealed ? color : t?.ink || "#ededed",
+                  fontSize: 18, fontWeight: 800,
+                  color: li === changedIdx && idx > 0 ? color : t?.ink || "#ededed",
                   fontFamily: FONT, transition: "all 0.3s ease",
                 }}>{l}</div>
-              );
-            })}
+              ))}
+            </div>
+          );
+        })}
+
+        {currentStep < p.steps.length && (
+          <div style={{ display: "flex", gap: 5, animation: shake ? "fillGapShake 0.35s ease" : correct ? "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1)" : "none" }}>
+            {Array.from({ length: stepWord.length }).map((_, li) => (
+              <div key={li} style={{
+                width: stepWord.length > 4 ? 44 : 52, height: stepWord.length > 4 ? 46 : 52,
+                borderRadius: 12,
+                border: `2px solid ${correct ? color : input[li] ? `${color}60` : t?.border || "rgba(255,255,255,0.2)"}`,
+                background: correct ? `${color}20` : input[li] ? `${color}10` : "transparent",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 18, fontWeight: 800,
+                color: correct ? color : input[li] ? t?.ink || "#ededed" : "rgba(255,255,255,0.2)",
+                fontFamily: FONT, transition: "all 0.2s ease",
+              }}>{input[li] || (correct ? stepWord[li] : "")}</div>
+            ))}
+          </div>
+        )}
+
+        {Array.from({ length: p.steps.length - currentStep - 1 }).map((_, i) => (
+          <div key={i} style={{ display: "flex", gap: 5, opacity: 0.2 }}>
+            {p.steps[currentStep + 1 + i].split("").map((_, li) => (
+              <div key={li} style={{
+                width: p.steps[0].length > 4 ? 44 : 52, height: p.steps[0].length > 4 ? 46 : 52,
+                borderRadius: 12, border: `2px solid ${t?.border || "rgba(255,255,255,0.12)"}`,
+                background: "transparent",
+              }} />
+            ))}
           </div>
         ))}
       </div>
-      <div style={{ display: "flex", gap: 10 }}>
-        {revealed < p.steps.length && (
-          <button type="button" onClick={() => {
-            const next = revealed + 1;
-            play?.("correct");
-            setRevealed(next);
-            if (next >= p.steps.length) setTimeout(() => play?.("correct"), 350);
-          }} style={{ flex: 1, padding: "13px", background: `${color}18`, color, border: `1px solid ${color}40`, borderRadius: 14, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Reveal Next Step</button>
-        )}
-        {pi + 1 < WORD_LADDER_PUZZLES.length && revealed >= p.steps.length && (
-          <button type="button" onClick={() => { setPi(pi + 1); setRevealed(1); }} style={{ flex: 1, padding: "13px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>Next Puzzle →</button>
-        )}
-      </div>
+
+      {currentStep < p.steps.length && (
+        <>
+          <p style={{ textAlign: "center", fontSize: 12.5, color: t?.muted || "#a1a1a1", marginBottom: 10, fontFamily: FONT }}>
+            Change 1 letter from <strong style={{ color }}>{prevWord}</strong> — type a {stepWord.length}-letter word
+          </p>
+          {/* Hidden input for desktop keyboard support */}
+          <input
+            type="text" maxLength={stepWord.length}
+            value={input}
+            onChange={e => setInput(e.target.value.toUpperCase().replace(/[^A-Z]/g, ""))}
+            onKeyDown={e => e.key === "Enter" && submitStep()}
+            style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 1, height: 1 }}
+          />
+          {/* On-screen keyboard */}
+          <div style={{ marginBottom: 12 }}>
+            {[["Q","W","E","R","T","Y","U","I","O","P"],["A","S","D","F","G","H","J","K","L"],["ENTER","Z","X","C","V","B","N","M","⌫"]].map((row, kri) => (
+              <div key={kri} style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: 5 }}>
+                {row.map(k => {
+                  const isWide = k === "ENTER" || k === "⌫";
+                  return (
+                    <button key={k} type="button" onClick={() => {
+                      if (k === "⌫") { setInput(v => v.slice(0, -1)); play?.("game_tap"); }
+                      else if (k === "ENTER") { play?.("build_word"); submitStep(); }
+                      else if (input.length < stepWord.length) { setInput(v => v + k); play?.("key_press"); }
+                    }} style={{
+                      minWidth: isWide ? 48 : 32, height: 42, borderRadius: 8,
+                      background: t?.light||"rgba(255,255,255,0.08)",
+                      color: t?.ink||"#ededed",
+                      border: `1px solid ${t?.border||"rgba(255,255,255,0.12)"}`,
+                      fontSize: isWide ? 9 : 13, fontWeight: 700,
+                      cursor: "pointer", fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+                      flexShrink: 0,
+                    }}>{k}</button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          {!hintUsed && (
+            <button type="button" onClick={useHint} style={{
+              display: "block", margin: "0 auto", padding: "8px 18px",
+              background: "rgba(255,255,255,0.06)", color: t?.muted || "#a1a1a1",
+              border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`,
+              borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
+              fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+            }}>💡 Reveal this step (no points)</button>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -1719,16 +2321,15 @@ function ScoreScreen({ score, total, color, customMsg, onReplay, onClose, t, pla
   useEffect(() => {
     if (played.current) return;
     played.current = true;
-    if (pct === 100) play?.("star");
-    else if (pct >= 60) play?.("correct");
-    else play?.("ok");
+    if (pct === 100) { play?.("level_up"); setTimeout(() => play?.("streak_5"), 350); }
+    else if (pct >= 60) play?.("word_correct");
+    else play?.("word_wrong");
   }, [pct, play]);
   const confettiColors = ["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#FF6FF2","#FF9E4F","#A0F0A0","#B388FF","#FFB347","#4FC3F7","#FF80AB","#69F0AE"];
   return (
     <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT }}>
       <style>{`
-        @keyframes scoreRing { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.12);opacity:0} }
-        @keyframes confettiFall { 0%{transform:translateY(-40px) rotate(0deg);opacity:1} 100%{transform:translateY(220px) rotate(720deg);opacity:0} }
+        /* keyframes defined in GameModal */
       `}</style>
       {pct === 100 && (
         <div style={{ position: "relative", height: 0, overflow: "visible" }}>

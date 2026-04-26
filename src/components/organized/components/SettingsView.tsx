@@ -319,6 +319,7 @@ export function SettingsView({
                   exit={{ height: 0, opacity: 0 }}
                   transition={SECTION_TRANSITION}
                   className="organized-settings-section-panel overflow-hidden bg-muted/20"
+                  style={{ willChange: 'height, opacity', transform: 'translateZ(0)' }}
                 >
                   <div className="px-4 py-4 space-y-3">
                     <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -403,6 +404,7 @@ export function SettingsView({
                     exit={{ height: 0, opacity: 0 }}
                     transition={SECTION_TRANSITION}
                     className="organized-settings-section-panel overflow-hidden bg-muted/20"
+                    style={{ willChange: 'height, opacity', transform: 'translateZ(0)' }}
                   >
                     <div className="px-4 py-3 divide-y divide-border/50">
                       <div className="flex items-center justify-between py-3">
@@ -552,6 +554,7 @@ export function SettingsView({
                     exit={{ height: 0, opacity: 0 }}
                     transition={SECTION_TRANSITION}
                     className="organized-settings-section-panel overflow-hidden bg-muted/20"
+                    style={{ willChange: 'height, opacity', transform: 'translateZ(0)' }}
                   >
                     <div className="px-4 py-3 divide-y divide-border/50">
                       <div className="flex items-center justify-between py-3">
@@ -766,6 +769,7 @@ export function SettingsView({
                   exit={{ height: 0, opacity: 0 }}
                   transition={SECTION_TRANSITION}
                   className="organized-settings-section-panel overflow-hidden bg-muted/20"
+                  style={{ willChange: 'height, opacity', transform: 'translateZ(0)' }}
                 >
                     <div className="organized-categories-panel px-4 py-3 space-y-2 max-h-[500px] overflow-y-auto">
                     <div className="space-y-2">
@@ -882,6 +886,7 @@ export function SettingsView({
                   exit={{ height: 0, opacity: 0 }}
                   transition={SECTION_TRANSITION}
                   className="organized-settings-section-panel overflow-hidden bg-muted/20"
+                  style={{ willChange: 'height, opacity', transform: 'translateZ(0)' }}
                 >
                     <div className="organized-tags-panel px-4 py-3 space-y-3 max-h-[400px] overflow-y-auto">
                     <div className="flex flex-wrap gap-2">
