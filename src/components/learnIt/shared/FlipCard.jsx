@@ -8,20 +8,25 @@ import {
 
 /**
  * FlipCard — Learn-It activity card with iOS-native press,
- * long-press peek, ripple, ribbon, and rich back-face content.
+ * long-press flip, ripple, ribbon, and rich back-face content.
  *
- * iOS Safari notes (kept from Phase 1):
- *   On iOS, `backface-visibility: hidden` is silently disabled when the
- *   3D-transformed parent has a `filter:` rule, or when the children have
- *   `backdrop-filter:`. That causes both faces to render at once and the
- *   front face wins z-order, so the BACK (with the Play button) is
- *   unreachable. We therefore:
- *     - keep `transformStyle: preserve-3d` only on the rotating wrapper
- *     - put NO `filter` on the rotating wrapper
- *     - put NO `backdrop-filter` on the faces
- *     - set `WebkitBackfaceVisibility: hidden` explicitly on each face
- *     - gate `pointer-events` so the hidden face never eats taps
+ * Flip mechanism: 2-phase 2D scaleX "pinch" animation
+ *   Phase 1 (ease-in):  scaleX 1 → 0.02  (card collapses edge-on)
+ *   Content swap:       at midpoint, face switches (display:none ↔ flex)
+ *   Phase 2 (ease-out): scaleX 0.02 → 1  (card opens on new face)
+ *
+ * Why not CSS 3D (preserve-3d / backface-visibility)?
+ *   iOS Safari silently disables backface-visibility:hidden when ANY
+ *   ancestor has filter: or ANY sibling/child uses backdrop-filter:.
+ *   Both conditions exist in this app shell. The result is both faces
+ *   render simultaneously and the front (mirrored, z-order winner) covers
+ *   the back's Play button. The 2D scaleX approach has no such limitation.
  */
+const FLIP_HALF = 140;       // ms — each half of the flip
+const FLIP_COLLAPSED = 0.02; // scaleX at the edge-on midpoint (virtually invisible)
+const LONG_PRESS_MS = 350;   // ms hold before long-press fires
+const PLAY_DELAY_MS = 80;    // ms after flip lands before Play button springs in
+
 export function FlipCard({
   game,
   color,
@@ -38,10 +43,11 @@ export function FlipCard({
   const [mounted, setMounted] = useState(false);
   const [playReady, setPlayReady] = useState(false);
   const [pressed, setPressed] = useState(false);
-  const [peeking, setPeeking] = useState(false);
+  const [flipPhase, setFlipPhase] = useState("idle"); // "idle" | "out" | "in"
   const [ripple, setRipple] = useState(null);
   const longPressTimerRef = useRef(null);
   const longPressFiredRef = useRef(false);
+  const flipTimerRef = useRef(null);
   const lastSoundRef = useRef({ type: null, ts: 0 });
 
   const longDesc = game.longDesc || game.desc;
@@ -53,7 +59,7 @@ export function FlipCard({
   // Difficulty hint text for the back-face meta row
   const difficultyHint = game.difficulty || (game.type === "tool" ? "Practice" : "Easy → Hard");
 
-  // Suppress duplicate sounds within 250 ms (long-press → flip etc.)
+  // Suppress duplicate sounds within 250 ms
   const playOnce = (type) => {
     if (!play) return;
     const now = Date.now();
@@ -62,31 +68,37 @@ export function FlipCard({
     play(type);
   };
 
+  // Stagger mount entrance
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), index * 65);
     return () => clearTimeout(t);
   }, [index]);
 
-  // Spring-pop the Play button shortly after the back face lands
+  // Clean up flip + long-press timers on unmount
+  useEffect(() => () => {
+    clearTimeout(flipTimerRef.current);
+    clearTimeout(longPressTimerRef.current);
+  }, []);
+
+  // Show Play button after the back face fully lands
   useEffect(() => {
-    if (!flipped) {
+    if (!flipped || flipPhase !== "idle") {
       setPlayReady(false);
       return;
     }
-    const delay = reducedMotion ? 0 : 250;
+    const delay = reducedMotion ? 0 : PLAY_DELAY_MS;
     const t = setTimeout(() => setPlayReady(true), delay);
     return () => clearTimeout(t);
-  }, [flipped, reducedMotion]);
+  }, [flipped, flipPhase, reducedMotion]);
 
   const clearLongPress = () => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
+    clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
   };
 
+  // 2-phase scaleX flip — content swaps at the collapsed midpoint
   const flipTo = (next) => {
-    setFlipped(next);
+    if (flipPhase !== "idle") return; // prevent double-flip during animation
     if (next) {
       playOnce("flip");
       haptic(8);
@@ -94,9 +106,18 @@ export function FlipCard({
     } else {
       playOnce("tap_soft");
     }
+    if (reducedMotion) {
+      setFlipped(next);
+      return;
+    }
+    const half = FLIP_HALF;
+    setFlipPhase("out");
+    flipTimerRef.current = setTimeout(() => {
+      setFlipped(next);
+      setFlipPhase("in");
+      flipTimerRef.current = setTimeout(() => setFlipPhase("idle"), half);
+    }, half);
   };
-
-  const handleFlipToggle = () => flipTo(!flipped);
 
   const spawnRipple = (e) => {
     if (reducedMotion) return;
@@ -114,45 +135,46 @@ export function FlipCard({
     longPressFiredRef.current = false;
     spawnRipple(e);
     clearLongPress();
-    if (!flipped && !reducedMotion) {
+    if (flipPhase === "idle" && !reducedMotion) {
       longPressTimerRef.current = setTimeout(() => {
         longPressFiredRef.current = true;
-        setPeeking(true);
         playOnce("long_press");
         haptic(10);
-      }, 350);
+      }, LONG_PRESS_MS);
     }
   };
 
   const handlePointerUp = () => {
     setPressed(false);
     clearLongPress();
-    if (peeking) {
-      // Long-press resolved → commit to a full flip (or back if already flipped).
-      setPeeking(false);
+    if (longPressFiredRef.current) {
+      // Long-press resolved → commit to a full flip.
+      // Do NOT clear longPressFiredRef here; handleClick will clear it
+      // to suppress the synthetic click that fires after pointer-up.
       flipTo(!flipped);
     }
   };
 
   const handlePointerCancel = () => {
     setPressed(false);
-    setPeeking(false);
     clearLongPress();
+    longPressFiredRef.current = false;
   };
 
   const handleClick = () => {
-    // Suppress click when long-press already triggered a transition.
+    // Suppress click when long-press already triggered a flip.
     if (longPressFiredRef.current) {
       longPressFiredRef.current = false;
       return;
     }
-    handleFlipToggle();
+    if (flipPhase !== "idle") return;
+    flipTo(!flipped);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      handleFlipToggle();
+      flipTo(!flipped);
     }
   };
 
@@ -163,22 +185,19 @@ export function FlipCard({
     onPlay(game.id);
   };
 
-  // Rotation transition — disabled under reduced motion.
-  // Peek = quarter-flip preview (~25%) anchored to back face.
-  const rotationTransition = reducedMotion
-    ? "none"
-    : "transform 0.6s cubic-bezier(0.34,1.56,0.64,1)";
-  const rotateAngle = flipped ? 180 : peeking ? 45 : 0;
-  const pressScale = pressed && !flipped ? 0.97 : 1;
-
-  // Belt-and-suspenders for iOS Safari: even when `backface-visibility:hidden`
-  // is silently disabled (e.g. due to a `filter:` ancestor or a child with
-  // `backdrop-filter:`), explicitly hide the off-screen face via opacity and
-  // visibility so the front can never cover the back's Play button.
-  // The toggle is delayed to the flip's midpoint (~half of 0.6s) so faces
-  // swap exactly when the card is edge-on, preserving the 3D illusion.
-  const halfFlipDelay = reducedMotion ? 0 : 0.3;
-  const faceVisibilityTransition = `opacity 0s linear ${halfFlipDelay}s, visibility 0s linear ${halfFlipDelay}s`;
+  // ── 2D scaleX wrapper — narrows to edge-on then opens on new face ──
+  // "out" phase: ease-in collapse; "in" phase: ease-out open.
+  const wrapperTransform = (() => {
+    if (flipPhase === "out") return `scaleX(${FLIP_COLLAPSED})`;
+    if (flipPhase === "in")  return "scaleX(1)";
+    return `scale(${pressed && flipPhase === "idle" ? 0.97 : 1})`;
+  })();
+  const wrapperTransition = (() => {
+    if (flipPhase === "out") return `transform ${FLIP_HALF}ms ease-in`;
+    if (flipPhase === "in")  return `transform ${FLIP_HALF}ms ease-out`;
+    if (pressed)             return "transform 0.1s ease";
+    return "transform 0.32s cubic-bezier(0.34,1.56,0.64,1)";
+  })();
 
   const ariaLabel = getFlipCardAriaLabel(game, flipped);
   const longDescId = `flipcard-desc-${game.id}`;
@@ -187,13 +206,11 @@ export function FlipCard({
     <div
       className="life-flipcard-shell"
       style={{
-        perspective: "1000px",
         opacity: mounted ? 1 : 0,
         transform: mounted ? "translateY(0) scale(1)" : "translateY(20px) scale(0.94)",
         transition: reducedMotion
           ? "none"
           : `opacity 0.4s ease ${index * 65}ms, transform 0.5s cubic-bezier(0.34,1.56,0.64,1) ${index * 65}ms`,
-        // Used by learnit-ios.css :focus-visible rule to colour the ring.
         "--life-flipcard-color": color,
       }}
     >
@@ -213,44 +230,35 @@ export function FlipCard({
           position: "relative",
           width: "100%",
           aspectRatio: "1 / 1.05",
-          transformStyle: "preserve-3d",
-          WebkitTransformStyle: "preserve-3d",
-          transform: `rotateY(${rotateAngle}deg) scale(${pressScale})`,
-          WebkitTransform: `rotateY(${rotateAngle}deg) scale(${pressScale})`,
-          transition: rotationTransition,
-          WebkitTransition: rotationTransition,
+          transform: wrapperTransform,
+          transition: wrapperTransition,
           cursor: "pointer",
-          isolation: "isolate",
           willChange: "transform",
           WebkitTapHighlightColor: "transparent",
           outline: "none",
         }}
       >
-        {/* FRONT */}
+
+        {/* ── FRONT FACE ─────────────────────────────────────────────── */}
         <div
           aria-hidden={flipped}
           style={{
             position: "absolute",
             inset: 0,
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
             background: "rgba(255,255,255,0.045)",
             border: `1px solid ${borderColor}`,
             borderRadius: 22,
-            display: "flex",
+            display: !flipped ? "flex" : "none",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             padding: "18px 14px 34px",
             gap: 10,
-            boxShadow: pressed && !flipped
+            boxShadow: pressed
               ? `0 2px 10px rgba(0,0,0,0.22), 0 0 0 1.5px ${color}40`
               : `0 6px 22px rgba(0,0,0,0.22)`,
             overflow: "hidden",
-            pointerEvents: flipped ? "none" : "auto",
-            opacity: flipped ? 0 : 1,
-            visibility: flipped ? "hidden" : "visible",
-            transition: `box-shadow 0.18s ease, ${faceVisibilityTransition}`,
+            transition: "box-shadow 0.18s ease",
           }}
         >
           {/* Shimmer sweep on mount */}
@@ -406,30 +414,22 @@ export function FlipCard({
           )}
         </div>
 
-        {/* BACK */}
+        {/* ── BACK FACE ──────────────────────────────────────────────── */}
         <div
           aria-hidden={!flipped}
           style={{
             position: "absolute",
             inset: 0,
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
-            transform: "rotateY(180deg)",
-            WebkitTransform: "rotateY(180deg)",
             background: `linear-gradient(160deg, ${lightColor.replace("0.12", "0.18")} 0%, rgba(255,255,255,0.04) 100%)`,
             border: `1.5px solid ${color}60`,
             borderRadius: 22,
-            display: "flex",
+            display: flipped ? "flex" : "none",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "flex-start",
             padding: "12px 12px 44px",
             gap: 5,
             boxShadow: `0 4px 28px ${color}25`,
-            pointerEvents: flipped ? "auto" : "none",
-            opacity: flipped ? 1 : 0,
-            visibility: flipped ? "visible" : "hidden",
-            transition: faceVisibilityTransition,
             overflow: "hidden",
           }}
         >
@@ -608,6 +608,9 @@ export function FlipCard({
             type="button"
             className="life-flipcard-play"
             onClick={handlePlayClick}
+            // Critical: stop pointer-down from bubbling to card wrapper
+            // so the long-press timer never starts when touching Play.
+            onPointerDown={(e) => e.stopPropagation()}
             aria-label={`Play ${game.title}`}
             aria-describedby={longDescId}
             tabIndex={flipped ? 0 : -1}
@@ -616,13 +619,13 @@ export function FlipCard({
               bottom: 10,
               left: "50%",
               transform: "translateX(-50%)",
-              padding: "5px 14px",
-              minHeight: 28,
+              padding: "7px 18px",
+              minHeight: 36,
               background: color,
               color: "#000",
               border: "none",
               borderRadius: 999,
-              fontSize: 11.5,
+              fontSize: 12,
               fontWeight: 700,
               cursor: "pointer",
               fontFamily: FONT,
@@ -631,13 +634,14 @@ export function FlipCard({
               transition: "transform 0.15s cubic-bezier(0.34,1.56,0.64,1)",
               WebkitTapHighlightColor: "transparent",
               opacity: playReady ? 1 : 0,
+              pointerEvents: playReady ? "auto" : "none",
               animation:
                 playReady && !reducedMotion
                   ? "flipCardPlayPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both"
                   : "none",
               display: "inline-flex",
               alignItems: "center",
-              gap: 4,
+              gap: 5,
               lineHeight: 1,
             }}
             onMouseDown={(e) => {
@@ -658,7 +662,7 @@ export function FlipCard({
               e.currentTarget.style.transform = "translateX(-50%) scale(1)";
             }}
           >
-            <span aria-hidden="true" style={{ fontSize: 9 }}>▶</span>
+            <span aria-hidden="true" style={{ fontSize: 10 }}>▶</span>
             Play
           </button>
         </div>

@@ -7,8 +7,7 @@
    src/ii-mobile-fixes.css and src/components/organized/organized.css.
 ────────────────────────────────────────────────────────────── */
 
-/* ── FIX 1: shimmer + play-pop keyframes (extracted from FlipCard inline <style>) ──
-   Note: `life-flipcard-hint-pulse` is defined in src/index.css (universal). */
+/* ── FIX 1: shimmer + play-pop keyframes (used by FlipCard inline styles) ── */
 @keyframes flipCardShimmer {
   0%   { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
   18%  { opacity: 0.55; }
@@ -20,6 +19,16 @@
   60%  { transform: translateX(-50%) scale(1.12); opacity: 1; }
   100% { transform: translateX(-50%) scale(1); opacity: 1; }
 }
+
+/* ── FIX 17: FlipCard flip animation keyframes (2D scaleX pinch) ──
+   The 3D preserve-3d / backface-visibility approach was replaced with a
+   2D scaleX pinch so that iOS Safari (which disables backface-visibility
+   silently when filter:/backdrop-filter: ancestors exist) never renders
+   both faces simultaneously.
+   Phase 1: scaleX 1→0.02 (ease-in)  → card "folds" edge-on
+   Phase 2: scaleX 0.02→1 (ease-out) → card "opens" on new face
+   Both phases are driven by JS setTimeout + inline transition strings
+   in FlipCard.jsx; no CSS animation name needed here. */
 
 /* ── FIX 2: ripple keyframe — anchored at touch point on FlipCard front ── */
 @keyframes life-flipcard-ripple {
