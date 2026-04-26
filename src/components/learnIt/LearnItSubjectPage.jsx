@@ -251,8 +251,29 @@ export function LearnItSubjectPage({ t, play, subject, onBack }) {
             background: "rgba(0,0,0,0.65)",
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
+            flexDirection: "column",
+            gap: 14,
+            padding: "0 20px",
           }}
         >
+          {/* Label */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: t?.muted || "#a1a1a1",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              fontFamily: FONT,
+              animation: "diffPickerIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both",
+              textShadow: "0 1px 8px rgba(0,0,0,0.6)",
+            }}
+          >
+            Choose Difficulty
+          </div>
+
+          {/* Pill picker */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -293,6 +314,38 @@ export function LearnItSubjectPage({ t, play, subject, onBack }) {
                 {dlabel}
               </button>
             ))}
+          </div>
+
+          {/* Question count subtitle row — mirrors pill positions */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              display: "flex",
+              gap: 6,
+              padding: "0 6px",
+              animation: "diffPickerIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both",
+            }}
+          >
+            {DIFFICULTY_OPTIONS.map(({ key }) => {
+              const slice = getQuestionsForDifficulty(difficultyPending, key);
+              const count = slice ? slice.length : 0;
+              return (
+                <div
+                  key={key}
+                  style={{
+                    flex: 1,
+                    textAlign: "center",
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: t?.muted || "rgba(255,255,255,0.55)",
+                    fontFamily: FONT,
+                    minWidth: 90,
+                  }}
+                >
+                  {count} questions
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

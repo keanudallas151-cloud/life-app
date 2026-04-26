@@ -21,16 +21,67 @@ export function GameModal({ children, onClose, color, title, t, play }) {
       display: "flex",
       flexDirection: "column",
       overflow: "hidden",
+      animation: "gmSlideUp 0.42s cubic-bezier(0.34,1.1,0.64,1) both",
+      transformOrigin: "bottom center",
     }}>
       <style>{`
+        @keyframes gmSlideUp {
+          from { transform: translateY(100%); opacity: 0.4; }
+          to   { transform: translateY(0);    opacity: 1; }
+        }
         @keyframes gmBgSweep {
           0%   { background-position: 0% 50%; }
           50%  { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
         @keyframes questionIn {
-          from { opacity: 0; transform: translateY(12px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
+          from { opacity: 0; transform: translateX(36px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes timerPulse {
+          0%,100% { transform: scale(1); }
+          50%     { transform: scale(1.15); }
+        }
+        @keyframes cardGlowPulse {
+          0%,100% { box-shadow: 0 0 0 0 rgba(229,72,77,0.0); }
+          50%     { box-shadow: 0 0 0 3px rgba(229,72,77,0.35); }
+        }
+        @keyframes streakPulseAnim {
+          0%,100% { transform: scale(1); }
+          50%     { transform: scale(1.08); }
+        }
+        @keyframes streakFlash {
+          0%   { opacity: 0; }
+          25%  { opacity: 0.6; }
+          100% { opacity: 0; }
+        }
+        @keyframes confettiBurst {
+          0%   { transform: translate(0,0) scale(0.4) rotate(0deg); opacity: 1; }
+          70%  { opacity: 1; }
+          100% { transform: translate(var(--cb-x), var(--cb-y)) scale(1) rotate(var(--cb-rot,720deg)); opacity: 0; }
+        }
+        @keyframes iconBounce {
+          0%   { transform: scale(0.4); opacity: 0; }
+          55%  { transform: scale(1.18); opacity: 1; }
+          80%  { transform: scale(0.96); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes ripple {
+          0%   { transform: scale(0); opacity: 0.45; }
+          100% { transform: scale(2.6); opacity: 0; }
+        }
+        @keyframes letterDrop {
+          0%   { opacity: 0; transform: translateY(-6px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes vocabFlip360 {
+          0%   { transform: rotateY(0deg); }
+          100% { transform: rotateY(360deg); }
+        }
+        @keyframes vocabHorizShake {
+          0%,100% { transform: translateX(0); }
+          20%,60% { transform: translateX(-6px); }
+          40%,80% { transform: translateX(6px); }
         }
         @keyframes fillGapShake {
           0%,100% { transform: translateX(0); }

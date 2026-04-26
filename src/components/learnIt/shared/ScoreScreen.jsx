@@ -20,25 +20,37 @@ export function ScoreScreen({ score, total, color, customMsg, onReplay, onClose,
   }, [pct, play]);
   const confettiColors = ["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#FF6FF2","#FF9E4F","#A0F0A0","#B388FF","#FFB347","#4FC3F7","#FF80AB","#69F0AE"];
   return (
-    <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT }}>
+    <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT, position: "relative" }}>
       {pct === 100 && (
-        <div style={{ position: "relative", height: 0, overflow: "visible" }}>
-          {confettiColors.map((c, i) => (
-            <div key={i} style={{
-              position: "absolute",
-              left: `${8 + (i * 7.5)}%`,
-              top: 0,
-              width: 10,
-              height: 10,
-              borderRadius: i % 2 === 0 ? "50%" : 2,
-              background: c,
-              animation: `confettiFall ${1.2 + (i % 4) * 0.2}s ease-in ${(i % 5) * 0.12}s both`,
-              pointerEvents: "none",
-            }} />
-          ))}
+        <div style={{ position: "absolute", left: "50%", top: 80, width: 0, height: 0, pointerEvents: "none", zIndex: 5 }}>
+          {confettiColors.map((c, i) => {
+            const angle = (i / confettiColors.length) * Math.PI * 2;
+            const dist = 110 + (i % 3) * 24;
+            const x = Math.cos(angle) * dist;
+            const y = Math.sin(angle) * dist;
+            const rot = (i % 2 === 0 ? 1 : -1) * (520 + (i * 30));
+            return (
+              <div key={i} style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: 9,
+                height: 9,
+                marginLeft: -4.5,
+                marginTop: -4.5,
+                borderRadius: i % 2 === 0 ? "50%" : 2,
+                background: c,
+                "--cb-x": `${x}px`,
+                "--cb-y": `${y}px`,
+                "--cb-rot": `${rot}deg`,
+                animation: `confettiBurst ${0.95 + (i % 4) * 0.15}s cubic-bezier(0.22,0.9,0.4,1) ${(i % 5) * 0.05}s both`,
+                pointerEvents: "none",
+              }} />
+            );
+          })}
         </div>
       )}
-      <div style={{ position: "relative", width: 120, height: 120, margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ position: "relative", width: 120, height: 120, margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", animation: "iconBounce 0.7s cubic-bezier(0.34,1.56,0.64,1) both" }}>
         <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: `3px solid ${color}`, animation: "scoreRing 2s ease-in-out infinite" }} />
         <div style={{ width: 100, height: 100, borderRadius: "50%", background: t?.white || "#111111", border: `3px solid ${color}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{iconPath}</svg>

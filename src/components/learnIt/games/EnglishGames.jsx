@@ -93,7 +93,10 @@ export function FillGapGame({ questions: questionsProp, color, onClose, t, play 
       )}
       {/* Timer ring */}
       <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-        <div style={{ position: "relative", width: 64, height: 64 }}>
+        <div style={{
+          position: "relative", width: 64, height: 64,
+          animation: timeLeft <= 5 ? "timerPulse 0.6s ease-in-out infinite" : "none",
+        }}>
           <svg width="64" height="64" viewBox="0 0 64 64" style={{ transform: "rotate(-90deg)" }}>
             <circle cx="32" cy="32" r="28" fill="none" stroke={t?.border||"rgba(255,255,255,0.1)"} strokeWidth="4" />
             <circle cx="32" cy="32" r="28" fill="none"
@@ -115,10 +118,21 @@ export function FillGapGame({ questions: questionsProp, color, onClose, t, play 
       <Progress current={qi} total={qs.length} color={color} t={t} />
       {streak >= 3 && (
         <div style={{ textAlign: "right", marginTop: -14, marginBottom: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontFamily: FONT, animation: "streakPop 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>🔥 ×{streak} streak!</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontFamily: FONT, animation: "streakPulseAnim 1.05s ease-in-out infinite" }}>🔥 ×{streak} streak!</span>
         </div>
       )}
-      <div key={qi} style={{ background: t?.light || "rgba(255,255,255,0.05)", borderRadius: 18, padding: "22px 18px", marginBottom: 22, border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`, animation: shake ? "fillGapShake 0.35s ease" : "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}>
+      <div key={qi} style={{
+        background: t?.light || "rgba(255,255,255,0.05)",
+        borderRadius: 18,
+        padding: "22px 18px",
+        marginBottom: 22,
+        border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`,
+        animation: shake
+          ? "fillGapShake 0.35s ease"
+          : timeLeft <= 5
+            ? "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both, cardGlowPulse 1.2s ease-in-out infinite 0.3s"
+            : "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both",
+      }}>
         <p style={{ fontSize: 16, color: t?.ink || "#ededed", lineHeight: 1.65, margin: 0, fontWeight: 500, letterSpacing: "-0.01em" }}>
           {q.sentence.replace("___", "______")}
         </p>
@@ -334,6 +348,7 @@ export function VocabMatchGame({ color, onClose, t, play }) {
   const [selected, setSelected] = useState({ word: null, def: null });
   const [matched, setMatched] = useState([]);
   const [wrong, setWrong] = useState(false);
+  const [lastMatch, setLastMatch] = useState({ word: null, def: null });
   const [done, setDone] = useState(false);
   const [moves, setMoves] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
@@ -389,6 +404,8 @@ export function VocabMatchGame({ color, onClose, t, play }) {
         play?.("match_found");
         const newMatched = [...matched, next.word];
         setMatched(newMatched);
+        setLastMatch({ word: next.word, def: next.def });
+        setTimeout(() => setLastMatch({ word: null, def: null }), 600);
         setSelected({ word: null, def: null });
       } else {
         play?.("word_wrong");
@@ -400,14 +417,20 @@ export function VocabMatchGame({ color, onClose, t, play }) {
 
   if (done) return <ScoreScreen score={matched.length} total={VOCAB_PAIRS.length} color={color} customMsg={`Matched ${matched.length} in ${moves} moves!`} onReplay={() => { setRound(0); setSelected({ word: null, def: null }); setMatched([]); setWrong(false); setDone(false); setMoves(0); setTimeLeft(30); }} onClose={onClose} t={t} play={play} />;
 
-  const btnStyle = (active, isMatched) => ({
-    padding: "11px 12px", borderRadius: 12, border: `1.5px solid ${isMatched ? `${color}40` : active ? color : wrong && active ? "#e5484d" : "rgba(255,255,255,0.1)"}`,
-    background: isMatched ? `${color}10` : active ? `${color}18` : wrong && active ? "rgba(229,72,77,0.15)" : "rgba(255,255,255,0.04)",
+  const btnStyle = (active, isMatched, isJustMatched, isWrongActive) => ({
+    padding: "11px 12px", borderRadius: 12, border: `1.5px solid ${isMatched ? `${color}40` : active ? color : isWrongActive ? "#e5484d" : "rgba(255,255,255,0.1)"}`,
+    background: isMatched ? `${color}10` : active ? `${color}18` : isWrongActive ? "rgba(229,72,77,0.15)" : "rgba(255,255,255,0.04)",
     color: isMatched ? `${color}80` : active ? color : t?.ink || "#ededed",
     fontSize: 12.5, fontWeight: 600, cursor: isMatched ? "default" : "pointer",
     fontFamily: FONT, textAlign: "left", lineHeight: 1.4,
     transition: "all 0.2s ease", WebkitTapHighlightColor: "transparent",
     opacity: isMatched ? 0.5 : 1,
+    animation: isJustMatched
+      ? "vocabFlip360 0.55s cubic-bezier(0.34,1.56,0.64,1) both"
+      : isWrongActive
+        ? "vocabHorizShake 0.4s ease both"
+        : "none",
+    transformStyle: "preserve-3d",
   });
 
   return (
@@ -447,7 +470,7 @@ export function VocabMatchGame({ color, onClose, t, play }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <p style={{ fontSize: 11, fontWeight: 600, color: color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Words</p>
           {roundWords.map(w => (
-            <button key={w} type="button" onClick={() => !matched.includes(w) && pick("word", w)} style={btnStyle(selected.word === w, matched.includes(w))}>{w}</button>
+            <button key={w} type="button" onClick={() => !matched.includes(w) && pick("word", w)} style={btnStyle(selected.word === w, matched.includes(w), lastMatch.word === w, wrong && selected.word === w)}>{w}</button>
           ))}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -455,7 +478,7 @@ export function VocabMatchGame({ color, onClose, t, play }) {
           {roundDefs.map(d => {
             const matchedWord = VOCAB_PAIRS.find(p => p.def === d && matched.includes(p.word));
             return (
-              <button key={d} type="button" onClick={() => !matchedWord && pick("def", d)} style={btnStyle(selected.def === d, !!matchedWord)}>{d}</button>
+              <button key={d} type="button" onClick={() => !matchedWord && pick("def", d)} style={btnStyle(selected.def === d, !!matchedWord, lastMatch.def === d, wrong && selected.def === d)}>{d}</button>
             );
           })}
         </div>
@@ -689,19 +712,28 @@ export function WordLadderGame({ color, t, play }) {
         })}
 
         {currentStep < p.steps.length && (
-          <div style={{ display: "flex", gap: 5, animation: shake ? "fillGapShake 0.35s ease" : correct ? "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1)" : "none" }}>
-            {Array.from({ length: stepWord.length }).map((_, li) => (
-              <div key={li} style={{
-                width: stepWord.length > 4 ? 44 : 52, height: stepWord.length > 4 ? 46 : 52,
-                borderRadius: 12,
-                border: `2px solid ${correct ? color : input[li] ? `${color}60` : t?.border || "rgba(255,255,255,0.2)"}`,
-                background: correct ? `${color}20` : input[li] ? `${color}10` : "transparent",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 18, fontWeight: 800,
-                color: correct ? color : input[li] ? t?.ink || "#ededed" : "rgba(255,255,255,0.2)",
-                fontFamily: FONT, transition: "all 0.2s ease",
-              }}>{input[li] || (correct ? stepWord[li] : "")}</div>
-            ))}
+          <div style={{ display: "flex", gap: 5, animation: shake ? "fillGapShake 0.35s ease" : "none" }}>
+            {Array.from({ length: stepWord.length }).map((_, li) => {
+              const showSolved = correct;
+              const ch = input[li] || (showSolved ? stepWord[li] : "");
+              return (
+                <div key={li} style={{
+                  width: stepWord.length > 4 ? 44 : 52, height: stepWord.length > 4 ? 46 : 52,
+                  borderRadius: 12,
+                  border: `2px solid ${correct ? color : input[li] ? `${color}60` : t?.border || "rgba(255,255,255,0.2)"}`,
+                  background: correct ? `${color}20` : input[li] ? `${color}10` : "transparent",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, fontWeight: 800,
+                  color: correct ? color : input[li] ? t?.ink || "#ededed" : "rgba(255,255,255,0.2)",
+                  fontFamily: FONT, transition: "all 0.2s ease",
+                }}>
+                  <span style={showSolved ? {
+                    display: "inline-block",
+                    animation: `letterDrop 0.32s cubic-bezier(0.34,1.56,0.64,1) ${li * 60}ms both`,
+                  } : undefined}>{ch}</span>
+                </div>
+              );
+            })}
           </div>
         )}
 

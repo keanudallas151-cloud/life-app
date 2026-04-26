@@ -4,21 +4,47 @@ import { FONT } from "./constants.js";
 export function FlipCard({ game, color, lightColor, borderColor, index, onPlay }) {
   const [flipped, setFlipped] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [playReady, setPlayReady] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), index * 65);
     return () => clearTimeout(t);
   }, [index]);
 
+  // Spring-pop the Play button shortly after the back face lands
+  useEffect(() => {
+    if (!flipped) { setPlayReady(false); return; }
+    const t = setTimeout(() => setPlayReady(true), 450);
+    return () => clearTimeout(t);
+  }, [flipped]);
+
+  // Subtle shadow that intensifies as the card rotates (sells the depth)
+  const cardShadow = flipped
+    ? `0 18px 42px ${color}38, 0 4px 12px rgba(0,0,0,0.35)`
+    : `0 6px 22px rgba(0,0,0,0.22)`;
+
   return (
     <div
       style={{
         perspective: "1000px",
         opacity: mounted ? 1 : 0,
-        transform: mounted ? "translateY(0) scale(1)" : "translateY(16px) scale(0.94)",
-        transition: `opacity 0.35s ease ${index * 65}ms, transform 0.4s cubic-bezier(0.34,1.56,0.64,1) ${index * 65}ms`,
+        transform: mounted ? "translateY(0) scale(1)" : "translateY(20px) scale(0.94)",
+        transition: `opacity 0.4s ease ${index * 65}ms, transform 0.5s cubic-bezier(0.34,1.56,0.64,1) ${index * 65}ms`,
       }}
     >
+      <style>{`
+        @keyframes flipCardShimmer {
+          0%   { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+          18%  { opacity: 0.55; }
+          60%  { opacity: 0.55; }
+          100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+        }
+        @keyframes flipCardPlayPop {
+          0%   { transform: scale(0.6); opacity: 0; }
+          60%  { transform: scale(1.12); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
       <div
         style={{
           position: "relative",
@@ -26,8 +52,9 @@ export function FlipCard({ game, color, lightColor, borderColor, index, onPlay }
           aspectRatio: "1 / 1.05",
           transformStyle: "preserve-3d",
           transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-          transition: "transform 0.5s cubic-bezier(0.34,1.56,0.64,1)",
+          transition: "transform 0.5s cubic-bezier(0.34,1.56,0.64,1), filter 0.5s ease",
           cursor: "pointer",
+          filter: `drop-shadow(${flipped ? `0 14px 28px ${color}30` : "0 4px 14px rgba(0,0,0,0.2)"})`,
         }}
         onClick={() => setFlipped(!flipped)}
       >
@@ -48,8 +75,32 @@ export function FlipCard({ game, color, lightColor, borderColor, index, onPlay }
           gap: 10,
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
-          boxShadow: `0 4px 20px rgba(0,0,0,0.15)`,
+          boxShadow: cardShadow,
+          overflow: "hidden",
         }}>
+          {/* Shimmer sweep on mount — disappears once it has played */}
+          {mounted && (
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                pointerEvents: "none",
+                overflow: "hidden",
+                borderRadius: 22,
+              }}
+            >
+              <div style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                width: "55%",
+                left: 0,
+                background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%)",
+                animation: `flipCardShimmer 1.4s ease ${index * 65 + 280}ms 1 both`,
+              }} />
+            </div>
+          )}
           {/* Type badge */}
           <div style={{
             position: "absolute",
@@ -170,6 +221,8 @@ export function FlipCard({ game, color, lightColor, borderColor, index, onPlay }
               boxShadow: `0 4px 16px ${color}40`,
               transition: "transform 0.15s cubic-bezier(0.34,1.56,0.64,1)",
               WebkitTapHighlightColor: "transparent",
+              opacity: playReady ? 1 : 0,
+              animation: playReady ? "flipCardPlayPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both" : "none",
             }}
             onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.94)"; }}
             onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
