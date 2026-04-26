@@ -48,13 +48,6 @@ function AppLoader() {
           }}
         />
       </div>
-      <style>{`
-        @keyframes life-load-bar {
-          0%   { width: 0%;   margin-left: 0;    }
-          50%  { width: 80%;  margin-left: 10%;  }
-          100% { width: 0%;   margin-left: 100%; }
-        }
-      `}</style>
     </div>
   )
 }

@@ -52,10 +52,9 @@
   background: transparent;
 }
 
-/* ── FIXME (perf): The inline style objects in SwipeableNotification and many
-   other components inside App.jsx are still created on every render.
-   The biggest wins will come from:
-   1. Extracting the sidebar JSX into a separate <Sidebar /> component.
-   2. Wrapping it in React.memo so it only re-renders when sidebar state
-      changes, not when unrelated content/reading state updates.
-   3. Doing the same for <BottomNav /> and notification-related components. ── */
+/* AppLoader animation — progress bar for the dynamic() import loading screen */
+@keyframes life-load-bar {
+  0%   { width: 0%;   margin-left: 0;    }
+  50%  { width: 80%;  margin-left: 10%;  }
+  100% { width: 0%;   margin-left: 100%; }
+}

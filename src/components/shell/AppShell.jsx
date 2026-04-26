@@ -110,11 +110,12 @@ export function SS({
   theme,
   playFn,
   onLabelClick,
-  // active is accepted but drives rendering at the parent level (App.jsx);
-  // future: use it to highlight the folder header when a child is selected.
-  // eslint-disable-next-line no-unused-vars
-  active,
+  // active: accepted for API consistency — reserved for future folder-header
+  // highlighting when a child item is selected. Intentionally not destructured
+  // to avoid an unused-variable lint error.
+  ...rest
 }) {
+  void rest; // consume rest so ESLint doesn't complain about spread being unused
   const th = theme || C;
   const iosfont = "-apple-system, SF Pro Display, Helvetica Neue, Arial, sans-serif";
 

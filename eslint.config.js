@@ -33,7 +33,7 @@ const browserGlobals = {
 };
 
 export default defineConfig([
-  globalIgnores(["dist"]),
+  globalIgnores(["dist", ".next", "node_modules"]),
   {
     files: ["**/*.{js,jsx}"],
     plugins: {

@@ -13,9 +13,10 @@ import {
   useState,
 } from "react";
 import { TreeNode } from "./components/shell/Field";
-// TODO (future): consider more granular per-section loading once the content
-// tree is split into separate files (e.g. only load finance section on demand).
-// content.js is loaded lazily the first time the "app" screen becomes active.
+// content.js is loaded lazily the first time the "app" screen becomes active
+// (see the dynamic import in the contentData useEffect below). Splitting it
+// further into per-section chunks is a future optimisation once the content
+// tree grows large enough to warrant it.
 import { auth, isFirebaseConfigured } from "./firebaseClient";
 import { Ic } from "./icons/Ic";
 import {
@@ -86,6 +87,7 @@ import { useSubscription } from "./systems/useSubscription";
 import { usePremiumOrganizedSync } from "./systems/usePremiumOrganizedSync";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { UIProvider, useUIContext } from "./contexts/UIContext";
+import { SoundProvider } from "./contexts/SoundContext";
 
 const PREF_DEFAULTS = {
   soundEnabled: true,
@@ -183,6 +185,29 @@ const SidebarSearchItem = memo(function SidebarSearchItem({ item, t, onSelect, p
     </button>
   );
 });
+
+// ── react-window row renderer for virtualized bookmarks list ─────────────────
+// Used when the bookmarks list exceeds BOOKMARK_VIRT_THRESHOLD items.
+// Each SL row is 44px tall (matches the .life-tap-target token).
+const BOOKMARK_VIRT_THRESHOLD = 50;
+const BOOKMARK_ITEM_HEIGHT = 44;
+function BookmarkRow({ index, style, data }) {
+  const { items, t, handleSelect } = data;
+  const item = items[index];
+  return (
+    <div style={style}>
+      <SL
+        theme={t}
+        label={item.node.label}
+        icon={item.node.icon}
+        onSelect={handleSelect}
+        nodeKey={item.key}
+        nodeData={item.node}
+        active={false}
+      />
+    </div>
+  );
+}
 
 // Maps notification type/activity to an iOS-style SVG icon.
 function notifIconKey(n) {
@@ -451,8 +476,8 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
   );
 }
 
-// Thin wrapper that provides AuthContext to the entire app.
-// TODO (future steps): wrap with ThemeContext, UIContext, ContentContext here.
+// Root wrapper: provides AuthContext, UIContext, and SoundContext to the app.
+// ThemeContext and ContentContext can be extracted here in a future refactor.
 export default function LifeApp() {
   return (
     <AuthProvider>
@@ -475,7 +500,6 @@ function LifeAppContent() {
   }, [dark, themeMode]);
 
   // ─── Auth state & mutations — sourced from AuthContext ───────────────────
-  // TODO (future): ThemeContext extraction will lift dark/t/themeMode here.
   const {
     screen,
     setScreen,
@@ -541,7 +565,6 @@ function LifeAppContent() {
     doSignOut,
     doDeleteAccount,
     performDeleteAccount,
-    _setPlay,
   } = useAuth();
 
   const subscription = useSubscription(user?.id);
@@ -563,11 +586,8 @@ function LifeAppContent() {
   // Intentionally narrow — use only when a specific element deserves its own
   // unique sound without duplicating the existing onClick play() call.
   useSoundDelegation(play);
-  // Wire play into AuthContext so auth mutations can give sound feedback.
-  // TODO: Remove this bridge once useSound is extracted to SoundContext.
-  useEffect(() => {
-    _setPlay(play);
-  }, [_setPlay, play]);
+  // SoundProvider keeps the module-level registry (callGlobalPlay) up to date.
+  // AuthContext mutations call callGlobalPlay() directly — no ref-bridge needed.
   const cloud = useUserData(userIdForData);
 
   const emailDeliverySyncKeyRef = useRef("");
@@ -867,9 +887,9 @@ function LifeAppContent() {
   const [showSearch, setShowSearch] = useState(false);
   const [readerModeActive, setReaderModeActive] = useState(false);
   const [secretSiennaUnlocked, setSecretSiennaUnlocked] = useState(false);
-  // TODO (perf): sidebarQuery is still local state; the sidebarSearchResults
-  // useMemo now consumes a deferred version (deferredSidebarQuery) so fast
-  // typing no longer triggers the full filter on every keystroke.
+  // sidebarQuery drives the controlled input; deferredSidebarQuery is the
+  // deferred version consumed by the filter useMemo so fast typing doesn't
+  // block the input with expensive computation.
   const [sidebarQuery, setSidebarQuery] = useState("");
   // Deferred value — lags behind sidebarQuery by one React scheduling slot so
   // the filter/sort computation runs at lower priority than the controlled input.
@@ -894,8 +914,7 @@ function LifeAppContent() {
   // ─── Lazy content data ────────────────────────────────────────────────────
   // content.js (~143 KB) is loaded dynamically the first time the main app
   // screen becomes active, keeping the initial bundle lighter on mobile.
-  // TODO (future): split content.js into per-section chunks and load each one
-  // only when the user navigates to that section (e.g. "finance" on demand).
+  // Per-section splitting is a future optimisation if the file grows further.
   const [contentData, setContentData] = useState(null);
   const [contentLoadErr, setContentLoadErr] = useState(false);
   useEffect(() => {
@@ -941,6 +960,12 @@ function LifeAppContent() {
       })
       .slice(0, 24);
   }, [deferredSidebarQuery, allContent]);
+
+  // Filtered bookmark items; virtualized when count > BOOKMARK_VIRT_THRESHOLD.
+  const bookmarkedItems = useMemo(
+    () => allContent.filter((c) => bookmarks.includes(c.key)),
+    [allContent, bookmarks],
+  );
 
   const libraryCategoryCards = useMemo(() => {
     return Object.entries(LIBRARY).map(([key, node]) => {
@@ -1356,10 +1381,9 @@ function LifeAppContent() {
 
   // useCallback ensures handleSelect has a stable reference across renders.
   // NOTE: inline arrow wrappers like `onClick={() => handleSelect(k, node)}`
-  // in list items still create new functions per render — to fully eliminate
-  // that, each list item would need to be wrapped in React.memo.
-  // TODO (perf): wrap SL/sidebar list items in React.memo and pass memoized
-  //              per-key callbacks to eliminate the last per-item re-render cost.
+  // SL sidebar items are wrapped in React.memo and accept stable onSelect/
+  // nodeKey/nodeData props so each item bails out of re-rendering unless its
+  // own props change. handleSelect is a stable useCallback reference.
   const handleSelect = useCallback((key, node) => {
     const alreadyRead = readKeys.includes(key);
     setSelKey(key);
@@ -2244,6 +2268,7 @@ function LifeAppContent() {
     );
 
   return (
+    <SoundProvider play={play}>
     <div
       data-page-tag="#dashboard_home"
       style={{
@@ -3518,24 +3543,30 @@ function LifeAppContent() {
                 >
                   Nothing saved yet.
                 </p>
+              ) : bookmarkedItems.length > BOOKMARK_VIRT_THRESHOLD ? (
+                <FixedSizeList
+                  height={Math.min(360, bookmarkedItems.length * BOOKMARK_ITEM_HEIGHT)}
+                  itemCount={bookmarkedItems.length}
+                  itemSize={BOOKMARK_ITEM_HEIGHT}
+                  width="100%"
+                  overscanCount={5}
+                  itemData={{ items: bookmarkedItems, t, handleSelect }}
+                >
+                  {BookmarkRow}
+                </FixedSizeList>
               ) : (
-                // TODO (perf): If bookmarks exceed 50 items, switch to a
-                // react-window FixedSizeList to avoid rendering all DOM nodes.
-                // bookmarks are user-controlled and could theoretically be large.
-                allContent
-                  .filter((c) => bookmarks.includes(c.key))
-                  .map((item) => (
-                    <SL
-                      theme={t}
-                      key={item.key}
-                      label={item.node.label}
-                      icon={item.node.icon}
-                      onSelect={handleSelect}
-                      nodeKey={item.key}
-                      nodeData={item.node}
-                      active={false}
-                    />
-                  ))
+                bookmarkedItems.map((item) => (
+                  <SL
+                    theme={t}
+                    key={item.key}
+                    label={item.node.label}
+                    icon={item.node.icon}
+                    onSelect={handleSelect}
+                    nodeKey={item.key}
+                    nodeData={item.node}
+                    active={false}
+                  />
+                ))
               )}
             </SS>
             <SS
@@ -4383,6 +4414,7 @@ function LifeAppContent() {
         />
       )}
     </div>
+    </SoundProvider>
   );
 }
 
