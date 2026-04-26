@@ -785,6 +785,26 @@ function LifeAppContent() {
     setPage("momentum_hub");
   }, [play, setPage]);
 
+  // ── UI state — sourced from UIContext (extracted from God Component) ──────
+  // Declared here (before the first useCallback that references setSidebarOpen)
+  // to avoid a temporal dead zone (TDZ) ReferenceError on iOS/Safari.
+  // Moving these out of LifeAppContent prevents unrelated re-renders when, e.g.,
+  // a sidebar accordion toggles or the viewport-width flag changes.
+  const {
+    sidebarOpen, setSidebarOpen,
+    lifeOpen, setLifeOpen,
+    libOpen, setLibOpen,
+    toolsOpen, setToolsOpen,
+    socialsOpen, setSocialsOpen,
+    guidedOpen, setGuidedOpen,
+    savedOpen, setSavedOpen,
+    experienceOpen, setExperienceOpen,
+    experienceTopic, setExperienceTopic,
+    isNarrowViewport,
+    showScrollTop, setShowScrollTop,
+    shareToast, setShareToast,
+  } = useUIContext();
+
   const openSidebarSectionPage = useCallback(
     (sectionPage, setSectionOpen) => {
       play("tap");
@@ -858,24 +878,6 @@ function LifeAppContent() {
     };
     document.title = titles[page] || "Life. — Knowledge, Growth, Community";
   }, [page]);
-
-  // ── UI state — sourced from UIContext (extracted from God Component) ──────
-  // Moving these out of LifeAppContent prevents unrelated re-renders when, e.g.,
-  // a sidebar accordion toggles or the viewport-width flag changes.
-  const {
-    sidebarOpen, setSidebarOpen,
-    lifeOpen, setLifeOpen,
-    libOpen, setLibOpen,
-    toolsOpen, setToolsOpen,
-    socialsOpen, setSocialsOpen,
-    guidedOpen, setGuidedOpen,
-    savedOpen, setSavedOpen,
-    experienceOpen, setExperienceOpen,
-    experienceTopic, setExperienceTopic,
-    isNarrowViewport,
-    showScrollTop, setShowScrollTop,
-    shareToast, setShareToast,
-  } = useUIContext();
 
   const [selKey, setSelKey] = useState(null);
   const [selContent, setSelContent] = useState(null);
