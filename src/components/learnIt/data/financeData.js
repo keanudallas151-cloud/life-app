@@ -128,3 +128,59 @@ export const COMPOUND_QS = [
   { principal: 10000, rate: 7, years: 4, ans: "$13,108", display: "$13,108", opts: ["$12,800", "$13,400", "$13,108", "$14,000"] },
   { principal: 500,  rate: 12, years: 3, ans: "$702",   display: "$702",   opts: ["$680", "$720", "$702", "$660"] },
 ];
+
+// ── Finance: APR vs APY ──────────────────────────────────────
+// Multi-choice questions on the difference between simple yearly
+// rate (APR) and compounding effect (APY), and which scenario is
+// actually better. Powers the `apr_apy` game via MultiChoiceGame.
+export const APR_QS = [
+  { q: "What does APR stand for?", opts: ["Annual Percentage Rate","Annual Profit Return","Average Payment Ratio","Asset Pricing Rule"], ans: "Annual Percentage Rate", tip: "APR is the yearly cost of borrowing, before compounding effects." },
+  { q: "What does APY stand for?", opts: ["Annual Profit Yearly","Annual Percentage Yield","Asset Payment Yield","Average Pay Year"], ans: "Annual Percentage Yield", tip: "APY includes the effect of compounding — typically what you earn on savings." },
+  { q: "If APR and APY are equal, what does that imply?", opts: ["The bank made a mistake","Interest compounds many times a year","Interest compounds only once a year","The loan has fees"], ans: "Interest compounds only once a year", tip: "APY = APR only when compounding happens annually. More frequent compounding makes APY higher." },
+  { q: "On a savings account, would you prefer a higher APR or APY?", opts: ["Higher APR","Higher APY","They're identical","Lower APY"], ans: "Higher APY", tip: "APY reflects what you actually earn — including compounding. Always compare savings using APY." },
+  { q: "On a credit card, would you prefer a lower APR or higher APY?", opts: ["Higher APR","Lower APR","Higher APY","They don't matter"], ans: "Lower APR", tip: "Credit card interest is a cost, so a lower APR means paying less to borrow." },
+  { q: "Bank A: 5% APR compounded monthly. Bank B: 5% APY. Which earns more on $1,000 over a year?", opts: ["Bank A","Bank B","They're identical","Cannot tell"], ans: "Bank A", tip: "Monthly compounding pushes the effective yield above 5%, so 5% APR > 5% APY (which is already after compounding)." },
+  { q: "Which gives a clearer picture of what you'll actually earn on savings?", opts: ["APR","APY","Nominal rate","Prime rate"], ans: "APY", tip: "APY normalises for compounding frequency, making products comparable." },
+  { q: "If a CD says 4.0% APR compounded daily, the APY will be...", opts: ["Lower than 4.0%","Equal to 4.0%","Slightly higher than 4.0%","Exactly double"], ans: "Slightly higher than 4.0%", tip: "Daily compounding pushes the effective annual yield above the stated APR — but only by a small amount at low rates." },
+  { q: "What does 'compounding frequency' refer to?", opts: ["How often you deposit","How often interest is added to the balance","The bank's branch hours","How often the rate changes"], ans: "How often interest is added to the balance", tip: "Daily, monthly, quarterly, and annual are typical frequencies." },
+  // Medium
+  { q: "Which is BETTER for a borrower (you owe money)?", opts: ["3.9% APR compounded daily","4.0% APR compounded annually","Same","Always APY"], ans: "4.0% APR compounded annually", tip: "Lower compounding frequency means less interest accrued for the borrower — at similar rates." },
+  { q: "Which is BETTER for a saver (you earn money)?", opts: ["3.9% APR compounded daily","3.9% APR compounded annually","Same","Always APR"], ans: "3.9% APR compounded daily", tip: "More frequent compounding = more interest-on-interest = higher real yield." },
+  { q: "A 'teaser rate' in a credit card APR usually means...", opts: ["A permanently low rate","A low introductory rate that rises later","An unusually high rate","A government-mandated rate"], ans: "A low introductory rate that rises later", tip: "Always check what the rate jumps to — and when — before relying on the introductory rate." },
+  { q: "Which fee is typically NOT included in a credit card APR?", opts: ["Interest charges","Annual fees","Late payment fees","All of the above are included"], ans: "Late payment fees", tip: "APR includes interest and some fees; one-off penalty fees and rewards aren't included." },
+  { q: "Mortgage A: 6.2% APR. Mortgage B: 6.0% APR + $3,000 in fees. Which is cheaper depends on...", opts: ["The compounding frequency","How long you stay in the home","Your credit score","The day you sign"], ans: "How long you stay in the home", tip: "Upfront fees only pay off if you keep the loan long enough to recoup them." },
+  { q: "Which statement about APR is TRUE?", opts: ["APR always includes all fees","APR ignores compounding","APR is always greater than APY","APR is the daily rate"], ans: "APR ignores compounding", tip: "APR is the simple yearly rate — APY is the one that bakes in compounding." },
+  // Hard
+  { q: "If a loan has 12% APR compounded monthly, the APY is approximately...", opts: ["12.00%","12.68%","13.50%","11.50%"], ans: "12.68%", tip: "APY = (1 + 0.12/12)^12 - 1 ≈ 12.68%. Compounding adds about 0.68 percentage points." },
+  { q: "Two CDs offer 5% APR. CD A compounds annually, CD B daily. The APY difference is closest to...", opts: ["~0.13 percentage points","~1.0 percentage point","~5 percentage points","Identical"], ans: "~0.13 percentage points", tip: "APY for daily compounding ≈ 5.13%. Frequency matters less than people often assume at low rates." },
+  { q: "If credit-card APR is 24%, the effective rate per month is roughly...", opts: ["1%","2%","6%","24%"], ans: "2%", tip: "24% / 12 ≈ 2% per month — and 2% on a balance of $1,000 is $20 every month." },
+  { q: "When comparing two savings products, the better choice is the one with the...", opts: ["Higher APR","Higher APY","Higher compounding frequency","Lower APR"], ans: "Higher APY", tip: "APY already accounts for compounding frequency — it's the apples-to-apples number." },
+  { q: "True or false: an APR of 0% always means no cost to borrow.", opts: ["True","False","Only for credit cards","Only for mortgages"], ans: "False", tip: "0% APR offers can still come with origination fees, balance-transfer fees, or fast rate jumps." },
+];
+
+// ── Finance: Needs vs Wants ──────────────────────────────────
+// Items the player swipes left (Want) or right (Need). Used by the
+// `needs_wants` game to build budgeting intuition. `category` is the
+// correct classification, `tip` is shown after each card.
+export const NEEDS_WANTS = [
+  { item: "Rent / mortgage payment", category: "need", emoji: "🏠", tip: "Shelter is a baseline need." },
+  { item: "Groceries for the week", category: "need", emoji: "🛒", tip: "Basic food at home is a need; eating out is usually a want." },
+  { item: "Streaming subscriptions", category: "want", emoji: "📺", tip: "Entertainment is a want — convenient, but not survival-critical." },
+  { item: "Health insurance", category: "need", emoji: "🩺", tip: "Insurance protects against catastrophic costs — a fundamental need." },
+  { item: "Designer handbag", category: "want", emoji: "👜", tip: "Status purchases are wants, no matter how nice." },
+  { item: "Reliable phone plan", category: "need", emoji: "📱", tip: "A basic working phone counts as a modern need; the latest model is a want." },
+  { item: "Daily takeaway coffee", category: "want", emoji: "☕", tip: "Lattes are wants. They add up faster than people expect." },
+  { item: "Electricity bill", category: "need", emoji: "💡", tip: "Utilities are needs — but you can negotiate the size of the bill." },
+  { item: "Latest gaming console", category: "want", emoji: "🎮", tip: "Pure entertainment — definitely a want." },
+  { item: "Public transport pass", category: "need", emoji: "🚌", tip: "If you need it to get to work, it's a need." },
+  { item: "Concert tickets", category: "want", emoji: "🎤", tip: "Memorable, but a clear want." },
+  { item: "Emergency fund contribution", category: "need", emoji: "🛟", tip: "Building 3–6 months of expenses is a financial need, not optional." },
+  { item: "New running shoes (current pair worn out)", category: "need", emoji: "👟", tip: "Functional replacement clothing/footwear is a need." },
+  { item: "Fifth pair of running shoes", category: "want", emoji: "👟", tip: "When you already have what you need, more is a want." },
+  { item: "Basic internet at home", category: "need", emoji: "🌐", tip: "For most modern jobs and study, basic internet is a need." },
+  { item: "Premium gym membership", category: "want", emoji: "🏋️", tip: "Movement is essential, but a premium gym is a want — there are free alternatives." },
+  { item: "Prescription medication", category: "need", emoji: "💊", tip: "Anything required for your health is a need." },
+  { item: "Brand-new car when current one works", category: "want", emoji: "🚗", tip: "If your current car is reliable, the upgrade is a want." },
+  { item: "Toothpaste and basic toiletries", category: "need", emoji: "🧴", tip: "Hygiene basics are needs; designer skincare is a want." },
+  { item: "Vacation in another country", category: "want", emoji: "✈️", tip: "Travel is a great want — budget for it deliberately." },
+];

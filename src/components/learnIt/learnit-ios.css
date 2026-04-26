@@ -1,0 +1,227 @@
+/* ──────────────────────────────────────────────────────────────
+   Learn-It iOS / mobile polish
+   Scoped under [data-page-tag="#learn_it_subject"] so styles can
+   never leak into the rest of the app.
+
+   Numbered FIX blocks follow the convention used in
+   src/ii-mobile-fixes.css and src/components/organized/organized.css.
+────────────────────────────────────────────────────────────── */
+
+/* ── FIX 1: shimmer + play-pop keyframes (extracted from FlipCard inline <style>) ──
+   Note: `life-flipcard-hint-pulse` is defined in src/index.css (universal). */
+@keyframes flipCardShimmer {
+  0%   { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+  18%  { opacity: 0.55; }
+  60%  { opacity: 0.55; }
+  100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+}
+@keyframes flipCardPlayPop {
+  0%   { transform: translateX(-50%) scale(0.6); opacity: 0; }
+  60%  { transform: translateX(-50%) scale(1.12); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* ── FIX 2: ripple keyframe — anchored at touch point on FlipCard front ── */
+@keyframes life-flipcard-ripple {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0.55; }
+  100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+}
+
+/* ── FIX 3: NEW ribbon entry animation ── */
+@keyframes life-flipcard-ribbon-in {
+  from { opacity: 0; transform: rotate(45deg) translateY(-8px); }
+  to   { opacity: 1; transform: rotate(45deg) translateY(0); }
+}
+
+/* ── FIX 4: shared subject hero gradient sweep (slow ambient motion) ── */
+@keyframes life-learnit-hero-sweep {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── FIX 5: Learn-It page root — safe-area + token-based spacing ── */
+[data-page-tag="#learn_it_subject"] {
+  padding-bottom: calc(var(--safe-bottom, 0px) + 96px);
+}
+
+/* ── FIX 6: subject header respects notch + uses fluid type tokens ── */
+[data-page-tag="#learn_it_subject"] .life-learnit-header {
+  padding-top: calc(var(--safe-top, 0px) + var(--life-space-3, 18px));
+  padding-left: calc(var(--safe-left, 0px) + var(--life-space-2, 14px));
+  padding-right: calc(var(--safe-right, 0px) + var(--life-space-2, 14px));
+}
+
+[data-page-tag="#learn_it_subject"] .life-learnit-title {
+  font-size: var(--life-text-2xl, clamp(24px, 4vw, 30px));
+}
+
+/* ── FIX 7: card grid — token spacing, rubber-band scroll, safe bottom ── */
+[data-page-tag="#learn_it_subject"] .life-learnit-grid {
+  gap: var(--life-space-2, 12px);
+  padding: var(--life-space-3, 20px) var(--life-space-2, 16px)
+           calc(var(--safe-bottom, 0px) + 96px);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ── FIX 8: landscape iPhone — 3 columns, shorter cards ── */
+@media (orientation: landscape) and (max-height: 480px) {
+  [data-page-tag="#learn_it_subject"] .life-learnit-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  [data-page-tag="#learn_it_subject"] .life-flipcard-shell {
+    aspect-ratio: 1 / 0.9 !important;
+  }
+}
+
+/* ── FIX 9: Play pill — keep visual size but expand hit area to 44px ── */
+[data-page-tag="#learn_it_subject"] .life-flipcard-play {
+  position: relative;
+}
+[data-page-tag="#learn_it_subject"] .life-flipcard-play::before {
+  content: "";
+  position: absolute;
+  inset: 50% 50% 50% 50%;
+  width: var(--life-tap-target, 44px);
+  height: var(--life-tap-target, 44px);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+/* ── FIX 10: focus-visible rings — keyboard accessibility ── */
+[data-page-tag="#learn_it_subject"] .life-flipcard-shell:focus-visible {
+  outline: 2px solid var(--life-flipcard-color, #ffffff);
+  outline-offset: 4px;
+  border-radius: 22px;
+}
+[data-page-tag="#learn_it_subject"] .life-flipcard-play:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+/* ── FIX 11: NEW ribbon — diagonal subject-tinted banner top-right ── */
+[data-page-tag="#learn_it_subject"] .life-flipcard-ribbon {
+  position: absolute;
+  top: 14px;
+  right: -32px;
+  width: 110px;
+  text-align: center;
+  padding: 3px 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #000;
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  animation: life-flipcard-ribbon-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+/* ── FIX 12: segmented filter (sticky under header) ── */
+[data-page-tag="#learn_it_subject"] .life-learnit-segmented {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+  padding: 10px var(--life-space-2, 16px);
+  margin: 0 var(--life-space-2, 16px);
+  background: rgba(10,10,10,0.78);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+[data-page-tag="#learn_it_subject"] .life-learnit-segmented::-webkit-scrollbar {
+  display: none;
+}
+[data-page-tag="#learn_it_subject"] .life-learnit-segment {
+  flex: 1 1 auto;
+  min-width: 64px;
+  min-height: var(--life-tap-target, 44px);
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  color: rgba(220,220,220,0.65);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.18s cubic-bezier(0.34,1.56,0.64,1),
+              color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+[data-page-tag="#learn_it_subject"] .life-learnit-segment[aria-pressed="true"] {
+  background: var(--life-segment-active-bg, rgba(255,255,255,0.12));
+  color: var(--life-segment-active-fg, #fff);
+}
+
+/* ── FIX 13: pull-to-refresh chevron (visual affordance only) ── */
+[data-page-tag="#learn_it_subject"] .life-learnit-refresh {
+  position: relative;
+  height: 0;
+  margin-top: -8px;
+  text-align: center;
+  pointer-events: none;
+  overflow: hidden;
+  transition: height 0.18s cubic-bezier(0.34,1.56,0.64,1);
+}
+[data-page-tag="#learn_it_subject"] .life-learnit-refresh[data-active="true"] {
+  height: 36px;
+}
+[data-page-tag="#learn_it_subject"] .life-learnit-refresh-icon {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  transition: transform 0.2s ease;
+}
+[data-page-tag="#learn_it_subject"] .life-learnit-refresh[data-armed="true"] .life-learnit-refresh-icon {
+  transform: rotate(180deg);
+}
+
+/* ── FIX 14: GameModal grabber handle (iOS sheet style) ── */
+.life-gamemodal-grabber {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.32);
+  margin: 6px auto 0;
+}
+
+/* ── FIX 15: GameModal — body parallax dim while sheet is open ── */
+body.life-gamemodal-open .life-app-shell,
+body.life-gamemodal-open #__next > main {
+  /* Best-effort: gracefully degrade if these selectors don't exist.  */
+  transform: scale(0.96);
+  filter: brightness(0.55);
+  transition: transform 0.42s cubic-bezier(0.34,1.1,0.64,1),
+              filter 0.42s cubic-bezier(0.34,1.1,0.64,1);
+}
+
+/* ── FIX 16: respect reduced motion across the feature ── */
+@media (prefers-reduced-motion: reduce) {
+  [data-page-tag="#learn_it_subject"] *,
+  [data-page-tag="#learn_it_subject"] *::before,
+  [data-page-tag="#learn_it_subject"] *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  body.life-gamemodal-open .life-app-shell,
+  body.life-gamemodal-open #__next > main {
+    transform: none !important;
+    filter: none !important;
+  }
+}

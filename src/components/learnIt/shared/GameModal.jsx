@@ -1,33 +1,154 @@
-import { useEffect, useRef } from "react";
-import { FONT } from "./constants.js";
+import { useEffect, useRef, useState } from "react";
+import { FONT, haptic } from "./constants.js";
 
 export function GameModal({ children, onClose, color, title, t, play }) {
   const contentRef = useRef(null);
+  const [drag, setDrag] = useState(0);
+  const [dismissing, setDismissing] = useState(false);
+  const dragStartRef = useRef(null); // { x, y, startedAt, fromTop }
+  const lastMoveRef = useRef({ y: 0, ts: 0, vy: 0 });
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    document.body.classList.add("life-gamemodal-open");
     play?.("game_start");
     if (contentRef.current) contentRef.current.scrollTop = 0;
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+      document.body.classList.remove("life-gamemodal-open");
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const triggerClose = () => {
+    play?.("sheet_close");
+    haptic([6, 30, 6]);
+    setDismissing(true);
+    // wait for slide-out animation, then unmount
+    setTimeout(() => onClose(), 280);
+  };
+
+  // ── Touch handlers: support iOS-style swipe-down dismiss and
+  // edge-swipe-from-left back gesture. We only initiate the
+  // pull-to-dismiss when the scroll container is at the top.
+  const handleTouchStart = (e) => {
+    if (dismissing) return;
+    const touch = e.touches[0];
+    const atTop = (contentRef.current?.scrollTop ?? 0) <= 0;
+    const fromLeftEdge = touch.clientX < 30;
+    dragStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      startedAt: Date.now(),
+      fromTop: atTop,
+      fromLeftEdge,
+      mode: null, // resolved on first move
+    };
+    lastMoveRef.current = { y: touch.clientY, ts: Date.now(), vy: 0 };
+  };
+
+  const handleTouchMove = (e) => {
+    const start = dragStartRef.current;
+    if (!start || dismissing) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+
+    if (!start.mode) {
+      if (start.fromLeftEdge && dx > 12 && Math.abs(dx) > Math.abs(dy)) {
+        start.mode = "edge-back";
+      } else if (start.fromTop && dy > 12 && Math.abs(dy) > Math.abs(dx)) {
+        start.mode = "pull-down";
+      } else if (Math.abs(dy) > 6 || Math.abs(dx) > 6) {
+        start.mode = "scroll"; // give up to inner scroll
+      }
+    }
+
+    if (start.mode === "pull-down" && dy > 0) {
+      setDrag(dy);
+      // velocity tracking
+      const now = Date.now();
+      const dt = Math.max(1, now - lastMoveRef.current.ts);
+      const vy = (touch.clientY - lastMoveRef.current.y) / dt;
+      lastMoveRef.current = { y: touch.clientY, ts: now, vy };
+    } else if (start.mode === "edge-back" && dx > 0) {
+      setDrag(dx);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    const start = dragStartRef.current;
+    if (!start) return;
+    const vy = lastMoveRef.current.vy; // px/ms; >0.5 ≈ a flick
+    const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
+    const screenW = typeof window !== "undefined" ? window.innerWidth : 400;
+
+    if (start.mode === "pull-down") {
+      const shouldDismiss = drag > screenH * 0.25 || vy > 0.5;
+      if (shouldDismiss) {
+        triggerClose();
+      } else {
+        setDrag(0);
+      }
+    } else if (start.mode === "edge-back") {
+      const shouldDismiss = drag > screenW * 0.3;
+      if (shouldDismiss) {
+        triggerClose();
+      } else {
+        setDrag(0);
+      }
+    } else {
+      setDrag(0);
+    }
+    dragStartRef.current = null;
+  };
+
+  // Compute transform for the sheet based on drag.
+  // Note: when no drag is active, leave transform off so the entry
+  // animation (`gmSlideUp`) can run unchallenged.
+  const isInteractive = dismissing || drag > 0;
+  const sheetTransform = dismissing
+    ? "translateY(100%)"
+    : drag > 0
+      ? `translateY(${drag}px)`
+      : undefined;
+  const dragProgress = drag > 0 ? Math.min(1, drag / 400) : 0;
+
   return (
-    <div style={{
-      position: "fixed",
-      inset: 0,
-      zIndex: 1000,
-      background: `radial-gradient(ellipse at 70% 20%, ${color}0a 0%, transparent 60%), ${t?.skin || "#0a0a0a"}`,
-      display: "flex",
-      flexDirection: "column",
-      overflow: "hidden",
-      animation: "gmSlideUp 0.42s cubic-bezier(0.34,1.1,0.64,1) both",
-      transformOrigin: "bottom center",
-    }}>
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        background: `radial-gradient(ellipse at 70% 20%, ${color}0a 0%, transparent 60%), ${t?.skin || "#0a0a0a"}`,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        animation: isInteractive
+          ? "none"
+          : "gmSlideUp 0.42s cubic-bezier(0.34,1.1,0.64,1) both",
+        transformOrigin: "bottom center",
+        transform: sheetTransform,
+        transition: drag === 0 && !dismissing
+          ? "transform 0.32s cubic-bezier(0.34,1.56,0.64,1)"
+          : dismissing
+            ? "transform 0.28s cubic-bezier(0.34,1.1,0.64,1), opacity 0.28s ease"
+            : "none",
+        opacity: 1 - dragProgress * 0.25,
+      }}
+    >
       <style>{`
         @keyframes gmSlideUp {
           from { transform: translateY(100%); opacity: 0.4; }
           to   { transform: translateY(0);    opacity: 1; }
+        }
+        @keyframes gmSlideDown {
+          from { transform: translateY(0); opacity: 1; }
+          to   { transform: translateY(100%); opacity: 0; }
         }
         @keyframes gmBgSweep {
           0%   { background-position: 0% 50%; }
@@ -147,18 +268,24 @@ export function GameModal({ children, onClose, color, title, t, play }) {
           }
         }
       `}</style>
+      {/* iOS-style sheet grabber */}
+      <div
+        aria-hidden="true"
+        className="life-gamemodal-grabber"
+        style={{ flexShrink: 0 }}
+      />
       {/* Header */}
       <div style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "16px 20px",
+        padding: "12px 20px 14px",
         borderBottom: `1px solid ${color}30`,
         background: t?.white || "#111111",
       }}>
         <button
           type="button"
-          onClick={() => { play?.("back_game"); onClose(); }}
+          onClick={() => { play?.("back_game"); triggerClose(); }}
           style={{
             display: "flex",
             alignItems: "center",
@@ -171,6 +298,7 @@ export function GameModal({ children, onClose, color, title, t, play }) {
             fontWeight: 600,
             fontFamily: FONT,
             padding: 0,
+            minHeight: 44,
             WebkitTapHighlightColor: "transparent",
           }}
         >
@@ -186,7 +314,7 @@ export function GameModal({ children, onClose, color, title, t, play }) {
         <div style={{ width: 50 }} />
       </div>
       {/* Content */}
-      <div ref={contentRef} style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+      <div ref={contentRef} style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
         {children}
       </div>
     </div>

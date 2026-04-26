@@ -1,7 +1,16 @@
-import { useEffect, useRef } from "react";
-import { FONT } from "./constants.js";
+import { useEffect, useRef, createContext, useContext } from "react";
+import { FONT, recordBestScore } from "./constants.js";
 
-export function ScoreScreen({ score, total, color, customMsg, onReplay, onClose, t, play }) {
+/**
+ * Context providing the currently-active Learn-It game id so any
+ * ScoreScreen rendered downstream can record its session-best
+ * without each game having to thread an extra prop.
+ */
+export const LearnItGameIdContext = createContext(null);
+
+export function ScoreScreen({ score, total, color, customMsg, onReplay, onClose, t, play, gameId }) {
+  const ctxId = useContext(LearnItGameIdContext);
+  const effectiveId = gameId || ctxId;
   const pct = Math.round((score / total) * 100);
   const iconPath = pct === 100
     ? <><path d="M6 9a6 6 0 0012 0V4H6v5z"/><path d="M6 4H3v3a3 3 0 003 3"/><path d="M18 4h3v3a3 3 0 01-3 3"/><path d="M9 21h6"/><path d="M12 15v6"/></>
@@ -14,10 +23,11 @@ export function ScoreScreen({ score, total, color, customMsg, onReplay, onClose,
   useEffect(() => {
     if (played.current) return;
     played.current = true;
+    if (effectiveId) recordBestScore(effectiveId, score, total);
     if (pct === 100) { play?.("level_up"); setTimeout(() => play?.("streak_5"), 350); }
     else if (pct >= 60) play?.("word_correct");
     else play?.("word_wrong");
-  }, [pct, play]);
+  }, [pct, play, effectiveId, score, total]);
   const confettiColors = ["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#FF6FF2","#FF9E4F","#A0F0A0","#B388FF","#FFB347","#4FC3F7","#FF80AB","#69F0AE"];
   return (
     <div style={{ padding: "32px 24px", textAlign: "center", fontFamily: FONT, position: "relative" }}>

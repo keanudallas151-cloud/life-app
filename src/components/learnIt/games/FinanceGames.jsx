@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FONT } from "../shared/constants.js";
 import { Progress } from "../shared/Progress.jsx";
 import { ScoreScreen } from "../shared/ScoreScreen.jsx";
@@ -6,7 +6,9 @@ import {
   INVEST_QS,
   MONEY_QS,
   COMPOUND_QS,
+  NEEDS_WANTS,
 } from "../data/financeData.js";
+import { recordBestScore } from "../shared/constants.js";
 
 export function FlashcardGame({ cards, color, t, play }) {
   const [i, setI] = useState(0);
@@ -345,6 +347,171 @@ export function CompoundGrowthGame({ color, onClose, t, play }) {
       {selected === "__timeout__" && (
         <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 14, background: "rgba(229,72,77,0.12)", border: "1px solid #e5484d40", fontSize: 12.5, color: "#e5484d", lineHeight: 1.55, fontFamily: FONT }}>
           Time&apos;s up! Answer: {q.display}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Needs vs Wants — iOS-style swipe classifier.
+   Swipe a card LEFT for "Want", RIGHT for "Need". Buttons are
+   provided as an accessible fallback for keyboard / VoiceOver.
+────────────────────────────────────────────────────────────── */
+export function NeedsWantsGame({ color, onClose, t, play }) {
+  const TOTAL = 12;
+  const [pool] = useState(() => [...NEEDS_WANTS].sort(() => Math.random() - 0.5).slice(0, TOTAL));
+  const [idx, setIdx] = useState(0);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const [drag, setDrag] = useState(0); // px offset
+  const [committed, setCommitted] = useState(null); // "left" | "right" | null
+  const [feedback, setFeedback] = useState(null); // { correct, tip } | null
+  const startRef = useRef(0);
+  const card = pool[idx];
+
+  const commit = (direction) => {
+    if (committed) return;
+    setCommitted(direction);
+    play?.("swipe");
+    const guess = direction === "right" ? "need" : "want";
+    const correct = guess === card.category;
+    if (correct) { setScore((s) => s + 1); play?.("correct"); }
+    else play?.("wrong");
+    setFeedback({ correct, tip: card.tip });
+    setTimeout(() => {
+      setFeedback(null);
+      setCommitted(null);
+      setDrag(0);
+      if (idx + 1 >= pool.length) setDone(true);
+      else setIdx((i) => i + 1);
+    }, 1100);
+  };
+
+  const onTouchStart = (e) => {
+    if (committed) return;
+    startRef.current = e.touches[0].clientX;
+  };
+  const onTouchMove = (e) => {
+    if (committed) return;
+    const dx = e.touches[0].clientX - startRef.current;
+    setDrag(dx);
+  };
+  const onTouchEnd = () => {
+    if (committed) return;
+    if (drag > 110) commit("right");
+    else if (drag < -110) commit("left");
+    else setDrag(0);
+  };
+
+  if (done) {
+    recordBestScore("needs_wants", score, pool.length);
+    return (
+      <ScoreScreen
+        score={score}
+        total={pool.length}
+        color={color}
+        onReplay={() => { setIdx(0); setScore(0); setDone(false); }}
+        onClose={onClose}
+        t={t}
+        play={play}
+      />
+    );
+  }
+
+  if (!card) return null;
+  const dragPct = Math.max(-1, Math.min(1, drag / 140));
+  const tilt = dragPct * 12;
+  const wantOpacity = Math.max(0, -dragPct);
+  const needOpacity = Math.max(0, dragPct);
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT, position: "relative" }}>
+      <Progress current={idx} total={pool.length} color={color} t={t} />
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "8px 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+        <span style={{ color: "#e5484d" }}>← Want</span>
+        <span style={{ color: t?.muted || "#a1a1a1" }}>Swipe or tap</span>
+        <span style={{ color: "#50c878" }}>Need →</span>
+      </div>
+
+      <div
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{
+          position: "relative",
+          background: t?.light || "rgba(255,255,255,0.05)",
+          borderRadius: 22,
+          padding: "30px 22px",
+          minHeight: 220,
+          border: `1.5px solid ${t?.border || "rgba(255,255,255,0.08)"}`,
+          textAlign: "center",
+          transform: committed === "left"
+            ? "translateX(-130%) rotate(-18deg)"
+            : committed === "right"
+              ? "translateX(130%) rotate(18deg)"
+              : `translateX(${drag}px) rotate(${tilt}deg)`,
+          transition: committed
+            ? "transform 0.45s cubic-bezier(0.34,1.1,0.64,1)"
+            : drag === 0 ? "transform 0.25s cubic-bezier(0.34,1.56,0.64,1)" : "none",
+          boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+          touchAction: "pan-y",
+          WebkitTapHighlightColor: "transparent",
+        }}
+      >
+        <div style={{ fontSize: 56, lineHeight: 1, marginBottom: 12 }}>{card.emoji}</div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: t?.ink || "#ededed", letterSpacing: "-0.02em" }}>{card.item}</div>
+        <p style={{ fontSize: 12.5, color: t?.muted || "#a1a1a1", margin: "10px 0 0" }}>Is this a need or a want?</p>
+        {/* Overlay stamps */}
+        <div style={{
+          position: "absolute", top: 18, left: 18,
+          padding: "6px 12px", borderRadius: 10, border: "2.5px solid #e5484d",
+          color: "#e5484d", fontWeight: 800, fontSize: 14, letterSpacing: "0.12em",
+          opacity: wantOpacity, transform: `rotate(-12deg)`,
+        }}>WANT</div>
+        <div style={{
+          position: "absolute", top: 18, right: 18,
+          padding: "6px 12px", borderRadius: 10, border: "2.5px solid #50c878",
+          color: "#50c878", fontWeight: 800, fontSize: 14, letterSpacing: "0.12em",
+          opacity: needOpacity, transform: `rotate(12deg)`,
+        }}>NEED</div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
+        <button
+          type="button"
+          onClick={() => commit("left")}
+          style={{
+            padding: "14px 0", borderRadius: 14,
+            border: "1.5px solid rgba(229,72,77,0.4)",
+            background: "rgba(229,72,77,0.1)",
+            color: "#e5484d", fontSize: 14, fontWeight: 700, cursor: "pointer",
+            fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+          }}
+        >Want</button>
+        <button
+          type="button"
+          onClick={() => commit("right")}
+          style={{
+            padding: "14px 0", borderRadius: 14,
+            border: "1.5px solid rgba(80,200,120,0.4)",
+            background: "rgba(80,200,120,0.1)",
+            color: "#50c878", fontSize: 14, fontWeight: 700, cursor: "pointer",
+            fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+          }}
+        >Need</button>
+      </div>
+
+      {feedback && (
+        <div style={{
+          marginTop: 14, padding: "12px 16px", borderRadius: 14,
+          background: feedback.correct ? `${color}18` : "rgba(229,72,77,0.12)",
+          border: `1px solid ${feedback.correct ? color + "40" : "#e5484d40"}`,
+          fontSize: 12.5, color: feedback.correct ? color : "#e5484d", lineHeight: 1.55, fontFamily: FONT,
+          animation: "tipSlideUp 0.3s ease both",
+        }}>
+          {feedback.correct ? "✓ Right call — " : "✗ Other side — "}{feedback.tip}
         </div>
       )}
     </div>

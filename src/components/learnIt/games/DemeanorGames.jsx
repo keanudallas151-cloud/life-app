@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FONT } from "../shared/constants.js";
 import { Progress } from "../shared/Progress.jsx";
 import { ScoreScreen } from "../shared/ScoreScreen.jsx";
@@ -262,6 +262,171 @@ export function DailyDemChallenge({ color, onClose, t, play }) {
         <p style={{ fontSize: 13.5, color: t?.ink || "#ededed", lineHeight: 1.6, margin: 0 }}>{challenge.tip}</p>
       </div>
       <button type="button" onClick={() => { play?.("star"); setAccepted(true); }} style={{ width: "100%", marginTop: 24, padding: "14px", background: color, color: "#000", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>I Accept the Challenge ✓</button>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Eye Contact Trainer — a face SVG appears for a randomised
+   2-6 second window. Tap when you "feel comfortable" sustaining
+   eye contact. Tracks streaks of windows you held to completion.
+────────────────────────────────────────────────────────────── */
+export function EyeContactTrainer({ color, onClose, t, play }) {
+  const [phase, setPhase] = useState("ready"); // "ready" | "active" | "result"
+  const [duration, setDuration] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [held, setHeld] = useState(null); // boolean: did user hold to end?
+  const startedRef = useRef(0);
+
+  const startRound = () => {
+    const ms = 2000 + Math.random() * 4000; // 2–6s
+    setDuration(ms);
+    setElapsed(0);
+    setHeld(null);
+    setPhase("active");
+    startedRef.current = Date.now();
+    play?.("tap_firm");
+  };
+
+  // Active timer
+  useEffect(() => {
+    if (phase !== "active") return;
+    let raf;
+    const tick = () => {
+      const e = Date.now() - startedRef.current;
+      setElapsed(e);
+      if (e >= duration) {
+        setHeld(true);
+        setPhase("result");
+        setStreak((s) => {
+          const next = s + 1;
+          setBestStreak((b) => Math.max(b, next));
+          return next;
+        });
+        play?.("success");
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [phase, duration, play]);
+
+  const breakEarly = () => {
+    if (phase !== "active") return;
+    setHeld(false);
+    setPhase("result");
+    setStreak(0);
+    play?.("wrong");
+  };
+
+  const remaining = Math.max(0, Math.ceil((duration - elapsed) / 1000));
+  const ringPct = duration > 0 ? Math.min(1, elapsed / duration) : 0;
+  const RING = 70;
+  const CIRC = 2 * Math.PI * RING;
+
+  return (
+    <div style={{ padding: "28px 24px 40px", fontFamily: FONT, textAlign: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+        <span style={{ fontSize: 11, color: t?.muted || "#a1a1a1", letterSpacing: "0.06em", textTransform: "uppercase" }}>Streak</span>
+        <span style={{ fontSize: 18, fontWeight: 800, color, fontFamily: FONT }}>🔥 {streak}</span>
+        <span style={{ fontSize: 11, color: t?.muted || "#a1a1a1", letterSpacing: "0.06em", textTransform: "uppercase" }}>Best {bestStreak}</span>
+      </div>
+
+      <div style={{
+        position: "relative",
+        margin: "0 auto",
+        width: 220, height: 220,
+      }}>
+        {/* Progress ring */}
+        <svg width="220" height="220" viewBox="0 0 220 220" style={{ position: "absolute", inset: 0 }}>
+          <circle cx="110" cy="110" r={RING} fill="none" stroke={t?.border || "rgba(255,255,255,0.1)"} strokeWidth="6" />
+          {phase === "active" && (
+            <circle
+              cx="110" cy="110" r={RING}
+              fill="none"
+              stroke={color}
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeDasharray={CIRC}
+              strokeDashoffset={CIRC * (1 - ringPct)}
+              transform="rotate(-90 110 110)"
+              style={{ transition: "stroke-dashoffset 0.06s linear" }}
+            />
+          )}
+        </svg>
+        {/* Face */}
+        <div style={{
+          position: "absolute", inset: 18,
+          borderRadius: "50%",
+          background: `radial-gradient(circle at 50% 40%, ${color}1f 0%, rgba(255,255,255,0.04) 70%)`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`,
+        }}>
+          <svg width="120" height="120" viewBox="0 0 120 120" aria-hidden="true">
+            {/* Head */}
+            <ellipse cx="60" cy="62" rx="42" ry="48" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" />
+            {/* Eyes */}
+            <circle cx="46" cy="56" r="5" fill={color} />
+            <circle cx="74" cy="56" r="5" fill={color} />
+            {/* Pupils — gentle micro-shift to feel alive */}
+            <circle cx="47" cy="56" r="1.6" fill="#000" />
+            <circle cx="75" cy="56" r="1.6" fill="#000" />
+            {/* Mouth */}
+            <path d="M 48 82 Q 60 90 72 82" stroke="rgba(255,255,255,0.55)" strokeWidth="2" fill="none" strokeLinecap="round" />
+          </svg>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 22, minHeight: 60 }}>
+        {phase === "ready" && (
+          <>
+            <p style={{ fontSize: 14, color: t?.muted || "#a1a1a1", lineHeight: 1.55, margin: "0 0 14px" }}>
+              Hold gentle eye contact with the face until the ring fills. You won&apos;t know how long it&apos;ll be.
+            </p>
+            <button type="button" onClick={startRound} style={{
+              padding: "13px 32px", background: color, color: "#000", border: "none",
+              borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: "pointer",
+              fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+            }}>Start a round</button>
+          </>
+        )}
+        {phase === "active" && (
+          <>
+            <p style={{ fontSize: 13, color: t?.muted || "#a1a1a1", margin: "0 0 12px" }}>
+              {remaining}s left — stay with it
+            </p>
+            <button type="button" onClick={breakEarly} style={{
+              padding: "10px 22px", background: "rgba(255,255,255,0.06)", color: t?.muted || "#a1a1a1",
+              border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`,
+              borderRadius: 999, fontSize: 12.5, fontWeight: 600, cursor: "pointer",
+              fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+            }}>I broke contact</button>
+          </>
+        )}
+        {phase === "result" && (
+          <>
+            <p style={{ fontSize: 16, fontWeight: 700, color: held ? color : "#e5484d", margin: "0 0 12px", letterSpacing: "-0.01em" }}>
+              {held ? "✓ Held the whole window" : "✗ Try again — just notice when you flinched"}
+            </p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+              <button type="button" onClick={startRound} style={{
+                padding: "11px 26px", background: color, color: "#000", border: "none",
+                borderRadius: 14, fontSize: 14, fontWeight: 700, cursor: "pointer",
+                fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+              }}>Next round</button>
+              <button type="button" onClick={onClose} style={{
+                padding: "11px 26px", background: "rgba(255,255,255,0.06)", color: t?.muted || "#a1a1a1",
+                border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`,
+                borderRadius: 14, fontSize: 14, fontWeight: 600, cursor: "pointer",
+                fontFamily: FONT, WebkitTapHighlightColor: "transparent",
+              }}>Done</button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

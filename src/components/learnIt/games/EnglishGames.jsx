@@ -8,7 +8,9 @@ import {
   VOCAB_PAIRS,
   SENTENCE_QS,
   WORD_LADDER_PUZZLES,
+  SPELL_SPRINT_WORDS,
 } from "../data/englishData.js";
+import { recordBestScore } from "../shared/constants.js";
 
 export function FillGapGame({ questions: questionsProp, color, onClose, t, play }) {
   const qs = questionsProp || FILL_GAP_QS;
@@ -797,6 +799,211 @@ export function WordLadderGame({ color, t, play }) {
               fontFamily: FONT, WebkitTapHighlightColor: "transparent",
             }}>💡 Reveal this step (no points)</button>
           )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Spell Sprint — show a word for a moment, then hide it; player
+   taps letters in the correct order under a per-word timer.
+────────────────────────────────────────────────────────────── */
+export function SpellSprintGame({ color, onClose, t, play }) {
+  const TOTAL = 8;
+  // Pick TOTAL distinct words; fall back to a clone if pool is small.
+  const [pool] = useState(() => {
+    const shuffled = [...SPELL_SPRINT_WORDS].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, TOTAL);
+  });
+  const [idx, setIdx] = useState(0);
+  const [phase, setPhase] = useState("show"); // "show" | "type" | "result"
+  const [typed, setTyped] = useState("");
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const [showTime, setShowTime] = useState(2);
+  const [letters, setLetters] = useState([]);
+  const [shake, setShake] = useState(false);
+  const target = pool[idx] || "";
+
+  // Build a tray of letters: target letters + a couple of distractors.
+  useEffect(() => {
+    if (!target) return;
+    const ALPH = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const extras = [];
+    while (extras.length < Math.max(2, Math.floor(target.length / 3))) {
+      const c = ALPH[Math.floor(Math.random() * ALPH.length)];
+      if (!target.includes(c)) extras.push(c);
+    }
+    const tray = (target + extras.join("")).split("").sort(() => Math.random() - 0.5);
+    setLetters(tray);
+    setTyped("");
+    setPhase("show");
+    setShowTime(2);
+  }, [target]);
+
+  // Show countdown then switch to type mode.
+  useEffect(() => {
+    if (phase !== "show") return;
+    if (showTime <= 0) {
+      play?.("tap_firm");
+      setPhase("type");
+      return;
+    }
+    const t1 = setTimeout(() => setShowTime((s) => s - 1), 1000);
+    return () => clearTimeout(t1);
+  }, [phase, showTime, play]);
+
+  const advance = (correct) => {
+    setPhase("result");
+    if (correct) { setScore((s) => s + 1); play?.("correct"); }
+    else { setShake(true); play?.("wrong"); setTimeout(() => setShake(false), 350); }
+    setTimeout(() => {
+      if (idx + 1 >= pool.length) {
+        setDone(true);
+      } else {
+        setIdx((i) => i + 1);
+      }
+    }, 900);
+  };
+
+  const tapLetter = (ch, i) => {
+    if (phase !== "type") return;
+    const next = typed + ch;
+    play?.("tap_soft");
+    if (target.startsWith(next)) {
+      setTyped(next);
+      // Remove this tile by index so duplicates don't auto-collapse.
+      setLetters((arr) => arr.map((c, j) => (j === i ? "" : c)));
+      if (next === target) advance(true);
+    } else {
+      setShake(true);
+      setTimeout(() => setShake(false), 320);
+      play?.("wrong");
+    }
+  };
+
+  const skip = () => advance(false);
+
+  if (done) {
+    recordBestScore("spell_sprint", score, pool.length);
+    return (
+      <ScoreScreen
+        score={score}
+        total={pool.length}
+        color={color}
+        onReplay={() => { setIdx(0); setScore(0); setDone(false); }}
+        onClose={onClose}
+        t={t}
+        play={play}
+      />
+    );
+  }
+
+  return (
+    <div style={{ padding: "20px 20px 40px", fontFamily: FONT, position: "relative" }}>
+      <Progress current={idx} total={pool.length} color={color} t={t} />
+      <div
+        key={`${idx}-${phase}`}
+        style={{
+          background: t?.light || "rgba(255,255,255,0.05)",
+          borderRadius: 18,
+          padding: "28px 18px",
+          marginBottom: 22,
+          border: `1px solid ${t?.border || "rgba(255,255,255,0.08)"}`,
+          minHeight: 130,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          animation: shake
+            ? "fillGapShake 0.32s ease"
+            : "questionIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both",
+        }}
+      >
+        {phase === "show" && (
+          <>
+            <p style={{ fontSize: 11, fontWeight: 700, color, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
+              Memorise — {showTime}s
+            </p>
+            <p style={{
+              fontSize: 36, fontWeight: 800, color: t?.ink || "#ededed",
+              letterSpacing: "0.18em", margin: "12px 0 0", fontFamily: FONT,
+            }}>
+              {target}
+            </p>
+          </>
+        )}
+        {phase !== "show" && (
+          <>
+            <p style={{ fontSize: 11, fontWeight: 700, color, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
+              Spell it
+            </p>
+            <p style={{
+              fontSize: 32, fontWeight: 800, color: t?.ink || "#ededed",
+              letterSpacing: "0.22em", margin: "12px 0 0", fontFamily: FONT,
+              minHeight: 44,
+            }}>
+              {typed.padEnd(target.length, "·").split("").map((c, i) => (
+                <span
+                  key={i}
+                  style={{
+                    color: i < typed.length ? color : "rgba(255,255,255,0.22)",
+                    marginRight: 4,
+                  }}
+                >{c}</span>
+              ))}
+            </p>
+          </>
+        )}
+      </div>
+      {phase !== "show" && (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
+            {letters.map((ch, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => tapLetter(ch, i)}
+                disabled={!ch}
+                style={{
+                  padding: "12px 0",
+                  borderRadius: 12,
+                  border: `1.5px solid ${ch ? t?.border || "rgba(255,255,255,0.12)" : "transparent"}`,
+                  background: ch ? t?.light || "rgba(255,255,255,0.05)" : "transparent",
+                  color: ch ? t?.ink || "#ededed" : "transparent",
+                  fontSize: 16,
+                  fontWeight: 800,
+                  cursor: ch ? "pointer" : "default",
+                  fontFamily: FONT,
+                  letterSpacing: "0.05em",
+                  transition: "all 0.15s cubic-bezier(0.34,1.56,0.64,1)",
+                  WebkitTapHighlightColor: "transparent",
+                  visibility: ch ? "visible" : "hidden",
+                }}
+                onTouchStart={(e) => { if (ch) e.currentTarget.style.transform = "scale(0.94)"; }}
+                onTouchEnd={(e) => { if (ch) e.currentTarget.style.transform = "scale(1)"; }}
+              >{ch}</button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={skip}
+            style={{
+              display: "block",
+              margin: "16px auto 0",
+              padding: "8px 18px",
+              background: "rgba(255,255,255,0.06)",
+              color: t?.muted || "#a1a1a1",
+              border: `1px solid ${t?.border || "rgba(255,255,255,0.12)"}`,
+              borderRadius: 999,
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: FONT,
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >Skip word</button>
         </>
       )}
     </div>

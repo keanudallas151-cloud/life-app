@@ -214,3 +214,70 @@ export const WORD_LADDER_PUZZLES = [
   { start: "CAKE", end: "WAKE", steps: ["CAKE","WAKE"] },
   { start: "ROPE", end: "ROLE", steps: ["ROPE","ROLE"] },
 ];
+
+// ── English: Idiom Decoder ───────────────────────────────────
+// Multi-choice meanings for common English idioms. Powers the
+// `idiom_decoder` game via MultiChoiceGame. Difficulty slices in
+// LearnItSubjectPage take 0..15, 15..30, 30..45.
+export const IDIOM_QS = [
+  { q: "Spill the beans", opts: ["Reveal a secret","Cook lunch","Make a mess","Argue loudly"], ans: "Reveal a secret", tip: "To spill the beans means to share information that was meant to be private." },
+  { q: "Break the ice", opts: ["Start a conversation","Win an argument","Cause a problem","End a friendship"], ans: "Start a conversation", tip: "Used when easing tension or starting a chat in a new group." },
+  { q: "Hit the books", opts: ["Get into a fight","Study hard","Throw a tantrum","Travel a long way"], ans: "Study hard", tip: "Common student slang for serious studying — usually before an exam." },
+  { q: "Piece of cake", opts: ["A bakery item","Something easy","An expensive treat","A bad deal"], ans: "Something easy", tip: "If something is a piece of cake, it requires very little effort." },
+  { q: "Costs an arm and a leg", opts: ["Is very cheap","Is dangerous","Is very expensive","Takes a long time"], ans: "Is very expensive", tip: "Used to describe something that costs a great deal of money." },
+  { q: "Under the weather", opts: ["Outside in the rain","Feeling unwell","Travelling north","Very angry"], ans: "Feeling unwell", tip: "A polite way to say you are feeling sick or low energy." },
+  { q: "Once in a blue moon", opts: ["Very rarely","Every night","Always at midnight","On a Monday"], ans: "Very rarely", tip: "Refers to events that happen only on rare occasions." },
+  { q: "Bite the bullet", opts: ["Lose your temper","Endure a painful task","Speak too quickly","Give up"], ans: "Endure a painful task", tip: "Originated from soldiers biting on a bullet during surgery — meaning to face pain bravely." },
+  { q: "Cut corners", opts: ["Drive carefully","Take shortcuts that lower quality","Trim a haircut","Save money wisely"], ans: "Take shortcuts that lower quality", tip: "Doing something the cheapest or quickest way at the expense of quality." },
+  { q: "Hit the nail on the head", opts: ["Build something","Get exactly the right answer","Cause an accident","Speak loudly"], ans: "Get exactly the right answer", tip: "Used when someone identifies the precise issue or correct point." },
+  { q: "Let the cat out of the bag", opts: ["Free a pet","Reveal a secret accidentally","Run away","Start a project"], ans: "Reveal a secret accidentally", tip: "Often used after someone slips up and shares something private." },
+  { q: "On the same page", opts: ["Reading a book","In agreement","Writing together","Teaching a class"], ans: "In agreement", tip: "Used when two or more people share the same understanding." },
+  { q: "Burn the midnight oil", opts: ["Set something on fire","Work or study late at night","Cook a meal","Stay warm"], ans: "Work or study late at night", tip: "Originates from oil lamps used before electricity — staying up to work." },
+  { q: "The ball is in your court", opts: ["You're playing tennis","It's your turn to act","You won the game","You lost a chance"], ans: "It's your turn to act", tip: "From tennis — the responsibility for the next move now rests with you." },
+  { q: "Speak of the devil", opts: ["A scary movie","Said when someone you mentioned appears","Curse loudly","Tell a lie"], ans: "Said when someone you mentioned appears", tip: "Short form of 'speak of the devil and he doth appear'." },
+  // Medium 15..30
+  { q: "Bend over backwards", opts: ["Stretch in yoga","Fall down","Try extremely hard to help","Avoid responsibility"], ans: "Try extremely hard to help", tip: "Going to great lengths, often beyond what's reasonable, to help someone." },
+  { q: "Cry over spilt milk", opts: ["Be very thirsty","Worry about something that can't be undone","Clean the kitchen","Argue with a child"], ans: "Worry about something that can't be undone", tip: "A reminder that regret over irreversible mistakes is unproductive." },
+  { q: "Throw in the towel", opts: ["Do laundry","Win a match","Give up","Change your mind"], ans: "Give up", tip: "From boxing — a coach throws a towel into the ring to concede defeat." },
+  { q: "Beat around the bush", opts: ["Garden carefully","Avoid the main point","Lose a competition","Walk in circles"], ans: "Avoid the main point", tip: "Talking around an issue rather than addressing it directly." },
+  { q: "The best of both worlds", opts: ["A fortunate compromise","A difficult choice","A travel itinerary","A bad outcome"], ans: "A fortunate compromise", tip: "When you enjoy advantages from two different situations at once." },
+  { q: "Pull yourself together", opts: ["Stretch","Calm down and regain control","Get dressed","Make a plan"], ans: "Calm down and regain control", tip: "Often said to someone who is upset or panicking." },
+  { q: "Read between the lines", opts: ["Skim a book","Find the hidden meaning","Speak softly","Edit text"], ans: "Find the hidden meaning", tip: "Notice what is implied but not explicitly stated." },
+  { q: "A blessing in disguise", opts: ["A clever costume","Something good that seemed bad at first","A surprise gift","Bad luck"], ans: "Something good that seemed bad at first", tip: "Used when an unfortunate event leads to a positive outcome." },
+  { q: "Throw caution to the wind", opts: ["Sail a boat","Take a risk","Plan carefully","Cancel a trip"], ans: "Take a risk", tip: "Acting boldly without worrying about consequences." },
+  { q: "Bite off more than you can chew", opts: ["Eat too much","Take on a task that's too big","Speak too softly","Run too fast"], ans: "Take on a task that's too big", tip: "Refers to overestimating your ability or capacity." },
+  { q: "Rule of thumb", opts: ["A strict law","A general guiding principle","A finger gesture","A type of measurement"], ans: "A general guiding principle", tip: "An informal but generally reliable rule, not a strict scientific one." },
+  { q: "Get cold feet", opts: ["Stand on ice","Suddenly feel scared to do something","Travel north","Become unwell"], ans: "Suddenly feel scared to do something", tip: "Often used about someone backing out of a commitment last minute." },
+  { q: "When pigs fly", opts: ["At dawn","Never","Every spring","On a holiday"], ans: "Never", tip: "Used sarcastically to mean something will not happen." },
+  { q: "Add insult to injury", opts: ["Apologise","Make a bad situation worse","Heal a wound","Compliment generously"], ans: "Make a bad situation worse", tip: "Doing or saying something hurtful on top of an existing problem." },
+  { q: "Barking up the wrong tree", opts: ["Walking a dog","Pursuing the wrong solution","Climbing a ladder","Telling a joke"], ans: "Pursuing the wrong solution", tip: "Like a dog mistakenly chasing the wrong target — looking in the wrong place." },
+  // Hard 30..45
+  { q: "A wolf in sheep's clothing", opts: ["A timid leader","A dangerous person hiding behind a friendly facade","A clumsy farmer","A skilled hunter"], ans: "A dangerous person hiding behind a friendly facade", tip: "Used to describe someone whose true intentions are far worse than they appear." },
+  { q: "Burn your bridges", opts: ["Travel a long way","Destroy your routes back to a place or relationship","Win an argument","Repair a road"], ans: "Destroy your routes back to a place or relationship", tip: "Often used as a warning against parting on bad terms." },
+  { q: "Cut to the chase", opts: ["Run quickly","Get to the point","End a movie","Skip a meal"], ans: "Get to the point", tip: "Originally from old films — skip the build-up and get to the main action." },
+  { q: "A storm in a teacup", opts: ["Severe weather","A small problem blown out of proportion","A messy kitchen","A loud argument"], ans: "A small problem blown out of proportion", tip: "Used when something trivial is being treated as a major crisis." },
+  { q: "Take with a grain of salt", opts: ["Season food","Treat with healthy scepticism","Eat slowly","Disagree loudly"], ans: "Treat with healthy scepticism", tip: "Don't accept information at face value — consider it carefully." },
+  { q: "The straw that broke the camel's back", opts: ["A small final problem with a big effect","A heavy burden","A weight loss tip","A desert journey"], ans: "A small final problem with a big effect", tip: "The minor last addition that triggers a much larger reaction." },
+  { q: "Pulling someone's leg", opts: ["Helping them up","Joking with them playfully","Forcing them to walk","Tying them down"], ans: "Joking with them playfully", tip: "Light teasing — usually with a harmless or affectionate intent." },
+  { q: "A penny for your thoughts", opts: ["Asking what someone is thinking","Asking for money","Counting change","A cheap idea"], ans: "Asking what someone is thinking", tip: "A gentle invitation for someone to share what's on their mind." },
+  { q: "Burning the candle at both ends", opts: ["Wasting money","Exhausting yourself by overworking","Cooking dinner","Studying"], ans: "Exhausting yourself by overworking", tip: "Trying to do too much for too long — typically by not sleeping enough." },
+  { q: "Don't count your chickens before they hatch", opts: ["Be patient with pets","Don't assume success too early","Avoid the kitchen","Stay home"], ans: "Don't assume success too early", tip: "Don't plan around outcomes that aren't guaranteed yet." },
+  { q: "The elephant in the room", opts: ["A circus animal","An obvious issue everyone avoids","A messy office","A heavy load"], ans: "An obvious issue everyone avoids", tip: "Used in conversations where a major topic is being deliberately ignored." },
+  { q: "Throw someone under the bus", opts: ["Help them","Betray them to protect yourself","Give them a ride","Argue politely"], ans: "Betray them to protect yourself", tip: "Sacrificing someone else's reputation to benefit your own." },
+  { q: "On thin ice", opts: ["Skating safely","In a precarious situation","Far away","In good favour"], ans: "In a precarious situation", tip: "Behaving in a way that's likely to get you in trouble." },
+  { q: "By the skin of your teeth", opts: ["Just barely","With great ease","After a long delay","With confidence"], ans: "Just barely", tip: "From the Book of Job — used when something is achieved by the narrowest margin." },
+  { q: "Throw your hat in the ring", opts: ["Quit","Officially enter a competition","Lose patience","Forget something"], ans: "Officially enter a competition", tip: "From old American politics — declaring yourself a candidate." },
+];
+
+// ── English: Spell Sprint Words ──────────────────────────────
+// A short word is shown briefly then hidden; the player taps letters in
+// order to reproduce it. Words are grouped 4/5/6 letters for a gentle
+// difficulty curve.
+export const SPELL_SPRINT_WORDS = [
+  // 4 letters
+  "TIME","BOOK","WIND","RAIN","STAR","MOON","TREE","SAND","FIRE","ROCK",
+  // 5 letters
+  "BRAVE","CLOUD","DRIFT","EMBER","FROST","GLINT","HONEY","IDEAL","JOLLY","KNOWS",
+  // 6 letters
+  "MIRROR","NATURE","ORBITS","PLANET","QUARTZ","RHYTHM","SUMMER","TANGLE","VENTURE","WONDER",
+];
