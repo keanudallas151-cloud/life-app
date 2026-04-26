@@ -1181,8 +1181,8 @@ function VocabMatchGame({ color, onClose, t, play }) {
   const roundPairs = VOCAB_PAIRS.slice(round * ROUND_SIZE, (round + 1) * ROUND_SIZE);
   const [roundDefsMap] = useState(() => {
     const map = [];
-    for (let r = 0; r < Math.ceil(VOCAB_PAIRS.length / 6); r++) {
-      const pairs = VOCAB_PAIRS.slice(r * 6, (r + 1) * 6);
+    for (let r = 0; r < Math.ceil(VOCAB_PAIRS.length / ROUND_SIZE); r++) {
+      const pairs = VOCAB_PAIRS.slice(r * ROUND_SIZE, (r + 1) * ROUND_SIZE);
       map.push([...pairs.map(p => p.def)].sort(() => Math.random() - 0.5));
     }
     return map;
@@ -1402,6 +1402,7 @@ function SentenceBuilderGame({ color, onClose, t, play }) {
 
 function MultiChoiceGame({ questions, color, onClose, t, play }) {
   const QUIZ_TIME = 12;
+  const TIMEOUT_SENTINEL = "__timeout__";
   const [qi, setQi] = useState(0);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
@@ -1418,7 +1419,7 @@ function MultiChoiceGame({ questions, color, onClose, t, play }) {
   useEffect(() => {
     if (selected || done) return;
     if (timeLeft <= 0) {
-      setSelected("__timeout__");
+      setSelected(TIMEOUT_SENTINEL);
       setStreak(0);
       setTimeout(() => {
         if (qi + 1 >= questions.length) setDone(true);
