@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { C } from "../../systems/theme";
 import { Ic } from "../../icons/Ic";
-import { QUIZ_QUESTIONS } from "../../data/quiz";
+// quiz.js is loaded dynamically when QuizPage mounts (see lazy load below).
+// Per-topic splitting is a future optimisation if the file grows further.
 import { LS } from "../../systems/storage";
 import { useQuizStats } from "../../systems/useQuizStats";
 
@@ -870,6 +871,18 @@ export function QuizPage({
   const timerPct   = maxTime > 0 ? timeLeft / maxTime : 0;
   const timerColor = timerPct>0.5 ? t.green : timerPct>0.25 ? t.gold : t.red;
 
+  // ─── Lazy quiz data ────────────────────────────────────────────────────────
+  // quiz.js (~146 KB) is loaded dynamically when QuizPage first mounts,
+  // keeping it out of the initial bundle on every other screen.
+  // Per-topic splitting is a future optimisation if the file grows further.
+  const [quizQuestions, setQuizQuestions] = useState(null);
+  const [quizLoadErr, setQuizLoadErr] = useState(false);
+  useEffect(() => {
+    import("../../data/quiz")
+      .then((m) => setQuizQuestions(m.QUIZ_QUESTIONS))
+      .catch(() => setQuizLoadErr(true));
+  }, []);
+
   useEffect(() => {
     if (!initialTopic || !TOPIC_META[initialTopic]) return;
     setTopic(initialTopic);
@@ -890,14 +903,15 @@ export function QuizPage({
       setPhase("communication_practice");
       return;
     }
+    if (!quizQuestions) return; // data still loading — guard against null
     let selected;
     if (fmt === "daily") {
       const seed    = getDailySeed();
-      const allPool = Object.values(QUIZ_QUESTIONS[topic] || {}).flat();
+      const allPool = Object.values(quizQuestions[topic] || {}).flat();
       // Daily: 15 questions (was 10)
       selected      = seededShuffle(allPool, seed).slice(0, 15);
     } else {
-      const pool  = QUIZ_QUESTIONS[topic]?.[diff] || [];
+      const pool  = quizQuestions[topic]?.[diff] || [];
       // Blitz: 15 (was 10) · Multiple choice / True-false: 12 (was 8)
       const limit = fmt === "blitz" ? 15 : 12;
       selected    = shuffle(pool).slice(0, limit);
@@ -906,7 +920,7 @@ export function QuizPage({
     setStreak(0); setBest(0); setAnswers([]); setShowFact(false);
     setTimeLeft(fmt==="blitz" ? 8 : QUIZ_SECS[diff]);
     setPhase("playing");
-  }, [topic, diff, fmt, play, communicationActivity]);
+  }, [topic, diff, fmt, play, communicationActivity, quizQuestions]);
 
   const handleAnswer = useCallback((picked) => {
     if (chosen !== null) return;
@@ -993,6 +1007,47 @@ export function QuizPage({
   const overallAcc = stats.totalAnswered > 0
     ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100)
     : 0;
+
+  // Show a skeleton (or error) while quiz.js is still being fetched (lazy load).
+  if (!quizQuestions) {
+    if (quizLoadErr) {
+      return (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "48px 24px",
+            fontFamily:
+              "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
+          }}
+        >
+          <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
+          <p style={{ fontSize: 16, color: t.ink, margin: "0 0 8px" }}>
+            Failed to load quiz data
+          </p>
+          <p style={{ fontSize: 13, color: t.muted, margin: 0 }}>
+            Check your connection and try again.
+          </p>
+        </div>
+      );
+    }
+    return (
+      <div style={{ padding: "32px 20px", maxWidth: 560, margin: "0 auto" }}>
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            style={{
+              height: 56,
+              borderRadius: 12,
+              marginBottom: 14,
+              background: `linear-gradient(90deg, ${t.white} 0%, ${t.light} 50%, ${t.white} 100%)`,
+              backgroundSize: "200% 100%",
+              animation: "life-skeleton-shimmer 1.3s ease-in-out infinite",
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
 
   if (phase === "setup") {
     const todayDone = stats.dailyDate === new Date().toLocaleDateString();

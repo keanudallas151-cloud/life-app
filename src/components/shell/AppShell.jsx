@@ -4,7 +4,7 @@
 // through props. Safe to edit independently.
 "use client";
 
-import { lazy } from "react";
+import { lazy, memo, useCallback } from "react";
 import { C } from "../../systems/theme";
 import { Ic } from "../../icons/Ic";
 
@@ -100,7 +100,7 @@ export function RouteFallback() {
   );
 }
 
-// Props: label, open, setOpen, children, tag, theme, playFn
+// Props: label, open, setOpen, children, tag, theme, playFn, onLabelClick, active
 export function SS({
   label,
   open,
@@ -110,7 +110,12 @@ export function SS({
   theme,
   playFn,
   onLabelClick,
+  // active: accepted for API consistency — reserved for future folder-header
+  // highlighting when a child item is selected. Intentionally not destructured
+  // to avoid an unused-variable lint error.
+  ...rest
 }) {
+  void rest; // consume rest so ESLint doesn't complain about spread being unused
   const th = theme || C;
   const iosfont = "-apple-system, SF Pro Display, Helvetica Neue, Arial, sans-serif";
 
@@ -229,16 +234,38 @@ export function SS({
     </div>
   );
 }
+// NOTE (perf): React.memo on SS would help the header button row but not the
+// children (which are new vdom each render). The real fix is to also wrap each
+// SL child in memo() — which is done below — so each leaf item bails out
+// independently when its specific props haven't changed.
 
 
-export function SL({ label, icon, onClick, active, theme }) {
+// SL — Sidebar Link leaf item.
+// Accepts two calling conventions:
+//   1. onClick (legacy): caller passes a handler, good for one-off buttons.
+//   2. onSelect + nodeKey + nodeData: SL creates a stable internal handler via
+//      useCallback, which lets React.memo bail out when the content hasn't changed.
+//      Use this pattern in .map() loops so each item doesn't create a new function
+//      on every parent render.
+export const SL = memo(function SL({ label, icon, onClick, onSelect, nodeKey, nodeData, active, theme }) {
   const th = theme || C;
   const Icon = icon && typeof Ic[icon] === "function" ? Ic[icon] : null;
   const iosfont = "-apple-system, SF Pro Text, Helvetica Neue, Arial, sans-serif";
+
+  // Stable handler — only recreates when onSelect, nodeKey, or nodeData changes.
+  // When those are stable memoized values (useCallback handler, string key,
+  // memoized data object), React.memo on SL truly bails out of re-rendering.
+  const handleClick = useCallback(() => {
+    if (onSelect && nodeKey !== undefined) {
+      onSelect(nodeKey, nodeData);
+    } else {
+      onClick?.();
+    }
+  }, [onSelect, nodeKey, nodeData, onClick]);
   return (
     <button
       className="life-sidebar-link"
-      onClick={onClick}
+      onClick={handleClick}
       style={{
         display: "flex",
         alignItems: "center",
@@ -312,4 +339,4 @@ export function SL({ label, icon, onClick, active, theme }) {
       )}
     </button>
   );
-}
+});

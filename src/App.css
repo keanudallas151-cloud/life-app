@@ -1,3 +1,60 @@
 /* App.css — Life. component overrides
    Most styling lives in index.css.
    This file is intentionally minimal. */
+
+/* ── Performance: static CSS classes for common inline-style patterns ─────────
+   These replace style objects that were recreated on every render in App.jsx.
+   Static CSS classes are parsed once by the browser; React never diffs them. */
+
+/* SwipeableNotification — delete reveal layer icon text */
+.life-swipe-delete-label {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Sidebar search result item — label and path text */
+.life-sidebar-result-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+.life-sidebar-result-path {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Notification panel section header */
+.life-notif-section-header {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+/* Common flex utilities used across many UI surfaces */
+.life-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.life-flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Invisible tap-target overlay (used for close-sidebar backdrop) */
+.life-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  background: transparent;
+}
+
+/* AppLoader animation — progress bar for the dynamic() import loading screen */
+@keyframes life-load-bar {
+  0%   { width: 0%;   margin-left: 0;    }
+  50%  { width: 80%;  margin-left: 10%;  }
+  100% { width: 0%;   margin-left: 100%; }
+}

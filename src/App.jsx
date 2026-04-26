@@ -1,39 +1,28 @@
 // v1.0.1 - auth fixes: DOB validation, 3s loading, Firebase migration follow-up
-import {
-  confirmPasswordReset,
-  createUserWithEmailAndPassword,
-  deleteUser,
-  onAuthStateChanged,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile,
-  verifyPasswordResetCode,
-} from "firebase/auth";
+// Auth state/mutations are now in src/contexts/AuthContext.jsx (Step 1 refactor).
+import { sendEmailVerification } from "firebase/auth";
+import { FixedSizeList } from "react-window";
 import {
   Suspense,
+  memo,
   useCallback,
+  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { TreeNode } from "./components/shell/Field";
-import {
-  allContent,
-  CONTENT,
-  GUIDED_ORDER,
-  LIBRARY,
-  MAP,
-} from "./data/content";
+// content.js is loaded lazily the first time the "app" screen becomes active
+// (see the dynamic import in the contentData useEffect below). Splitting it
+// further into per-section chunks is a future optimisation once the content
+// tree grows large enough to warrant it.
 import { auth, isFirebaseConfigured } from "./firebaseClient";
 import { Ic } from "./icons/Ic";
 import {
   queueWelcomeConfirmedEmailOnce,
   syncPrivateEmailIdentity,
 } from "./services/emailDelivery";
-import { getFirebaseProfile } from "./services/firebaseProfile";
 import { SUPPORT_EMAIL } from "./systems/appConfig";
 import {
   appendNotification,
@@ -94,9 +83,11 @@ import { LearnItPage } from "./components/learnIt/LearnItPage";
 import { LearnItSubjectPage } from "./components/learnIt/LearnItSubjectPage";
 import { VerifyEmailPage } from "./components/auth/VerifyEmailPage";
 import { WhereToStartPage } from "./components/shell/WhereToStartPage";
-import { signInWithGoogle } from "./services/firebaseAuth";
 import { useSubscription } from "./systems/useSubscription";
 import { usePremiumOrganizedSync } from "./systems/usePremiumOrganizedSync";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { UIProvider, useUIContext } from "./contexts/UIContext";
+import { SoundProvider } from "./contexts/SoundContext";
 
 const PREF_DEFAULTS = {
   soundEnabled: true,
@@ -116,6 +107,107 @@ const PREF_DEFAULTS = {
 // Swipe left beyond 72px to delete; direction-locked to avoid vertical-scroll conflicts.
 const SWIPE_HORIZONTAL_BIAS = 1.5;
 const SECRET_SIENNA_SEARCH_CODE = "160705kc";
+
+// ── react-window row renderer for the global search results list ─────────────
+// Defined outside LifeAppContent so the reference is stable across renders —
+// prevents react-window from remounting every row on each parent render.
+const _SEARCH_FONT = "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif";
+function SearchResultRow({ index, style, data }) {
+  const { searchResults, t, handleSelect, setShowSearch, setSearch } = data;
+  const item = searchResults[index];
+  return (
+    <div style={style}>
+      <button
+        onClick={() => {
+          handleSelect(item.key, item.node);
+          setShowSearch(false);
+          setSearch("");
+        }}
+        style={{
+          display: "block",
+          width: "100%",
+          height: "100%",
+          textAlign: "left",
+          background: "transparent",
+          border: "none",
+          borderBottom: `1px solid ${t.light}`,
+          padding: "10px 24px",
+          cursor: "pointer",
+          fontFamily: _SEARCH_FONT,
+          boxSizing: "border-box",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = t.light)}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+      >
+        <div style={{ fontSize: 15, fontWeight: 600, color: t.ink }}>
+          {item.node.icon && <span style={{ marginRight: 8 }}>{item.node.icon}</span>}
+          {item.node.label}
+        </div>
+        <div style={{ fontSize: 12, color: t.muted, marginTop: 2, fontStyle: "italic" }}>
+          {item.path.join(" — ")}
+        </div>
+      </button>
+    </div>
+  );
+}
+
+// ── Memoized sidebar search result item ─────────────────────────────────────
+// Defined outside LifeAppContent so the component reference is stable and
+// React.memo actually prevents re-renders between parent renders.
+const _SB_FONT = "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif";
+const SidebarSearchItem = memo(function SidebarSearchItem({ item, t, onSelect, play }) {
+  const handleClick = useCallback(() => {
+    play("open");
+    onSelect(item.key, item.node);
+  }, [item.key, item.node, onSelect, play]);
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      style={{
+        width: "100%",
+        textAlign: "left",
+        border: `1px solid ${t.border}`,
+        background: t.white,
+        borderRadius: 12,
+        padding: "10px 12px",
+        cursor: "pointer",
+        fontFamily: _SB_FONT,
+      }}
+    >
+      <div className="life-sidebar-result-label" style={{ color: t.ink }}>
+        {item.node.label}
+      </div>
+      <div className="life-sidebar-result-path" style={{ color: t.muted }}>
+        {item.path.join(" / ")}
+      </div>
+    </button>
+  );
+});
+
+// ── react-window row renderer for virtualized bookmarks list ─────────────────
+// Used when the bookmarks list exceeds BOOKMARK_VIRT_THRESHOLD items.
+// Each SL row is 44px tall (matches the .life-tap-target token).
+const BOOKMARK_VIRT_THRESHOLD = 50;
+const BOOKMARK_ITEM_HEIGHT = 44;
+function BookmarkRow({ index, style, data }) {
+  const { items, t, handleSelect } = data;
+  const item = items[index];
+  return (
+    <div style={style}>
+      <SL
+        theme={t}
+        label={item.node.label}
+        icon={item.node.icon}
+        onSelect={handleSelect}
+        nodeKey={item.key}
+        nodeData={item.node}
+        active={false}
+      />
+    </div>
+  );
+}
 
 // Maps notification type/activity to an iOS-style SVG icon.
 function notifIconKey(n) {
@@ -144,6 +236,8 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
   const currentX = useRef(0);
   const didDrag = useRef(false);
   const directionLocked = useRef(null);
+  // rAF handle — ensures onMouseMove/onTouchMove fires at most once per frame.
+  const rafHandle = useRef(null);
 
   const revealRatio = Math.min(1, Math.abs(offset) / 72);
 
@@ -159,24 +253,36 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
 
   const onMove = (clientX, clientY) => {
     if (!dragging.current || exiting) return;
-    const dx = clientX - startX.current;
-    const dy = clientY - startY.current;
-    if (
-      directionLocked.current === null &&
-      (Math.abs(dx) > 5 || Math.abs(dy) > 5)
-    ) {
-      directionLocked.current =
-        Math.abs(dx) > Math.abs(dy) * SWIPE_HORIZONTAL_BIAS
-          ? "horizontal"
-          : "vertical";
-    }
-    if (directionLocked.current === "vertical") return;
-    currentX.current = clientX;
-    if (Math.abs(dx) > 5) didDrag.current = true;
-    setOffset(Math.min(0, dx));
+    // Throttle to one update per animation frame via requestAnimationFrame.
+    // This prevents the move handler from flooding the main thread during
+    // fast mouse/touch movement (potentially 1000+ calls/sec without this).
+    if (rafHandle.current !== null) return; // already scheduled for this frame
+    rafHandle.current = requestAnimationFrame(() => {
+      rafHandle.current = null;
+      if (!dragging.current || exiting) return;
+      const dx = clientX - startX.current;
+      const dy = clientY - startY.current;
+      if (
+        directionLocked.current === null &&
+        (Math.abs(dx) > 5 || Math.abs(dy) > 5)
+      ) {
+        directionLocked.current =
+          Math.abs(dx) > Math.abs(dy) * SWIPE_HORIZONTAL_BIAS
+            ? "horizontal"
+            : "vertical";
+      }
+      if (directionLocked.current === "vertical") return;
+      currentX.current = clientX;
+      if (Math.abs(dx) > 5) didDrag.current = true;
+      setOffset(Math.min(0, dx));
+    });
   };
 
   const onEnd = () => {
+    if (rafHandle.current !== null) {
+      cancelAnimationFrame(rafHandle.current);
+      rafHandle.current = null;
+    }
     if (!dragging.current) return;
     dragging.current = false; // release drag lock FIRST so transition is active
     const delta = currentX.current - startX.current;
@@ -370,7 +476,19 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
   );
 }
 
+// Root wrapper: provides AuthContext, UIContext, and SoundContext to the app.
+// ThemeContext and ContentContext can be extracted here in a future refactor.
 export default function LifeApp() {
+  return (
+    <AuthProvider>
+      <UIProvider>
+        <LifeAppContent />
+      </UIProvider>
+    </AuthProvider>
+  );
+}
+
+function LifeAppContent() {
   const { dark, toggleTheme, t, themeMode, setThemeMode, systemDark } =
     useTheme();
 
@@ -381,294 +499,76 @@ export default function LifeApp() {
     document.body.classList.toggle("life-light", !dark && themeMode === THEME_MODES.light);
   }, [dark, themeMode]);
 
-  const [screen, setScreen] = useState("loading"); // start loading until session resolved
-  const [user, setUser] = useState(null); // { id, email, name, username }
+  // ─── Auth state & mutations — sourced from AuthContext ───────────────────
+  const {
+    screen,
+    setScreen,
+    user,
+    setUser,
+    authLoading,
+    siSocialErr,
+    setSiSocialErr,
+    siEmail,
+    setSiEmail,
+    siPass,
+    setSiPass,
+    siErr,
+    setSiErr,
+    siShowPass,
+    setSiShowPass,
+    forgotMode,
+    setForgotMode,
+    fpEmail,
+    setFpEmail,
+    fpMsg,
+    setFpMsg,
+    fpErr,
+    setFpErr,
+    rName,
+    setRName,
+    rEmail,
+    setREmail,
+    rDob,
+    setRDob,
+    rPass,
+    setRPass,
+    rPass2,
+    setRPass2,
+    rShowPass,
+    setRShowPass,
+    rShowPass2,
+    setRShowPass2,
+    rErr,
+    setRErr,
+    verifyEmailAddress,
+    rpPass,
+    setRpPass,
+    rpPass2,
+    setRpPass2,
+    rpShowPass,
+    setRpShowPass,
+    rpShowPass2,
+    setRpShowPass2,
+    rpErr,
+    setRpErr,
+    deleteConfirmOpen,
+    setDeleteConfirmOpen,
+    deleteInProgress,
+    deleteCancelRef,
+    passwordRecoveryRef,
+    AUTH_PROVIDERS,
+    doProviderSignIn,
+    doEmailSignIn,
+    doForgotPassword,
+    doResetPassword,
+    doRegister,
+    doSignOut,
+    doDeleteAccount,
+    performDeleteAccount,
+  } = useAuth();
+
   const subscription = useSubscription(user?.id);
   usePremiumOrganizedSync(subscription.tier);
-  const [authLoading, setAuthLoading] = useState(false);
-  const [siSocialErr, setSiSocialErr] = useState("");
-
-  // Sign-in email/password fields
-  const [siEmail, setSiEmail] = useState("");
-  const [siPass, setSiPass] = useState("");
-  const [siErr, setSiErr] = useState("");
-  const [siShowPass, setSiShowPass] = useState(false);
-
-  // Forgot password (P9a)
-  const [forgotMode, setForgotMode] = useState(false);
-  const [fpEmail, setFpEmail] = useState("");
-  const [fpMsg, setFpMsg] = useState("");
-  const [fpErr, setFpErr] = useState("");
-
-  // Register form
-  const [rName, setRName] = useState("");
-  const [rEmail, setREmail] = useState("");
-  const [rDob, setRDob] = useState("");
-  const [rPass, setRPass] = useState("");
-  const [rPass2, setRPass2] = useState("");
-  const [rShowPass, setRShowPass] = useState(false);
-  const [rShowPass2, setRShowPass2] = useState(false);
-  const [rErr, setRErr] = useState({});
-  const [verifyEmailAddress, setVerifyEmailAddress] = useState("");
-  const [rpPass, setRpPass] = useState("");
-  const [rpPass2, setRpPass2] = useState("");
-  const [rpShowPass, setRpShowPass] = useState(false);
-  const [rpShowPass2, setRpShowPass2] = useState(false);
-  const [rpErr, setRpErr] = useState("");
-  // Delete-account confirm sheet (iOS-style modal instead of native confirm)
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [deleteInProgress, setDeleteInProgress] = useState(false);
-  const deleteCancelRef = useRef(null);
-  const postAuthScreenRef = useRef(null);
-  const passwordRecoveryRef = useRef(false);
-  const passwordResetOobCodeRef = useRef(null);
-  // Snapshots the form values at the moment errors are set.
-  // We only clear an error when that specific field's CURRENT value
-  // differs from its snapshot (i.e. the user actually edited it),
-  // AND the new value is valid. This fixes the "errors flash and
-  // disappear" bug where server-side errors were instantly erased
-  // because the submitted values were already "valid-looking".
-  const rErrSnapshot = useRef({
-    name: "",
-    email: "",
-    dob: "",
-    pass: "",
-    pass2: "",
-  });
-
-  useEffect(() => {
-    if (!rErr || Object.keys(rErr).length === 0) return;
-    setRErr((prev) => {
-      let changed = false;
-      const next = { ...prev };
-      const snap = rErrSnapshot.current;
-
-      // name: clear once user edits away from snapshot AND value is non-empty.
-      if (next.name && rName !== snap.name && rName.trim()) {
-        delete next.name;
-        changed = true;
-      }
-      // email: clear only on actual edit + valid-looking address.
-      if (
-        next.email &&
-        rEmail !== snap.email &&
-        rEmail.includes("@") &&
-        rEmail.includes(".")
-      ) {
-        delete next.email;
-        changed = true;
-      }
-      // dob: clear on edit + non-empty.
-      if (next.dob && rDob !== snap.dob && rDob.trim()) {
-        delete next.dob;
-        changed = true;
-      }
-      // pass: clear only when it now meets ALL complexity requirements.
-      const passStrong =
-        rPass.length >= 8 &&
-        /[A-Z]/.test(rPass) &&
-        /[a-z]/.test(rPass) &&
-        /[0-9]/.test(rPass) &&
-        /[^A-Za-z0-9]/.test(rPass);
-      if (next.pass && rPass !== snap.pass && passStrong) {
-        delete next.pass;
-        changed = true;
-      }
-      // pass2: clear only when it matches pass.
-      if (next.pass2 && rPass2 !== snap.pass2 && rPass2 && rPass === rPass2) {
-        delete next.pass2;
-        changed = true;
-      }
-      return changed ? next : prev;
-    });
-  }, [rDob, rEmail, rErr, rName, rPass, rPass2]);
-
-  const clearAuthFormState = useCallback(() => {
-    setSiSocialErr("");
-    setSiEmail("");
-    setSiPass("");
-    setSiErr("");
-    setSiShowPass(false);
-    setForgotMode(false);
-    setFpEmail("");
-    setFpMsg("");
-    setFpErr("");
-    setRName("");
-    setREmail("");
-    setRDob("");
-    setRPass("");
-    setRPass2("");
-    setRShowPass(false);
-    setRShowPass2(false);
-    setRErr({});
-    setVerifyEmailAddress("");
-    setRpPass("");
-    setRpPass2("");
-    setRpShowPass(false);
-    setRpShowPass2(false);
-    setRpErr("");
-  }, []);
-
-  // Landing page providers: Google is live; Phone is a placeholder.
-  const AUTH_PROVIDERS = [
-    {
-      key: "google",
-      label: "Google",
-      live: true,
-      color: "#4285F4",
-    },
-    {
-      key: "phone",
-      label: "Phone",
-      live: false,
-      color: "#3d5a4c",
-    },
-  ];
-
-  const shapeUser = useCallback((firebaseUser, profileDoc = null) => {
-    return {
-      id: firebaseUser.uid,
-      email: profileDoc?.email || firebaseUser.email || "",
-      name:
-        profileDoc?.full_name || firebaseUser.displayName || firebaseUser.email || "",
-      username: profileDoc?.username || "",
-      emailConfirmed: Boolean(firebaseUser.emailVerified),
-      avatarUrl: profileDoc?.avatar_url || firebaseUser.photoURL || "",
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isFirebaseConfigured || !auth) {
-      setUser(null);
-      setScreen("landing");
-      return undefined;
-    }
-
-    // Detect Firebase password-reset link (mode=resetPassword&oobCode=…) on load.
-    if (typeof window !== "undefined") {
-      try {
-        const search = window.location.search || "";
-        const readParam = (name) => {
-          const m = new RegExp(`[?&]${name}=([^&#]*)`).exec(search);
-          return m ? decodeURIComponent(m[1]) : null;
-        };
-        const mode = readParam("mode");
-        const oobCode = readParam("oobCode");
-        if (mode === "resetPassword" && oobCode) {
-          verifyPasswordResetCode(auth, oobCode)
-            .then(() => {
-              passwordResetOobCodeRef.current = oobCode;
-              passwordRecoveryRef.current = true;
-              setScreen("reset_password");
-              // Clean the URL so a refresh doesn't re-trigger with a stale code.
-              try {
-                window.history.replaceState(
-                  null,
-                  "",
-                  window.location.pathname,
-                );
-              } catch {
-                /* ignore */
-              }
-            })
-            .catch(() => {
-              setRpErr(
-                "This reset link is invalid or has expired. Request a new email from the sign-in screen.",
-              );
-              setScreen("signin");
-            });
-        }
-      } catch {
-        /* ignore URL parse errors */
-      }
-    }
-
-    let active = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        const nextScreen = postAuthScreenRef.current || "landing";
-        postAuthScreenRef.current = null;
-        passwordRecoveryRef.current = false;
-        if (!active) return;
-        setUser(null);
-        clearAuthFormState();
-        setScreen(nextScreen);
-        return;
-      }
-
-      const isGoogleUser = firebaseUser.providerData?.some(
-        (provider) => provider.providerId === "google.com",
-      );
-
-      if (!firebaseUser.emailVerified && !isGoogleUser) {
-        if (!active) return;
-        setUser(null);
-        setVerifyEmailAddress(firebaseUser.email || "");
-        setScreen("verify_email");
-        return;
-      }
-
-      let profileDoc = null;
-      try {
-        profileDoc = await getFirebaseProfile(firebaseUser.uid);
-      } catch (error) {
-        console.error("Failed to load Firebase profile during auth restore", error);
-      }
-
-      if (!active) return;
-
-      const shapedUser = shapeUser(firebaseUser, profileDoc);
-      setUser(shapedUser);
-
-      const onboarded = LS.get(`onboarded_${shapedUser.id}`, false);
-      if (!onboarded) {
-        LS.set(`onboarded_${shapedUser.id}`, true);
-      }
-
-      const lastScreen = LS.get("life_last_screen", "app");
-      const validScreens = [
-        "app",
-        "tailor_intro",
-        "tailor_qs",
-        "tailor_result",
-      ];
-      setScreen(
-        !onboarded && !isGoogleUser
-          ? "theme_picker"
-          : validScreens.includes(lastScreen)
-            ? lastScreen
-            : "app",
-      );
-    });
-
-    return () => {
-      active = false;
-      unsubscribe();
-    };
-  }, [clearAuthFormState, shapeUser]);
-
-  useEffect(() => {
-    const guestScreens = [
-      "loading",
-      "landing",
-      "signin",
-      "register",
-      "privacy_policy",
-      "terms_conditions",
-      "verify_email",
-      "reset_password",
-    ];
-    if (!user && screen && !guestScreens.includes(screen)) {
-      setScreen("landing");
-    }
-  }, [screen, user]);
-
-  useEffect(() => {
-    if (screen && screen !== "loading") {
-      LS.set("life_last_screen", screen);
-    }
-  }, [screen]);
 
   const uid = user?.email || "_";
   const userIdForData = user?.id || null;
@@ -686,6 +586,8 @@ export default function LifeApp() {
   // Intentionally narrow — use only when a specific element deserves its own
   // unique sound without duplicating the existing onClick play() call.
   useSoundDelegation(play);
+  // SoundProvider keeps the module-level registry (callGlobalPlay) up to date.
+  // AuthContext mutations call callGlobalPlay() directly — no ref-bridge needed.
   const cloud = useUserData(userIdForData);
 
   const emailDeliverySyncKeyRef = useRef("");
@@ -890,7 +792,7 @@ export default function LifeApp() {
       setSidebarOpen(false);
       if (typeof setSectionOpen === "function") setSectionOpen(true);
     },
-    [play, setPage],
+    [play, setPage, setSidebarOpen],
   );
 
   const [categoryPageData, setCategoryPageData] = useState(null);
@@ -956,7 +858,25 @@ export default function LifeApp() {
     };
     document.title = titles[page] || "Life. — Knowledge, Growth, Community";
   }, [page]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // ── UI state — sourced from UIContext (extracted from God Component) ──────
+  // Moving these out of LifeAppContent prevents unrelated re-renders when, e.g.,
+  // a sidebar accordion toggles or the viewport-width flag changes.
+  const {
+    sidebarOpen, setSidebarOpen,
+    lifeOpen, setLifeOpen,
+    libOpen, setLibOpen,
+    toolsOpen, setToolsOpen,
+    socialsOpen, setSocialsOpen,
+    guidedOpen, setGuidedOpen,
+    savedOpen, setSavedOpen,
+    experienceOpen, setExperienceOpen,
+    experienceTopic, setExperienceTopic,
+    isNarrowViewport,
+    showScrollTop, setShowScrollTop,
+    shareToast, setShareToast,
+  } = useUIContext();
+
   const [selKey, setSelKey] = useState(null);
   const [selContent, setSelContent] = useState(null);
   const [selNode, setSelNode] = useState(null);
@@ -967,17 +887,16 @@ export default function LifeApp() {
   const [showSearch, setShowSearch] = useState(false);
   const [readerModeActive, setReaderModeActive] = useState(false);
   const [secretSiennaUnlocked, setSecretSiennaUnlocked] = useState(false);
-  const [isNarrowViewport, setIsNarrowViewport] = useState(false);
+  // sidebarQuery drives the controlled input; deferredSidebarQuery is the
+  // deferred version consumed by the filter useMemo so fast typing doesn't
+  // block the input with expensive computation.
   const [sidebarQuery, setSidebarQuery] = useState("");
+  // Deferred value — lags behind sidebarQuery by one React scheduling slot so
+  // the filter/sort computation runs at lower priority than the controlled input.
+  const deferredSidebarQuery = useDeferredValue(sidebarQuery);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return undefined;
-    const media = window.matchMedia("(max-width: 767px)");
-    const syncViewport = () => setIsNarrowViewport(media.matches);
-    syncViewport();
-    media.addEventListener("change", syncViewport);
-    return () => media.removeEventListener("change", syncViewport);
-  }, []);
+  // Deferred search value for the global search overlay (same principle).
+  const deferredSearch = useDeferredValue(search);
 
   useEffect(() => {
     if (!showSearch || search.length <= 1) return;
@@ -990,18 +909,41 @@ export default function LifeApp() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [showSearch, search]);
-  const [lifeOpen, setLifeOpen] = useState(true);
-  const [libOpen, setLibOpen] = useState(false);
-  const [toolsOpen, setToolsOpen] = useState(false);
   const [learnItSubject, setLearnItSubject] = useState(null); // "english" | "finance" | "demeanor"
-  const [socialsOpen, setSocialsOpen] = useState(false);
-  const [guidedOpen, setGuidedOpen] = useState(false);
-  const [savedOpen, setSavedOpen] = useState(false);
-  const [experienceOpen, setExperienceOpen] = useState(false);
-  const [experienceTopic, setExperienceTopic] = useState(null);
+
+  // ─── Lazy content data ────────────────────────────────────────────────────
+  // content.js (~143 KB) is loaded dynamically the first time the main app
+  // screen becomes active, keeping the initial bundle lighter on mobile.
+  // Per-section splitting is a future optimisation if the file grows further.
+  const [contentData, setContentData] = useState(null);
+  const [contentLoadErr, setContentLoadErr] = useState(false);
+  useEffect(() => {
+    if (screen !== "app" || contentData) return;
+    import("./data/content")
+      .then((m) => {
+        setContentData({
+          CONTENT: m.CONTENT,
+          LIBRARY: m.LIBRARY,
+          GUIDED_ORDER: m.GUIDED_ORDER,
+          MAP: m.MAP,
+          allContent: m.allContent,
+        });
+      })
+      .catch(() => setContentLoadErr(true));
+  }, [screen, contentData]);
+
+  // Memoized aliases — stable references, empty until the async load resolves.
+  // All consumers below gracefully handle empty collections during loading.
+  const CONTENT = useMemo(() => contentData?.CONTENT ?? {}, [contentData]);
+  const LIBRARY = useMemo(() => contentData?.LIBRARY ?? {}, [contentData]);
+  const GUIDED_ORDER = useMemo(() => contentData?.GUIDED_ORDER ?? [], [contentData]);
+  const MAP = useMemo(() => contentData?.MAP ?? {}, [contentData]);
+  const allContent = useMemo(() => contentData?.allContent ?? [], [contentData]);
 
   const sidebarSearchResults = useMemo(() => {
-    const query = sidebarQuery.trim().toLowerCase();
+    // Uses deferredSidebarQuery so the filter runs at low priority while the
+    // controlled input updates immediately — prevents jank on fast typing.
+    const query = deferredSidebarQuery.trim().toLowerCase();
     if (query.length < 2) return [];
 
     return allContent
@@ -1017,7 +959,13 @@ export default function LifeApp() {
         return haystack.includes(query);
       })
       .slice(0, 24);
-  }, [sidebarQuery]);
+  }, [deferredSidebarQuery, allContent]);
+
+  // Filtered bookmark items; virtualized when count > BOOKMARK_VIRT_THRESHOLD.
+  const bookmarkedItems = useMemo(
+    () => allContent.filter((c) => bookmarks.includes(c.key)),
+    [allContent, bookmarks],
+  );
 
   const libraryCategoryCards = useMemo(() => {
     return Object.entries(LIBRARY).map(([key, node]) => {
@@ -1026,10 +974,7 @@ export default function LifeApp() {
       ).length;
       return { key, node, topicCount };
     });
-  }, []);
-  const [shareToast, setShareToast] = useState(false);
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
+  }, [LIBRARY, allContent]);
   const [a2hsPrompt, setA2hsPrompt] = useState(null); // Android/Chrome BeforeInstallPromptEvent
   const [showA2hs, setShowA2hs] = useState(false);
   const [a2hsDismissed, setA2hsDismissed] = useState(() =>
@@ -1099,7 +1044,7 @@ export default function LifeApp() {
     setShowSearch(false);
     setShowNotif(false);
     setSidebarOpen(false);
-  }, []);
+  }, [setSidebarOpen]);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const pushSystemNotification = useCallback(
@@ -1140,7 +1085,7 @@ export default function LifeApp() {
       setSidebarOpen(false);
       setShowNotif(false);
     };
-  }, []);
+  }, [setSidebarOpen]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -1212,9 +1157,17 @@ export default function LifeApp() {
 
   const [catStep, setCatStep] = useState(0);
 
+  // Background color is set via a single --life-bg CSS variable on :root rather
+  // than imperative direct mutations on body/html. All surfaces that need the page
+  // background colour should use var(--life-bg) instead of hardcoded values.
+  // This is cleaner than separate body + html style assignments and avoids
+  // bypassing React's rendering model.
   useEffect(() => {
-    document.body.style.background = t.skin;
-    document.documentElement.style.background = t.skin;
+    const root = document.documentElement;
+    root.style.setProperty("--life-bg", t.skin);
+    // Keep body/html background in sync so there is no flash behind the app shell.
+    document.body.style.background = "var(--life-bg)";
+    root.style.background = "var(--life-bg)";
   }, [t.skin]);
   const [isOffline, setIsOffline] = useState(
     typeof navigator !== "undefined" ? !navigator.onLine : false,
@@ -1249,7 +1202,7 @@ export default function LifeApp() {
     setShowSearch(false);
     setSidebarOpen(false);
     searchInputRef.current?.blur();
-  }, [setPage]);
+  }, [setPage, setSidebarOpen]);
 
   useEffect(() => {
     closeTransientOverlays();
@@ -1422,348 +1375,16 @@ export default function LifeApp() {
     }
   }, [uid, userIdForData]);
 
-  const doGoogleSignIn = async () => {
-    if (authLoading) return;
-    play("tap");
-    setSiSocialErr("");
-    if (!isFirebaseConfigured || !auth) {
-      setSiSocialErr(
-        "Firebase auth is not configured yet. Add the NEXT_PUBLIC_FIREBASE_* values to your deployment settings.",
-      );
-      play("err");
-      return;
-    }
-    setAuthLoading(true);
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      setSiSocialErr(
-        String(error.message || "Could not start Google sign in."),
-      );
-      play("err");
-    } finally {
-      setAuthLoading(false);
-    }
-  };
+  // Auth mutations (doGoogleSignIn, doEmailSignIn, doForgotPassword,
+  // doResetPassword, doRegister, doSignOut, doDeleteAccount,
+  // performDeleteAccount) are now in AuthContext — consumed via useAuth() above.
 
-  const doProviderSignIn = (item) => {
-    if (!item.live) {
-      play("tap");
-      setSiSocialErr(`${item.label} login is coming soon.`);
-      return;
-    }
-    if (item.key === "google") {
-      doGoogleSignIn();
-    }
-  };
-
-  const doEmailSignIn = async () => {
-    if (authLoading) return;
-    setSiErr("");
-    setSiSocialErr("");
-    if (!isFirebaseConfigured || !auth) {
-      setSiErr(
-        "Firebase auth is not configured yet. Add the NEXT_PUBLIC_FIREBASE_* values to your deployment settings.",
-      );
-      play("err");
-      return;
-    }
-    if (!siEmail.trim()) {
-      setSiErr("Please enter your email.");
-      play("err");
-      return;
-    }
-    if (!siPass) {
-      setSiErr("Please enter your password.");
-      play("err");
-      return;
-    }
-    setAuthLoading(true);
-    try {
-      await signInWithEmailAndPassword(
-        auth,
-        siEmail.toLowerCase().trim(),
-        siPass,
-      );
-    } catch (error) {
-      const msg = String(error.message || "").toLowerCase();
-      if (msg.includes("invalid") || error.code === "auth/invalid-credential") {
-        setSiErr("no_account_or_wrong_password");
-      } else if (msg.includes("rate") || msg.includes("too many")) {
-        setSiErr("Too many attempts. Wait a moment.");
-      } else {
-        setSiErr("Could not sign in. Check your details.");
-      }
-      play("err");
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const doForgotPassword = async () => {
-    if (authLoading) return;
-    setFpErr("");
-    setFpMsg("");
-    if (!isFirebaseConfigured || !auth) {
-      setFpErr(
-        "Firebase auth is not configured yet. Add the NEXT_PUBLIC_FIREBASE_* values to your deployment settings.",
-      );
-      play("err");
-      return;
-    }
-    if (!fpEmail.trim() || !fpEmail.includes("@")) {
-      setFpErr("Please enter a valid email.");
-      play("err");
-      return;
-    }
-    setAuthLoading(true);
-    try {
-      await sendPasswordResetEmail(auth, fpEmail.toLowerCase().trim());
-      setFpMsg("Password reset email sent. Check your inbox.");
-      play("ok");
-    } catch (error) {
-      setFpErr(String(error.message || "Could not send reset email."));
-      play("err");
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const doResetPassword = async () => {
-    if (authLoading) return;
-    setRpErr("");
-
-    if (rpPass.length < 8) {
-      setRpErr("Password must be at least 8 characters.");
-      play("err");
-      return;
-    }
-    if (
-      !/[A-Z]/.test(rpPass) ||
-      !/[a-z]/.test(rpPass) ||
-      !/\d/.test(rpPass) ||
-      !/[^A-Za-z0-9]/.test(rpPass)
-    ) {
-      setRpErr("Use upper/lowercase letters, a number, and a symbol.");
-      play("err");
-      return;
-    }
-    if (rpPass !== rpPass2) {
-      setRpErr("Passwords do not match.");
-      play("err");
-      return;
-    }
-
-    const oobCode = passwordResetOobCodeRef.current;
-    if (!auth || !oobCode) {
-      setRpErr(
-        "This reset link is invalid or has expired. Request a new email from the sign-in screen.",
-      );
-      play("err");
-      return;
-    }
-
-    setAuthLoading(true);
-    try {
-      await confirmPasswordReset(auth, oobCode, rpPass);
-      passwordResetOobCodeRef.current = null;
-      passwordRecoveryRef.current = false;
-      setRpPass("");
-      setRpPass2("");
-      play("ok");
-      setScreen("signin");
-    } catch (error) {
-      const code = String(error?.code || "");
-      if (code === "auth/expired-action-code" || code === "auth/invalid-action-code") {
-        setRpErr(
-          "This reset link is invalid or has expired. Request a new email from the sign-in screen.",
-        );
-      } else if (code === "auth/weak-password") {
-        setRpErr("Password is too weak. Use upper/lowercase, a number, and a symbol.");
-      } else {
-        setRpErr(
-          String(error?.message || "Could not update password. Please try again."),
-        );
-      }
-      play("err");
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const doRegister = async () => {
-    if (authLoading) return;
-    setRErr({});
-    if (!isFirebaseConfigured || !auth) {
-      setRErr({
-        email:
-          "Firebase auth is not configured yet. Add the NEXT_PUBLIC_FIREBASE_* values to your deployment settings.",
-      });
-      play("err");
-      return;
-    }
-    // Helper that snapshots current form values BEFORE updating errors,
-    // so the clearing-effect knows what "old" values looked like.
-    const setRErrSnap = (errs) => {
-      rErrSnapshot.current = {
-        name: rName,
-        email: rEmail,
-        dob: rDob,
-        pass: rPass,
-        pass2: rPass2,
-      };
-      setRErr(errs);
-    };
-    const err = {};
-    if (!rName.trim()) err.name = "Full name is required.";
-    if (!rEmail.trim() || !rEmail.includes("@"))
-      err.email = "Enter a valid email.";
-    if (!rDob) err.dob = "Date of birth is required.";
-    else {
-      const dobParts = rDob.split("/");
-      const dd = Number(dobParts[0]);
-      const mm = Number(dobParts[1]);
-      const yyRaw = Number(dobParts[2] || 0);
-      const yr =
-        yyRaw < 100 ? (yyRaw <= 26 ? 2000 + yyRaw : 1900 + yyRaw) : yyRaw;
-      const dob = new Date(yr, mm - 1, dd);
-      const today = new Date();
-      let age = today.getFullYear() - dob.getFullYear();
-      if (
-        today.getMonth() < mm - 1 ||
-        (today.getMonth() === mm - 1 && today.getDate() < dd)
-      )
-        age--;
-      if (isNaN(dob.getTime()) || dd < 1 || dd > 31 || mm < 1 || mm > 12)
-        err.dob = "Enter a valid date (dd/mm/yyyy).";
-      else if (age < 13) err.dob = "You must be 13 or older to use Life.";
-    }
-    if (rPass.length < 8) err.pass = "Password must be at least 8 characters.";
-    else if (
-      !/[A-Z]/.test(rPass) ||
-      !/[a-z]/.test(rPass) ||
-      !/[0-9]/.test(rPass) ||
-      !/[^A-Za-z0-9]/.test(rPass)
-    ) {
-      err.pass = "Use upper/lowercase letters, a number, and a symbol.";
-    }
-    if (rPass !== rPass2) err.pass2 = "Passwords do not match.";
-    if (Object.keys(err).length) {
-      setRErrSnap(err);
-      play("err");
-      return;
-    }
-
-    setAuthLoading(true);
-    try {
-      const credentials = await createUserWithEmailAndPassword(
-        auth,
-        rEmail.toLowerCase().trim(),
-        rPass,
-      );
-      await updateProfile(credentials.user, {
-        displayName: rName.trim(),
-      });
-      await sendEmailVerification(credentials.user);
-      setVerifyEmailAddress(
-        credentials.user.email || rEmail.toLowerCase().trim(),
-      );
-      LS.set(`onboarded_${credentials.user.uid}`, false);
-      play("ok");
-      setScreen("verify_email");
-    } catch (error) {
-      const raw = String(error.message || "")
-        .trim()
-        .toLowerCase();
-      if (raw.includes("already")) {
-        setRErrSnap({ email: "already_registered" });
-      } else if (
-        raw.includes("password") ||
-        raw.includes("character") ||
-        raw.includes("weak")
-      ) {
-        setRErrSnap({
-          pass: "Password too weak. Use upper/lowercase, number, and symbol.",
-        });
-      } else if (raw.includes("email")) {
-        setRErrSnap({ email: "Please enter a valid email address." });
-      } else {
-        setRErrSnap({
-          email: "Could not create account. Please check details.",
-        });
-      }
-      play("err");
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const doSignOut = async () => {
-    postAuthScreenRef.current = "landing";
-    passwordRecoveryRef.current = false;
-    if (auth) {
-      await signOut(auth);
-    }
-    clearAuthFormState();
-    setUser(null);
-    setScreen("landing");
-    setSiSocialErr("");
-  };
-
-  const doDeleteAccount = () => {
-    // Open the iOS-style confirm sheet; the actual deletion happens
-    // in performDeleteAccount after the user confirms.
-    setDeleteConfirmOpen(true);
-  };
-
-  const performDeleteAccount = async () => {
-    setDeleteInProgress(true);
-    try {
-      const currentUser = auth?.currentUser;
-      // Best-effort: wipe local-only keys for this user first so a partial failure
-      // still clears client-side data.
-      try {
-        LS.del(`tsd_${uid}`);
-        LS.del(`bk_${uid}`);
-        LS.del(`nt_${uid}`);
-        LS.del(`rd_${uid}`);
-        LS.del(`tools_todos_${uid}`);
-        LS.del(`tools_lockin_${uid}`);
-        LS.del(`prefs_${uid}`);
-        LS.del(`onboarded_${uid}`);
-      } catch {
-        /* ignore LS wipe errors */
-      }
-      if (currentUser) {
-        await deleteUser(currentUser);
-      }
-      play("ok");
-      setDeleteConfirmOpen(false);
-      await doSignOut();
-    } catch (error) {
-      const code = String(error?.code || "");
-      if (code === "auth/requires-recent-login") {
-        setDeleteConfirmOpen(false);
-        if (typeof window !== "undefined") {
-          window.alert(
-            "For security, please sign in again and then retry deleting your account.",
-          );
-        }
-        await doSignOut();
-        return;
-      }
-      play("err");
-      if (typeof window !== "undefined") {
-        window.alert(
-          String(error?.message || "Could not delete your account. Please try again."),
-        );
-      }
-    } finally {
-      setDeleteInProgress(false);
-    }
-  };
-
-  const handleSelect = (key, node) => {
+  // useCallback ensures handleSelect has a stable reference across renders.
+  // NOTE: inline arrow wrappers like `onClick={() => handleSelect(k, node)}`
+  // SL sidebar items are wrapped in React.memo and accept stable onSelect/
+  // nodeKey/nodeData props so each item bails out of re-rendering unless its
+  // own props change. handleSelect is a stable useCallback reference.
+  const handleSelect = useCallback((key, node) => {
     const alreadyRead = readKeys.includes(key);
     setSelKey(key);
     setSelContent(node.content);
@@ -1788,7 +1409,8 @@ export default function LifeApp() {
         label: node?.label,
       },
     });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readKeys, notes, setSidebarOpen, setPage, setSearch, trackMomentumEvent]);
 
   const handleSelectRef = useRef(handleSelect);
   handleSelectRef.current = handleSelect;
@@ -1804,7 +1426,7 @@ export default function LifeApp() {
       "",
       window.location.pathname + window.location.search,
     );
-  }, [screen, user]);
+  }, [screen, user, MAP]);
 
   useEffect(() => {
     if (screen !== "app") return;
@@ -1836,7 +1458,7 @@ export default function LifeApp() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [screen, setPage]);
+  }, [screen, setPage, setSidebarOpen]);
 
   const goHome = () => {
     play("home_return");
@@ -1913,7 +1535,7 @@ export default function LifeApp() {
     handleScroll();
     scroller.addEventListener("scroll", handleScroll, { passive: true });
     return () => scroller.removeEventListener("scroll", handleScroll);
-  }, [screen]);
+  }, [screen, setShowScrollTop]);
 
   useEffect(() => {
     const toOnline = () => setIsOffline(false);
@@ -1939,11 +1561,13 @@ export default function LifeApp() {
   const isBookmarked = bookmarks.includes(selKey);
   const related = (selNode?.related || []).map((k) => MAP[k]).filter(Boolean);
   const searchResults =
-    search.length > 1
+    // Use deferredSearch so the filter runs at low priority while the input
+    // updates immediately — no jank during fast typing in the search overlay.
+    deferredSearch.length > 1
       ? allContent.filter(
           (i) =>
-            i.node.label.toLowerCase().includes(search.toLowerCase()) ||
-            i.node.content?.text?.toLowerCase().includes(search.toLowerCase()),
+            i.node.label.toLowerCase().includes(deferredSearch.toLowerCase()) ||
+            i.node.content?.text?.toLowerCase().includes(deferredSearch.toLowerCase()),
         )
       : [];
   const initials = user?.name
@@ -2607,7 +2231,44 @@ export default function LifeApp() {
     );
 
   // Keep the layout primitives straightforward because this will likely be ported into a native app shell later.
+  // Show a loading fallback while the content data chunk is being fetched on
+  // first entry to the app screen. Auth screens all early-return above this point.
+  if (screen === "app" && !contentData)
+    return (
+      <div
+        style={{
+          height: "100%",
+          background: t.skin,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {contentLoadErr ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "32px 24px",
+              fontFamily:
+                "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
+            }}
+          >
+            <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
+            <p style={{ fontSize: 16, color: t.ink, marginBottom: 8 }}>
+              Failed to load content
+            </p>
+            <p style={{ fontSize: 13, color: t.muted }}>
+              Check your connection and reload the app.
+            </p>
+          </div>
+        ) : (
+          <RouteFallback />
+        )}
+      </div>
+    );
+
   return (
+    <SoundProvider play={play}>
     <div
       data-page-tag="#dashboard_home"
       style={{
@@ -3227,7 +2888,7 @@ export default function LifeApp() {
         </button>
       </div>
 
-      {showSearch && search.length > 1 && (
+      {showSearch && deferredSearch.length > 1 && (
         <div
           className="life-search-dropdown"
           style={{
@@ -3239,8 +2900,6 @@ export default function LifeApp() {
             backdropFilter: "blur(14px)",
             WebkitBackdropFilter: "blur(14px)",
             borderBottom: `1px solid ${t.border}`,
-            maxHeight: 320,
-            overflowY: "auto",
             boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
             animation: "life-fade-in 0.25s ease",
           }}
@@ -3258,50 +2917,19 @@ export default function LifeApp() {
               No results.
             </p>
           ) : (
-            searchResults.map((item) => (
-              <button
-                key={item.key}
-                onClick={() => {
-                  handleSelect(item.key, item.node);
-                  setShowSearch(false);
-                  setSearch("");
-                }}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  textAlign: "left",
-                  background: "transparent",
-                  border: "none",
-                  borderBottom: `1px solid ${t.light}`,
-                  padding: "14px 24px",
-                  cursor: "pointer",
-                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = t.light)
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                <div style={{ fontSize: 15, fontWeight: 600, color: t.ink }}>
-                  {item.node.icon && (
-                    <span style={{ marginRight: 8 }}>{item.node.icon}</span>
-                  )}
-                  {item.node.label}
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: t.muted,
-                    marginTop: 2,
-                    fontStyle: "italic",
-                  }}
-                >
-                  {item.path.join(" — ")}
-                </div>
-              </button>
-            ))
+            /* react-window virtualization — only renders the visible search-result
+               rows instead of all 60+ DOM nodes. Each row is 60px tall; the list
+               grows up to 300px (5 visible rows) before scrolling kicks in. */
+            <FixedSizeList
+              height={Math.min(300, searchResults.length * 60)}
+              itemCount={searchResults.length}
+              itemSize={60}
+              width="100%"
+              overscanCount={3}
+              itemData={{ searchResults, t, handleSelect, setShowSearch, setSearch }}
+            >
+              {SearchResultRow}
+            </FixedSizeList>
           )}
         </div>
       )}
@@ -3594,44 +3222,13 @@ export default function LifeApp() {
                 ) : (
                   <div style={{ display: "grid", gap: 8 }}>
                     {sidebarSearchResults.map((item) => (
-                      <button
+                      <SidebarSearchItem
                         key={item.key}
-                        type="button"
-                        onClick={() => {
-                          play("open");
-                          handleSelect(item.key, item.node);
-                        }}
-                        style={{
-                          width: "100%",
-                          textAlign: "left",
-                          border: `1px solid ${t.border}`,
-                          background: t.white,
-                          borderRadius: 12,
-                          padding: "10px 12px",
-                          cursor: "pointer",
-                          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 700,
-                            color: t.ink,
-                          }}
-                        >
-                          {item.node.label}
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 3,
-                            fontSize: 11,
-                            color: t.muted,
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {item.path.join(" / ")}
-                        </div>
-                      </button>
+                        item={item}
+                        t={t}
+                        onSelect={handleSelect}
+                        play={play}
+                      />
                     ))}
                   </div>
                 )}
@@ -3907,12 +3504,16 @@ export default function LifeApp() {
                 const node = CONTENT[k];
                 if (!node) return null;
                 return (
+                  // onSelect + nodeKey + nodeData: SL creates a stable internal
+                  // useCallback handler so React.memo on SL actually bails out.
                   <SL
                     theme={t}
                     key={k}
                     label={node.label}
                     icon={node.icon}
-                    onClick={() => handleSelect(k, node)}
+                    onSelect={handleSelect}
+                    nodeKey={k}
+                    nodeData={node}
                     active={selKey === k}
                   />
                 );
@@ -3942,21 +3543,30 @@ export default function LifeApp() {
                 >
                   Nothing saved yet.
                 </p>
+              ) : bookmarkedItems.length > BOOKMARK_VIRT_THRESHOLD ? (
+                <FixedSizeList
+                  height={Math.min(360, bookmarkedItems.length * BOOKMARK_ITEM_HEIGHT)}
+                  itemCount={bookmarkedItems.length}
+                  itemSize={BOOKMARK_ITEM_HEIGHT}
+                  width="100%"
+                  overscanCount={5}
+                  itemData={{ items: bookmarkedItems, t, handleSelect }}
+                >
+                  {BookmarkRow}
+                </FixedSizeList>
               ) : (
-                allContent
-                  .filter((c) => bookmarks.includes(c.key))
-                  .map((item) => (
-                    <SL
-                      theme={t}
-                      key={item.key}
-                      label={item.node.label}
-                      icon={item.node.icon}
-                      onClick={() => {
-                        handleSelect(item.key, item.node);
-                      }}
-                      active={false}
-                    />
-                  ))
+                bookmarkedItems.map((item) => (
+                  <SL
+                    theme={t}
+                    key={item.key}
+                    label={item.node.label}
+                    icon={item.node.icon}
+                    onSelect={handleSelect}
+                    nodeKey={item.key}
+                    nodeData={item.node}
+                    active={false}
+                  />
+                ))
               )}
             </SS>
             <SS
@@ -4804,6 +4414,7 @@ export default function LifeApp() {
         />
       )}
     </div>
+    </SoundProvider>
   );
 }
 

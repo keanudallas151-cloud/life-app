@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 .next
+# dist/ was the old custom Next.js build directory (distDir: "dist") — no longer used.
+# Kept here so any leftover dist/ folder from a previous local build stays untracked.
 dist
 *.local
 .env
