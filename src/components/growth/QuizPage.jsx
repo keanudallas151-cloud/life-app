@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { C } from "../../systems/theme";
 import { Ic } from "../../icons/Ic";
-// TODO (future): if quiz.js is split by topic, load only the active topic's
-// questions on demand (e.g. import(`../../data/quiz/${topic}`) per start).
+// quiz.js is loaded dynamically when QuizPage mounts (see lazy load below).
+// Per-topic splitting is a future optimisation if the file grows further.
 import { LS } from "../../systems/storage";
 import { useQuizStats } from "../../systems/useQuizStats";
 
@@ -874,8 +874,7 @@ export function QuizPage({
   // ─── Lazy quiz data ────────────────────────────────────────────────────────
   // quiz.js (~146 KB) is loaded dynamically when QuizPage first mounts,
   // keeping it out of the initial bundle on every other screen.
-  // TODO (future): split quiz.js by topic so only the selected topic's
-  // questions are fetched (e.g. import(`../../data/quiz/${topic}`)).
+  // Per-topic splitting is a future optimisation if the file grows further.
   const [quizQuestions, setQuizQuestions] = useState(null);
   const [quizLoadErr, setQuizLoadErr] = useState(false);
   useEffect(() => {

@@ -10,11 +10,8 @@
  *  - Guest screen guard and screen persistence
  *
  * App.jsx consumes this via <AuthProvider> + useAuth().
- *
- * TODO (future steps):
- *  - Move UIContext (theme, sidebar, search, notifications, A2HS) out of App.jsx
- *  - Move ContentContext (bookmarks, notes, readKeys, momentum) out of App.jsx
- *  - Replace _setPlay ref-bridge with a SoundContext once useSound moves out
+ * Sound feedback for auth mutations is routed through SoundContext
+ * (callGlobalPlay) so there is no ref-bridge wiring needed from App.jsx.
  */
 
 import {
@@ -41,6 +38,7 @@ import { auth, isFirebaseConfigured } from "../firebaseClient";
 import { getFirebaseProfile } from "../services/firebaseProfile";
 import { signInWithGoogle } from "../services/firebaseAuth";
 import { LS } from "../systems/storage";
+import { callGlobalPlay } from "./SoundContext";
 
 /** Landing page providers: Google is live; Phone is a placeholder. */
 export const AUTH_PROVIDERS = [
@@ -111,14 +109,9 @@ export function AuthProvider({ children }) {
   });
 
   // ─── Play sound bridge ────────────────────────────────────────────────────
-  // Auth mutations need sound feedback, but useSound() lives in App.jsx.
-  // App.jsx wires its `play` function in via _setPlay() after initialisation.
-  // TODO: Replace this ref-bridge once useSound is extracted to SoundContext.
-  const playRef = useRef(() => {});
-  const _setPlay = useCallback((fn) => {
-    if (typeof fn === "function") playRef.current = fn;
-  }, []);
-  const _play = useCallback((type) => playRef.current(type), []);
+  // Sound feedback for auth mutations is provided via SoundContext.callGlobalPlay().
+  // No ref-bridge or manual wiring needed — SoundProvider in App.jsx keeps the
+  // module-level registry up to date whenever the play function changes.
 
   // ─── rErr auto-clearing effect ────────────────────────────────────────────
   // Only clear a field error when that field changes from its snapshot value
@@ -350,13 +343,13 @@ export function AuthProvider({ children }) {
   // ─── Auth mutation: Google sign-in ────────────────────────────────────────
   const doGoogleSignIn = async () => {
     if (authLoading) return;
-    _play("tap");
+    callGlobalPlay("tap");
     setSiSocialErr("");
     if (!isFirebaseConfigured || !auth) {
       setSiSocialErr(
         "Firebase auth is not configured yet. Add the NEXT_PUBLIC_FIREBASE_* values to your deployment settings.",
       );
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
     setAuthLoading(true);
@@ -366,7 +359,7 @@ export function AuthProvider({ children }) {
       setSiSocialErr(
         String(error.message || "Could not start Google sign in."),
       );
-      _play("err");
+      callGlobalPlay("err");
     } finally {
       setAuthLoading(false);
     }
@@ -374,7 +367,7 @@ export function AuthProvider({ children }) {
 
   const doProviderSignIn = (item) => {
     if (!item.live) {
-      _play("tap");
+      callGlobalPlay("tap");
       setSiSocialErr(`${item.label} login is coming soon.`);
       return;
     }
@@ -392,17 +385,17 @@ export function AuthProvider({ children }) {
       setSiErr(
         "Firebase auth is not configured yet. Add the NEXT_PUBLIC_FIREBASE_* values to your deployment settings.",
       );
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
     if (!siEmail.trim()) {
       setSiErr("Please enter your email.");
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
     if (!siPass) {
       setSiErr("Please enter your password.");
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
     setAuthLoading(true);
@@ -421,7 +414,7 @@ export function AuthProvider({ children }) {
       } else {
         setSiErr("Could not sign in. Check your details.");
       }
-      _play("err");
+      callGlobalPlay("err");
     } finally {
       setAuthLoading(false);
     }
@@ -436,22 +429,22 @@ export function AuthProvider({ children }) {
       setFpErr(
         "Firebase auth is not configured yet. Add the NEXT_PUBLIC_FIREBASE_* values to your deployment settings.",
       );
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
     if (!fpEmail.trim() || !fpEmail.includes("@")) {
       setFpErr("Please enter a valid email.");
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
     setAuthLoading(true);
     try {
       await sendPasswordResetEmail(auth, fpEmail.toLowerCase().trim());
       setFpMsg("Password reset email sent. Check your inbox.");
-      _play("ok");
+      callGlobalPlay("ok");
     } catch (error) {
       setFpErr(String(error.message || "Could not send reset email."));
-      _play("err");
+      callGlobalPlay("err");
     } finally {
       setAuthLoading(false);
     }
@@ -464,7 +457,7 @@ export function AuthProvider({ children }) {
 
     if (rpPass.length < 8) {
       setRpErr("Password must be at least 8 characters.");
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
     if (
@@ -474,12 +467,12 @@ export function AuthProvider({ children }) {
       !/[^A-Za-z0-9]/.test(rpPass)
     ) {
       setRpErr("Use upper/lowercase letters, a number, and a symbol.");
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
     if (rpPass !== rpPass2) {
       setRpErr("Passwords do not match.");
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
 
@@ -488,7 +481,7 @@ export function AuthProvider({ children }) {
       setRpErr(
         "This reset link is invalid or has expired. Request a new email from the sign-in screen.",
       );
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
 
@@ -499,7 +492,7 @@ export function AuthProvider({ children }) {
       passwordRecoveryRef.current = false;
       setRpPass("");
       setRpPass2("");
-      _play("ok");
+      callGlobalPlay("ok");
       setScreen("signin");
     } catch (error) {
       const code = String(error?.code || "");
@@ -514,7 +507,7 @@ export function AuthProvider({ children }) {
           String(error?.message || "Could not update password. Please try again."),
         );
       }
-      _play("err");
+      callGlobalPlay("err");
     } finally {
       setAuthLoading(false);
     }
@@ -529,7 +522,7 @@ export function AuthProvider({ children }) {
         email:
           "Firebase auth is not configured yet. Add the NEXT_PUBLIC_FIREBASE_* values to your deployment settings.",
       });
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
     // Helper that snapshots current form values BEFORE updating errors,
@@ -580,7 +573,7 @@ export function AuthProvider({ children }) {
     if (rPass !== rPass2) err.pass2 = "Passwords do not match.";
     if (Object.keys(err).length) {
       setRErrSnap(err);
-      _play("err");
+      callGlobalPlay("err");
       return;
     }
 
@@ -599,7 +592,7 @@ export function AuthProvider({ children }) {
         credentials.user.email || rEmail.toLowerCase().trim(),
       );
       LS.set(`onboarded_${credentials.user.uid}`, false);
-      _play("ok");
+      callGlobalPlay("ok");
       setScreen("verify_email");
     } catch (error) {
       const raw = String(error.message || "")
@@ -622,7 +615,7 @@ export function AuthProvider({ children }) {
           email: "Could not create account. Please check details.",
         });
       }
-      _play("err");
+      callGlobalPlay("err");
     } finally {
       setAuthLoading(false);
     }
@@ -674,7 +667,7 @@ export function AuthProvider({ children }) {
       if (currentUser) {
         await deleteUser(currentUser);
       }
-      _play("ok");
+      callGlobalPlay("ok");
       setDeleteConfirmOpen(false);
       await doSignOut();
     } catch (error) {
@@ -689,7 +682,7 @@ export function AuthProvider({ children }) {
         await doSignOut();
         return;
       }
-      _play("err");
+      callGlobalPlay("err");
       if (typeof window !== "undefined") {
         window.alert(
           String(error?.message || "Could not delete your account. Please try again."),
@@ -785,10 +778,6 @@ export function AuthProvider({ children }) {
     doSignOut,
     doDeleteAccount,
     performDeleteAccount,
-
-    // Play wiring — App.jsx calls _setPlay(play) once useSound() initialises.
-    // TODO: Remove once useSound is extracted to SoundContext (future step).
-    _setPlay,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

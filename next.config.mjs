@@ -9,7 +9,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  distDir: "dist",
+  // distDir is intentionally omitted — leave it at the default ".next" so
+  // Vercel's Next.js adapter can locate the build artefacts automatically.
   outputFileTracingRoot: __dirname,
   generateBuildId: async () => "build-" + Date.now(),
   allowedDevOrigins: ["127.0.0.1", "localhost"],

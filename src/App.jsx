@@ -1,18 +1,22 @@
 // v1.0.1 - auth fixes: DOB validation, 3s loading, Firebase migration follow-up
 // Auth state/mutations are now in src/contexts/AuthContext.jsx (Step 1 refactor).
 import { sendEmailVerification } from "firebase/auth";
+import { FixedSizeList } from "react-window";
 import {
   Suspense,
+  memo,
   useCallback,
+  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { TreeNode } from "./components/shell/Field";
-// TODO (future): consider more granular per-section loading once the content
-// tree is split into separate files (e.g. only load finance section on demand).
-// content.js is loaded lazily the first time the "app" screen becomes active.
+// content.js is loaded lazily the first time the "app" screen becomes active
+// (see the dynamic import in the contentData useEffect below). Splitting it
+// further into per-section chunks is a future optimisation once the content
+// tree grows large enough to warrant it.
 import { auth, isFirebaseConfigured } from "./firebaseClient";
 import { Ic } from "./icons/Ic";
 import {
@@ -82,6 +86,8 @@ import { WhereToStartPage } from "./components/shell/WhereToStartPage";
 import { useSubscription } from "./systems/useSubscription";
 import { usePremiumOrganizedSync } from "./systems/usePremiumOrganizedSync";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { UIProvider, useUIContext } from "./contexts/UIContext";
+import { SoundProvider } from "./contexts/SoundContext";
 
 const PREF_DEFAULTS = {
   soundEnabled: true,
@@ -101,6 +107,107 @@ const PREF_DEFAULTS = {
 // Swipe left beyond 72px to delete; direction-locked to avoid vertical-scroll conflicts.
 const SWIPE_HORIZONTAL_BIAS = 1.5;
 const SECRET_SIENNA_SEARCH_CODE = "160705kc";
+
+// ── react-window row renderer for the global search results list ─────────────
+// Defined outside LifeAppContent so the reference is stable across renders —
+// prevents react-window from remounting every row on each parent render.
+const _SEARCH_FONT = "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif";
+function SearchResultRow({ index, style, data }) {
+  const { searchResults, t, handleSelect, setShowSearch, setSearch } = data;
+  const item = searchResults[index];
+  return (
+    <div style={style}>
+      <button
+        onClick={() => {
+          handleSelect(item.key, item.node);
+          setShowSearch(false);
+          setSearch("");
+        }}
+        style={{
+          display: "block",
+          width: "100%",
+          height: "100%",
+          textAlign: "left",
+          background: "transparent",
+          border: "none",
+          borderBottom: `1px solid ${t.light}`,
+          padding: "10px 24px",
+          cursor: "pointer",
+          fontFamily: _SEARCH_FONT,
+          boxSizing: "border-box",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = t.light)}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+      >
+        <div style={{ fontSize: 15, fontWeight: 600, color: t.ink }}>
+          {item.node.icon && <span style={{ marginRight: 8 }}>{item.node.icon}</span>}
+          {item.node.label}
+        </div>
+        <div style={{ fontSize: 12, color: t.muted, marginTop: 2, fontStyle: "italic" }}>
+          {item.path.join(" — ")}
+        </div>
+      </button>
+    </div>
+  );
+}
+
+// ── Memoized sidebar search result item ─────────────────────────────────────
+// Defined outside LifeAppContent so the component reference is stable and
+// React.memo actually prevents re-renders between parent renders.
+const _SB_FONT = "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif";
+const SidebarSearchItem = memo(function SidebarSearchItem({ item, t, onSelect, play }) {
+  const handleClick = useCallback(() => {
+    play("open");
+    onSelect(item.key, item.node);
+  }, [item.key, item.node, onSelect, play]);
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      style={{
+        width: "100%",
+        textAlign: "left",
+        border: `1px solid ${t.border}`,
+        background: t.white,
+        borderRadius: 12,
+        padding: "10px 12px",
+        cursor: "pointer",
+        fontFamily: _SB_FONT,
+      }}
+    >
+      <div className="life-sidebar-result-label" style={{ color: t.ink }}>
+        {item.node.label}
+      </div>
+      <div className="life-sidebar-result-path" style={{ color: t.muted }}>
+        {item.path.join(" / ")}
+      </div>
+    </button>
+  );
+});
+
+// ── react-window row renderer for virtualized bookmarks list ─────────────────
+// Used when the bookmarks list exceeds BOOKMARK_VIRT_THRESHOLD items.
+// Each SL row is 44px tall (matches the .life-tap-target token).
+const BOOKMARK_VIRT_THRESHOLD = 50;
+const BOOKMARK_ITEM_HEIGHT = 44;
+function BookmarkRow({ index, style, data }) {
+  const { items, t, handleSelect } = data;
+  const item = items[index];
+  return (
+    <div style={style}>
+      <SL
+        theme={t}
+        label={item.node.label}
+        icon={item.node.icon}
+        onSelect={handleSelect}
+        nodeKey={item.key}
+        nodeData={item.node}
+        active={false}
+      />
+    </div>
+  );
+}
 
 // Maps notification type/activity to an iOS-style SVG icon.
 function notifIconKey(n) {
@@ -129,6 +236,8 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
   const currentX = useRef(0);
   const didDrag = useRef(false);
   const directionLocked = useRef(null);
+  // rAF handle — ensures onMouseMove/onTouchMove fires at most once per frame.
+  const rafHandle = useRef(null);
 
   const revealRatio = Math.min(1, Math.abs(offset) / 72);
 
@@ -144,24 +253,36 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
 
   const onMove = (clientX, clientY) => {
     if (!dragging.current || exiting) return;
-    const dx = clientX - startX.current;
-    const dy = clientY - startY.current;
-    if (
-      directionLocked.current === null &&
-      (Math.abs(dx) > 5 || Math.abs(dy) > 5)
-    ) {
-      directionLocked.current =
-        Math.abs(dx) > Math.abs(dy) * SWIPE_HORIZONTAL_BIAS
-          ? "horizontal"
-          : "vertical";
-    }
-    if (directionLocked.current === "vertical") return;
-    currentX.current = clientX;
-    if (Math.abs(dx) > 5) didDrag.current = true;
-    setOffset(Math.min(0, dx));
+    // Throttle to one update per animation frame via requestAnimationFrame.
+    // This prevents the move handler from flooding the main thread during
+    // fast mouse/touch movement (potentially 1000+ calls/sec without this).
+    if (rafHandle.current !== null) return; // already scheduled for this frame
+    rafHandle.current = requestAnimationFrame(() => {
+      rafHandle.current = null;
+      if (!dragging.current || exiting) return;
+      const dx = clientX - startX.current;
+      const dy = clientY - startY.current;
+      if (
+        directionLocked.current === null &&
+        (Math.abs(dx) > 5 || Math.abs(dy) > 5)
+      ) {
+        directionLocked.current =
+          Math.abs(dx) > Math.abs(dy) * SWIPE_HORIZONTAL_BIAS
+            ? "horizontal"
+            : "vertical";
+      }
+      if (directionLocked.current === "vertical") return;
+      currentX.current = clientX;
+      if (Math.abs(dx) > 5) didDrag.current = true;
+      setOffset(Math.min(0, dx));
+    });
   };
 
   const onEnd = () => {
+    if (rafHandle.current !== null) {
+      cancelAnimationFrame(rafHandle.current);
+      rafHandle.current = null;
+    }
     if (!dragging.current) return;
     dragging.current = false; // release drag lock FIRST so transition is active
     const delta = currentX.current - startX.current;
@@ -355,12 +476,14 @@ function SwipeableNotification({ n, theme, dark, onTap, onDelete }) {
   );
 }
 
-// Thin wrapper that provides AuthContext to the entire app.
-// TODO (future steps): wrap with ThemeContext, UIContext, ContentContext here.
+// Root wrapper: provides AuthContext, UIContext, and SoundContext to the app.
+// ThemeContext and ContentContext can be extracted here in a future refactor.
 export default function LifeApp() {
   return (
     <AuthProvider>
-      <LifeAppContent />
+      <UIProvider>
+        <LifeAppContent />
+      </UIProvider>
     </AuthProvider>
   );
 }
@@ -377,7 +500,6 @@ function LifeAppContent() {
   }, [dark, themeMode]);
 
   // ─── Auth state & mutations — sourced from AuthContext ───────────────────
-  // TODO (future): ThemeContext extraction will lift dark/t/themeMode here.
   const {
     screen,
     setScreen,
@@ -443,7 +565,6 @@ function LifeAppContent() {
     doSignOut,
     doDeleteAccount,
     performDeleteAccount,
-    _setPlay,
   } = useAuth();
 
   const subscription = useSubscription(user?.id);
@@ -465,11 +586,8 @@ function LifeAppContent() {
   // Intentionally narrow — use only when a specific element deserves its own
   // unique sound without duplicating the existing onClick play() call.
   useSoundDelegation(play);
-  // Wire play into AuthContext so auth mutations can give sound feedback.
-  // TODO: Remove this bridge once useSound is extracted to SoundContext.
-  useEffect(() => {
-    _setPlay(play);
-  }, [_setPlay, play]);
+  // SoundProvider keeps the module-level registry (callGlobalPlay) up to date.
+  // AuthContext mutations call callGlobalPlay() directly — no ref-bridge needed.
   const cloud = useUserData(userIdForData);
 
   const emailDeliverySyncKeyRef = useRef("");
@@ -674,7 +792,7 @@ function LifeAppContent() {
       setSidebarOpen(false);
       if (typeof setSectionOpen === "function") setSectionOpen(true);
     },
-    [play, setPage],
+    [play, setPage, setSidebarOpen],
   );
 
   const [categoryPageData, setCategoryPageData] = useState(null);
@@ -740,7 +858,25 @@ function LifeAppContent() {
     };
     document.title = titles[page] || "Life. — Knowledge, Growth, Community";
   }, [page]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // ── UI state — sourced from UIContext (extracted from God Component) ──────
+  // Moving these out of LifeAppContent prevents unrelated re-renders when, e.g.,
+  // a sidebar accordion toggles or the viewport-width flag changes.
+  const {
+    sidebarOpen, setSidebarOpen,
+    lifeOpen, setLifeOpen,
+    libOpen, setLibOpen,
+    toolsOpen, setToolsOpen,
+    socialsOpen, setSocialsOpen,
+    guidedOpen, setGuidedOpen,
+    savedOpen, setSavedOpen,
+    experienceOpen, setExperienceOpen,
+    experienceTopic, setExperienceTopic,
+    isNarrowViewport,
+    showScrollTop, setShowScrollTop,
+    shareToast, setShareToast,
+  } = useUIContext();
+
   const [selKey, setSelKey] = useState(null);
   const [selContent, setSelContent] = useState(null);
   const [selNode, setSelNode] = useState(null);
@@ -751,17 +887,16 @@ function LifeAppContent() {
   const [showSearch, setShowSearch] = useState(false);
   const [readerModeActive, setReaderModeActive] = useState(false);
   const [secretSiennaUnlocked, setSecretSiennaUnlocked] = useState(false);
-  const [isNarrowViewport, setIsNarrowViewport] = useState(false);
+  // sidebarQuery drives the controlled input; deferredSidebarQuery is the
+  // deferred version consumed by the filter useMemo so fast typing doesn't
+  // block the input with expensive computation.
   const [sidebarQuery, setSidebarQuery] = useState("");
+  // Deferred value — lags behind sidebarQuery by one React scheduling slot so
+  // the filter/sort computation runs at lower priority than the controlled input.
+  const deferredSidebarQuery = useDeferredValue(sidebarQuery);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return undefined;
-    const media = window.matchMedia("(max-width: 767px)");
-    const syncViewport = () => setIsNarrowViewport(media.matches);
-    syncViewport();
-    media.addEventListener("change", syncViewport);
-    return () => media.removeEventListener("change", syncViewport);
-  }, []);
+  // Deferred search value for the global search overlay (same principle).
+  const deferredSearch = useDeferredValue(search);
 
   useEffect(() => {
     if (!showSearch || search.length <= 1) return;
@@ -774,21 +909,12 @@ function LifeAppContent() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [showSearch, search]);
-  const [lifeOpen, setLifeOpen] = useState(true);
-  const [libOpen, setLibOpen] = useState(false);
-  const [toolsOpen, setToolsOpen] = useState(false);
   const [learnItSubject, setLearnItSubject] = useState(null); // "english" | "finance" | "demeanor"
-  const [socialsOpen, setSocialsOpen] = useState(false);
-  const [guidedOpen, setGuidedOpen] = useState(false);
-  const [savedOpen, setSavedOpen] = useState(false);
-  const [experienceOpen, setExperienceOpen] = useState(false);
-  const [experienceTopic, setExperienceTopic] = useState(null);
 
   // ─── Lazy content data ────────────────────────────────────────────────────
   // content.js (~143 KB) is loaded dynamically the first time the main app
   // screen becomes active, keeping the initial bundle lighter on mobile.
-  // TODO (future): split content.js into per-section chunks and load each one
-  // only when the user navigates to that section (e.g. "finance" on demand).
+  // Per-section splitting is a future optimisation if the file grows further.
   const [contentData, setContentData] = useState(null);
   const [contentLoadErr, setContentLoadErr] = useState(false);
   useEffect(() => {
@@ -815,7 +941,9 @@ function LifeAppContent() {
   const allContent = useMemo(() => contentData?.allContent ?? [], [contentData]);
 
   const sidebarSearchResults = useMemo(() => {
-    const query = sidebarQuery.trim().toLowerCase();
+    // Uses deferredSidebarQuery so the filter runs at low priority while the
+    // controlled input updates immediately — prevents jank on fast typing.
+    const query = deferredSidebarQuery.trim().toLowerCase();
     if (query.length < 2) return [];
 
     return allContent
@@ -831,7 +959,13 @@ function LifeAppContent() {
         return haystack.includes(query);
       })
       .slice(0, 24);
-  }, [sidebarQuery, allContent]);
+  }, [deferredSidebarQuery, allContent]);
+
+  // Filtered bookmark items; virtualized when count > BOOKMARK_VIRT_THRESHOLD.
+  const bookmarkedItems = useMemo(
+    () => allContent.filter((c) => bookmarks.includes(c.key)),
+    [allContent, bookmarks],
+  );
 
   const libraryCategoryCards = useMemo(() => {
     return Object.entries(LIBRARY).map(([key, node]) => {
@@ -841,9 +975,6 @@ function LifeAppContent() {
       return { key, node, topicCount };
     });
   }, [LIBRARY, allContent]);
-  const [shareToast, setShareToast] = useState(false);
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
   const [a2hsPrompt, setA2hsPrompt] = useState(null); // Android/Chrome BeforeInstallPromptEvent
   const [showA2hs, setShowA2hs] = useState(false);
   const [a2hsDismissed, setA2hsDismissed] = useState(() =>
@@ -913,7 +1044,7 @@ function LifeAppContent() {
     setShowSearch(false);
     setShowNotif(false);
     setSidebarOpen(false);
-  }, []);
+  }, [setSidebarOpen]);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const pushSystemNotification = useCallback(
@@ -954,7 +1085,7 @@ function LifeAppContent() {
       setSidebarOpen(false);
       setShowNotif(false);
     };
-  }, []);
+  }, [setSidebarOpen]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -1026,9 +1157,17 @@ function LifeAppContent() {
 
   const [catStep, setCatStep] = useState(0);
 
+  // Background color is set via a single --life-bg CSS variable on :root rather
+  // than imperative direct mutations on body/html. All surfaces that need the page
+  // background colour should use var(--life-bg) instead of hardcoded values.
+  // This is cleaner than separate body + html style assignments and avoids
+  // bypassing React's rendering model.
   useEffect(() => {
-    document.body.style.background = t.skin;
-    document.documentElement.style.background = t.skin;
+    const root = document.documentElement;
+    root.style.setProperty("--life-bg", t.skin);
+    // Keep body/html background in sync so there is no flash behind the app shell.
+    document.body.style.background = "var(--life-bg)";
+    root.style.background = "var(--life-bg)";
   }, [t.skin]);
   const [isOffline, setIsOffline] = useState(
     typeof navigator !== "undefined" ? !navigator.onLine : false,
@@ -1063,7 +1202,7 @@ function LifeAppContent() {
     setShowSearch(false);
     setSidebarOpen(false);
     searchInputRef.current?.blur();
-  }, [setPage]);
+  }, [setPage, setSidebarOpen]);
 
   useEffect(() => {
     closeTransientOverlays();
@@ -1240,7 +1379,12 @@ function LifeAppContent() {
   // doResetPassword, doRegister, doSignOut, doDeleteAccount,
   // performDeleteAccount) are now in AuthContext — consumed via useAuth() above.
 
-  const handleSelect = (key, node) => {
+  // useCallback ensures handleSelect has a stable reference across renders.
+  // NOTE: inline arrow wrappers like `onClick={() => handleSelect(k, node)}`
+  // SL sidebar items are wrapped in React.memo and accept stable onSelect/
+  // nodeKey/nodeData props so each item bails out of re-rendering unless its
+  // own props change. handleSelect is a stable useCallback reference.
+  const handleSelect = useCallback((key, node) => {
     const alreadyRead = readKeys.includes(key);
     setSelKey(key);
     setSelContent(node.content);
@@ -1265,7 +1409,8 @@ function LifeAppContent() {
         label: node?.label,
       },
     });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readKeys, notes, setSidebarOpen, setPage, setSearch, trackMomentumEvent]);
 
   const handleSelectRef = useRef(handleSelect);
   handleSelectRef.current = handleSelect;
@@ -1313,7 +1458,7 @@ function LifeAppContent() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [screen, setPage]);
+  }, [screen, setPage, setSidebarOpen]);
 
   const goHome = () => {
     play("home_return");
@@ -1390,7 +1535,7 @@ function LifeAppContent() {
     handleScroll();
     scroller.addEventListener("scroll", handleScroll, { passive: true });
     return () => scroller.removeEventListener("scroll", handleScroll);
-  }, [screen]);
+  }, [screen, setShowScrollTop]);
 
   useEffect(() => {
     const toOnline = () => setIsOffline(false);
@@ -1416,11 +1561,13 @@ function LifeAppContent() {
   const isBookmarked = bookmarks.includes(selKey);
   const related = (selNode?.related || []).map((k) => MAP[k]).filter(Boolean);
   const searchResults =
-    search.length > 1
+    // Use deferredSearch so the filter runs at low priority while the input
+    // updates immediately — no jank during fast typing in the search overlay.
+    deferredSearch.length > 1
       ? allContent.filter(
           (i) =>
-            i.node.label.toLowerCase().includes(search.toLowerCase()) ||
-            i.node.content?.text?.toLowerCase().includes(search.toLowerCase()),
+            i.node.label.toLowerCase().includes(deferredSearch.toLowerCase()) ||
+            i.node.content?.text?.toLowerCase().includes(deferredSearch.toLowerCase()),
         )
       : [];
   const initials = user?.name
@@ -2121,6 +2268,7 @@ function LifeAppContent() {
     );
 
   return (
+    <SoundProvider play={play}>
     <div
       data-page-tag="#dashboard_home"
       style={{
@@ -2740,7 +2888,7 @@ function LifeAppContent() {
         </button>
       </div>
 
-      {showSearch && search.length > 1 && (
+      {showSearch && deferredSearch.length > 1 && (
         <div
           className="life-search-dropdown"
           style={{
@@ -2752,8 +2900,6 @@ function LifeAppContent() {
             backdropFilter: "blur(14px)",
             WebkitBackdropFilter: "blur(14px)",
             borderBottom: `1px solid ${t.border}`,
-            maxHeight: 320,
-            overflowY: "auto",
             boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
             animation: "life-fade-in 0.25s ease",
           }}
@@ -2771,50 +2917,19 @@ function LifeAppContent() {
               No results.
             </p>
           ) : (
-            searchResults.map((item) => (
-              <button
-                key={item.key}
-                onClick={() => {
-                  handleSelect(item.key, item.node);
-                  setShowSearch(false);
-                  setSearch("");
-                }}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  textAlign: "left",
-                  background: "transparent",
-                  border: "none",
-                  borderBottom: `1px solid ${t.light}`,
-                  padding: "14px 24px",
-                  cursor: "pointer",
-                  fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = t.light)
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                <div style={{ fontSize: 15, fontWeight: 600, color: t.ink }}>
-                  {item.node.icon && (
-                    <span style={{ marginRight: 8 }}>{item.node.icon}</span>
-                  )}
-                  {item.node.label}
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: t.muted,
-                    marginTop: 2,
-                    fontStyle: "italic",
-                  }}
-                >
-                  {item.path.join(" — ")}
-                </div>
-              </button>
-            ))
+            /* react-window virtualization — only renders the visible search-result
+               rows instead of all 60+ DOM nodes. Each row is 60px tall; the list
+               grows up to 300px (5 visible rows) before scrolling kicks in. */
+            <FixedSizeList
+              height={Math.min(300, searchResults.length * 60)}
+              itemCount={searchResults.length}
+              itemSize={60}
+              width="100%"
+              overscanCount={3}
+              itemData={{ searchResults, t, handleSelect, setShowSearch, setSearch }}
+            >
+              {SearchResultRow}
+            </FixedSizeList>
           )}
         </div>
       )}
@@ -3107,44 +3222,13 @@ function LifeAppContent() {
                 ) : (
                   <div style={{ display: "grid", gap: 8 }}>
                     {sidebarSearchResults.map((item) => (
-                      <button
+                      <SidebarSearchItem
                         key={item.key}
-                        type="button"
-                        onClick={() => {
-                          play("open");
-                          handleSelect(item.key, item.node);
-                        }}
-                        style={{
-                          width: "100%",
-                          textAlign: "left",
-                          border: `1px solid ${t.border}`,
-                          background: t.white,
-                          borderRadius: 12,
-                          padding: "10px 12px",
-                          cursor: "pointer",
-                          fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 700,
-                            color: t.ink,
-                          }}
-                        >
-                          {item.node.label}
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 3,
-                            fontSize: 11,
-                            color: t.muted,
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {item.path.join(" / ")}
-                        </div>
-                      </button>
+                        item={item}
+                        t={t}
+                        onSelect={handleSelect}
+                        play={play}
+                      />
                     ))}
                   </div>
                 )}
@@ -3420,12 +3504,16 @@ function LifeAppContent() {
                 const node = CONTENT[k];
                 if (!node) return null;
                 return (
+                  // onSelect + nodeKey + nodeData: SL creates a stable internal
+                  // useCallback handler so React.memo on SL actually bails out.
                   <SL
                     theme={t}
                     key={k}
                     label={node.label}
                     icon={node.icon}
-                    onClick={() => handleSelect(k, node)}
+                    onSelect={handleSelect}
+                    nodeKey={k}
+                    nodeData={node}
                     active={selKey === k}
                   />
                 );
@@ -3455,21 +3543,30 @@ function LifeAppContent() {
                 >
                   Nothing saved yet.
                 </p>
+              ) : bookmarkedItems.length > BOOKMARK_VIRT_THRESHOLD ? (
+                <FixedSizeList
+                  height={Math.min(360, bookmarkedItems.length * BOOKMARK_ITEM_HEIGHT)}
+                  itemCount={bookmarkedItems.length}
+                  itemSize={BOOKMARK_ITEM_HEIGHT}
+                  width="100%"
+                  overscanCount={5}
+                  itemData={{ items: bookmarkedItems, t, handleSelect }}
+                >
+                  {BookmarkRow}
+                </FixedSizeList>
               ) : (
-                allContent
-                  .filter((c) => bookmarks.includes(c.key))
-                  .map((item) => (
-                    <SL
-                      theme={t}
-                      key={item.key}
-                      label={item.node.label}
-                      icon={item.node.icon}
-                      onClick={() => {
-                        handleSelect(item.key, item.node);
-                      }}
-                      active={false}
-                    />
-                  ))
+                bookmarkedItems.map((item) => (
+                  <SL
+                    theme={t}
+                    key={item.key}
+                    label={item.node.label}
+                    icon={item.node.icon}
+                    onSelect={handleSelect}
+                    nodeKey={item.key}
+                    nodeData={item.node}
+                    active={false}
+                  />
+                ))
               )}
             </SS>
             <SS
@@ -4317,6 +4414,7 @@ function LifeAppContent() {
         />
       )}
     </div>
+    </SoundProvider>
   );
 }
 
