@@ -95,6 +95,8 @@ import { LearnItSubjectPage } from "./components/learnIt/LearnItSubjectPage";
 import { VerifyEmailPage } from "./components/auth/VerifyEmailPage";
 import { WhereToStartPage } from "./components/shell/WhereToStartPage";
 import { signInWithGoogle } from "./services/firebaseAuth";
+import { useSubscription } from "./systems/useSubscription";
+import { usePremiumOrganizedSync } from "./systems/usePremiumOrganizedSync";
 
 const PREF_DEFAULTS = {
   soundEnabled: true,
@@ -381,6 +383,8 @@ export default function LifeApp() {
 
   const [screen, setScreen] = useState("loading"); // start loading until session resolved
   const [user, setUser] = useState(null); // { id, email, name, username }
+  const subscription = useSubscription(user?.id);
+  usePremiumOrganizedSync(subscription.tier);
   const [authLoading, setAuthLoading] = useState(false);
   const [siSocialErr, setSiSocialErr] = useState("");
 
@@ -4549,7 +4553,7 @@ export default function LifeApp() {
             )}
 
             {/* Extra: Premium / Payment */}
-            {page === "premium" && <PremiumPage t={t} play={play} />}
+            {page === "premium" && <PremiumPage t={t} play={play} user={user} />}
 
             {page === "profile" && (
               <ProfilePage
@@ -4562,6 +4566,7 @@ export default function LifeApp() {
                 readKeys={readKeys}
                 bookmarks={bookmarks}
                 totalTopics={allContent.length}
+                subscription={subscription}
                 onAvatarChange={(url) =>
                   setUser((prev) => (prev ? { ...prev, avatarUrl: url } : prev))
                 }

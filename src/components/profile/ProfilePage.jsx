@@ -14,6 +14,7 @@ export default function ProfilePage({
   readKeys = [],
   bookmarks = [],
   totalTopics = 0,
+  subscription = null,
   onAvatarChange,
   onSystemNotify,
 }) {
@@ -120,6 +121,28 @@ export default function ProfilePage({
     },
   ];
 
+  const planTier = subscription?.tier || "free";
+  const planLabel =
+    planTier === "premium" ? "Premium" : planTier === "basic" ? "Basic" : "Free";
+  const planSub = (() => {
+    if (planTier === "free") return "Upgrade your plan";
+    const iso = subscription?.currentPeriodEnd;
+    if (!iso) return `${planLabel} plan`;
+    try {
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return `${planLabel} plan`;
+      const formatted = date.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
+      return subscription?.cancelAtPeriodEnd
+        ? `${planLabel} · ends ${formatted}`
+        : `${planLabel} · renews ${formatted}`;
+    } catch {
+      return `${planLabel} plan`;
+    }
+  })();
+
   const quickLinks = [
     {
       key: "progress_dashboard",
@@ -183,6 +206,25 @@ export default function ProfilePage({
         >
           <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
           <circle cx="12" cy="7" r="4" />
+        </svg>
+      ),
+    },
+    {
+      key: "premium",
+      label: `Subscription · ${planLabel}`,
+      sub: planSub,
+      icon: (
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={t.green}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2" />
         </svg>
       ),
     },
