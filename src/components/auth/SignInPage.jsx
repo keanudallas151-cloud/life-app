@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import { SystemStatusNotice } from "../shell/SystemStatusNotice";
 
 export function SignInPage({
@@ -27,6 +28,26 @@ export function SignInPage({
   setSiSocialErr,
   systemNotice,
 }) {
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('life_remembered_email');
+    if (savedEmail && !siEmail) {
+      setSiEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleRememberToggle = () => {
+    const next = !rememberMe;
+    setRememberMe(next);
+    if (next) {
+      if (siEmail) localStorage.setItem('life_remembered_email', siEmail);
+    } else {
+      localStorage.removeItem('life_remembered_email');
+    }
+  };
+
   return (
     <div
       data-page-tag="#sign_in_page"
@@ -132,6 +153,7 @@ export function SignInPage({
         className="life-auth-card"
         onSubmit={(e) => {
           e.preventDefault();
+          if (rememberMe && siEmail) localStorage.setItem('life_remembered_email', siEmail);
           if (!authLoading) doEmailSignIn();
         }}
         style={{
@@ -260,6 +282,37 @@ export function SignInPage({
           </div>
         </div>
 
+        {/* Remember Me toggle */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", minHeight:44, padding:"4px 2px" }}>
+          <span style={{ fontSize:14, color:C.muted, fontFamily:"-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif" }}>
+            Remember me
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={rememberMe}
+            onClick={handleRememberToggle}
+            style={{
+              appearance:"none", border:"none", padding:0, margin:0,
+              width:51, height:31, borderRadius:999,
+              background: rememberMe ? C.green : "rgba(120,120,128,0.32)",
+              position:"relative", cursor:"pointer",
+              transition:"background-color 0.2s ease",
+              flexShrink:0,
+              WebkitTapHighlightColor:"transparent",
+            }}
+          >
+            <span style={{
+              position:"absolute",
+              top:2, left: rememberMe ? 22 : 2,
+              width:27, height:27, borderRadius:"50%",
+              background:"#fff",
+              boxShadow:"0 2px 6px rgba(0,0,0,0.25)",
+              transition:"left 0.2s cubic-bezier(0.34,1.56,0.64,1)",
+            }} />
+          </button>
+        </div>
+
         {siErr && (
           <p
             style={{
@@ -295,7 +348,6 @@ export function SignInPage({
 
         <button
           type="submit"
-          onClick={doEmailSignIn}
           disabled={authLoading}
           style={{
             background: `linear-gradient(135deg, ${C.green}, #3a7d4a)`,

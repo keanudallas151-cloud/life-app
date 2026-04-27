@@ -46,6 +46,9 @@ function greetingFor(hour) {
 export function HomePage({
   t,
   userName,
+  preferredName,
+  gender,
+  genderCustom,
   onResume,
   onOpenQuiz,
   onOpenDailyGrowth,
@@ -121,10 +124,16 @@ export function HomePage({
     return () => clearInterval(id);
   }, []);
   const greeting = useMemo(() => greetingFor(greetHour), [greetHour]);
-  const firstName = useMemo(() => {
-    if (!userName) return "";
-    return String(userName).trim().split(/\s+/)[0] || "";
-  }, [userName]);
+  const displayName = useMemo(() => {
+    const pref = preferredName?.trim();
+    const base = pref || (userName ? String(userName).trim().split(/\s+/)[0] : "");
+    if (!base) return "";
+    const g = gender?.toLowerCase();
+    if (g === "mr") return `Mr ${base}`;
+    if (g === "mrs") return `Mrs ${base}`;
+    if (g === "other" && genderCustom?.trim()) return `${genderCustom.trim()} ${base}`;
+    return base;
+  }, [preferredName, userName, gender, genderCustom]);
 
   const onResumePointerDown = (e) => {
     if (resumePhase !== "idle" && resumePhase !== "snapping") return;
@@ -293,7 +302,7 @@ export function HomePage({
             }}
           >
             {greeting}
-            {firstName ? `, ${firstName}` : ""}
+            {displayName ? `, ${displayName}` : ""}
           </p>
           <h1
             style={{

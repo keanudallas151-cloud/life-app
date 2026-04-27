@@ -76,6 +76,7 @@ import SettingsPage from "./components/profile/SettingsPage";
 import { SidebarSectionPage } from "./components/content/SidebarSectionPage";
 import { SignInPage } from "./components/auth/SignInPage";
 import { ThemePickerPage } from "./components/profile/ThemePickerPage";
+import { PreferredNamePage } from "./components/auth/PreferredNamePage";
 import { ToolsLockInPage } from "./components/tools/ToolsLockInPage";
 import { ToolsOrganizedPage } from "./components/tools/ToolsOrganizedPage";
 import { FocusTimerPage } from "./components/tools/FocusTimerPage";
@@ -540,6 +541,10 @@ function LifeAppContent() {
     setRShowPass2,
     rErr,
     setRErr,
+    rGender,
+    setRGender,
+    rGenderCustom,
+    setRGenderCustom,
     verifyEmailAddress,
     rpPass,
     setRpPass,
@@ -2076,6 +2081,16 @@ function LifeAppContent() {
         setThemeMode={setThemeMode}
         dark={dark}
         t={t}
+        onContinue={() => { play("ok"); setScreen("preferred_name"); }}
+      />
+    );
+
+  if (screen === "preferred_name")
+    return (
+      <PreferredNamePage
+        C={C}
+        play={play}
+        userId={user?.id}
         onContinue={() => setScreen("tailor_intro")}
       />
     );
@@ -2220,6 +2235,10 @@ function LifeAppContent() {
         authLoading={authLoading}
         doRegister={doRegister}
         setSiEmail={setSiEmail}
+        rGender={rGender}
+        setRGender={setRGender}
+        rGenderCustom={rGenderCustom}
+        setRGenderCustom={setRGenderCustom}
         systemNotice={
           !isFirebaseConfigured
             ? {
@@ -3723,6 +3742,9 @@ function LifeAppContent() {
               <HomePage
                 t={t}
                 userName={user?.name || ""}
+                preferredName={user?.preferredName || ""}
+                gender={user?.gender || ""}
+                genderCustom={user?.genderCustom || ""}
                 play={play}
                 onResume={(key) => {
                   const pack = MAP[key];
