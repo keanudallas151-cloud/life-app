@@ -35,7 +35,7 @@ import {
   useState,
 } from "react";
 import { auth, isFirebaseConfigured } from "../firebaseClient";
-import { getFirebaseProfile } from "../services/firebaseProfile";
+import { getFirebaseProfile, mergeFirebaseProfile } from "../services/firebaseProfile";
 import { signInWithGoogle } from "../services/firebaseAuth";
 import { LS } from "../systems/storage";
 import { callGlobalPlay } from "./SoundContext";
@@ -76,6 +76,8 @@ export function AuthProvider({ children }) {
   const [rShowPass, setRShowPass] = useState(false);
   const [rShowPass2, setRShowPass2] = useState(false);
   const [rErr, setRErr] = useState({});
+  const [rGender, setRGender] = useState(""); // "mr" | "mrs" | "other" | ""
+  const [rGenderCustom, setRGenderCustom] = useState("");
   const [verifyEmailAddress, setVerifyEmailAddress] = useState("");
 
   // ─── Reset-password form ──────────────────────────────────────────────────
@@ -182,6 +184,8 @@ export function AuthProvider({ children }) {
     setRShowPass(false);
     setRShowPass2(false);
     setRErr({});
+    setRGender("");
+    setRGenderCustom("");
     setVerifyEmailAddress("");
     setRpPass("");
     setRpPass2("");
@@ -200,6 +204,9 @@ export function AuthProvider({ children }) {
       username: profileDoc?.username || "",
       emailConfirmed: Boolean(firebaseUser.emailVerified),
       avatarUrl: profileDoc?.avatar_url || firebaseUser.photoURL || "",
+      gender: profileDoc?.gender || "",
+      genderCustom: profileDoc?.gender_custom || "",
+      preferredName: profileDoc?.preferred_name || "",
     };
   }, []);
 
@@ -592,6 +599,14 @@ export function AuthProvider({ children }) {
         credentials.user.email || rEmail.toLowerCase().trim(),
       );
       LS.set(`onboarded_${credentials.user.uid}`, false);
+      if (rGender) {
+        try {
+          await mergeFirebaseProfile(credentials.user.uid, {
+            gender: rGender,
+            ...(rGender === "other" && rGenderCustom ? { gender_custom: rGenderCustom } : {}),
+          });
+        } catch { /* non-blocking */ }
+      }
       callGlobalPlay("ok");
       setScreen("verify_email");
     } catch (error) {
@@ -741,6 +756,10 @@ export function AuthProvider({ children }) {
     setRShowPass2,
     rErr,
     setRErr,
+    rGender,
+    setRGender,
+    rGenderCustom,
+    setRGenderCustom,
     verifyEmailAddress,
     setVerifyEmailAddress,
 

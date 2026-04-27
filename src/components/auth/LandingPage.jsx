@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { SystemStatusNotice } from "../shell/SystemStatusNotice";
 
 const SF = "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif";
@@ -92,6 +92,24 @@ export function LandingPage({
 }) {
   const [activeValueProp, setActiveValueProp] = useState(null);
   const activeValuePropData = VALUE_PROPS.find((item) => item.label === activeValueProp) || null;
+  const [panelDragY, setPanelDragY] = useState(0);
+  const [panelFullScreen, setPanelFullScreen] = useState(false);
+  const [panelPhase, setPanelPhase] = useState("idle"); // "idle"|"dragging"|"snapping"
+  const panelDragRef = useRef({ active:false, startY:0, pointerId:null });
+  const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  // Resets all drag/phase/fullscreen state (used both when opening and closing the panel).
+  const resetDragState = () => {
+    setPanelDragY(0);
+    setPanelPhase("idle");
+    setPanelFullScreen(false);
+  };
+
+  // Closes the panel and resets all state.
+  const resetPanel = () => {
+    setActiveValueProp(null);
+    resetDragState();
+  };
 
   return (
     <div
@@ -119,6 +137,13 @@ export function LandingPage({
         .landing-cta-primary:active { transform:scale(0.97)!important; opacity:0.92; }
         .landing-cta-secondary:active { transform:scale(0.97)!important; opacity:0.8; }
         .landing-social-btn:active { transform:scale(0.93)!important; }
+        @media (min-width: 640px) {
+          .landing-vp-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; }
+          .landing-vp-grid button:nth-child(1), .landing-vp-grid button:nth-child(2) { border-bottom: 0.5px solid rgba(255,255,255,0.1) !important; }
+          .landing-vp-grid button:nth-child(3), .landing-vp-grid button:nth-child(4) { border-bottom: none !important; }
+          .landing-vp-grid button:nth-child(odd) { border-right: 0.5px solid rgba(255,255,255,0.1) !important; }
+          .landing-vp-grid button:nth-child(even) { border-right: none !important; }
+        }
       `}</style>
 
       {/* ── HERO ─────────────────────────────────────────── */}
@@ -188,6 +213,7 @@ export function LandingPage({
 
         {/* ── VALUE PROPS — iOS inset-grouped list ──────── */}
         <div
+          className="landing-vp-grid"
           style={{
             width: "100%",
             maxWidth: 390,
@@ -204,7 +230,7 @@ export function LandingPage({
               key={v.label}
               type="button"
               className="landing-row-btn"
-              onClick={() => { play("tap"); setActiveValueProp(v.label); }}
+              onClick={() => { play("tap"); setActiveValueProp(v.label); resetDragState(); }}
               data-page-tag={`#landing_value_prop_${v.label.toLowerCase().replace(/\s+/g, "_")}`}
               aria-label={`Open ${v.label} overview`}
               style={{
@@ -427,125 +453,134 @@ export function LandingPage({
       </div>
 
       {/* ── VALUE PROP BOTTOM SHEET ───────────────────────── */}
-      {activeValuePropData && (
-        <>
-          {/* Scrim */}
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={() => { play("tap"); setActiveValueProp(null); }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.55)",
-              backdropFilter: "blur(6px)",
-              WebkitBackdropFilter: "blur(6px)",
-              border: "none",
-              cursor: "pointer",
-              zIndex: 80,
-            }}
-          />
-          {/* Sheet */}
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="vp-sheet-title"
-            style={{
-              position: "fixed",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 81,
-              background: "rgba(28,28,30,0.96)",
-              backdropFilter: "blur(24px) saturate(180%)",
-              WebkitBackdropFilter: "blur(24px) saturate(180%)",
-              borderRadius: "22px 22px 0 0",
-              padding: "12px 22px calc(max(28px, env(safe-area-inset-bottom)) + 10px)",
-              maxHeight: "82dvh",
-              overflowY: "auto",
-              WebkitOverflowScrolling: "touch",
-              animation: "landing-sheet-up 0.36s cubic-bezier(0.34,1.1,0.64,1) both",
-              boxShadow: "0 -4px 40px rgba(0,0,0,0.4)",
-            }}
-          >
-            {/* Handle bar */}
-            <div style={{ width: 36, height: 4, borderRadius: 999, background: "rgba(255,255,255,0.2)", margin: "0 auto 20px" }} />
+      {activeValuePropData && (() => {
+        const sheetMaxH = panelFullScreen ? "100dvh" : "82dvh";
+        const sheetBorderRadius = panelFullScreen ? "0" : "22px 22px 0 0";
+        const backdropOpacity = panelDragY > 0
+          ? Math.max(0, 0.55 - (panelDragY / 300) * 0.55)
+          : 0.55;
 
-            {/* Header */}
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 18 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "0.5px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
-                  {activeValuePropData.emoji}
-                </div>
-                <h2
-                  id="vp-sheet-title"
-                  style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#ffffff", fontFamily: SF, letterSpacing: "-0.025em", lineHeight: 1.1 }}
-                >
-                  {activeValuePropData.title}
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => { play("tap"); setActiveValueProp(null); }}
-                aria-label="Close"
-                style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  border: "none",
-                  background: "rgba(255,255,255,0.12)",
-                  color: "#ffffff",
-                  fontSize: 18,
-                  lineHeight: 1,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  WebkitTapHighlightColor: "transparent",
-                }}
-              >
-                ×
-              </button>
-            </div>
+        const handlePanelPointerDown = (e) => {
+          if (e.pointerType === "mouse" && e.button !== 0) return;
+          panelDragRef.current = { active:true, startY:e.clientY, pointerId:e.pointerId };
+          try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+          setPanelPhase("dragging");
+        };
+        const handlePanelPointerMove = (e) => {
+          if (!panelDragRef.current.active) return;
+          const dy = e.clientY - panelDragRef.current.startY;
+          setPanelDragY(dy);
+        };
+        const handlePanelPointerUp = (e) => {
+          if (!panelDragRef.current.active) return;
+          panelDragRef.current.active = false;
+          const dy = panelDragY;
+          const panelH = e.currentTarget.offsetHeight;
+          if (dy > panelH * 0.3) {
+            setPanelPhase("snapping");
+            setPanelDragY(window.innerHeight);
+            setTimeout(() => { resetPanel(); }, 350);
+          } else if (!panelFullScreen && dy < -(panelH * 0.2)) {
+            setPanelFullScreen(true);
+            setPanelDragY(0);
+            setPanelPhase("snapping");
+            setTimeout(() => setPanelPhase("idle"), 400);
+          } else if (panelFullScreen && dy > 80) {
+            setPanelFullScreen(false);
+            setPanelDragY(0);
+            setPanelPhase("snapping");
+            setTimeout(() => setPanelPhase("idle"), 400);
+          } else {
+            setPanelPhase("snapping");
+            setPanelDragY(0);
+            setTimeout(() => setPanelPhase("idle"), 400);
+          }
+        };
 
-            {/* Summary */}
-            <p style={{ margin: "0 0 20px", color: "rgba(255,255,255,0.72)", fontSize: 15, lineHeight: 1.75, fontFamily: SF, fontWeight: 400 }}>
-              {activeValuePropData.summary}
-            </p>
+        const transform = panelDragY !== 0 ? `translateY(${panelDragY}px)` : undefined;
+        const transition = panelPhase === "dragging" ? "none"
+          : prefersReducedMotion ? "opacity 0.2s ease"
+          : "transform 0.38s cubic-bezier(0.34,1.56,0.64,1), border-radius 0.35s ease, height 0.35s ease";
 
-            {/* Bullets — iOS grouped list style */}
-            <div
+        return (
+          <>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => resetPanel()}
               style={{
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: 14,
-                border: "0.5px solid rgba(255,255,255,0.1)",
-                overflow: "hidden",
+                position:"fixed", inset:0,
+                background:`rgba(0,0,0,${backdropOpacity})`,
+                backdropFilter:"blur(6px)", WebkitBackdropFilter:"blur(6px)",
+                border:"none", cursor:"pointer", zIndex:80,
+                transition:"background 0.1s ease",
+              }}
+            />
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="vp-sheet-title"
+              onPointerDown={handlePanelPointerDown}
+              onPointerMove={handlePanelPointerMove}
+              onPointerUp={handlePanelPointerUp}
+              onPointerCancel={handlePanelPointerUp}
+              style={{
+                position:"fixed", left:0, right:0, bottom:0, zIndex:81,
+                background:"rgba(28,28,30,0.96)",
+                backdropFilter:"blur(24px) saturate(180%)",
+                WebkitBackdropFilter:"blur(24px) saturate(180%)",
+                borderRadius:sheetBorderRadius,
+                maxHeight:sheetMaxH,
+                height: panelFullScreen ? "100dvh" : "auto",
+                overflowY:"auto",
+                WebkitOverflowScrolling:"touch",
+                transform,
+                transition: prefersReducedMotion ? "opacity 0.2s ease" : transition,
+                boxShadow:"0 -4px 40px rgba(0,0,0,0.4)",
+                touchAction:"none",
               }}
             >
-              {activeValuePropData.bullets.map((item, bi) => (
-                <div
-                  key={item}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 12,
-                    padding: "13px 16px",
-                    borderBottom: bi < activeValuePropData.bullets.length - 1 ? "0.5px solid rgba(255,255,255,0.08)" : "none",
-                  }}
-                >
-                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: "rgba(80,200,120,0.18)", color: "#50c878", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 12, fontWeight: 700, fontFamily: SF, marginTop: 1 }}>
-                    ✓
+              {/* Drag handle */}
+              <div style={{ width:36, height:4, borderRadius:999, background:"rgba(255,255,255,0.2)", margin:"12px auto 0" }} />
+
+              <div style={{ padding:"8px 22px calc(max(28px, env(safe-area-inset-bottom)) + 10px)" }}>
+                {/* Header */}
+                <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:12, marginBottom:18 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                    <div style={{ width:48, height:48, borderRadius:14, background:"rgba(255,255,255,0.08)", border:"0.5px solid rgba(255,255,255,0.12)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0 }}>
+                      {activeValuePropData.emoji}
+                    </div>
+                    <h2 id="vp-sheet-title" style={{ margin:0, fontSize:22, fontWeight:700, color:"#ffffff", fontFamily:SF, letterSpacing:"-0.025em", lineHeight:1.1 }}>
+                      {activeValuePropData.title}
+                    </h2>
                   </div>
-                  <span style={{ color: "rgba(255,255,255,0.82)", fontSize: 14, lineHeight: 1.65, fontFamily: SF }}>
-                    {item}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => resetPanel()}
+                    aria-label="Close"
+                    style={{ width:30, height:30, borderRadius:"50%", border:"none", background:"rgba(255,255,255,0.12)", color:"#ffffff", fontSize:18, lineHeight:1, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, WebkitTapHighlightColor:"transparent" }}
+                  >
+                    ×
+                  </button>
                 </div>
-              ))}
+                {/* Summary */}
+                <p style={{ margin:"0 0 20px", color:"rgba(255,255,255,0.72)", fontSize:15, lineHeight:1.75, fontFamily:SF }}>
+                  {activeValuePropData.summary}
+                </p>
+                {/* Bullets */}
+                <div style={{ background:"rgba(255,255,255,0.05)", borderRadius:14, border:"0.5px solid rgba(255,255,255,0.1)", overflow:"hidden" }}>
+                  {activeValuePropData.bullets.map((item, bi) => (
+                    <div key={item} style={{ display:"flex", alignItems:"flex-start", gap:12, padding:"13px 16px", borderBottom: bi < activeValuePropData.bullets.length - 1 ? "0.5px solid rgba(255,255,255,0.08)" : "none" }}>
+                      <div style={{ width:22, height:22, borderRadius:"50%", background:"rgba(80,200,120,0.18)", color:"#50c878", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontSize:12, fontWeight:700, marginTop:1 }}>✓</div>
+                      <span style={{ color:"rgba(255,255,255,0.82)", fontSize:14, lineHeight:1.65, fontFamily:SF }}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        );
+      })()}
     </div>
   );
 }

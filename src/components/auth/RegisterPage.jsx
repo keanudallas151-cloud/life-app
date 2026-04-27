@@ -24,6 +24,10 @@ export function RegisterPage({
   authLoading,
   doRegister,
   setSiEmail,
+  rGender,
+  setRGender,
+  rGenderCustom,
+  setRGenderCustom,
   systemNotice,
 }) {
   const passwordHasMinLength = rPass.length >= 8;
@@ -194,6 +198,56 @@ export function RegisterPage({
             }}
           />
           {rErr.name && <p style={{ margin: 0, fontSize: 12, color: C.red, fontStyle: "italic" }}>{rErr.name}</p>}
+        </div>
+
+        {/* Gender Picker */}
+        <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+          <label style={{ fontSize:10, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:C.muted }}>
+            How should we address you?
+          </label>
+          <div style={{ display:"flex", borderRadius:12, background:C.skin, border:`1.5px solid ${C.border}`, overflow:"hidden", minHeight:44 }}>
+            {["Mr","Mrs","Other"].map((opt) => {
+              const val = opt.toLowerCase();
+              const active = rGender === val;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => { setRGender(val); if (val !== "other") setRGenderCustom(""); }}
+                  style={{
+                    flex:1, border:"none", borderRadius:0,
+                    background: active ? C.green : "transparent",
+                    color: active ? "#000" : C.muted,
+                    fontSize:15, fontWeight:active ? 700 : 500,
+                    cursor:"pointer", minHeight:44,
+                    fontFamily:"-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif",
+                    transition:"all 0.2s cubic-bezier(0.34,1.56,0.64,1)",
+                    WebkitTapHighlightColor:"transparent",
+                  }}
+                >{opt}</button>
+              );
+            })}
+          </div>
+          {/* "Other" custom input — animated expand */}
+          <div style={{
+            overflow:"hidden",
+            maxHeight: rGender === "other" ? 56 : 0,
+            opacity: rGender === "other" ? 1 : 0,
+            transition:"max-height 0.3s ease, opacity 0.2s ease",
+          }}>
+            <input
+              value={rGenderCustom}
+              onChange={(e) => setRGenderCustom(e.target.value)}
+              placeholder="Please specify your title or preference"
+              style={{
+                background:C.skin, border:`1.5px solid ${C.border}`,
+                borderRadius:12, padding:"13px 14px",
+                fontSize:16, color:C.ink, outline:"none",
+                fontFamily:"-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif",
+                boxSizing:"border-box", width:"100%", marginTop:6,
+              }}
+            />
+          </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
