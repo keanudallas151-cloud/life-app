@@ -1740,6 +1740,7 @@ function LifeAppContent() {
   const completeOnboarding = () => {
     if (user?.id) {
       LS.set(`onboarded_${user.id}`, true);
+      LS.set(`life_returning_${user.id}`, true);
     }
     play("ok");
     setScreen("app");
@@ -3745,6 +3746,12 @@ function LifeAppContent() {
                 preferredName={user?.preferredName || ""}
                 gender={user?.gender || ""}
                 genderCustom={user?.genderCustom || ""}
+                userId={user?.id || ""}
+                notifications={notifications}
+                readingStreak={readingStreak}
+                progressPercent={progressPercent}
+                readKeys={readKeys}
+                onNavigate={(pg) => { play("tap"); setPage(pg); }}
                 play={play}
                 onResume={(key) => {
                   const pack = MAP[key];
@@ -3767,6 +3774,10 @@ function LifeAppContent() {
                 onGetStarted={() => {
                   play("tap");
                   setPage("where_to_start");
+                }}
+                onOpenFocusTimer={() => {
+                  play("tap");
+                  setPage("focus_timer");
                 }}
               />
             )}

@@ -91,6 +91,7 @@ export default function SettingsPage({
   LS,
   trackMomentumEvent,
   onDeleteAccount,
+  onOpenVoice,
 }) {
   const [openSections, setOpenSections] = useState({});
   const [openAccountGroups, setOpenAccountGroups] = useState({
@@ -229,6 +230,19 @@ export default function SettingsPage({
               desc: "Toggle all feedback sounds",
               value: uiPrefs.soundEnabled,
               onChange: (v) => updateUiPrefs({ soundEnabled: v }),
+            },
+          ],
+        },
+        {
+          tag: "#setting_voice",
+          title: "Voice Assistant",
+          icon: "mic",
+          items: [
+            {
+              label: "Tired of typing?",
+              desc: "Tap to open the voice assistant and navigate hands-free",
+              type: "voice_cta",
+              onTap: onOpenVoice,
             },
           ],
         },
@@ -533,6 +547,32 @@ export default function SettingsPage({
                         );
                       })}
                     </div>
+                  ) : item.type === "voice_cta" ? (
+                    <button
+                      type="button"
+                      onClick={() => { play("tap"); item.onTap?.(); }}
+                      style={{
+                        background: t.green,
+                        border: "none",
+                        borderRadius: 10,
+                        padding: "8px 16px",
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: "#000",
+                        fontFamily: IOS_FONT,
+                        cursor: "pointer",
+                        flexShrink: 0,
+                        WebkitTapHighlightColor: "transparent",
+                        transition: "transform 0.15s cubic-bezier(0.34,1.56,0.64,1)",
+                        minHeight: 36,
+                      }}
+                      onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+                      onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+                      onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.96)"; }}
+                      onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+                    >
+                      Open
+                    </button>
                   ) : (
                     <IOSSwitch
                       checked={!!item.value}

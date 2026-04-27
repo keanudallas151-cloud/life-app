@@ -4,6 +4,8 @@ import { clearResumeTopic, getResumeTopic } from "../../systems/resumeReading";
 import { S } from "../../systems/theme";
 import { Ic } from "../../icons/Ic";
 import { LS } from "../../systems/storage";
+import { ReturningUserDashboard } from "./ReturningUserDashboard";
+import { VoiceAssistant } from "./VoiceAssistant";
 
 const HABIT_KEY = "life_daily_habits";
 const DEFAULT_HABITS = [
@@ -49,6 +51,12 @@ export function HomePage({
   preferredName,
   gender,
   genderCustom,
+  userId,
+  notifications,
+  readingStreak,
+  progressPercent,
+  readKeys,
+  onNavigate,
   onResume,
   onOpenQuiz,
   onOpenDailyGrowth,
@@ -56,10 +64,19 @@ export function HomePage({
   onOpenGoalSetting,
   onGetStarted,
   onOpenIncomeIdeas,
+  onOpenFocusTimer,
   play,
 }) {
   const [dismissed, setDismissed] = useState(false);
+  const [isReturning, setIsReturning] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const { checked: habitChecked, toggle: toggleHabit } = useDailyHabits();
+
+  useEffect(() => {
+    if (userId && LS.get(`life_returning_${userId}`)) {
+      setIsReturning(true);
+    }
+  }, [userId]);
   const resumeTopic = useMemo(() => {
     const saved = getResumeTopic();
     if (!saved?.key || !MAP[saved.key]) return null;
@@ -241,6 +258,28 @@ export function HomePage({
         boxSizing: "border-box",
       }}
     >
+      {isReturning ? (
+        <ReturningUserDashboard
+          t={t}
+          play={play}
+          userId={userId}
+          userName={userName}
+          preferredName={preferredName}
+          gender={gender}
+          genderCustom={genderCustom}
+          notifications={notifications || []}
+          readingStreak={readingStreak || 0}
+          progressPercent={progressPercent || 0}
+          readKeys={readKeys || []}
+          onNavigate={onNavigate}
+          onOpenReading={() => {}}
+          onOpenQuiz={onOpenQuiz}
+          onOpenOrganize={() => onNavigate?.("organize")}
+          onOpenProgress={() => onNavigate?.("progress_dashboard")}
+          onOpenPostIt={() => onNavigate?.("post_it")}
+          onOpenFocusTimer={onOpenFocusTimer || (() => onNavigate?.("focus_timer"))}
+        />
+      ) : (
       <div
         className="life-grain life-home-hero"
         style={{
@@ -463,6 +502,7 @@ export function HomePage({
           </div>
         </div>
       </div>
+      )}
 
       <div style={{ padding: "28px 20px 0", maxWidth: 620, margin: "0 auto" }}>
         {resumeTopic && !dismissed && (() => {
@@ -978,6 +1018,57 @@ export function HomePage({
           &copy; {new Date().getFullYear()} Life. All rights reserved.
         </p>
       </div>
+
+      {/* Voice Assistant FAB — only for returning users */}
+      {isReturning && userId && (
+        <button
+          type="button"
+          onClick={() => { play?.("tap"); setVoiceOpen(true); }}
+          aria-label="Open voice assistant"
+          style={{
+            position: "fixed",
+            bottom: `calc(var(--life-bottom-nav-height, 80px) + 16px + env(safe-area-inset-bottom, 0px))`,
+            right: 20,
+            width: 56,
+            height: 56,
+            borderRadius: "50%",
+            background: t.green,
+            border: "none",
+            boxShadow: `0 4px 20px ${t.green}60`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            zIndex: 200,
+            WebkitTapHighlightColor: "transparent",
+            transition: "transform 0.2s cubic-bezier(0.34,1.56,0.64,1)",
+          }}
+          onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.92)"; }}
+          onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+          onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.92)"; }}
+          onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+      )}
+
+      {/* Voice Assistant Overlay */}
+      {voiceOpen && (
+        <VoiceAssistant
+          t={t}
+          play={play}
+          isOpen={voiceOpen}
+          onClose={() => setVoiceOpen(false)}
+          displayName={preferredName || userName || ""}
+          onNavigate={onNavigate}
+          onAddTask={() => {}}
+        />
+      )}
     </div>
   );
 }
