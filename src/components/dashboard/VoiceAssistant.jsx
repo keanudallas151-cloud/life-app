@@ -53,6 +53,12 @@ export function VoiceAssistant({ t, play, isOpen, onClose, displayName, onNaviga
       return;
     }
 
+    // Abort any existing instance before creating a new one
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch { /* ignore */ }
+      recognitionRef.current = null;
+    }
+
     const recognition = new SR();
     recognition.continuous = false;
     recognition.interimResults = true;
@@ -141,7 +147,7 @@ export function VoiceAssistant({ t, play, isOpen, onClose, displayName, onNaviga
   }
 
   const statusMessages = {
-    idle: displayName ? `Hi ${displayName.split(" ")[0]}. Tap the mic and speak.` : "Tap the mic and speak.",
+    idle: displayName?.trim() ? `Hi ${displayName.trim().split(" ")[0]}. Tap the mic and speak.` : "Tap the mic and speak.",
     listening: "Listening...",
     processing: "Got it — working on that...",
     confirming: pendingPage ? `I'll take you to ${DEST_LABELS[pendingPage] || pendingPage}. Shall I proceed?` : "",

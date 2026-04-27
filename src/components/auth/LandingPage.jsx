@@ -139,10 +139,10 @@ export function LandingPage({
         .landing-social-btn:active { transform:scale(0.93)!important; }
         @media (min-width: 640px) {
           .landing-vp-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; }
-          .landing-vp-grid button { border-bottom: 0.5px solid rgba(255,255,255,0.1) !important; border-right: none !important; }
           .landing-vp-grid button:nth-child(1), .landing-vp-grid button:nth-child(2) { border-bottom: 0.5px solid rgba(255,255,255,0.1) !important; }
           .landing-vp-grid button:nth-child(3), .landing-vp-grid button:nth-child(4) { border-bottom: none !important; }
           .landing-vp-grid button:nth-child(odd) { border-right: 0.5px solid rgba(255,255,255,0.1) !important; }
+          .landing-vp-grid button:nth-child(even) { border-right: none !important; }
         }
       `}</style>
 
@@ -463,6 +463,7 @@ export function LandingPage({
         const handlePanelPointerDown = (e) => {
           if (e.pointerType === "mouse" && e.button !== 0) return;
           panelDragRef.current = { active:true, startY:e.clientY, pointerId:e.pointerId };
+          try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* ignore */ }
           setPanelPhase("dragging");
         };
         const handlePanelPointerMove = (e) => {

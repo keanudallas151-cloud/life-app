@@ -272,7 +272,7 @@ export function HomePage({
           progressPercent={progressPercent || 0}
           readKeys={readKeys || []}
           onNavigate={onNavigate}
-          onOpenReading={() => {}}
+          onOpenReading={onResume ? () => onResume(null) : () => onNavigate?.("sidebar_life")}
           onOpenQuiz={onOpenQuiz}
           onOpenOrganize={() => onNavigate?.("organize")}
           onOpenProgress={() => onNavigate?.("progress_dashboard")}
