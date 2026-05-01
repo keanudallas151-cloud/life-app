@@ -1074,7 +1074,7 @@ body.life-dark .life-glass-card {
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6) !important;
 }
 
-body.life-dark 
+body.life-dark
 
 body.life-dark select {
   background-image:
@@ -2905,7 +2905,7 @@ button:active:not(:disabled),
     font-weight: 600;
   }
 
-  
+
 
   /* Push page content above the bottom nav */
   .life-main-scroll {
@@ -4356,7 +4356,7 @@ button {
   letter-spacing: -0.01em;
   cursor: pointer;
   min-height: 50px;
-  transition: 
+  transition:
     transform 0.15s var(--ios-spring),
     box-shadow 0.2s ease,
     background 0.15s ease,
@@ -4628,7 +4628,7 @@ button {
 
 .ios-folder-children {
   overflow: hidden;
-  transition: 
+  transition:
     max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.25s ease;
 }
@@ -4701,7 +4701,7 @@ button {
   font-weight: 500;
   color: rgba(161,161,161,0.8);
   cursor: pointer;
-  transition: 
+  transition:
     background 0.2s ease,
     color 0.2s ease,
     transform 0.15s var(--ios-spring);
@@ -7307,12 +7307,12 @@ select:focus-visible {
 /* Override the global [data-page-tag] input rule for THIS search specifically */
 
 
-body.life-dark 
+body.life-dark
 
 /* Subtle focus brighten — iOS doesn't change border, it brightens the fill */
 
 
-body.life-dark 
+body.life-dark
 
 /* Focus outline off — iOS doesn't show one on search */
 
@@ -7320,7 +7320,7 @@ body.life-dark
 /* Clear button hover */
 
 
-body.life-dark 
+body.life-dark
 
 
 

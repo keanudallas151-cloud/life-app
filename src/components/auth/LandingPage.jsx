@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { SystemStatusNotice } from "../shell/SystemStatusNotice";
 
 const SF = "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif";
@@ -599,4 +599,3 @@ export function LandingPage({
     </div>
   );
 }
-
