@@ -178,21 +178,36 @@ export function LandingPage({
           <span style={{ color: "#fff", fontSize: 44, fontWeight: 700, fontFamily: "-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',Arial,sans-serif", letterSpacing: "-0.02em", lineHeight: 1 }}>L</span>
         </div>
 
-        {/* App name */}
+        {/* App name — SF Pro Rounded Black per Life. design system v1.0 */}
         <h1
           style={{
             margin: "0 0 8px",
-            fontSize: 34,
-            fontWeight: 700,
+            fontSize: 38,
+            fontWeight: 900,
             color: "#ffffff",
-            fontFamily: SF,
+            fontFamily: "var(--life-font-rounded)",
             letterSpacing: "-0.025em",
             lineHeight: 1.05,
             textAlign: "center",
+            display: "inline-flex",
+            alignItems: "baseline",
+            justifyContent: "center",
+            gap: "0.04em",
             animation: "landing-fade-up 0.5s ease-out 0.1s both",
           }}
         >
-          Life.
+          <span>Life</span>
+          <span
+            aria-hidden="true"
+            style={{
+              display: "inline-block",
+              width: "0.16em",
+              height: "0.16em",
+              background: "var(--life-green)",
+              borderRadius: "50%",
+              marginBottom: "0.06em",
+            }}
+          />
         </h1>
         <p
           style={{
