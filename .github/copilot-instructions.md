@@ -1,7 +1,29 @@
 # Copilot Instructions for `life-app`
 
+<<<<<<< HEAD
+## Session Baseline
+
+- Treat this repository as `life-app`.
+- When local path context matters, use `C:\Users\louie\life-app` as the canonical local repository path.
+- Assume `main` is the only working branch unless the user explicitly approves another branch.
+- Before continuing any task that depends on current code state, check the latest branch history and confirm the local workspace is up to date with `origin/main`. Always work on the latest update, even if the latest commit was made by someone else. If the workspace is behind, pull `origin/main` first; if history has diverged or there are conflicting local changes, stop and surface it instead of forcing.
+- If the current workspace or branch conflicts with those assumptions, say so plainly instead of guessing.
+- Be brutally honest, extremely concise, and direct.
+- Fix the requested issue first, then opportunistically fix small nearby issues that are clearly in scope and low risk.
+- If you uncover a larger issue that materially expands scope, finish the requested work and then surface the larger issue separately with evidence and a recommended follow-up.
+- When a reusable lesson is discovered, suggest promoting it into persistent project guidance instead of letting it disappear between chats.
+
+### Companion skills
+
+- `start` — run at the beginning of every conversation; full session bootstrap including latest-update policy.
+- `pre-commit-check` — run before committing or pushing; lint/build/repo-rule validation.
+- `mobile-audit` — run when touching UI; mobile, iOS, and theme compliance sweep.
+
+## Build, lint, and test commands
+=======
 These instructions are the fast-start rules for AI coding agents in this repository.
 Keep this file concise and link out to source docs instead of duplicating them.
+>>>>>>> 544d9cff000ce7b41bd47e26d92e325f2853f745
 
 ## Session baseline
 
